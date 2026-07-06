@@ -5,3 +5,4 @@ cybersecurity
 ai and notes and pdf i created
 ---
 
+lang
