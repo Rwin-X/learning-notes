@@ -1,0 +1,73 @@
+---
+title: "00-Learning-Path-MOC"
+difficulty: easy
+tags:
+  - easy
+  - moc
+---
+
+# 00-Learning-Path-MOC
+
+`🟢 EASY` #easy
+
+The full curriculum, ordered **easy → hard**. Check items off as you go (Obsidian supports `- [ ]` checkboxes natively).
+
+## 🟢 01 — Beginner (foundations)
+- [ ] [[Python Setup and Environment]]
+- [ ] [[Variables and Data Types]]
+- [ ] [[Operators and Expressions]]
+- [ ] [[Conditionals]]
+- [ ] [[Loops]]
+- [ ] [[Lists and Tuples]]
+- [ ] [[Dictionaries and Sets]]
+- [ ] [[Strings Deep Dive]]
+- [ ] [[Functions Basics]]
+- [ ] [[List Comprehensions]]
+
+## 🟡 02 — Intermediate
+- [ ] [[Scope and Closures]]
+- [ ] [[Decorators]]
+- [ ] [[Generators and Iterators]]
+- [ ] [[File IO]]
+- [ ] [[Exception Handling]]
+- [ ] [[Context Managers]]
+- [ ] [[Modules and Packages]]
+- [ ] [[Python Package Management (pip venv)]]
+- [ ] [[Working with JSON and CSV]]
+- [ ] [[Regular Expressions]]
+- [ ] [[Working with CLI Arguments (argparse)]]
+- [ ] [[Logging]]
+
+## 🟠 03 — Advanced
+- [ ] [[Object-Oriented Programming Basics]]
+- [ ] [[Inheritance and Polymorphism]]
+- [ ] [[Dataclasses]]
+- [ ] [[Type Hints and Static Typing]]
+- [ ] [[Iterators and itertools]]
+- [ ] [[Concurrency - Threading]]
+- [ ] [[Concurrency - Multiprocessing]]
+- [ ] [[Concurrency - Asyncio]]
+- [ ] [[Working with Sockets]]
+- [ ] [[Working with APIs (requests)]]
+- [ ] [[Web Scraping (BeautifulSoup)]]
+- [ ] [[Design Patterns in Python]]
+- [ ] [[GUI Development with PyQt6]]
+- [ ] [[Testing with pytest]]
+
+## 🔴 04 — Expert
+- [ ] [[Metaclasses and Descriptors]]
+- [ ] [[Memory Management and Garbage Collection]]
+- [ ] [[The GIL and CPython Internals]]
+- [ ] [[Performance Profiling]]
+- [ ] [[Packaging and Distributing Python Tools]]
+- [ ] [[Building Python C Extensions]]
+
+## 🟣 05 — Security Track
+See [[00-Security-Track-MOC]] for the dedicated path.
+
+## 🔵 06 — Projects & Labs
+See [[00-Projects-Labs-MOC]] for hands-on builds tied to each stage.
+
+
+## Related
+- [[00-Home]]
