@@ -1,0 +1,200 @@
+{
+  "main": {
+    "id": "a91dce679f8b3701",
+    "type": "split",
+    "children": [
+      {
+        "id": "1c7539f2f8238e1d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "20a5d3c9a32b9fb6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "03-Advanced/Object-Oriented Programming Basics.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Object-Oriented Programming Basics"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "34870f326e4e0411",
+    "type": "split",
+    "children": [
+      {
+        "id": "c536c622682c5511",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cbf3d8eb336c765d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "a4d4f4cb7f7acd32",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "tag:#security",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "1083eda8840a7365",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "58de8c341ed17111",
+    "type": "split",
+    "children": [
+      {
+        "id": "69cf788c8f18efba",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ffba957c4c13087b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "03-Advanced/Object-Oriented Programming Basics.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Object-Oriented Programming Basics"
+            }
+          },
+          {
+            "id": "e84a775737716a03",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "03-Advanced/Object-Oriented Programming Basics.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Object-Oriented Programming Basics"
+            }
+          },
+          {
+            "id": "34864dd6822412bd",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "aba00dcf179ec9af",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "b31888d6d82b747f",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "03-Advanced/Object-Oriented Programming Basics.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Object-Oriented Programming Basics"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "20a5d3c9a32b9fb6",
+  "lastOpenFiles": [
+    "03-Advanced/Dataclasses.md",
+    "04-Expert/Memory Management and Garbage Collection.md",
+    "04-Expert/Performance Profiling.md",
+    "04-Expert/Building Python C Extensions.md",
+    "05-Security-Track/Building a Honeypot Service.md",
+    "00-MOC/00-Learning-Path-MOC.md",
+    "02-Intermediate/Working with CLI Arguments (argparse).md",
+    "02-Intermediate/Modules and Packages.md",
+    "01-Beginner/Dictionaries and Sets.md",
+    "01-Beginner/Conditionals.md"
+  ]
+}
