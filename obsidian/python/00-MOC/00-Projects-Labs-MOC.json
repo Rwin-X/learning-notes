@@ -1,0 +1,32 @@
+---
+title: "00-Projects-Labs-MOC"
+difficulty: medium
+tags:
+  - medium
+  - moc
+  - project
+---
+
+# 00-Projects-Labs-MOC
+
+`🟡 MEDIUM` #medium
+
+Hands-on labs, ordered easy → hard, each tied to specific notes above. This is where reading turns into building — the same instinct behind your `devforge` repo.
+
+- [ ] [[Lab 01 - CLI Todo App]] 🟢
+- [ ] [[Lab 02 - Log File Analyzer]] 🟡
+- [ ] [[Lab 03 - Multithreaded Port Scanner]] 🟠
+- [ ] [[Lab 04 - Encrypted Notes CLI]] 🟠
+- [ ] [[Lab 05 - Mini Honeypot]] 🔴
+
+## Philosophy
+Each lab should be small enough to finish in one sitting, but real enough to commit to `devforge`. When a lab is solid, graduate it into its own repo folder with a proper README — same pattern you already use.
+
+
+## Related
+- [[00-Home]]
+- [[Lab 01 - CLI Todo App]]
+- [[Lab 02 - Log File Analyzer]]
+- [[Lab 03 - Multithreaded Port Scanner]]
+- [[Lab 04 - Encrypted Notes CLI]]
+- [[Lab 05 - Mini Honeypot]]
