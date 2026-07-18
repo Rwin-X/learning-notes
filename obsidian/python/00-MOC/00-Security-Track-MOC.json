@@ -1,0 +1,43 @@
+---
+title: "00-Security-Track-MOC"
+difficulty: medium
+tags:
+  - medium
+  - moc
+  - security
+---
+
+# 00-Security-Track-MOC
+
+`🟡 MEDIUM` #medium
+
+Python specifically for your CEH / Security+ track and `devforge`-style tooling.
+
+## Prerequisite core skills
+Finish these from the main path first: [[Working with Sockets]], [[Concurrency - Threading]], [[File IO]], [[Regular Expressions]], [[Working with CLI Arguments (argparse)]]
+
+## Security-track notes (easy → hard)
+- [ ] [[Python for CEH and Security Plus]] — start here
+- [ ] [[Hashing and Checksums]] 🟡
+- [ ] [[Working with Log Parsing]] 🟡
+- [ ] [[Web Request Auditing and Header Checks]] 🟡
+- [ ] [[OSINT Scripting Basics]] 🟡
+- [ ] [[Building a Port Scanner]] 🟠
+- [ ] [[Parsing Network Data with Scapy]] 🟠
+- [ ] [[Symmetric Encryption with cryptography lib]] 🟠
+- [ ] [[Building a Password Manager CLI]] 🟠
+- [ ] [[Building a Honeypot Service]] 🔴
+
+## Maps to your existing devforge projects
+- `secNT`, `CipherVault` → [[Symmetric Encryption with cryptography lib]]
+- `HoneyShield` → [[Building a Honeypot Service]]
+- `NetViz`, `PacketForge` → [[Parsing Network Data with Scapy]], [[Working with Sockets]]
+- `inOs` → [[OSINT Scripting Basics]], [[Concurrency - Asyncio]]
+- `METAINSPECT` → [[Working with CLI Arguments (argparse)]], [[Working with JSON and CSV]]
+
+Always build and test against your own lab VMs / localhost — never unauthorized targets.
+
+
+## Related
+- [[00-Home]]
+- [[Python for CEH and Security Plus]]
