@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cybersec_roadmap.sh</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+  :root{
+    --bg: #090c09;
+    --bg-raised: #0e130f;
+    --hairline: #16211a;
+    --hairline-bright: #27392c;
+    --green: #3ef27a;
+    --green-dim: #1f8a4c;
+    --green-faint: #12331f;
+    --amber: #f2b33e;
+    --amber-dim: #8a641f;
+    --text: #c9d6cd;
+    --text-dim: #6f8277;
+    --text-faint: #3c4a41;
+    --red: #f2543e;
+  }
+
+  *{ box-sizing: border-box; }
+  ::selection{ background: var(--green-faint); color: var(--green); }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+    font-size: 15px;
+    line-height: 1.6;
+    background-image:
+      radial-gradient(ellipse 900px 500px at 15% -5%, rgba(62,242,122,0.06), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 20%, rgba(62,242,122,0.04), transparent 60%);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+
+  a{ color: var(--green); }
+
+  /* ---------- scanline / crt flavor, very subtle ---------- */
+  .crt-overlay{
+    pointer-events:none;
+    position: fixed; inset:0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.012) 0px,
+      rgba(255,255,255,0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ---------- top bar ---------- */
+  .winbar{
+    position: sticky; top:0; z-index: 50;
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 18px;
+    background: rgba(9,12,9,0.88);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .dot{ width:10px; height:10px; border-radius:50%; opacity:0.85; }
+  .dot.r{ background:#f2543e; } .dot.y{ background:#f2b33e; } .dot.g{ background:#3ef27a; }
+  .winbar .path{ margin-left: 14px; color: var(--text-dim); font-size: 12.5px; letter-spacing: 0.02em; }
+  .winbar .path b{ color: var(--green); font-weight:500; }
+  .winbar .clock{ margin-left:auto; color: var(--text-faint); font-size: 12px; }
+
+  /* ---------- hero / boot sequence ---------- */
+  .hero{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 64px 24px 40px;
+  }
+  .boot-line{
+    color: var(--text-dim);
+    font-size: 13px;
+    margin: 0 0 4px;
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+  }
+  .boot-line .ok{ color: var(--green); }
+  .boot-line .tag{ color: var(--text-faint); }
+  .boot-line:nth-child(1){ animation-delay: 0.05s; }
+  .boot-line:nth-child(2){ animation-delay: 0.20s; }
+  .boot-line:nth-child(3){ animation-delay: 0.35s; }
+  .boot-line:nth-child(4){ animation-delay: 0.50s; }
+
+  @keyframes fadeIn{ to{ opacity:1; } }
+
+  h1.title{
+    margin: 22px 0 6px;
+    font-size: clamp(30px, 5vw, 46px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #eafff0;
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+    animation-delay: 0.7s;
+  }
+  h1.title .prompt{ color: var(--green); }
+  h1.title .cursor{
+    display:inline-block; width: 0.5em; height: 0.85em;
+    background: var(--green); margin-left: 4px;
+    animation: blink 1s steps(1) infinite;
+    transform: translateY(2px);
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .subtitle{
+    color: var(--text-dim);
+    max-width: 640px;
+    font-size: 14.5px;
+    opacity:0;
+    animation: fadeIn 0.5s ease forwards;
+    animation-delay: 0.9s;
+  }
+
+  .stats-row{
+    display:flex; flex-wrap:wrap; gap: 10px;
+    margin-top: 26px;
+    opacity:0;
+    animation: fadeIn 0.5s ease forwards;
+    animation-delay: 1.05s;
+  }
+  .stat{
+    border: 1px solid var(--hairline);
+    background: var(--bg-raised);
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+    display:flex; gap:8px; align-items:baseline;
+  }
+  .stat b{ color: var(--green); font-size: 14px; font-weight:600; }
+
+  /* ---------- legend ---------- */
+  .legend{
+    max-width: 980px; margin: 0 auto; padding: 0 24px 8px;
+    display:flex; flex-wrap:wrap; gap: 18px;
+    font-size: 12px; color: var(--text-faint);
+  }
+  .legend span{ display:flex; align-items:center; gap:7px; }
+  .legend i{ width:9px; height:9px; display:inline-block; border:1px solid currentColor; }
+  .legend .l-core i{ background: var(--green); border-color: var(--green); color: var(--green); }
+  .legend .l-cert i{ background: var(--amber); border-color: var(--amber); color: var(--amber); }
+  .legend .l-opt i{ background: transparent; border-color: var(--text-faint); }
+
+  /* ---------- tree / spine layout ---------- */
+  .tree{
+    max-width: 980px;
+    margin: 40px auto 0;
+    padding: 0 24px 100px;
+    position: relative;
+  }
+
+  .spine{
+    position: absolute;
+    left: 43px;
+    top: 8px;
+    bottom: 60px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--hairline-bright), var(--hairline) 92%, transparent);
+  }
+
+  .stage{
+    position: relative;
+    margin-bottom: 10px;
+  }
+
+  .stage-head{
+    display:flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 0 14px;
+    position: relative;
+  }
+
+  .node{
+    flex: none;
+    width: 30px; height:30px;
+    border-radius: 50%;
+    background: var(--bg-raised);
+    border: 1px solid var(--hairline-bright);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 12px;
+    color: var(--text-dim);
+    position: relative;
+    z-index: 2;
+    margin-left: 28px;
+  }
+  .stage[data-tier="core"] .node{ border-color: var(--green-dim); color: var(--green); box-shadow: 0 0 0 3px var(--bg), 0 0 14px -4px rgba(62,242,122,0.5); }
+  .stage[data-tier="cert"] .node{ border-color: var(--amber-dim); color: var(--amber); box-shadow: 0 0 0 3px var(--bg), 0 0 14px -4px rgba(242,179,62,0.5); }
+
+  .stage-title-wrap{ min-width:0; }
+  .stage-eyebrow{
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 3px;
+  }
+  .stage-title{
+    font-size: 19px; font-weight: 700; color: #eafff0;
+    letter-spacing: -0.01em;
+  }
+  .stage[data-tier="cert"] .stage-title{ color: #fff3da; }
+
+  .stage-duration{
+    margin-left:auto;
+    flex: none;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    border: 1px solid var(--hairline);
+    padding: 4px 9px;
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 3px;
+  }
+
+  .branch-line{
+    position:absolute;
+    left: 43px; top: 37px;
+    width: 24px; height: 1px;
+    background: var(--hairline-bright);
+    z-index:1;
+  }
+
+  .stage-body{
+    margin-left: 74px;
+    padding-bottom: 30px;
+    border-left: 1px solid transparent;
+  }
+
+  .stage-desc{
+    color: var(--text-dim);
+    font-size: 13.5px;
+    max-width: 620px;
+    margin: 0 0 16px;
+  }
+
+  .topic-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 10px;
+  }
+
+  .topic-card{
+    border: 1px solid var(--hairline);
+    background: var(--bg-raised);
+    padding: 12px 13px;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .topic-card:hover{
+    border-color: var(--green-dim);
+    transform: translateY(-1px);
+  }
+  .stage[data-tier="cert"] .topic-card:hover{ border-color: var(--amber-dim); }
+
+  .topic-card .t-name{
+    font-size: 13px; font-weight: 600; color: var(--text);
+    margin-bottom: 4px;
+    display:flex; align-items:center; gap:7px;
+  }
+  .topic-card .t-name::before{
+    content: "▸";
+    color: var(--green-dim);
+    font-size: 11px;
+  }
+  .stage[data-tier="cert"] .topic-card .t-name::before{ color: var(--amber-dim); }
+
+  .topic-card .t-detail{
+    font-size: 12px; color: var(--text-faint);
+    line-height: 1.5;
+  }
+
+  .resource-line{
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-faint);
+    display:flex; flex-wrap:wrap; gap: 6px 0;
+  }
+  .resource-line .r-label{ color: var(--text-dim); margin-right: 8px; }
+  .resource-line code{
+    background: var(--green-faint);
+    color: var(--green);
+    padding: 2px 7px;
+    font-size: 11.5px;
+    margin-right: 6px;
+    border-radius: 2px;
+  }
+  .stage[data-tier="cert"] .resource-line code{
+    background: rgba(242,179,62,0.1);
+    color: var(--amber);
+  }
+
+  .milestone{
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--green);
+    display:flex; gap: 8px; align-items:baseline;
+    padding-top: 12px;
+    border-top: 1px dashed var(--hairline);
+  }
+  .milestone::before{ content:"✓ checkpoint —"; color: var(--text-faint); }
+
+  /* branching sub-paths for specialization stage */
+  .fork-note{
+    margin-top: 18px;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    border-left: 2px solid var(--hairline-bright);
+    padding-left: 12px;
+  }
+
+  /* ---------- footer terminal ---------- */
+  .outro{
+    max-width: 980px; margin: 0 auto;
+    padding: 0 24px 90px;
+  }
+  .outro-box{
+    border: 1px solid var(--hairline-bright);
+    background: var(--bg-raised);
+    padding: 22px 24px;
+  }
+  .outro-box .line{ font-size: 13px; color: var(--text-dim); margin: 4px 0; }
+  .outro-box .line b{ color: var(--green); }
+  .outro-box .prompt-end{ color: var(--green); margin-top: 10px; }
+
+  footer{
+    text-align:center;
+    color: var(--text-faint);
+    font-size: 11.5px;
+    padding: 20px 24px 50px;
+  }
+
+  /* scroll reveal */
+  .stage{
+    opacity: 0;
+    transform: translateY(14px);
+    animation: reveal 0.6s ease forwards;
+    animation-timeline: view();
+    animation-range: entry 0% cover 20%;
+  }
+  @supports not (animation-timeline: view()){
+    .stage{ opacity: 1; transform:none; animation: none; }
+  }
+  @keyframes reveal{ to{ opacity:1; transform: translateY(0); } }
+
+  @media (max-width: 640px){
+    .spine{ left: 33px; }
+    .node{ margin-left: 18px; width:26px; height:26px; }
+    .branch-line{ left: 33px; width: 18px; top:34px; }
+    .stage-body{ margin-left: 52px; }
+    .stage-duration{ display:none; }
+    .stage-head{ gap:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<div class="winbar">
+  <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+  <div class="path">black8arch@devforge <b>~/roadmap</b> $ cat cybersec_path.tree</div>
+  <div class="clock" id="clock"></div>
+</div>
+
+<div class="hero">
+  <p class="boot-line">[ <span class="ok">OK</span> ] loading kernel modules <span class="tag">... offsec, defsec, netstack</span></p>
+  <p class="boot-line">[ <span class="ok">OK</span> ] mounting knowledge base <span class="tag">... 6 stages, 2 cert checkpoints</span></p>
+  <p class="boot-line">[ <span class="ok">OK</span> ] compiling roadmap <span class="tag">... build succeeded</span></p>
+  <p class="boot-line">[ <span class="ok">OK</span> ] ready.</p>
+
+  <h1 class="title"><span class="prompt">&gt;</span> Cybersecurity Learning Roadmap<span class="cursor"></span></h1>
+  <p class="subtitle">A staged path from computing fundamentals to offensive and defensive security specialization — sequenced so each stage unlocks the next. Built around CEH and CompTIA Security+ as the two certification checkpoints.</p>
+
+  <div class="stats-row">
+    <div class="stat"><b>6</b> stages</div>
+    <div class="stat"><b>2</b> cert checkpoints</div>
+    <div class="stat"><b>~12–18mo</b> at steady pace</div>
+    <div class="stat"><b>0→</b> specialization</div>
+  </div>
+</div>
+
+<div class="legend">
+  <span class="l-core"><i></i> core stage</span>
+  <span class="l-cert"><i></i> certification checkpoint</span>
+  <span class="l-opt"><i></i> specialization track</span>
+</div>
+
+<div class="tree">
+  <div class="spine"></div>
+
+  <!-- STAGE 0 -->
+  <div class="stage" data-tier="core">
+    <div class="stage-head">
+      <div class="branch-line"></div>
+      <div class="node">00</div>
+      <div class="stage-title-wrap">
+        <div class="stage-eyebrow">Foundation</div>
+        <div class="stage-title">Computing & OS Fundamentals</div>
+      </div>
+      <div class="stage-duration">4–6 weeks</div>
+    </div>
+    <div class="stage-body">
+      <p class="stage-desc">Everything above this breaks without it. You need to be comfortable inside both Linux and Windows before any security concept means much.</p>
+      <div class="topic-grid">
+        <div class="topic-card"><div class="t-name">Linux fundamentals</div><div class="t-detail">Filesystem hierarchy, permissions, processes, package managers, bash scripting</div></div>
+        <div class="topic-card"><div class="t-name">Windows internals</div><div class="t-detail">Registry, services, Active Directory basics, PowerShell</div></div>
+        <div class="topic-card"><div class="t-name">Networking basics</div><div class="t-detail">TCP/IP, OSI model, subnetting, DNS, DHCP, routing</div></div>
+        <div class="topic-card"><div class="t-name">Programming literacy</div><div class="t-detail">Python for scripting, plus reading C to understand memory-level bugs later</div></div>
+      </div>
+      <div class="resource-line"><span class="r-label">practice:</span><code>OverTheWire Bandit</code><code>TryHackMe: Linux Fundamentals</code><code>PowerShell for Pentesters</code></div>
+      <div class="milestone">comfortable navigating Linux/Windows via CLI with no GUI crutch</div>
+    </div>
+  </div>
+
+  <!-- STAGE 1 -->
+  <div class="stage" data-tier="core">
+    <div class="stage-head">
+      <div class="branch-line"></div>
+      <div class="node">01</div>
+      <div class="stage-title-wrap">
+        <div class="stage-eyebrow">Foundation</div>
+        <div class="stage-title">Networking & Protocol Deep Dive</div>
+      </div>
+      <div class="stage-duration">4–6 weeks</div>
+    </div>
+    <div class="stage-body">
+      <p class="stage-desc">Nearly every attack and defense technique is a networking concept in disguise. This stage is what makes packet captures readable instead of noise.</p>
+      <div class="topic-grid">
+        <div class="topic-card"><div class="t-name">Packet analysis</div><div class="t-detail">Wireshark, tcpdump, reading captures at the byte level</div></div>
+        <div class="topic-card"><div class="t-name">Core protocols</div><div class="t-detail">HTTP/S, DNS, SMB, FTP, SSH, ARP — how each is abused</div></div>
+        <div class="topic-card"><div class="t-name">Network devices</div><div class="t-detail">Firewalls, routers, switches, VLANs, NAT, VPNs</div></div>
+        <div class="topic-card"><div class="t-name">Network monitoring</div><div class="t-detail">IDS/IPS concepts, netflow, baseline traffic analysis</div></div>
+      </div>
+      <div class="resource-line"><span class="r-label">practice:</span><code>Wireshark sample captures</code><code>TryHackMe: Network Fundamentals</code><code>Cisco NetAcad (free)</code></div>
+      <div class="milestone">can trace a full TCP handshake and explain a pcap without notes</div>
+    </div>
+  </div>
+
+  <!-- STAGE 2 - CERT -->
+  <div class="stage" data-tier="cert">
+    <div class="stage-head">
+      <div class="branch-line"></div>
+      <div class="node">✓</div>
+      <div class="stage-title-wrap">
+        <div class="stage-eyebrow">Checkpoint 01 — Certification</div>
+        <div class="stage-title">CompTIA Security+</div>
+      </div>
+      <div class="stage-duration">4–8 weeks</div>
+    </div>
+    <div class="stage-body">
+      <p class="stage-desc">The industry-standard baseline cert. Validates that fundamentals and stage 0–1 material are solid before moving into offensive territory. Often a hiring gate for entry-level SOC/analyst roles.</p>
+      <div class="topic-grid">
+        <div class="topic-card"><div class="t-name">Threats & vulnerabilities</div><div class="t-detail">Malware types, social engineering, attack vectors</div></div>
+        <div class="topic-card"><div class="t-name">Architecture & design</div><div class="t-detail">Secure network design, cloud security, zero trust concepts</div></div>
+        <div class="topic-card"><div class="t-name">Governance & risk</div><div class="t-detail">Compliance frameworks, risk management, policy</div></div>
+        <div class="topic-card"><div class="t-name">Cryptography basics</div><div class="t-detail">Symmetric/asymmetric encryption, PKI, hashing</div></div>
+      </div>
+      <div class="resource-line"><span class="r-label">study:</span><code>Professor Messer (free video course)</code><code>Security+ SY0-701 objectives</code><code>Practice exams</code></div>
+      <div class="milestone">Security+ exam passed</div>
+    </div>
+  </div>
+
+  <!-- STAGE 3 -->
+  <div class="stage" data-tier="core">
+    <div class="stage-head">
+      <div class="branch-line"></div>
+      <div class="node">02</div>
+      <div class="stage-title-wrap">
+        <div class="stage-eyebrow">Offensive Track</div>
+        <div class="stage-title">Ethical Hacking & Penetration Testing</div>
+      </div>
+      <div class="stage-duration">8–12 weeks</div>
+    </div>
+    <div class="stage-body">
+      <p class="stage-desc">The methodical attacker's mindset — reconnaissance through reporting. This is where the CEH curriculum lives, and where hands-on labs matter more than reading.</p>
+      <div class="topic-grid">
+        <div class="topic-card"><div class="t-name">Recon & footprinting</div><div class="t-detail">OSINT, Shodan, DNS enumeration, Nmap scanning</div></div>
+        <div class="topic-card"><div class="t-name">Vulnerability scanning</div><div class="t-detail">Nessus, OpenVAS, manual verification of findings</div></div>
+        <div class="topic-card"><div class="t-name">Exploitation</div><div class="t-detail">Metasploit, manual exploit development basics, privilege escalation</div></div>
+        <div class="topic-card"><div class="t-name">Web app security</div><div class="t-detail">OWASP Top 10, Burp Suite, SQLi, XSS, auth bypass</div></div>
+        <div class="topic-card"><div class="t-name">Post-exploitation</div><div class="t-detail">Persistence, lateral movement, pivoting</div></div>
+        <div class="topic-card"><div class="t-name">Reporting</div><div class="t-detail">Writing findings a non-technical client can act on</div></div>
+      </div>
+      <div class="resource-line"><span class="r-label">practice:</span><code>HackTheBox</code><code>TryHackMe: Offensive Pentesting path</code><code>PortSwigger Web Security Academy</code></div>
+      <div class="milestone">10+ HTB/THM boxes rooted independently, no walkthroughs</div>
+    </div>
+  </div>
+
+  <!-- STAGE 4 - CERT -->
+  <div class="stage" data-tier="cert">
+    <div class="stage-head">
+      <div class="branch-line"></div>
+      <div class="node">✓</div>
+      <div class="stage-title-wrap">
+        <div class="stage-eyebrow">Checkpoint 02 — Certification</div>
+        <div class="stage-title">Certified Ethical Hacker (CEH)</div>
+      </div>
+      <div class="stage-duration">6–10 weeks</div>
+    </div>
+    <div class="stage-body">
+      <p class="stage-desc">Formalizes the offensive methodology from stage 02 into a recognized credential — attacker tools, techniques, and the legal/ethical framework around using them.</p>
+      <div class="topic-grid">
+        <div class="topic-card"><div class="t-name">Attack lifecycle</div><div class="t-detail">Formal phases: recon → gain access → maintain access → cover tracks</div></div>
+        <div class="topic-card"><div class="t-name">Tool proficiency</div><div class="t-detail">Standardized toolkit knowledge across the CEH blueprint</div></div>
+        <div class="topic-card"><div class="t-name">Legal & ethical framework</div><div class="t-detail">Scope, authorization, rules of engagement</div></div>
+      </div>
+      <div class="resource-line"><span class="r-label">study:</span><code>EC-Council courseware</code><code>CEH practical labs</code><code>Practice exams</code></div>
+      <div class="milestone">CEH exam passed</div>
+    </div>
+  </div>
+
+  <!-- STAGE 5 -->
+  <div class="stage" data-tier="core">
+    <div class="stage-head">
+      <div class="branch-line"></div>
+      <div class="node">03</div>
+      <div class="stage-title-wrap">
+        <div class="stage-eyebrow">Defensive Track</div>
+        <div class="stage-title">Blue Team, Detection & Incident Response</div>
+      </div>
+      <div class="stage-duration">8–10 weeks</div>
+    </div>
+    <div class="stage-body">
+      <p class="stage-desc">Understanding attacks is only half the value — knowing how to detect and respond to them is what makes the offensive knowledge operational rather than academic.</p>
+      <div class="topic-grid">
+        <div class="topic-card"><div class="t-name">SIEM & log analysis</div><div class="t-detail">Splunk, ELK stack, correlating events across sources</div></div>
+        <div class="topic-card"><div class="t-name">Threat detection</div><div class="t-detail">Building detection rules, MITRE ATT&CK mapping</div></div>
+        <div class="topic-card"><div class="t-name">Incident response</div><div class="t-detail">IR lifecycle, containment, eradication, recovery</div></div>
+        <div class="topic-card"><div class="t-name">Digital forensics</div><div class="t-detail">Disk/memory forensics, chain of custody, Autopsy/Volatility</div></div>
+        <div class="topic-card"><div class="t-name">Malware analysis</div><div class="t-detail">Static/dynamic analysis basics, sandboxing</div></div>
+      </div>
+      <div class="resource-line"><span class="r-label">practice:</span><code>TryHackMe: SOC Level 1</code><code>LetsDefend</code><code>MITRE ATT&CK Navigator</code></div>
+      <div class="milestone">can run a full incident timeline reconstruction from logs alone</div>
+    </div>
+  </div>
+
+  <!-- STAGE 6 - SPECIALIZATION -->
+  <div class="stage" data-tier="opt">
+    <div class="stage-head">
+      <div class="branch-line"></div>
+      <div class="node">04</div>
+      <div class="stage-title-wrap">
+        <div class="stage-eyebrow">Specialization</div>
+        <div class="stage-title">Pick a Track & Go Deep</div>
+      </div>
+      <div class="stage-duration">ongoing</div>
+    </div>
+    <div class="stage-body">
+      <p class="stage-desc">The roadmap forks here. Pick based on where your existing project interests already point — tooling, automation, and hands-on building compound fastest in whichever track matches your instincts.</p>
+      <div class="topic-grid">
+        <div class="topic-card"><div class="t-name">Red team / offensive</div><div class="t-detail">OSCP, exploit dev, C2 frameworks, adversary simulation</div></div>
+        <div class="topic-card"><div class="t-name">Blue team / detection eng.</div><div class="t-detail">GCIH/GCFA, building custom detection tooling, threat hunting</div></div>
+        <div class="topic-card"><div class="t-name">Application security</div><div class="t-detail">Secure code review, SAST/DAST, OSWE</div></div>
+        <div class="topic-card"><div class="t-name">Cloud security</div><div class="t-detail">AWS/Azure security, IAM hardening, CSPM tooling</div></div>
+        <div class="topic-card"><div class="t-name">Malware / RE</div><div class="t-detail">Reverse engineering, GREM, IDA/Ghidra proficiency</div></div>
+        <div class="topic-card"><div class="t-name">Security tooling & automation</div><div class="t-detail">Building your own scanners, monitors, and dashboards</div></div>
+      </div>
+      <div class="fork-note">Each track keeps compounding on stages 00–03 — none of it is wasted if you switch tracks later.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="outro">
+  <div class="outro-box">
+    <p class="line"><b>$</b> roadmap --status</p>
+    <p class="line">→ Stages are sequential in <b>difficulty</b>, not strictly in time — networking and Linux study can run in parallel.</p>
+    <p class="line">→ Build something at every stage. A packet-analysis tool, a mini scanner, a log parser — devforge is the right place for these.</p>
+    <p class="line">→ Certifications validate; labs build the actual skill. Don't let exam prep replace hands-on time.</p>
+    <p class="line prompt-end">&gt; end of roadmap._</p>
+  </div>
+</div>
+
+<footer>generated for black8arch — cybersec_roadmap v1.0</footer>
+
+<script>
+  function tick(){
+    const el = document.getElementById('clock');
+    const now = new Date();
+    el.textContent = now.toTimeString().slice(0,8);
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+</body>
+</html>
