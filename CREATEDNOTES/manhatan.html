@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MANHATTAN — 3D MAP</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0d12; font-family: 'Courier New', monospace; }
+  canvas { display: block; }
+
+  #hud { position: fixed; inset: 0; pointer-events: none; color: #d7e6ff; z-index: 10; }
+
+  .corner-frame { position: absolute; width: 24px; height: 24px; border-color: rgba(120,200,255,0.5); border-style: solid; border-width: 0; }
+  .cf-tl { top: 14px; left: 14px; border-top-width: 2px; border-left-width: 2px; }
+  .cf-tr { top: 14px; right: 14px; border-top-width: 2px; border-right-width: 2px; }
+  .cf-bl { bottom: 14px; left: 14px; border-bottom-width: 2px; border-left-width: 2px; }
+  .cf-br { bottom: 14px; right: 14px; border-bottom-width: 2px; border-right-width: 2px; }
+
+  #title-block { position: absolute; top: 22px; left: 44px; letter-spacing: 3px; }
+  #title-block .t1 { font-size: 11px; opacity: 0.5; letter-spacing: 4px; }
+  #title-block .t2 { font-size: 18px; font-weight: bold; color: #eaf4ff; text-shadow: 0 0 12px rgba(120,200,255,0.5); margin-top: 2px; }
+
+  #info-panel {
+    position: absolute; top: 20px; right: 44px; text-align: right;
+    font-size: 11px; line-height: 1.7; letter-spacing: 1px; max-width: 260px;
+  }
+  #info-panel .lbl { opacity: 0.5; }
+  #info-panel .val { color: #8fe3ff; font-weight: bold; }
+
+  #legend {
+    position: absolute; bottom: 26px; left: 44px;
+    font-size: 10.5px; line-height: 1.9; letter-spacing: 1px; opacity: 0.85;
+  }
+  #legend .row { display: flex; align-items: center; gap: 8px; }
+  #legend .swatch { width: 10px; height: 10px; display: inline-block; flex: none; }
+
+  #controls-hint {
+    position: absolute; bottom: 26px; right: 44px; text-align: right;
+    font-size: 10.5px; line-height: 1.9; letter-spacing: 1px; opacity: 0.6;
+  }
+  #controls-hint .key { color: #8fe3ff; }
+
+  #landmark-label {
+    position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; letter-spacing: 3px; color: #ffd48f;
+    text-shadow: 0 0 10px rgba(255,180,120,0.6);
+    opacity: 0; transition: opacity 0.5s ease; text-align: center;
+    pointer-events: none;
+  }
+  #landmark-label .sub { font-size: 10px; letter-spacing: 2px; color: #a8c8e8; margin-top: 3px; opacity: 0.8; }
+
+  #compass-badge {
+    position: absolute; top: 100px; right: 44px;
+    width: 64px; height: 64px; pointer-events: none;
+  }
+
+  #scale-bar {
+    position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+    text-align: center; font-size: 10px; letter-spacing: 1px; opacity: 0.7;
+  }
+  #scale-bar-line { height: 2px; background: #8fe3ff; margin-top: 4px; box-shadow: 0 0 4px #6fd2ff; }
+
+  #loading-screen {
+    position: fixed; inset: 0; z-index: 100;
+    background: radial-gradient(ellipse at center, #0c1420 0%, #04060a 100%);
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    color: #eaf4ff; font-family: 'Courier New', monospace;
+  }
+  #loading-screen .eyebrow { font-size: 12px; letter-spacing: 6px; color: #6fd2ff; opacity: 0.8; margin-bottom: 14px; }
+  #loading-screen h1 { font-size: clamp(32px, 7vw, 62px); letter-spacing: 6px; text-shadow: 0 0 30px rgba(120,200,255,0.5); margin-bottom: 20px; }
+  #loading-screen h1 span { color: #ff8a5c; text-shadow: 0 0 30px rgba(255,138,92,0.6); }
+  #loading-bar-wrap { width: 320px; height: 3px; background: rgba(120,200,255,0.15); margin-top: 10px; }
+  #loading-bar { height: 100%; width: 0%; background: linear-gradient(90deg,#6fd2ff,#ff8a5c); transition: width 0.2s; }
+  #loading-status { font-size: 10px; letter-spacing: 2px; opacity: 0.5; margin-top: 10px; }
+
+  #district-toast {
+    position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; letter-spacing: 2px; opacity: 0; transition: opacity 0.4s;
+    color: #a8c8e8; background: rgba(10,15,25,0.6); padding: 6px 16px; border: 1px solid rgba(120,200,255,0.3);
+  }
+</style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="eyebrow">GEOSPATIAL RECONSTRUCTION</div>
+  <h1>MANHATTAN<span>.</span></h1>
+  <div id="loading-status">MAPPING STREET GRID — 28.9° GRID ROTATION</div>
+  <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
+</div>
+
+<div id="hud">
+  <div class="corner-frame cf-tl"></div>
+  <div class="corner-frame cf-tr"></div>
+  <div class="corner-frame cf-bl"></div>
+  <div class="corner-frame cf-br"></div>
+
+  <div id="title-block">
+    <div class="t1">3D MAP — DOWNTOWN / MIDTOWN</div>
+    <div class="t2">MANHATTAN, NYC</div>
+  </div>
+
+  <div id="info-panel">
+    <div><span class="lbl">CENTER LAT/LNG</span> <span class="val" id="info-latlng">40.7484, -73.9857</span></div>
+    <div><span class="lbl">CAMERA DIST</span> <span class="val" id="info-dist">0 m</span></div>
+    <div><span class="lbl">GRID ROTATION</span> <span class="val">28.9° E of N</span></div>
+  </div>
+
+  <div id="district-toast"></div>
+
+  <div id="landmark-label">
+    <div id="landmark-name"></div>
+    <div class="sub" id="landmark-sub"></div>
+  </div>
+
+  <div id="legend">
+    <div class="row"><span class="swatch" style="background:#3a4a5f"></span> Office / Glass tower</div>
+    <div class="row"><span class="swatch" style="background:#8a7f6e"></span> Pre-war / Stone</div>
+    <div class="row"><span class="swatch" style="background:#6b4038"></span> Residential brick</div>
+    <div class="row"><span class="swatch" style="background:#2f5c34"></span> Park / Green space</div>
+    <div class="row"><span class="swatch" style="background:#ffb060"></span> Landmark</div>
+  </div>
+
+  <div id="controls-hint">
+    <div><span class="key">DRAG</span> Orbit</div>
+    <div><span class="key">RIGHT-DRAG</span> Pan</div>
+    <div><span class="key">SCROLL</span> Zoom</div>
+    <div><span class="key">CLICK</span> Landmark info</div>
+  </div>
+
+  <div id="scale-bar">
+    <div id="scale-bar-text">500 m</div>
+    <div id="scale-bar-line" style="width:80px; margin:4px auto 0;"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+
+// ============================================================================
+// GEOGRAPHY ENGINE
+// Converts real-world lat/lng to local meter-space, then rotates into
+// Manhattan's true grid frame (avenues/streets axis-aligned in local space).
+// Manhattan grid is rotated 28.9 degrees east of true north (Commissioners'
+// Plan of 1811) — this is why avenues don't run true N-S.
+// ============================================================================
+
+// Reference origin: Herald Square area (approx center of Midtown), used as
+// the local-tangent-plane origin for equirectangular-ish projection.
+const REF_LAT = 40.7484;
+const REF_LNG = -73.9857;
+const METERS_PER_DEG_LAT = 111320;
+const METERS_PER_DEG_LNG = 111320 * Math.cos(REF_LAT * Math.PI/180);
+
+const GRID_ROTATION_DEG = 28.9; // Manhattan avenues run ~28.9deg east of true north
+const GRID_ROTATION = GRID_ROTATION_DEG * Math.PI/180;
+
+function latLngToLocal(lat, lng){
+  // equirectangular local tangent plane, meters, X=east, Z=south (so -Z = north, matches typical map "up")
+  const x = (lng - REF_LNG) * METERS_PER_DEG_LNG;
+  const z = -(lat - REF_LAT) * METERS_PER_DEG_LAT;
+  // rotate into grid-aligned frame: after this rotation, +X points "along avenues" (true grid east)
+  // and +Z points "along streets" (true grid south), so avenues render as straight columns.
+  const cos = Math.cos(-GRID_ROTATION), sin = Math.sin(-GRID_ROTATION);
+  const rx = x*cos - z*sin;
+  const rz = x*sin + z*cos;
+  return { x: rx, z: rz };
+}
+
+// ============================================================================
+// REAL MANHATTAN GRID PARAMETERS (Commissioners' Plan of 1811 + modern data)
+// Standard block: ~264 ft (80.5m) between avenues x ~900ft varies; using the
+// canonical figures: avenue-to-avenue ~ 920ft varies by corridor, street-to-street
+// (north-south spacing between numbered streets) = 200ft (61m).
+// We use representative/averaged real spacing rather than every historical
+// irregularity, anchored to true landmark positions so key sites line up.
+// ============================================================================
+const FT_TO_M = 0.3048;
+const STREET_SPACING = 200 * FT_TO_M;      // ~61m between consecutive numbered streets
+const AVENUE_SPACING = avgAvenueSpacing(); // computed below from real avenue positions
+const BLOCK_WIDTH = AVENUE_SPACING;         // along-avenue block width
+const STREET_WIDTH_M = 18;                  // typical NYC street width incl sidewalks
+const AVENUE_WIDTH_M = 30;                  // avenues are wider
+
+function avgAvenueSpacing(){ return 274 * FT_TO_M; } // ~83.5m typical avenue-to-avenue
+
+// Real avenue x-offsets (approx, west-to-east across midtown), in local grid-x meters,
+// derived from actual relative spacing along 42nd St (12th Ave through 1st Ave + Park/Madison/Lex).
+// We anchor Fifth Avenue at grid-x = 0 for readability.
+const AVENUES = [
+  { name: '12th Ave',    offset: -8 },
+  { name: '11th Ave',    offset: -7 },
+  { name: '10th Ave',    offset: -6 },
+  { name: '9th Ave',     offset: -5 },
+  { name: '8th Ave',     offset: -4 },
+  { name: '7th Ave',     offset: -3 },
+  { name: 'Broadway*',   offset: -2.25, broadway: true },
+  { name: '6th Ave',     offset: -2 },
+  { name: '5th Ave',     offset: 0 },
+  { name: 'Madison Ave', offset: 1 },
+  { name: 'Park Ave',    offset: 2 },
+  { name: 'Lexington Ave', offset: 2.6 },
+  { name: '3rd Ave',     offset: 3.3 },
+  { name: '2nd Ave',     offset: 4.3 },
+  { name: '1st Ave',     offset: 5.3 },
+];
+
+// Numbered streets range covered (Downtown low numbers + Midtown up to 60s)
+const STREET_MIN = -8;   // roughly Canal/Houston area (south)
+const STREET_MAX = 60;   // up to Central Park south edge
+
+// ============================================================================
+// REAL LANDMARKS — actual lat/lng anchors so the map is geographically true
+// at these key reference points, with approximate real building heights.
+// ============================================================================
+const LANDMARKS = [
+  { name: 'Empire State Building', sub: '5th Ave & W 34th St · 443m', lat: 40.7484, lng: -73.9857, heightM: 443, footprint: 60, color: 0xb8ae9c, type:'landmark' },
+  { name: 'One World Trade Center', sub: 'Financial District · 541m', lat: 40.7127, lng: -74.0134, heightM: 541, footprint: 62, color: 0x9fd8e8, type:'landmark' },
+  { name: 'Chrysler Building', sub: 'Lexington Ave & E 42nd St · 319m', lat: 40.7516, lng: -73.9755, heightM: 319, footprint: 47, color: 0xc9c2a8, type:'landmark' },
+  { name: 'Flatiron Building', sub: 'Broadway & 5th Ave · 87m', lat: 40.7411, lng: -73.9897, heightM: 87, footprint: 30, color: 0xa89478, type:'landmark' },
+  { name: 'Times Square', sub: 'Broadway & 7th Ave, W 42–47th St', lat: 40.7580, lng: -73.9855, heightM: 0, footprint: 0, type:'plaza' },
+  { name: 'Madison Square Garden', sub: 'W 31st–33rd St, 7th–8th Ave', lat: 40.7505, lng: -73.9934, heightM: 48, footprint: 90, color: 0x555a60, type:'landmark' },
+  { name: 'Grand Central Terminal', sub: 'E 42nd St & Park Ave', lat: 40.7527, lng: -73.9772, heightM: 38, footprint: 90, color: 0xc4b596, type:'landmark' },
+  { name: 'New York Stock Exchange', sub: '11 Wall St, Financial District', lat: 40.7069, lng: -74.0113, heightM: 30, footprint: 45, color: 0xd6cbb0, type:'landmark' },
+  { name: 'Trinity Church', sub: 'Broadway & Wall St', lat: 40.7081, lng: -74.0119, heightM: 86, footprint: 24, color: 0x8a7d6a, type:'landmark' },
+  { name: 'Washington Square Park', sub: 'Greenwich Village', lat: 40.7308, lng: -73.9973, heightM: 0, footprint: 0, type:'park' },
+  { name: 'Union Square', sub: '14th St & Broadway/Park Ave S', lat: 40.7359, lng: -73.9911, heightM: 0, footprint: 0, type:'plaza' },
+  { name: 'Bryant Park', sub: 'Behind the NY Public Library', lat: 40.7536, lng: -73.9832, heightM: 0, footprint: 0, type:'park' },
+  { name: 'Central Park (south end)', sub: 'Columbus Circle to 59th St', lat: 40.7663, lng: -73.9776, heightM: 0, footprint: 0, type:'park' },
+  { name: 'One Vanderbilt', sub: 'Next to Grand Central · 427m', lat: 40.7527, lng: -73.9787, heightM: 427, footprint: 45, color: 0x8fb8d0, type:'landmark' },
+];
+
+// convert all landmarks to local space upfront
+LANDMARKS.forEach(l => { const p = latLngToLocal(l.lat, l.lng); l.x = p.x; l.z = p.z; });
+
+// ============================================================================
+// THREE.JS SETUP
+// ============================================================================
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d1420);
+scene.fog = new THREE.FogExp2(0x0d1420, 0.0009);
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 1, 8000);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// lighting: soft daylight with a directional sun
+const hemi = new THREE.HemisphereLight(0xcfe0ff, 0x22283a, 0.9);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff2dc, 1.15);
+sun.position.set(-600, 900, 400);
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0x6fa8ff, 0.3);
+fill.position.set(500, 300, -500);
+scene.add(fill);
+
+// ============================================================================
+// ORBIT / PAN / ZOOM CAMERA CONTROLLER (Google-Earth style, no external lib)
+// ============================================================================
+const orbit = {
+  target: new THREE.Vector3(0, 0, 0),
+  distance: 1400,
+  minDistance: 60,
+  maxDistance: 3200,
+  theta: Math.PI * 0.72,   // azimuth
+  phi: 0.95,               // polar angle from vertical (clamped)
+  minPhi: 0.15,
+  maxPhi: 1.5,
+};
+
+function updateCameraFromOrbit(){
+  const sinPhi = Math.sin(orbit.phi);
+  const x = orbit.target.x + orbit.distance * sinPhi * Math.sin(orbit.theta);
+  const y = orbit.target.y + orbit.distance * Math.cos(orbit.phi);
+  const z = orbit.target.z + orbit.distance * sinPhi * Math.cos(orbit.theta);
+  camera.position.set(x, y, z);
+  camera.lookAt(orbit.target);
+}
+updateCameraFromOrbit();
+
+let isDragging = false, isPanning = false;
+let lastMouseX = 0, lastMouseY = 0;
+
+renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+
+renderer.domElement.addEventListener('mousedown', (e) => {
+  lastMouseX = e.clientX; lastMouseY = e.clientY;
+  if (e.button === 0) isDragging = true;
+  if (e.button === 2) isPanning = true;
+});
+window.addEventListener('mouseup', () => { isDragging = false; isPanning = false; });
+
+window.addEventListener('mousemove', (e) => {
+  const dx = e.clientX - lastMouseX;
+  const dy = e.clientY - lastMouseY;
+  lastMouseX = e.clientX; lastMouseY = e.clientY;
+
+  if (isDragging){
+    orbit.theta -= dx * 0.0045;
+    orbit.phi -= dy * 0.0035;
+    orbit.phi = Math.max(orbit.minPhi, Math.min(orbit.maxPhi, orbit.phi));
+    updateCameraFromOrbit();
+  } else if (isPanning){
+    // pan along camera-right and camera-forward-flat vectors
+    const right = new THREE.Vector3(Math.sin(orbit.theta + Math.PI/2), 0, Math.cos(orbit.theta + Math.PI/2));
+    const fwd = new THREE.Vector3(Math.sin(orbit.theta), 0, Math.cos(orbit.theta));
+    const panScale = orbit.distance * 0.0016;
+    orbit.target.addScaledVector(right, -dx * panScale);
+    orbit.target.addScaledVector(fwd, dy * panScale);
+    updateCameraFromOrbit();
+  }
+});
+
+renderer.domElement.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = Math.exp(e.deltaY * 0.0012);
+  orbit.distance = Math.max(orbit.minDistance, Math.min(orbit.maxDistance, orbit.distance * factor));
+  updateCameraFromOrbit();
+}, { passive: false });
+
+// touch support (single-finger orbit, two-finger pinch zoom + pan)
+let touchState = { mode: null, lastX:0, lastY:0, lastDist:0 };
+renderer.domElement.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1){
+    touchState.mode = 'orbit';
+    touchState.lastX = e.touches[0].clientX; touchState.lastY = e.touches[0].clientY;
+  } else if (e.touches.length === 2){
+    touchState.mode = 'pinch';
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    touchState.lastDist = Math.sqrt(dx*dx+dy*dy);
+  }
+}, {passive:true});
+renderer.domElement.addEventListener('touchmove', (e) => {
+  if (touchState.mode === 'orbit' && e.touches.length === 1){
+    const dx = e.touches[0].clientX - touchState.lastX;
+    const dy = e.touches[0].clientY - touchState.lastY;
+    touchState.lastX = e.touches[0].clientX; touchState.lastY = e.touches[0].clientY;
+    orbit.theta -= dx * 0.005;
+    orbit.phi -= dy * 0.004;
+    orbit.phi = Math.max(orbit.minPhi, Math.min(orbit.maxPhi, orbit.phi));
+    updateCameraFromOrbit();
+  } else if (touchState.mode === 'pinch' && e.touches.length === 2){
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    const factor = touchState.lastDist / Math.max(1,dist);
+    touchState.lastDist = dist;
+    orbit.distance = Math.max(orbit.minDistance, Math.min(orbit.maxDistance, orbit.distance * factor));
+    updateCameraFromOrbit();
+  }
+}, {passive:true});
+
+// ============================================================================
+// MATERIALS
+// ============================================================================
+function winTexture(cols, rows, colorHex, litRatio, baseHex){
+  const c = document.createElement('canvas');
+  c.width = 32; c.height = 96;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = baseHex || '#141a22';
+  ctx.fillRect(0,0,c.width,c.height);
+  const cw = c.width/cols, rh = c.height/rows;
+  for (let x=0;x<cols;x++) for (let y=0;y<rows;y++){
+    if (Math.random() < litRatio){
+      ctx.fillStyle = colorHex;
+      ctx.fillRect(x*cw+1, y*rh+1, cw-2, rh-2);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+const matGlass = new THREE.MeshPhongMaterial({ color: 0x3a4a5f, shininess: 70, specular: 0x9fc8ff });
+const matGlassTeal = new THREE.MeshPhongMaterial({ color: 0x35505a, shininess: 70, specular: 0x8fdfff });
+const matStone = new THREE.MeshPhongMaterial({ color: 0x8a7f6e, shininess: 8 });
+const matStoneLight = new THREE.MeshPhongMaterial({ color: 0xa89a84, shininess: 8 });
+const matBrick = new THREE.MeshPhongMaterial({ color: 0x6b4038, shininess: 4 });
+const matConcrete = new THREE.MeshPhongMaterial({ color: 0x707068, shininess: 5 });
+const matRoof = new THREE.MeshPhongMaterial({ color: 0x24262c, shininess: 15 });
+const matLandmark = new THREE.MeshPhongMaterial({ color: 0xd8cdb0, shininess: 30, specular: 0xffe8c0 });
+
+const winGlassTex = winTexture(4,20,'#bfe0ff',0.3,'#0e141c');
+const winWarmTex  = winTexture(4,20,'#ffd48a',0.28,'#141008');
+const matWinGlass = new THREE.MeshBasicMaterial({ map: winGlassTex, transparent:false });
+const matWinWarm  = new THREE.MeshBasicMaterial({ map: winWarmTex, transparent:false });
+
+const districtMats = {
+  glass: [matGlass, matGlassTeal],
+  stone: [matStone, matStoneLight],
+  brick: [matBrick],
+  mixed: [matGlass, matStone, matBrick, matConcrete],
+};
+
+// ============================================================================
+// CITY GROUP
+// ============================================================================
+const cityGroup = new THREE.Group();
+scene.add(cityGroup);
+const buildingRegistry = [];
+
+let seed = 90210;
+function rnd(){ seed = (seed*1103515245+12345)&0x7fffffff; return (seed%10000)/10000; }
+
+function addBox(cx, cz, w, d, h, mat, winMat){
+  const grp = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+  body.position.y = h/2;
+  grp.add(body);
+  if (winMat){
+    const wm = winMat.clone();
+    wm.map = winMat.map.clone();
+    wm.map.needsUpdate = true;
+    const repY = Math.max(1, Math.round(h/18));
+    wm.map.repeat.set(1, repY);
+    const win = new THREE.Mesh(new THREE.BoxGeometry(w*1.001,h,d*1.001), wm);
+    win.position.y = h/2;
+    grp.add(win);
+  }
+  if (rnd() > 0.65){
+    const capH = h*0.05;
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(w*0.06,w*0.06,capH*3,6), matRoof);
+    cap.position.y = h + capH*1.5;
+    grp.add(cap);
+  }
+  grp.position.set(cx,0,cz);
+  cityGroup.add(grp);
+  buildingRegistry.push({x:cx,z:cz,hw:w/2,hd:d/2,h});
+  return grp;
+}
+
+// ============================================================================
+// BUILD STREET GRID + BLOCKS
+// This lays out real numbered streets (rows) and avenues (columns) at true
+// relative spacing, fills each resulting block with procedurally-varied
+// low-rise/high-rise boxes whose *district* character (glass Midtown office
+// canyon vs. brick West Village vs. stone Financial District) follows the
+// real neighborhood each block sits in.
+// ============================================================================
+const AVE_UNIT = AVENUE_SPACING; // meters per "offset unit" in AVENUES list roughly
+
+function districtForStreet(streetNum){
+  if (streetNum < -4) return { name:'Tribeca/Financial District', mats:'stone', hMin:25, hMax:280, dense:0.92 };
+  if (streetNum < 4)  return { name:'SoHo / Village', mats:'brick', hMin:15, hMax:45, dense:0.85 };
+  if (streetNum < 14) return { name:'Chelsea / Union Sq', mats:'mixed', hMin:20, hMax:70, dense:0.85 };
+  if (streetNum < 30) return { name:'Midtown South', mats:'glass', hMin:40, hMax:200, dense:0.95 };
+  if (streetNum < 60) return { name:'Midtown', mats:'glass', hMin:60, hMax:320, dense:0.97 };
+  return { name:'Central Park', mats:'mixed', hMin:0, hMax:0, dense:0 };
+}
+
+const streetXPositions = []; // avenue centerlines (grid-x meters), sorted
+AVENUES.forEach(a => streetXPositions.push(a.offset * AVE_UNIT));
+streetXPositions.sort((a,b)=>a-b);
+
+const blockGap = AVENUE_WIDTH_M;
+
+for (let s = STREET_MIN; s < STREET_MAX; s++){
+  const zNear = s * STREET_SPACING;
+  const zFar = (s+1) * STREET_SPACING;
+  const zCenter = (zNear+zFar)/2;
+  const d = STREET_SPACING - STREET_WIDTH_M;
+
+  const district = districtForStreet(s);
+  if (district.dense === 0) continue; // Central Park area — handled separately
+
+  for (let i = 0; i < streetXPositions.length-1; i++){
+    const xNear = streetXPositions[i];
+    const xFar = streetXPositions[i+1];
+    const blockW = xFar - xNear;
+    const xCenter = (xNear+xFar)/2;
+    const w = blockW - blockGap;
+    if (w < 15) continue; // skip degenerate/overlapping slivers (e.g. tight Broadway crossings)
+
+    if (rnd() > district.dense) continue;
+
+    // subdivide block into 1-3 lots along its width for variety
+    const lots = blockW > 140 ? (rnd() > 0.5 ? 2 : 3) : 1;
+    const lotW = w/lots;
+    for (let li=0; li<lots; li++){
+      const lotX = xNear + blockGap/2 + lotW*(li+0.5);
+      const h = district.hMin + rnd()*rnd()*(district.hMax-district.hMin) + 6;
+      const lw = lotW * (0.78 + rnd()*0.18);
+      const ld = d * (0.7 + rnd()*0.25);
+      const matPool = districtMats[district.mats];
+      const mat = matPool[Math.floor(rnd()*matPool.length)];
+      const winMat = rnd() > 0.2 ? (rnd() > 0.5 ? matWinGlass : matWinWarm) : null;
+      addBox(lotX, zCenter + (rnd()-0.5)*d*0.15, lw, ld, h, mat, winMat);
+    }
+  }
+}
+
+// ============================================================================
+// GROUND + STREET SURFACE (grid-aligned canvas texture, rotated to match)
+// ============================================================================
+const groundSize = 4000;
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(groundSize, groundSize),
+  new THREE.MeshPhongMaterial({ color: 0x14171c, shininess: 1 })
+);
+ground.rotation.x = -Math.PI/2;
+ground.position.y = -0.15;
+scene.add(ground);
+
+// street pattern texture sized to real block dimensions
+function makeStreetTexture(){
+  const size = 1024;
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#26282d';
+  ctx.fillRect(0,0,size,size);
+  ctx.fillStyle = '#3c3e44';
+  const streetFrac = STREET_WIDTH_M/STREET_SPACING;
+  const aveFrac = AVENUE_WIDTH_M/AVENUE_SPACING;
+  // horizontal streets
+  const rows = Math.round(size/(STREET_SPACING*0.5));
+  for (let i=0;i<rows;i++){
+    const y = i*(size/rows);
+    ctx.fillRect(0, y, size, size/rows*streetFrac*2);
+  }
+  const cols = Math.round(size/(AVENUE_SPACING*0.5));
+  for (let i=0;i<cols;i++){
+    const x = i*(size/cols);
+    ctx.fillRect(x, 0, size/cols*aveFrac*2, size);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(groundSize/(STREET_SPACING*0.5*rows/1), groundSize/(STREET_SPACING*0.5*rows/1));
+  tex.repeat.set(6,6);
+  return tex;
+}
+const streetPlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(groundSize*0.7, groundSize*0.7),
+  new THREE.MeshPhongMaterial({ map: makeStreetTexture(), shininess: 2 })
+);
+streetPlane.rotation.x = -Math.PI/2;
+streetPlane.position.y = -0.08;
+scene.add(streetPlane);
+
+// ============================================================================
+// CENTRAL PARK (south portion, real position relative to Midtown)
+// ============================================================================
+const parkSouthZ = 59 * STREET_SPACING;
+const parkNorthZ = 59 * STREET_SPACING - 1500; // extends north, we only render the visible south edge
+const parkWestX = streetXPositions[2];
+const parkEastX = streetXPositions[streetXPositions.length-1] + 100;
+const parkCenterX = (parkWestX+parkEastX)/2;
+const parkCenterZ = parkSouthZ - 500;
+
+const parkGround = new THREE.Mesh(
+  new THREE.PlaneGeometry(parkEastX-parkWestX, 1400),
+  new THREE.MeshPhongMaterial({ color: 0x24401f, shininess: 2 })
+);
+parkGround.rotation.x = -Math.PI/2;
+parkGround.position.set(parkCenterX, 0.2, parkCenterZ);
+scene.add(parkGround);
+
+const treeTrunkMat = new THREE.MeshPhongMaterial({ color:0x4a3527 });
+const treeLeafMat = new THREE.MeshPhongMaterial({ color:0x2f5c28 });
+for (let i=0;i<120;i++){
+  const tx = parkCenterX + (rnd()-0.5)*(parkEastX-parkWestX)*0.9;
+  const tz = parkCenterZ + (rnd()-0.5)*1300;
+  const th = 5+rnd()*7;
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.5,th*0.4,5), treeTrunkMat);
+  trunk.position.set(tx, th*0.2, tz);
+  scene.add(trunk);
+  const leaf = new THREE.Mesh(new THREE.ConeGeometry(th*0.32,th*0.75,6), treeLeafMat);
+  leaf.position.set(tx, th*0.6, tz);
+  scene.add(leaf);
+}
+
+// small park polygons for Washington Sq, Union Sq, Bryant Park, Madison Sq (from LANDMARKS)
+LANDMARKS.filter(l=>l.type==='park'||l.type==='plaza').forEach(l => {
+  if (l.name.includes('Central Park')) return;
+  const size = l.type==='park' ? 90 : 55;
+  const plaza = new THREE.Mesh(
+    new THREE.PlaneGeometry(size,size),
+    new THREE.MeshPhongMaterial({ color: l.type==='park'?0x2f5c34:0x555248, shininess:2 })
+  );
+  plaza.rotation.x = -Math.PI/2;
+  plaza.position.set(l.x, 0.25, l.z);
+  scene.add(plaza);
+});
+
+// ============================================================================
+// LANDMARK BUILDINGS — real position, real approximate height
+// ============================================================================
+const landmarkMeshes = [];
+LANDMARKS.filter(l=>l.type==='landmark').forEach(l => {
+  const grp = new THREE.Group();
+  const w = l.footprint;
+  const levels = l.heightM > 200 ? 5 : 1;
+  let curH = 0;
+  let curW = w;
+  for (let i=0;i<levels;i++){
+    const stepH = l.heightM/levels;
+    const stepW = curW * (1 - i*0.1);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(stepW, stepH, stepW), matLandmark);
+    mesh.position.y = curH + stepH/2;
+    grp.add(mesh);
+    curH += stepH;
+  }
+  if (l.heightM > 300){
+    const spireH = l.heightM*0.08;
+    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.6,1.2,spireH,6), matRoof);
+    spire.position.y = curH + spireH/2;
+    grp.add(spire);
+    const beaconMesh = new THREE.Mesh(new THREE.SphereGeometry(1.6,8,8), new THREE.MeshBasicMaterial({color:0xff5544}));
+    beaconMesh.position.y = curH+spireH;
+    grp.add(beaconMesh);
+    l.blink = beaconMesh;
+  }
+  grp.position.set(l.x, 0, l.z);
+  grp.userData.landmark = l;
+  cityGroup.add(grp);
+  landmarkMeshes.push(grp);
+  buildingRegistry.push({x:l.x,z:l.z,hw:w/2,hd:w/2,h:curH});
+});
+
+// ============================================================================
+// LANDMARK PICKING (click to show info)
+// ============================================================================
+const raycaster = new THREE.Raycaster();
+const mouseNDC = new THREE.Vector2();
+let downX=0, downY=0;
+renderer.domElement.addEventListener('mousedown', (e)=>{ downX=e.clientX; downY=e.clientY; });
+renderer.domElement.addEventListener('mouseup', (e)=>{
+  if (Math.abs(e.clientX-downX)>4 || Math.abs(e.clientY-downY)>4) return; // was a drag, not a click
+  mouseNDC.x = (e.clientX/window.innerWidth)*2-1;
+  mouseNDC.y = -(e.clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(mouseNDC, camera);
+  const hits = raycaster.intersectObjects(landmarkMeshes, true);
+  if (hits.length){
+    let obj = hits[0].object;
+    while (obj && !obj.userData.landmark) obj = obj.parent;
+    if (obj) showLandmark(obj.userData.landmark);
+  }
+});
+
+const elLandmarkLabel = document.getElementById('landmark-label');
+const elLandmarkName = document.getElementById('landmark-name');
+const elLandmarkSub = document.getElementById('landmark-sub');
+let landmarkTimer = 0;
+function showLandmark(l){
+  elLandmarkName.textContent = l.name;
+  elLandmarkSub.textContent = l.sub;
+  elLandmarkLabel.style.opacity = '1';
+  landmarkTimer = 3.2;
+}
+
+// ============================================================================
+// HUD UPDATES
+// ============================================================================
+const elDist = document.getElementById('info-dist');
+const elLatLng = document.getElementById('info-latlng');
+const elScaleText = document.getElementById('scale-bar-text');
+const elScaleLine = document.getElementById('scale-bar-line');
+const elDistrictToast = document.getElementById('district-toast');
+let lastDistrictName = '';
+let districtToastTimer = 0;
+
+function localToLatLng(x,z){
+  const cos = Math.cos(GRID_ROTATION), sin = Math.sin(GRID_ROTATION);
+  const ux = x*cos - z*sin;
+  const uz = x*sin + z*cos;
+  const lng = REF_LNG + ux/METERS_PER_DEG_LNG;
+  const lat = REF_LAT - uz/METERS_PER_DEG_LAT;
+  return {lat, lng};
+}
+
+function updateHUD(){
+  elDist.textContent = Math.round(orbit.distance) + ' m';
+  const ll = localToLatLng(orbit.target.x, orbit.target.z);
+  elLatLng.textContent = ll.lat.toFixed(4) + ', ' + ll.lng.toFixed(4);
+
+  // scale bar: figure out how many meters correspond to 80px at current distance
+  const metersPerPixel = (2*orbit.distance*Math.tan(camera.fov*Math.PI/360)) / window.innerHeight;
+  const barMeters = metersPerPixel * 80;
+  let niceVal = 100;
+  const steps = [10,20,50,100,200,500,1000,2000];
+  for (const s of steps){ if (s >= barMeters*0.6){ niceVal = s; break; } niceVal = s; }
+  const barPx = niceVal/metersPerPixel;
+  elScaleText.textContent = niceVal + ' m';
+  elScaleLine.style.width = Math.max(20,Math.min(200,barPx)) + 'px';
+
+  const streetIdx = Math.round(orbit.target.z / STREET_SPACING);
+  const d = districtForStreet(streetIdx);
+  if (d.name !== lastDistrictName){
+    lastDistrictName = d.name;
+    elDistrictToast.textContent = d.name.toUpperCase();
+    elDistrictToast.style.opacity = '1';
+    districtToastTimer = 2.2;
+  }
+  if (districtToastTimer > 0){
+    districtToastTimer -= 0.016;
+    if (districtToastTimer<=0) elDistrictToast.style.opacity='0';
+  }
+  if (landmarkTimer > 0){
+    landmarkTimer -= 0.016;
+    if (landmarkTimer<=0) elLandmarkLabel.style.opacity='0';
+  }
+}
+
+// ============================================================================
+// INITIAL CAMERA TARGET: frame Midtown around Empire State / Times Square
+// ============================================================================
+const empireState = LANDMARKS.find(l=>l.name.includes('Empire'));
+orbit.target.set(empireState.x, 40, empireState.z);
+orbit.distance = 900;
+orbit.theta = Math.PI*0.65;
+orbit.phi = 1.0;
+updateCameraFromOrbit();
+
+// ============================================================================
+// RENDER LOOP
+// ============================================================================
+function animate(){
+  requestAnimationFrame(animate);
+  const t = performance.now()*0.002;
+  LANDMARKS.forEach(l => { if (l.blink) l.blink.material.color.setScalar(0.6+0.4*Math.sin(t*3)); });
+  updateHUD();
+  renderer.render(scene, camera);
+}
+
+// loading flourish
+let loadPct = 0;
+const loadBar = document.getElementById('loading-bar');
+const loadStatus = document.getElementById('loading-status');
+const statuses = ['MAPPING STREET GRID — 28.9° ROTATION','PLACING LANDMARK GEOMETRY','GENERATING BLOCK FOOTPRINTS','CALIBRATING CAMERA'];
+let si = 0;
+const loadIv = setInterval(()=>{
+  loadPct += 10+Math.random()*16;
+  si = Math.min(statuses.length-1, Math.floor(loadPct/28));
+  loadStatus.textContent = statuses[si];
+  if (loadPct>=100){
+    loadPct=100;
+    clearInterval(loadIv);
+    setTimeout(()=>{ document.getElementById('loading-screen').style.display='none'; }, 250);
+  }
+  loadBar.style.width = loadPct+'%';
+}, 110);
+
+animate();
+
+})();
+</script>
+</body>
+</html>
