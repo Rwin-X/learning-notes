@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cybersecurity Roadmap</title>
+<style>
+  :root{
+    --bg: #060a08;
+    --bg-raise: #0a100d;
+    --line: #163326;
+    --line-dim: #0e2018;
+    --green: #4fe6a4;
+    --green-dim: #2b8f66;
+    --green-faint: #1c5a41;
+    --cyan: #5fd7d0;
+    --amber: #d7b25f;
+    --text: #cfe9dc;
+    --text-dim: #6f9484;
+    --text-faint: #3f5f52;
+    --mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* faint scanline / grid wash */
+  body::before{
+    content:"";
+    position: fixed;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      linear-gradient(var(--line-dim) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-dim) 1px, transparent 1px);
+    background-size: 42px 42px;
+    opacity: .18;
+    z-index: 0;
+  }
+
+  .wrap{
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 64px 24px 120px;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    margin-bottom: 72px;
+  }
+  .tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size: 12px;
+    letter-spacing: .18em;
+    color: var(--green-dim);
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: 3px;
+    margin-bottom: 22px;
+  }
+  .tag::before{
+    content:"";
+    width:6px; height:6px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:1; }
+    50%{ opacity:.35; }
+  }
+
+  h1{
+    font-size: clamp(32px, 5vw, 46px);
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+    color: #eafff2;
+    font-weight: 600;
+  }
+  h1 span{ color: var(--green); }
+
+  .sub{
+    color: var(--text-dim);
+    max-width: 620px;
+    font-size: 14.5px;
+  }
+
+  .meta-row{
+    display:flex;
+    gap: 28px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+  .meta-row b{ color: var(--text-dim); font-weight: 500; }
+
+  /* ---------- legend ---------- */
+  .legend{
+    display:flex;
+    gap:18px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .legend .dot{
+    display:inline-block;
+    width:8px; height:8px;
+    border-radius: 2px;
+    margin-right: 7px;
+    vertical-align: middle;
+  }
+  .dot.core{ background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot.branch{ background: var(--cyan); }
+  .dot.opt{ background: var(--amber); }
+
+  /* ---------- spine / path ---------- */
+  .path{
+    position: relative;
+    padding-left: 34px;
+  }
+  .path::before{
+    content:"";
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
+    background: linear-gradient(var(--green-faint), var(--line), var(--green-faint));
+  }
+
+  .stage{
+    position: relative;
+    margin-bottom: 54px;
+  }
+  .stage:last-child{ margin-bottom: 0; }
+
+  .stage-node{
+    position:absolute;
+    left: -34px;
+    top: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--green);
+    box-shadow: 0 0 10px rgba(79,230,164,.5);
+  }
+  .stage-node::after{
+    content:"";
+    position:absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .stage-index{
+    font-size: 11px;
+    color: var(--green-dim);
+    letter-spacing: .16em;
+    margin-bottom: 6px;
+  }
+
+  .stage-title{
+    font-size: 20px;
+    color: #eafff2;
+    font-weight: 600;
+    margin: 0 0 6px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .stage-title small{
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-faint);
+    letter-spacing: .04em;
+  }
+
+  .stage-desc{
+    color: var(--text-dim);
+    font-size: 13.5px;
+    max-width: 640px;
+    margin-bottom: 18px;
+  }
+
+  /* branch grid inside a stage */
+  .branches{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .branch{
+    border: 1px solid var(--line);
+    background: var(--bg-raise);
+    border-radius: 6px;
+    padding: 14px 16px;
+    position: relative;
+    transition: border-color .15s ease, transform .15s ease, background .15s ease;
+  }
+  .branch:hover{
+    border-color: var(--green-dim);
+    background: #0c1512;
+    transform: translateY(-1px);
+  }
+  .branch.optional{
+    border-style: dashed;
+  }
+  .branch-head{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .branch-name{
+    color: var(--cyan);
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .branch.optional .branch-name{ color: var(--amber); }
+
+  .branch-badge{
+    font-size: 9.5px;
+    letter-spacing: .1em;
+    color: var(--text-faint);
+    border: 1px solid var(--line);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .branch ul{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .branch li{
+    font-size: 12.5px;
+    color: var(--text-dim);
+    padding-left: 14px;
+    position: relative;
+    margin-bottom: 5px;
+  }
+  .branch li:last-child{ margin-bottom: 0; }
+  .branch li::before{
+    content:"›";
+    position:absolute;
+    left:0;
+    top:0;
+    color: var(--green-dim);
+  }
+
+  /* connector from spine to branch grid */
+  .stage-body{
+    position: relative;
+  }
+  .stage-body::before{
+    content:"";
+    position:absolute;
+    left: -20px;
+    top: -2px;
+    width: 14px;
+    height: 1px;
+    background: var(--green-faint);
+  }
+
+  /* ---------- milestone / checkpoint dividers ---------- */
+  .checkpoint{
+    position: relative;
+    margin: 0 0 54px;
+    padding-left: 4px;
+  }
+  .checkpoint-node{
+    position:absolute;
+    left: -34px;
+    top: 2px;
+    width: 12px;
+    height: 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .checkpoint-node::before{
+    content:"◆";
+    color: var(--amber);
+    font-size: 11px;
+  }
+  .checkpoint-label{
+    font-size: 11px;
+    letter-spacing: .14em;
+    color: var(--amber);
+    border-left: 2px solid var(--amber);
+    padding-left: 10px;
+  }
+  .checkpoint-desc{
+    font-size: 12.5px;
+    color: var(--text-faint);
+    padding-left: 12px;
+    margin-top: 4px;
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    margin-top: 90px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 11.5px;
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 560px){
+    .wrap{ padding: 40px 16px 80px; }
+    .path{ padding-left: 26px; }
+    .path::before{ left: 3px; }
+    .stage-node, .checkpoint-node{ left: -26px; }
+    .stage-body::before{ left: -14px; width: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="tag">learning_path.map</span>
+    <h1>cybersecurity <span>roadmap</span></h1>
+    <p class="sub">A linear path from computing fundamentals to specialization — networking and systems first, then defensive skill, then offense, then a chosen track. Each stage lists the branches worth studying in parallel.</p>
+
+    <div class="legend">
+      <span><span class="dot core"></span>core stage</span>
+      <span><span class="dot branch"></span>skill branch</span>
+      <span><span class="dot opt"></span>optional / specialization</span>
+    </div>
+
+    <div class="meta-row">
+      <span><b>stages</b> 7</span>
+      <span><b>format</b> sequential, branch in parallel</span>
+      <span><b>status</b> foundation → specialization</span>
+    </div>
+  </header>
+
+  <div class="path">
+
+    <!-- STAGE 01 -->
+    <section class="stage">
+      <div class="stage-node"></div>
+      <div class="stage-index">STAGE 01 / FOUNDATION</div>
+      <h2 class="stage-title">Computing &amp; Networking Basics <small>required before anything else</small></h2>
+      <p class="stage-desc">You cannot secure what you don't understand. This stage builds the mental model of how machines, networks, and operating systems actually behave.</p>
+      <div class="stage-body">
+        <div class="branches">
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Networking</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>OSI &amp; TCP/IP models</li>
+              <li>IP addressing, subnetting, DNS, DHCP</li>
+              <li>TCP vs UDP, ports, common protocols</li>
+              <li>Routing &amp; switching basics</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Operating Systems</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>Linux fundamentals &amp; shell (bash)</li>
+              <li>Windows internals &amp; Active Directory basics</li>
+              <li>File systems, permissions, processes</li>
+              <li>Package management, services</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Programming</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>Python for scripting &amp; automation</li>
+              <li>Bash scripting</li>
+              <li>Reading C (for exploit &amp; malware analysis later)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 02 -->
+    <section class="stage">
+      <div class="stage-node"></div>
+      <div class="stage-index">STAGE 02 / FOUNDATION</div>
+      <h2 class="stage-title">Security Fundamentals <small>concepts &amp; vocabulary</small></h2>
+      <p class="stage-desc">The shared language of the field — CIA triad, risk, threat modeling, cryptography basics. This is what certifications like Security+ formalize.</p>
+      <div class="stage-body">
+        <div class="branches">
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Core Concepts</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>CIA triad, AAA, defense in depth</li>
+              <li>Threats, vulnerabilities, risk vs exposure</li>
+              <li>Security policies &amp; compliance basics</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Cryptography</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>Symmetric vs asymmetric encryption</li>
+              <li>Hashing, salting, digital signatures</li>
+              <li>TLS/SSL handshake, PKI &amp; certificates</li>
+            </ul>
+          </div>
+          <div class="branch optional">
+            <div class="branch-head"><span class="branch-name">Certification track</span><span class="branch-badge">OPT</span></div>
+            <ul>
+              <li>CompTIA Security+</li>
+              <li>CompTIA Network+ (if networking is weak)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="checkpoint">
+      <div class="checkpoint-node"></div>
+      <div class="checkpoint-label">CHECKPOINT — you should now be able to</div>
+      <div class="checkpoint-desc">explain how a packet travels from your machine to a server, set up a basic Linux box, and describe the CIA triad without notes.</div>
+    </div>
+
+    <!-- STAGE 03 -->
+    <section class="stage">
+      <div class="stage-node"></div>
+      <div class="stage-index">STAGE 03 / DEFENSIVE</div>
+      <h2 class="stage-title">Defensive Security (Blue Team) <small>detect, monitor, respond</small></h2>
+      <p class="stage-desc">Understanding defense before offense makes offense meaningful. This is also where most entry-level jobs live.</p>
+      <div class="stage-body">
+        <div class="branches">
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Monitoring</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>SIEM tools (Splunk, ELK, Wazuh)</li>
+              <li>Log analysis &amp; correlation</li>
+              <li>IDS / IPS (Snort, Suricata)</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Incident Response</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>IR lifecycle (prepare → contain → eradicate → recover)</li>
+              <li>Digital forensics basics</li>
+              <li>Malware analysis fundamentals</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Hardening</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>System &amp; network hardening baselines</li>
+              <li>Firewalls, segmentation, least privilege</li>
+              <li>Patch &amp; vulnerability management</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 04 -->
+    <section class="stage">
+      <div class="stage-node"></div>
+      <div class="stage-index">STAGE 04 / OFFENSIVE</div>
+      <h2 class="stage-title">Offensive Security (Red Team) <small>think like the attacker</small></h2>
+      <p class="stage-desc">Ethical hacking — same techniques as attackers, used with authorization to find weaknesses before they do.</p>
+      <div class="stage-body">
+        <div class="branches">
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Reconnaissance</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>OSINT techniques &amp; tools</li>
+              <li>Nmap &amp; service enumeration</li>
+              <li>Passive vs active recon</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Exploitation</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>Vulnerability scanning (Nessus, OpenVAS)</li>
+              <li>Metasploit fundamentals</li>
+              <li>Manual exploitation basics</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Web Application</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>OWASP Top 10</li>
+              <li>Burp Suite workflow</li>
+              <li>SQLi, XSS, SSRF, auth flaws</li>
+            </ul>
+          </div>
+          <div class="branch optional">
+            <div class="branch-head"><span class="branch-name">Certification track</span><span class="branch-badge">OPT</span></div>
+            <ul>
+              <li>CEH</li>
+              <li>eJPT (practical alternative)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="checkpoint">
+      <div class="checkpoint-node"></div>
+      <div class="checkpoint-label">CHECKPOINT — you should now be able to</div>
+      <div class="checkpoint-desc">run a full recon-to-report cycle on a lab target (TryHackMe / HTB machine) and explain each finding's real-world impact.</div>
+    </div>
+
+    <!-- STAGE 05 -->
+    <section class="stage">
+      <div class="stage-node"></div>
+      <div class="stage-index">STAGE 05 / APPLIED</div>
+      <h2 class="stage-title">Hands-On Practice <small>where theory becomes skill</small></h2>
+      <p class="stage-desc">None of the above sticks without repetition against real targets. This stage runs in parallel with 03–04, not after them.</p>
+      <div class="stage-body">
+        <div class="branches">
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Labs</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>TryHackMe learning paths</li>
+              <li>HackTheBox machines &amp; challenges</li>
+              <li>Home lab (VMs, pfSense, vulnerable VMs)</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">CTFs</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>picoCTF for beginners</li>
+              <li>Weekend CTFs (CTFtime.org)</li>
+              <li>Category focus: web, crypto, forensics, pwn</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Build &amp; document</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>Write your own tools (scanners, parsers)</li>
+              <li>Publish writeups &amp; a GitHub portfolio</li>
+              <li>Keep a lab notebook of what broke and why</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 06 -->
+    <section class="stage">
+      <div class="stage-node"></div>
+      <div class="stage-index">STAGE 06 / SPECIALIZATION</div>
+      <h2 class="stage-title">Pick a Track <small>go deep in one direction</small></h2>
+      <p class="stage-desc">Generalist knowledge gets you hired at junior level; depth in one track is what moves you up. Pick based on what you enjoyed most in stages 3–5.</p>
+      <div class="stage-body">
+        <div class="branches">
+          <div class="branch optional">
+            <div class="branch-head"><span class="branch-name">Penetration Testing</span><span class="branch-badge">TRACK</span></div>
+            <ul>
+              <li>Advanced Burp / manual web exploitation</li>
+              <li>Active Directory attacks</li>
+              <li>OSCP</li>
+            </ul>
+          </div>
+          <div class="branch optional">
+            <div class="branch-head"><span class="branch-name">Threat Intel &amp; SOC</span><span class="branch-badge">TRACK</span></div>
+            <ul>
+              <li>MITRE ATT&amp;CK framework</li>
+              <li>Threat hunting methodology</li>
+              <li>GCIH / Security Blue Team certs</li>
+            </ul>
+          </div>
+          <div class="branch optional">
+            <div class="branch-head"><span class="branch-name">Malware Analysis</span><span class="branch-badge">TRACK</span></div>
+            <ul>
+              <li>Static &amp; dynamic analysis</li>
+              <li>Reverse engineering (Ghidra, x64dbg)</li>
+              <li>Sandboxing &amp; behavioral analysis</li>
+            </ul>
+          </div>
+          <div class="branch optional">
+            <div class="branch-head"><span class="branch-name">Cloud Security</span><span class="branch-badge">TRACK</span></div>
+            <ul>
+              <li>AWS / Azure security fundamentals</li>
+              <li>IAM misconfig &amp; container security</li>
+              <li>AZ-500 / AWS Security Specialty</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 07 -->
+    <section class="stage">
+      <div class="stage-node"></div>
+      <div class="stage-index">STAGE 07 / CAREER</div>
+      <h2 class="stage-title">Portfolio &amp; Entry <small>turn skill into a role</small></h2>
+      <p class="stage-desc">The last mile — making everything above legible to someone who has to decide whether to hire you.</p>
+      <div class="stage-body">
+        <div class="branches">
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Proof of work</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>GitHub with real, documented tools</li>
+              <li>CTF / HTB rank as evidence of skill</li>
+              <li>Blog or writeups explaining your thinking</li>
+            </ul>
+          </div>
+          <div class="branch">
+            <div class="branch-head"><span class="branch-name">Entry points</span><span class="branch-badge">CORE</span></div>
+            <ul>
+              <li>SOC analyst (tier 1)</li>
+              <li>IT / sysadmin roles as a stepping stone</li>
+              <li>Bug bounty as supplementary proof</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>path: foundation → defense → offense → specialization → career</span>
+    <span>rev. 2026</span>
+  </footer>
+
+</div>
+</body>
+</html>
