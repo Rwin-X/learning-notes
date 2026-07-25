@@ -1,0 +1,40 @@
+<div style="background:#0a0e0d;border-radius:12px;padding:0;overflow:hidden;border:0.5px solid #1a3a2e;">
+<div style="display:flex;align-items:center;gap:6px;padding:10px 14px;background:#0d1512;border-bottom:0.5px solid #1a3a2e;">
+<div style="width:9px;height:9px;border-radius:50%;background:#2a3a35;"></div>
+<div style="width:9px;height:9px;border-radius:50%;background:#2a3a35;"></div>
+<div style="width:9px;height:9px;border-radius:50%;background:#2a3a35;"></div>
+<span style="margin-left:8px;font-family:monospace;font-size:11px;color:#4a6a5c;">cube.sh — rotating</span>
+</div>
+<div style="position:relative;height:420px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center, #0d1a15 0%, #060a09 70%);perspective:900px;overflow:hidden;">
+<div id="starfield" style="position:absolute;inset:0;"></div>
+<div style="position:relative;width:180px;height:180px;transform-style:preserve-3d;animation:spin 9s linear infinite;" id="cube">
+<div class="face" style="transform:translateZ(90px);"></div>
+<div class="face" style="transform:rotateY(180deg) translateZ(90px);"></div>
+<div class="face" style="transform:rotateY(90deg) translateZ(90px);"></div>
+<div class="face" style="transform:rotateY(-90deg) translateZ(90px);"></div>
+<div class="face" style="transform:rotateX(90deg) translateZ(90px);"></div>
+<div class="face" style="transform:rotateX(-90deg) translateZ(90px);"></div>
+</div>
+</div>
+<div style="padding:8px 14px;background:#0d1512;border-top:0.5px solid #1a3a2e;font-family:monospace;font-size:11px;color:#3a8a6e;">
+$ rendering wireframe... status: <span style="color:#5adfb5;">stable_orbit</span>
+</div>
+</div>
+<style>
+.face{position:absolute;width:180px;height:180px;background:rgba(20,60,50,0.08);border:1px solid #4adfae;box-shadow:0 0 12px rgba(74,223,174,0.25) inset,0 0 8px rgba(74,223,174,0.15);}
+@keyframes spin{
+0%{transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg);}
+100%{transform:rotateX(360deg) rotateY(360deg) rotateZ(180deg);}
+}
+</style>
+<script>
+(function(){
+var sf=document.getElementById('starfield');
+for(var i=0;i<40;i++){
+var s=document.createElement('div');
+var sz=Math.random()*2+1;
+s.style.cssText='position:absolute;width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:#3a8a6e;opacity:'+(Math.random()*0.6+0.2)+';top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;';
+sf.appendChild(s);
+}
+})();
+</script>
