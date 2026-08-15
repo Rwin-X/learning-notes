@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloudnotes</title>
+<style>
+  :root{
+    --sky-top:#ffffff;
+    --sky-bottom:#eef4fb;
+    --ink:#3a4256;
+    --ink-soft:#8992a6;
+    --line:#e3e8f0;
+    --accent:#6f8fc9;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-bottom) 100%);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    color:var(--ink);
+  }
+
+  header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 28px;
+    background:linear-gradient(180deg,rgba(255,255,255,0.92) 60%,rgba(255,255,255,0));
+    pointer-events:none;
+  }
+
+  header *{pointer-events:auto;}
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:0.2px;
+    color:var(--ink);
+  }
+
+  .brand svg{width:22px;height:22px;flex-shrink:0;}
+
+  .composer{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#ffffff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:8px 8px 8px 16px;
+    box-shadow:0 2px 10px rgba(60,80,130,0.06);
+    width:min(460px,50vw);
+  }
+
+  .composer-fields{
+    display:flex;
+    flex-direction:column;
+    flex:1;
+    gap:2px;
+  }
+
+  .composer input{
+    border:none;
+    outline:none;
+    font-size:14px;
+    color:var(--ink);
+    background:transparent;
+    font-family:inherit;
+    padding:2px 0;
+  }
+
+  .composer input#title-input{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+  }
+
+  .composer input::placeholder{color:var(--ink-soft);}
+  .composer input#title-input::placeholder{color:#b7c2da;text-transform:none;font-weight:500;letter-spacing:0;}
+
+  .composer button{
+    border:none;
+    border-radius:999px;
+    width:34px;
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--ink);
+    color:#fff;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:transform 0.15s ease, background 0.15s ease;
+    align-self:center;
+  }
+
+  .composer button:hover{background:var(--accent);}
+  .composer button:active{transform:scale(0.92);}
+  .composer button svg{width:15px;height:15px;}
+
+  #sky{
+    position:relative;
+    width:100%;
+    height:100%;
+  }
+
+  .note{
+    position:absolute;
+    width:240px;
+    height:150px;
+    cursor:grab;
+    touch-action:none;
+    will-change:transform;
+    z-index:1;
+  }
+
+  .note.dragging{cursor:grabbing;z-index:100 !important;}
+
+  .note-title{
+    position:absolute;
+    top:-11px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#ffffff;
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.2px;
+    padding:4px 12px;
+    border-radius:999px;
+    white-space:nowrap;
+    max-width:88%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    box-shadow:0 2px 6px rgba(90,110,160,0.1);
+    z-index:3;
+    outline:none;
+    cursor:text;
+  }
+
+  .note-title:empty::before{
+    content:attr(data-placeholder);
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+
+  .note-cloud{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    filter:drop-shadow(0 10px 18px rgba(90,110,160,0.16));
+    pointer-events:none;
+  }
+
+  .note-body{
+    position:relative;
+    z-index:1;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    padding:26px 40px 32px;
+  }
+
+  .word-field{
+    position:relative;
+    width:100%;
+    height:100%;
+  }
+
+  .word{
+    position:absolute;
+    font-size:13.5px;
+    font-weight:500;
+    color:var(--ink);
+    white-space:nowrap;
+    transition:left 0.6s cubic-bezier(.4,0,.2,1), top 0.6s cubic-bezier(.4,0,.2,1), transform 0.6s cubic-bezier(.4,0,.2,1);
+    cursor:default;
+  }
+
+  .word.settled{
+    animation:none !important;
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    .word.floating{
+      animation:bob 4s ease-in-out infinite;
+    }
+  }
+
+  @keyframes bob{
+    0%{transform:translateY(0px);}
+    50%{transform:translateY(-5px);}
+    100%{transform:translateY(0px);}
+  }
+
+  .note-hint{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:0 30px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    pointer-events:none;
+  }
+
+  .note-delete{
+    position:absolute;
+    top:16px;
+    right:34px;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,0.75);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    opacity:0;
+    transition:opacity 0.15s ease, background 0.15s ease;
+    z-index:4;
+  }
+
+  .note:hover .note-delete{opacity:1;}
+  .note-delete:hover{background:#fff;}
+  .note-delete svg{width:11px;height:11px;color:var(--ink-soft);}
+
+  .note-resize{
+    position:absolute;
+    right:24px;
+    bottom:26px;
+    width:16px;
+    height:16px;
+    cursor:nwse-resize;
+    opacity:0;
+    transition:opacity 0.15s ease;
+    z-index:4;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .note:hover .note-resize{opacity:0.55;}
+  .note-resize svg{width:12px;height:12px;color:var(--ink);}
+
+  .note-status{
+    position:absolute;
+    bottom:8px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:10px;
+    color:var(--ink-soft);
+    opacity:0;
+    transition:opacity 0.2s ease;
+    pointer-events:none;
+    z-index:2;
+    letter-spacing:0.2px;
+  }
+
+  .note:hover .note-status{opacity:0.8;}
+
+  .empty-hint{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:14px;
+    pointer-events:none;
+    z-index:1;
+  }
+
+  .empty-hint .big{
+    font-size:16px;
+    color:var(--ink);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+
+  @media (max-width:640px){
+    header{flex-direction:column;align-items:stretch;gap:12px;padding:16px;}
+    .composer{width:100%;}
+    .brand{justify-content:center;}
+    .note{width:190px;height:130px;}
+    .note-body{padding:22px 30px 28px;}
+    .word{font-size:12px;}
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    .note{animation:drift 9s ease-in-out infinite;}
+  }
+
+  @keyframes drift{
+    0%{transform:translateY(0px) rotate(var(--tilt,0deg));}
+    50%{transform:translateY(-9px) rotate(var(--tilt,0deg));}
+    100%{transform:translateY(0px) rotate(var(--tilt,0deg));}
+  }
+
+  .note.dragging{animation:none !important;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6.5 17C4.01 17 2 14.99 2 12.5C2 10.26 3.64 8.4 5.79 8.06C6.38 5.72 8.49 4 11 4C13.86 4 16.21 6.13 16.56 8.9C18.55 9.23 20 10.94 20 13C20 15.21 18.21 17 16 17H6.5Z" stroke="#3a4256" stroke-width="1.6" stroke-linejoin="round"/>
+    </svg>
+    <span>Cloudnotes</span>
+  </div>
+  <div class="composer">
+    <div class="composer-fields">
+      <input id="title-input" type="text" placeholder="Title" maxlength="40" />
+      <input id="note-input" type="text" placeholder="Write a note and press enter" maxlength="240" />
+    </div>
+    <button id="add-btn" aria-label="Add note">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<div id="sky">
+  <div class="empty-hint" id="empty-hint">
+    <div class="big">Your sky is empty</div>
+    <div>Write a title and a note above, they will drift up as a cloud</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var sky = document.getElementById('sky');
+  var input = document.getElementById('note-input');
+  var titleInput = document.getElementById('title-input');
+  var addBtn = document.getElementById('add-btn');
+  var emptyHint = document.getElementById('empty-hint');
+  var STORAGE_KEY = 'cloudnotes-v3';
+  var zTop = 10;
+
+  var palette = [
+    {fill:'#ffffff', stroke:'#dbe4f2'},
+    {fill:'#f7faff', stroke:'#d7e2f4'},
+    {fill:'#fbfdff', stroke:'#dfe8f6'}
+  ];
+
+  // --- morphing cloud outline ---
+  // A base puffy-cloud path plus a few organic variations of the same
+  // point count, animated with SMIL <animate> so the silhouette itself
+  // breathes continuously.
+
+  var cloudKeyframes = [
+    'M46,96 Q14,96 14,68 Q14,46 36,42 Q37,20 62,17 Q73,3 100,8 Q122,-1 138,13 Q164,10 175,32 Q200,35 200,60 Q200,88 173,92 Q173,96 46,96 Z',
+    'M44,94 Q12,92 15,66 Q11,44 38,40 Q40,18 64,20 Q77,1 102,10 Q124,-4 140,16 Q166,8 176,34 Q202,32 198,60 Q203,86 174,90 Q170,98 44,94 Z',
+    'M48,97 Q16,98 12,69 Q16,47 34,43 Q34,22 60,15 Q71,5 99,7 Q120,2 137,11 Q163,13 174,31 Q198,38 199,61 Q197,89 172,93 Q176,95 48,97 Z',
+    'M45,95 Q13,94 14,67 Q13,45 37,41 Q38,19 63,18 Q74,2 101,9 Q123,-2 139,14 Q165,9 175,33 Q201,34 199,60 Q201,87 173,91 Q172,97 45,95 Z'
+  ];
+
+  function svgCloud(colors, uidStr){
+    var dur = (14 + Math.random()*6).toFixed(1) + 's';
+    var vals = cloudKeyframes.join(';') + ';' + cloudKeyframes[0];
+    return '<svg viewBox="0 0 214 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<path fill="' + colors.fill + '" stroke="' + colors.stroke + '" stroke-width="1.5" d="' + cloudKeyframes[0] + '">' +
+        '<animate attributeName="d" dur="' + dur + '" values="' + vals + '" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" />' +
+      '</path>' +
+    '</svg>';
+  }
+
+  function uid(){
+    return 'n_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7);
+  }
+
+  function clampPercent(v, min, max){
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function updateEmptyHint(){
+    var count = sky.querySelectorAll('.note').length;
+    emptyHint.style.display = count === 0 ? 'block' : 'none';
+  }
+
+  function saveNotes(){
+    var notes = [];
+    sky.querySelectorAll('.note').forEach(function(el){
+      notes.push({
+        id: el.dataset.id,
+        title: el.dataset.title || '',
+        text: el.dataset.text || '',
+        x: parseFloat(el.style.left),
+        y: parseFloat(el.style.top),
+        w: el.offsetWidth,
+        h: el.offsetHeight,
+        tilt: el.style.getPropertyValue('--tilt'),
+        colorIndex: el.dataset.colorIndex
+      });
+    });
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    }catch(e){}
+  }
+
+  // --- word field: words float freely, then loosely cluster near
+  // center on click (never a strict grid or wrapped lines) ---
+
+  var WORD_H = 16;
+  var PAD = 6;
+  var GAP_X = 8;
+  var GAP_Y = 8;
+
+  // Shelf-packing layout: guarantees zero overlap by construction
+  // (rows of known height, words placed left-to-right with a running
+  // cursor) instead of random retries, which fail in tight spaces.
+  // Organic feel comes from randomized row order, per-word vertical
+  // jitter within a row's slack, and random horizontal gaps.
+  function packWords(words, fieldW, fieldH, opts){
+    opts = opts || {};
+    var centered = !!opts.centered;
+    var availW = Math.max(20, fieldW - PAD * 2);
+    var availH = Math.max(20, fieldH - PAD * 2);
+
+    // shuffle word order so the same words don't always end up in the
+    // same rows/positions
+    var order = words.map(function(_, i){ return i; });
+    for(var s = order.length - 1; s > 0; s--){
+      var j = Math.floor(Math.random() * (s + 1));
+      var tmp = order[s]; order[s] = order[j]; order[j] = tmp;
+    }
+
+    // greedily wrap shuffled words into rows that fit availW
+    var rows = [];
+    var currentRow = [];
+    var currentW = 0;
+    order.forEach(function(idx){
+      var w = words[idx];
+      var addW = currentRow.length ? w._measuredWidth + GAP_X : w._measuredWidth;
+      if(currentW + addW > availW && currentRow.length){
+        rows.push(currentRow);
+        currentRow = [idx];
+        currentW = w._measuredWidth;
+      } else {
+        currentRow.push(idx);
+        currentW += addW;
+      }
+    });
+    if(currentRow.length) rows.push(currentRow);
+
+    var rowH = WORD_H + GAP_Y;
+    var totalH = rows.length * rowH - GAP_Y;
+    // If content is taller than the field, do NOT compress row height
+    // below a safe minimum (that would cause visual overlap) — instead
+    // let excess rows extend past the visible area; the field's
+    // overflow:hidden clips them cleanly rather than stacking words.
+    var minRowH = WORD_H + 3;
+    if(totalH > availH && rows.length > 0){
+      rowH = Math.max(minRowH, availH / rows.length);
+    }
+    var startY = centered ? Math.max(0, (availH - Math.min(totalH, availH)) / 2) : 0;
+    var vJitter = Math.max(0, Math.min(3, rowH - WORD_H - 2));
+
+    rows.forEach(function(row, ri){
+      var rowWidth = 0;
+      row.forEach(function(idx, i){
+        rowWidth += words[idx]._measuredWidth + (i ? GAP_X : 0);
+      });
+      var extraSlack = Math.max(0, availW - rowWidth);
+      var jitterBudget = centered ? 0 : Math.min(extraSlack, 26);
+      var rowStartX = centered ? Math.max(0, (availW - rowWidth) / 2) : (Math.random() * Math.min(extraSlack, 18));
+      var cursorX = rowStartX;
+      var rowY = startY + ri * rowH;
+      row.forEach(function(idx, i){
+        var w = words[idx];
+        var jitterY = vJitter > 0 ? (Math.random() * vJitter - vJitter/2) : 0;
+        var extraGap = (!centered && i > 0 && jitterBudget > 0) ? Math.random() * (jitterBudget / Math.max(1,row.length)) : 0;
+        cursorX += extraGap;
+        w.el.style.left = (PAD + cursorX) + 'px';
+        w.el.style.top = (PAD + rowY + jitterY) + 'px';
+        cursorX += w._measuredWidth + GAP_X;
+      });
+    });
+  }
+
+  function scatterWords(words, fieldW, fieldH){
+    // organic floating look: pack into rows (no overlap) but with
+    // shuffled order and jitter, spread across the whole field rather
+    // than centered, so it still reads as "scattered"
+    packWords(words, fieldW, fieldH, { centered:false });
+    words.forEach(function(w){
+      w.el.style.animationDelay = (Math.random() * 3.5).toFixed(2) + 's';
+      w.el.style.animationDuration = (3.2 + Math.random() * 2.4).toFixed(2) + 's';
+    });
+  }
+
+  function clusterWords(words, fieldW, fieldH){
+    // loose cluster near center: same non-overlapping row packing,
+    // but centered both horizontally and vertically so it reads as
+    // "gathered" rather than spread across the whole cloud
+    packWords(words, fieldW, fieldH, { centered:true });
+  }
+
+  function buildWordField(fieldEl, text){
+    fieldEl.innerHTML = '';
+    var raw = (text || '').trim();
+    if(!raw){
+      return { words: [], hasText:false };
+    }
+    var tokens = raw.split(/\s+/);
+    var words = tokens.map(function(tok){
+      var span = document.createElement('span');
+      span.className = 'word floating';
+      span.textContent = tok;
+      fieldEl.appendChild(span);
+      return { el: span, text: tok };
+    });
+    words.forEach(function(w){
+      w._measuredWidth = w.el.offsetWidth;
+    });
+    return { words: words, hasText:true };
+  }
+
+  function settleField(note){
+    var fieldEl = note.querySelector('.word-field');
+    var words = note._words || [];
+    if(!words.length) return;
+    var fieldW = fieldEl.clientWidth;
+    var fieldH = fieldEl.clientHeight;
+    words.forEach(function(w){ w.el.classList.remove('floating'); w.el.classList.add('settled'); });
+    clusterWords(words, fieldW, fieldH);
+    note.dataset.settled = '1';
+  }
+
+  function scatterField(note){
+    var fieldEl = note.querySelector('.word-field');
+    var words = note._words || [];
+    if(!words.length) return;
+    var fieldW = fieldEl.clientWidth;
+    var fieldH = fieldEl.clientHeight;
+    words.forEach(function(w){ w.el.classList.add('floating'); w.el.classList.remove('settled'); });
+    scatterWords(words, fieldW, fieldH);
+    note.dataset.settled = '0';
+  }
+
+  function refreshField(note, text){
+    var fieldEl = note.querySelector('.word-field');
+    var hintEl = note.querySelector('.note-hint');
+    var built = buildWordField(fieldEl, text);
+    note._words = built.words;
+    note.dataset.text = text || '';
+    hintEl.style.display = built.hasText ? 'none' : 'flex';
+    if(built.hasText){
+      var fieldW = fieldEl.clientWidth;
+      var fieldH = fieldEl.clientHeight;
+      scatterWords(built.words, fieldW, fieldH);
+    }
+    note.dataset.settled = '0';
+  }
+
+  function estimateNoteSize(text){
+    var raw = (text || '').trim();
+    var minW = 240, minH = 150;
+    if(!raw) return { w: minW, h: minH };
+    var wordCount = raw.split(/\s+/).length;
+    var avgCharsPerWord = raw.length / wordCount;
+    // rough estimate of rows needed at a comfortable field width
+    var fieldW = 190; // approx interior width at default note size
+    var charW = 7.2; // approx px per character at 13.5px font
+    var perRowChars = fieldW / charW;
+    var totalChars = raw.length + wordCount; // include inter-word gaps
+    var estRows = Math.max(1, Math.ceil(totalChars / perRowChars));
+    var rowH = 24;
+    var neededH = estRows * rowH + 70; // + padding for title/hint margins
+    var neededW = minW + Math.min(140, Math.max(0, (avgCharsPerWord - 5) * 8));
+    return {
+      w: Math.max(minW, Math.min(420, neededW)),
+      h: Math.max(minH, Math.min(320, neededH))
+    };
+  }
+
+  function createNote(opts){
+    opts = opts || {};
+    var id = opts.id || uid();
+    var colorIndex = opts.colorIndex !== undefined ? opts.colorIndex : Math.floor(Math.random() * palette.length);
+    var colors = palette[colorIndex % palette.length];
+
+    var note = document.createElement('div');
+    note.className = 'note';
+    note.dataset.id = id;
+    note.dataset.colorIndex = colorIndex;
+    note.dataset.title = opts.title || '';
+    note.dataset.settled = '0';
+
+    var autoSize = estimateNoteSize(opts.text || '');
+    var x = opts.x !== undefined ? opts.x : (10 + Math.random() * 58);
+    var y = opts.y !== undefined ? opts.y : (18 + Math.random() * 52);
+    var w = opts.w || autoSize.w;
+    var h = opts.h || autoSize.h;
+    var tilt = opts.tilt || ((Math.random() * 4 - 2).toFixed(2) + 'deg');
+    var delay = (Math.random() * 4).toFixed(2) + 's';
+
+    note.style.left = x + '%';
+    note.style.top = y + '%';
+    note.style.width = w + 'px';
+    note.style.height = h + 'px';
+    note.style.setProperty('--tilt', tilt);
+    note.style.animationDelay = delay;
+    note.style.zIndex = ++zTop;
+
+    note.innerHTML =
+      '<div class="note-title" contenteditable="true" spellcheck="false" data-placeholder="Untitled"></div>' +
+      '<div class="note-cloud">' + svgCloud(colors, id) + '</div>' +
+      '<div class="note-body"><div class="word-field"></div><div class="note-hint">Click to gather the words</div></div>' +
+      '<div class="note-status">tap to gather</div>' +
+      '<button class="note-delete" aria-label="Delete note"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
+      '<div class="note-resize" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 20L20 13M20 20L13 20M20 20L4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>';
+
+    var titleEl = note.querySelector('.note-title');
+    titleEl.textContent = opts.title || '';
+
+    titleEl.addEventListener('blur', function(){
+      note.dataset.title = titleEl.textContent.trim();
+      saveNotes();
+    });
+    titleEl.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); titleEl.blur(); }
+    });
+    titleEl.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+
+    sky.appendChild(note);
+
+    refreshField(note, opts.text || '');
+
+    note.querySelector('.note-delete').addEventListener('click', function(e){
+      e.stopPropagation();
+      note.remove();
+      updateEmptyHint();
+      saveNotes();
+    });
+
+    note.addEventListener('click', function(e){
+      if(e.target.closest('.note-resize') || e.target.closest('.note-delete') || e.target.closest('.note-title')) return;
+      if(note.dataset.settled === '1'){
+        scatterField(note);
+        note.querySelector('.note-status').textContent = 'tap to gather';
+      } else {
+        settleField(note);
+        note.querySelector('.note-status').textContent = 'tap to scatter';
+      }
+    });
+
+    makeDraggable(note);
+    makeResizable(note, note.querySelector('.note-resize'));
+    updateEmptyHint();
+    return note;
+  }
+
+  function makeDraggable(note){
+    var dragging = false;
+    var offX = 0, offY = 0;
+    var moved = false;
+
+    note.addEventListener('pointerdown', function(e){
+      if(e.target.closest('.note-resize') || e.target.closest('.note-delete') || e.target.closest('.note-title') || e.target.closest('.word')) return;
+      dragging = true;
+      moved = false;
+      note.classList.add('dragging');
+      note.style.zIndex = ++zTop;
+      var rect = note.getBoundingClientRect();
+      offX = e.clientX - rect.left;
+      offY = e.clientY - rect.top;
+      note.setPointerCapture(e.pointerId);
+    });
+
+    note.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      moved = true;
+      var skyRect = sky.getBoundingClientRect();
+      var xPx = e.clientX - skyRect.left - offX;
+      var yPx = e.clientY - skyRect.top - offY;
+      var xPct = clampPercent((xPx / skyRect.width) * 100, -8, 96);
+      var yPct = clampPercent((yPx / skyRect.height) * 100, -6, 94);
+      note.style.left = xPct + '%';
+      note.style.top = yPct + '%';
+    });
+
+    function stop(){
+      if(dragging){
+        dragging = false;
+        note.classList.remove('dragging');
+        if(moved) saveNotes();
+      }
+    }
+    note.addEventListener('pointerup', stop);
+    note.addEventListener('pointercancel', stop);
+  }
+
+  function makeResizable(note, handle){
+    var resizing = false;
+    var startW = 0, startH = 0, startX = 0, startY = 0;
+
+    handle.addEventListener('pointerdown', function(e){
+      e.stopPropagation();
+      resizing = true;
+      startW = note.offsetWidth;
+      startH = note.offsetHeight;
+      startX = e.clientX;
+      startY = e.clientY;
+      handle.setPointerCapture(e.pointerId);
+    });
+
+    handle.addEventListener('pointermove', function(e){
+      if(!resizing) return;
+      var dw = e.clientX - startX;
+      var dh = e.clientY - startY;
+      var newW = Math.max(170, Math.min(460, startW + dw));
+      var newH = Math.max(100, Math.min(300, startH + dh));
+      note.style.width = newW + 'px';
+      note.style.height = newH + 'px';
+    });
+
+    function stop(){
+      if(resizing){
+        resizing = false;
+        var fieldEl = note.querySelector('.word-field');
+        var words = note._words || [];
+        if(words.length){
+          if(note.dataset.settled === '1'){
+            clusterWords(words, fieldEl.clientWidth, fieldEl.clientHeight);
+          } else {
+            scatterWords(words, fieldEl.clientWidth, fieldEl.clientHeight);
+          }
+        }
+        saveNotes();
+      }
+    }
+    handle.addEventListener('pointerup', stop);
+    handle.addEventListener('pointercancel', stop);
+  }
+
+  function addFromInput(){
+    var text = input.value.trim();
+    var title = titleInput.value.trim();
+    if(!text && !title) return;
+    createNote({text: text, title: title});
+    input.value = '';
+    titleInput.value = '';
+    input.focus();
+    saveNotes();
+  }
+
+  addBtn.addEventListener('click', addFromInput);
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') addFromInput();
+  });
+  titleInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') input.focus();
+  });
+
+  function loadNotes(){
+    var raw;
+    try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){ raw = null; }
+    if(!raw) return false;
+    var notes;
+    try{ notes = JSON.parse(raw); }catch(e){ return false; }
+    if(!Array.isArray(notes) || notes.length === 0) return false;
+    notes.forEach(function(n){
+      createNote({
+        id: n.id, title: n.title, text: n.text, x: n.x, y: n.y, w: n.w, h: n.h,
+        tilt: n.tilt, colorIndex: n.colorIndex
+      });
+    });
+    return true;
+  }
+
+  function seedDefaults(){
+    createNote({title:'Reminder', text:'Drag me anywhere on the sky', x:12, y:20});
+    createNote({title:'Tip', text:'Pull the corner to resize the cloud', x:50, y:42});
+    createNote({title:'Try this', text:'Click the cloud to gather the floating words', x:20, y:66});
+  }
+
+  if(!loadNotes()){
+    seedDefaults();
+    saveNotes();
+  }
+  updateEmptyHint();
+
+  window.addEventListener('resize', function(){
+    sky.querySelectorAll('.note').forEach(function(note){
+      var left = parseFloat(note.style.left);
+      var top = parseFloat(note.style.top);
+      note.style.left = clampPercent(left, -8, 96) + '%';
+      note.style.top = clampPercent(top, -6, 94) + '%';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
