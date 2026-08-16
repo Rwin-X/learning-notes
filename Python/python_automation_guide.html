@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Python Automation Guide</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #161923;
+    --panel-2: #1c202c;
+    --border: #2a2f3d;
+    --text: #e4e6ee;
+    --text-dim: #9aa1b4;
+    --accent: #7ee3b0;
+    --accent-2: #5eb0ff;
+    --warn: #ffb454;
+    --danger: #ff6b6b;
+    --code-bg: #0b0d13;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  a { color: var(--accent); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  nav.sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  nav.sidebar h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin: 20px 0 8px;
+  }
+  nav.sidebar h2:first-child { margin-top: 0; }
+  nav.sidebar ul { list-style: none; padding: 0; margin: 0; }
+  nav.sidebar li { margin: 2px 0; }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  nav.sidebar a:hover { background: var(--panel-2); color: var(--text); }
+
+  main {
+    padding: 40px 56px 120px;
+    max-width: 980px;
+  }
+
+  header.hero {
+    padding: 8px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  header.hero h1 {
+    font-size: 34px;
+    margin: 0 0 8px;
+  }
+  header.hero p {
+    color: var(--text-dim);
+    font-size: 16px;
+    margin: 0;
+  }
+  .badges { margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  section { margin-bottom: 52px; scroll-margin-top: 20px; }
+  section h2 {
+    font-size: 24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  section h3 {
+    font-size: 18px;
+    margin-top: 28px;
+    color: var(--accent-2);
+  }
+  section p { color: #cfd2de; }
+
+  .lib-tag {
+    display: inline-block;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 6px;
+    color: #0f1117;
+    background: var(--accent);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 13.5px;
+    position: relative;
+  }
+  code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  p code, li code, td code {
+    background: var(--panel-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+    font-size: 13px;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a5e3a5; }
+  .com { color: #6a7185; font-style: italic; }
+  .fn { color: #82aaff; }
+  .num { color: #f78c6c; }
+  .builtin { color: #ffcb6b; }
+
+  .code-wrap { position: relative; }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+  .callout {
+    border-left: 3px solid var(--accent-2);
+    background: var(--panel);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 14.5px;
+  }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout.danger { border-left-color: var(--danger); }
+  .callout strong { color: var(--text); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 12px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th { background: var(--panel-2); color: var(--text-dim); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 900px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .layout { grid-template-columns: 1fr; }
+    nav.sidebar { position: relative; height: auto; }
+    main { padding: 24px; }
+  }
+
+  footer {
+    color: var(--text-dim);
+    font-size: 13px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .example-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .example-card h4 {
+    margin: 0 0 10px;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  ::selection { background: rgba(126,227,176,0.3); }
+
+  .top-link {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+  }
+  .top-link:hover { color: var(--text); border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <h2>Getting Started</h2>
+    <ul>
+      <li><a href="#intro">Introduction</a></li>
+      <li><a href="#install">Installation Map</a></li>
+      <li><a href="#choose">Choosing the Right Tool</a></li>
+    </ul>
+    <h2>Files &amp; OS</h2>
+    <ul>
+      <li><a href="#files">File &amp; folder automation</a></li>
+      <li><a href="#paths">Paths with pathlib</a></li>
+      <li><a href="#shutil">Copy / move / archive</a></li>
+      <li><a href="#os-system">Running system commands</a></li>
+      <li><a href="#watch">Watching folders for changes</a></li>
+    </ul>
+    <h2>Scheduling</h2>
+    <ul>
+      <li><a href="#schedule-lib">The schedule library</a></li>
+      <li><a href="#cron">Cron &amp; Task Scheduler</a></li>
+      <li><a href="#apscheduler">APScheduler</a></li>
+    </ul>
+    <h2>Web &amp; Browser</h2>
+    <ul>
+      <li><a href="#scraping">Web scraping (requests + BS4)</a></li>
+      <li><a href="#selenium">Browser automation (Selenium)</a></li>
+      <li><a href="#playwright">Browser automation (Playwright)</a></li>
+    </ul>
+    <h2>Documents &amp; Data</h2>
+    <ul>
+      <li><a href="#excel">Excel automation</a></li>
+      <li><a href="#pdf">PDF automation</a></li>
+      <li><a href="#csv-json">CSV / JSON pipelines</a></li>
+    </ul>
+    <h2>Comms &amp; Desktop</h2>
+    <ul>
+      <li><a href="#email">Email automation</a></li>
+      <li><a href="#gui-auto">Desktop GUI automation</a></li>
+      <li><a href="#notifications">Notifications</a></li>
+    </ul>
+    <h2>Practical</h2>
+    <ul>
+      <li><a href="#logging-cli">Logging &amp; CLI scripts</a></li>
+      <li><a href="#patterns">Real-world automation patterns</a></li>
+      <li><a href="#security">Security &amp; safety notes</a></li>
+      <li><a href="#cheatsheet">Cheat sheet</a></li>
+      <li><a href="#troubleshooting">Troubleshooting</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <header class="hero" id="intro">
+      <h1>The Complete Python Automation Guide</h1>
+      <p>Automate files, folders, browsers, spreadsheets, PDFs, emails, schedules, and the desktop itself — all in Python. Full of runnable examples, from a five-line script to a scheduled multi-step pipeline.</p>
+      <div class="badges">
+        <span class="badge">pathlib / shutil / os</span>
+        <span class="badge">schedule / APScheduler</span>
+        <span class="badge">Selenium / Playwright</span>
+        <span class="badge">openpyxl</span>
+        <span class="badge">smtplib</span>
+        <span class="badge">pyautogui</span>
+        <span class="badge">Python 3.9+</span>
+      </div>
+    </header>
+
+    <section id="install">
+      <h2>1. Installation Map</h2>
+      <p>Automation spans many small, focused libraries. Install only what a given script needs.</p>
+      <div class="code-wrap"><pre><span class="com"># File watching</span>
+pip install watchdog
+
+<span class="com"># Scheduling</span>
+pip install schedule apscheduler
+
+<span class="com"># Web scraping</span>
+pip install requests beautifulsoup4 lxml
+
+<span class="com"># Browser automation</span>
+pip install selenium webdriver-manager
+pip install playwright <span class="com">&&</span> playwright install
+
+<span class="com"># Excel</span>
+pip install openpyxl pandas
+
+<span class="com"># PDF</span>
+pip install pypdf pdfplumber reportlab
+
+<span class="com"># Desktop GUI automation</span>
+pip install pyautogui pillow
+
+<span class="com"># Cross-platform desktop notifications</span>
+pip install plyer
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout">
+        <strong>Tip:</strong> keep automation scripts in their own virtual environment per project — GUI/browser libraries pull in a lot of platform-specific dependencies that don't need to touch your other work.
+      </div>
+    </section>
+
+    <section id="choose">
+      <h2>2. Choosing the Right Tool</h2>
+      <table>
+        <tr><th>Task</th><th>Best tool</th><th>Why</th></tr>
+        <tr><td>Rename/move/organize files</td><td><code>pathlib</code> + <code>shutil</code></td><td>Built-in, no dependencies</td></tr>
+        <tr><td>Run on a schedule (daily/hourly)</td><td>OS scheduler (cron / Task Scheduler)</td><td>Runs even if your script/session isn't open</td></tr>
+        <tr><td>Run on a schedule from inside a long-lived app</td><td><code>schedule</code> or <code>APScheduler</code></td><td>In-process scheduling with Python-native syntax</td></tr>
+        <tr><td>Scrape static HTML pages</td><td><code>requests</code> + <code>BeautifulSoup</code></td><td>Lightweight, fast, no browser needed</td></tr>
+        <tr><td>Scrape JS-rendered pages / click buttons</td><td><code>Playwright</code> (or Selenium)</td><td>Runs a real browser, waits for JS to render</td></tr>
+        <tr><td>Fill spreadsheets with formulas/formatting</td><td><code>openpyxl</code></td><td>Full control over cells, styles, formulas</td></tr>
+        <tr><td>Bulk data transform in a spreadsheet</td><td><code>pandas</code></td><td>Vectorized operations, easy read/write of xlsx/csv</td></tr>
+        <tr><td>Control legacy desktop apps with no API</td><td><code>pyautogui</code></td><td>Simulates real mouse/keyboard input</td></tr>
+        <tr><td>Send automated emails</td><td><code>smtplib</code> / <code>imaplib</code></td><td>Standard library, no third-party account needed</td></tr>
+      </table>
+    </section>
+
+    <section id="files">
+      <h2>3. File &amp; Folder Automation</h2>
+      <h3>List, filter, and rename files</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+folder = Path(<span class="str">"./downloads"</span>)
+
+<span class="com"># List all PDF files</span>
+pdf_files = <span class="fn">list</span>(folder.glob(<span class="str">"*.pdf"</span>))
+<span class="kw">print</span>(<span class="fn">f"Found </span>{<span class="fn">len</span>(pdf_files)}<span class="str"> PDFs"</span>)
+
+<span class="com"># Recursive search through subfolders</span>
+all_images = <span class="fn">list</span>(folder.rglob(<span class="str">"*.jpg"</span>)) + <span class="fn">list</span>(folder.rglob(<span class="str">"*.png"</span>))
+
+<span class="com"># Rename every .txt file to add a "processed_" prefix</span>
+<span class="kw">for</span> file <span class="kw">in</span> folder.glob(<span class="str">"*.txt"</span>):
+    new_name = file.with_name(<span class="fn">f"processed_</span>{file.name}<span class="str">")
+    file.rename(new_name)
+    <span class="kw">print</span>(<span class="fn">f"Renamed </span>{file.name}<span class="str"> -> </span>{new_name.name}<span class="str">")
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Organize files into folders by extension</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">import</span> shutil
+
+source = Path(<span class="str">"./Downloads"</span>)
+
+CATEGORY_MAP = {
+    <span class="str">".pdf"</span>: <span class="str">"PDFs"</span>,
+    <span class="str">".jpg"</span>: <span class="str">"Images"</span>, <span class="str">".png"</span>: <span class="str">"Images"</span>, <span class="str">".gif"</span>: <span class="str">"Images"</span>,
+    <span class="str">".mp4"</span>: <span class="str">"Videos"</span>, <span class="str">".mkv"</span>: <span class="str">"Videos"</span>,
+    <span class="str">".zip"</span>: <span class="str">"Archives"</span>, <span class="str">".tar"</span>: <span class="str">"Archives"</span>, <span class="str">".gz"</span>: <span class="str">"Archives"</span>,
+    <span class="str">".py"</span>: <span class="str">"Code"</span>, <span class="str">".js"</span>: <span class="str">"Code"</span>,
+}
+
+<span class="kw">def</span> <span class="fn">organize_downloads</span>(source: Path):
+    <span class="kw">for</span> file <span class="kw">in</span> source.iterdir():
+        <span class="kw">if</span> file.is_dir():
+            <span class="kw">continue</span>
+        category = CATEGORY_MAP.get(file.suffix.lower(), <span class="str">"Other"</span>)
+        dest_folder = source / category
+        dest_folder.mkdir(exist_ok=<span class="kw">True</span>)
+        shutil.move(<span class="fn">str</span>(file), dest_folder / file.name)
+        <span class="kw">print</span>(<span class="fn">f"</span>{file.name}<span class="str"> -> </span>{category}<span class="str">/")
+
+organize_downloads(source)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Find and delete duplicate files by hash</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> hashlib
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+
+<span class="kw">def</span> <span class="fn">file_hash</span>(path: Path, chunk_size=<span class="num">8192</span>):
+    h = hashlib.sha256()
+    <span class="kw">with</span> path.<span class="fn">open</span>(<span class="str">"rb"</span>) <span class="kw">as</span> f:
+        <span class="kw">for</span> chunk <span class="kw">in</span> <span class="fn">iter</span>(<span class="kw">lambda</span>: f.read(chunk_size), <span class="str">b""</span>):
+            h.update(chunk)
+    <span class="kw">return</span> h.hexdigest()
+
+<span class="kw">def</span> <span class="fn">find_duplicates</span>(folder: Path):
+    hashes = defaultdict(<span class="fn">list</span>)
+    <span class="kw">for</span> file <span class="kw">in</span> folder.rglob(<span class="str">"*"</span>):
+        <span class="kw">if</span> file.is_file():
+            hashes[file_hash(file)].append(file)
+    <span class="kw">return</span> {h: paths <span class="kw">for</span> h, paths <span class="kw">in</span> hashes.items() <span class="kw">if</span> <span class="fn">len</span>(paths) > <span class="num">1</span>}
+
+duplicates = find_duplicates(Path(<span class="str">"./photos"</span>))
+<span class="kw">for</span> file_hash_val, paths <span class="kw">in</span> duplicates.items():
+    <span class="kw">print</span>(<span class="str">"Duplicate set:"</span>)
+    <span class="kw">for</span> p <span class="kw">in</span> paths:
+        <span class="kw">print</span>(<span class="str">"  "</span>, p)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="paths">
+      <h2>4. Paths with <code>pathlib</code></h2>
+      <div class="code-wrap"><pre><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+p = Path(<span class="str">"reports/2026/august/summary.pdf"</span>)
+
+p.name           <span class="com"># "summary.pdf"</span>
+p.stem            <span class="com"># "summary"</span>
+p.suffix          <span class="com"># ".pdf"</span>
+p.parent          <span class="com"># Path("reports/2026/august")</span>
+p.parts           <span class="com"># ("reports", "2026", "august", "summary.pdf")</span>
+
+p.exists()         <span class="com"># True/False</span>
+p.is_file()
+p.is_dir()
+
+<span class="com"># Build paths safely across OSes with /</span>
+base = Path.home() / <span class="str">"Documents"</span> / <span class="str">"backups"</span>
+base.mkdir(parents=<span class="kw">True</span>, exist_ok=<span class="kw">True</span>)
+
+<span class="com"># Read / write text quickly</span>
+config_path = Path(<span class="str">"config.txt"</span>)
+config_path.write_text(<span class="str">"debug=true\n"</span>)
+content = config_path.read_text()
+
+<span class="com"># Absolute path + resolving ../ segments</span>
+<span class="kw">print</span>(p.resolve())
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="shutil">
+      <h2>5. Copy, Move, Archive with <code>shutil</code></h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> shutil
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+<span class="com"># Copy a single file</span>
+shutil.copy(<span class="str">"source.txt"</span>, <span class="str">"backup/source.txt"</span>)
+shutil.copy2(<span class="str">"source.txt"</span>, <span class="str">"backup/source.txt"</span>)  <span class="com"># preserves metadata (timestamps)</span>
+
+<span class="com"># Copy an entire directory tree</span>
+shutil.copytree(<span class="str">"project"</span>, <span class="str">"project_backup"</span>, dirs_exist_ok=<span class="kw">True</span>)
+
+<span class="com"># Move (works across filesystems, unlike os.rename)</span>
+shutil.move(<span class="str">"temp/report.pdf"</span>, <span class="str">"archive/report.pdf"</span>)
+
+<span class="com"># Delete a directory tree (careful!)</span>
+shutil.rmtree(<span class="str">"old_build"</span>, ignore_errors=<span class="kw">True</span>)
+
+<span class="com"># Create a zip archive</span>
+shutil.make_archive(<span class="str">"backup_2026_08_16"</span>, <span class="str">"zip"</span>, root_dir=<span class="str">"project"</span>)
+
+<span class="com"># Extract a zip archive</span>
+shutil.unpack_archive(<span class="str">"backup_2026_08_16.zip"</span>, extract_dir=<span class="str">"restored"</span>)
+
+<span class="com"># Check free disk space before a big operation</span>
+total, used, free = shutil.disk_usage(<span class="str">"."</span>)
+<span class="kw">print</span>(<span class="fn">f"Free: </span>{free // (<span class="num">2</span>**<span class="num">30</span>)}<span class="str"> GB")
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout danger">
+        <strong>shutil.rmtree deletes permanently</strong> — no recycle bin. Always double-check the path (ideally with a dry-run print) before calling it in an automated script.
+      </div>
+    </section>
+
+    <section id="os-system">
+      <h2>6. Running System Commands</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> subprocess
+
+<span class="com"># Run a command and capture output (preferred over os.system)</span>
+result = subprocess.run(
+    [<span class="str">"ping"</span>, <span class="str">"-c"</span>, <span class="str">"4"</span>, <span class="str">"example.com"</span>],
+    capture_output=<span class="kw">True</span>,
+    text=<span class="kw">True</span>,
+    timeout=<span class="num">15</span>,
+)
+<span class="kw">print</span>(<span class="str">"stdout:"</span>, result.stdout)
+<span class="kw">print</span>(<span class="str">"exit code:"</span>, result.returncode)
+
+<span class="com"># Raise an exception automatically on non-zero exit</span>
+<span class="kw">try</span>:
+    subprocess.run([<span class="str">"git"</span>, <span class="str">"pull"</span>], check=<span class="kw">True</span>, cwd=<span class="str">"/home/user/project"</span>)
+<span class="kw">except</span> subprocess.CalledProcessError <span class="kw">as</span> e:
+    <span class="kw">print</span>(<span class="fn">f"git pull failed with code </span>{e.returncode}<span class="str">")
+
+<span class="com"># Run a shell pipeline (use with caution - shell=True can be a security risk</span>
+<span class="com"># if any part of the command comes from untrusted/user input)</span>
+result = subprocess.run(<span class="str">"ls -la | grep .py"</span>, shell=<span class="kw">True</span>, capture_output=<span class="kw">True</span>, text=<span class="kw">True</span>)
+<span class="kw">print</span>(result.stdout)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout warn">
+        <strong>Avoid <code>shell=True</code> with untrusted input.</strong> Building a command string from user-supplied data and running it with <code>shell=True</code> is a classic command-injection vulnerability. Pass a list of arguments instead whenever possible.
+      </div>
+    </section>
+
+    <section id="watch">
+      <h2>7. Watching Folders for Changes</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> time
+<span class="kw">from</span> watchdog.observers <span class="kw">import</span> Observer
+<span class="kw">from</span> watchdog.events <span class="kw">import</span> FileSystemEventHandler
+
+<span class="kw">class</span> <span class="fn">NewFileHandler</span>(FileSystemEventHandler):
+    <span class="kw">def</span> <span class="fn">on_created</span>(self, event):
+        <span class="kw">if</span> <span class="kw">not</span> event.is_directory:
+            <span class="kw">print</span>(<span class="fn">f"New file detected: </span>{event.src_path}<span class="str">")
+            <span class="com"># e.g. trigger processing, move the file, notify someone...</span>
+
+    <span class="kw">def</span> <span class="fn">on_modified</span>(self, event):
+        <span class="kw">if</span> <span class="kw">not</span> event.is_directory:
+            <span class="kw">print</span>(<span class="fn">f"Modified: </span>{event.src_path}<span class="str">")
+
+    <span class="kw">def</span> <span class="fn">on_deleted</span>(self, event):
+        <span class="kw">print</span>(<span class="fn">f"Deleted: </span>{event.src_path}<span class="str">")
+
+path_to_watch = <span class="str">"./incoming"</span>
+event_handler = NewFileHandler()
+observer = Observer()
+observer.schedule(event_handler, path_to_watch, recursive=<span class="kw">True</span>)
+observer.start()
+
+<span class="kw">print</span>(<span class="fn">f"Watching </span>{path_to_watch}<span class="str"> for changes... (Ctrl+C to stop)")
+<span class="kw">try</span>:
+    <span class="kw">while</span> <span class="kw">True</span>:
+        time.sleep(<span class="num">1</span>)
+<span class="kw">except</span> <span class="fn">KeyboardInterrupt</span>:
+    observer.stop()
+observer.join()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="schedule-lib">
+      <h2>8. In-Process Scheduling with <code>schedule</code></h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> schedule
+<span class="kw">import</span> time
+
+<span class="kw">def</span> <span class="fn">backup_job</span>():
+    <span class="kw">print</span>(<span class="str">"Running daily backup..."</span>)
+
+<span class="kw">def</span> <span class="fn">check_prices</span>():
+    <span class="kw">print</span>(<span class="str">"Checking prices..."</span>)
+
+<span class="com"># Different schedule patterns</span>
+schedule.every().day.at(<span class="str">"02:00"</span>).do(backup_job)
+schedule.every(<span class="num">10</span>).minutes.do(check_prices)
+schedule.every().monday.at(<span class="str">"09:00"</span>).do(<span class="kw">lambda</span>: <span class="kw">print</span>(<span class="str">"Weekly report time"</span>))
+schedule.every().hour.do(<span class="kw">lambda</span>: <span class="kw">print</span>(<span class="str">"Hourly check-in"</span>))
+
+<span class="kw">print</span>(<span class="str">"Scheduler running. Press Ctrl+C to stop."</span>)
+<span class="kw">while</span> <span class="kw">True</span>:
+    schedule.run_pending()
+    time.sleep(<span class="num">1</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout">
+        <strong>Note:</strong> <code>schedule</code> only runs while your Python process is alive. For "always runs, even after reboot" scheduling, use the OS scheduler (cron / Task Scheduler) instead — see the next section.
+      </div>
+    </section>
+
+    <section id="cron">
+      <h2>9. OS-Level Scheduling: cron &amp; Task Scheduler</h2>
+      <h3>Linux/macOS — cron</h3>
+      <div class="code-wrap"><pre><span class="com"># Edit your crontab</span>
+crontab -e
+
+<span class="com"># Run a script every day at 2:00 AM</span>
+0 2 * * * /usr/bin/python3 /home/rwin/scripts/backup.py >> /home/rwin/logs/backup.log 2>&1
+
+<span class="com"># Run every 15 minutes</span>
+*/15 * * * * /usr/bin/python3 /home/rwin/scripts/check_prices.py
+
+<span class="com"># Run every Monday at 9 AM</span>
+0 9 * * 1 /usr/bin/python3 /home/rwin/scripts/weekly_report.py
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Windows — Task Scheduler (PowerShell)</h3>
+      <div class="code-wrap"><pre><span class="com"># Create a daily scheduled task at 2:00 AM</span>
+$action = New-ScheduledTaskAction -Execute <span class="str">"python.exe"</span> -Argument <span class="str">"C:\scripts\backup.py"</span>
+$trigger = New-ScheduledTaskTrigger -Daily -At <span class="str">2am</span>
+Register-ScheduledTask -TaskName <span class="str">"DailyBackup"</span> -Action $action -Trigger $trigger
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout warn">
+        <strong>Always use absolute paths</strong> for the Python interpreter, script, and any files it touches in cron/Task Scheduler jobs — the working directory and <code>PATH</code> are often different from your interactive shell.
+      </div>
+    </section>
+
+    <section id="apscheduler">
+      <h2>10. Advanced Scheduling with APScheduler</h2>
+      <div class="code-wrap"><pre><span class="kw">from</span> apscheduler.schedulers.blocking <span class="kw">import</span> BlockingScheduler
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+scheduler = BlockingScheduler()
+
+<span class="kw">def</span> <span class="fn">job_interval</span>():
+    <span class="kw">print</span>(<span class="fn">f"[</span>{datetime.now()}<span class="str">] Running every 30 seconds")
+
+<span class="kw">def</span> <span class="fn">job_cron</span>():
+    <span class="kw">print</span>(<span class="str">"Running at 08:30 on weekdays"</span>)
+
+<span class="com"># Interval trigger</span>
+scheduler.add_job(job_interval, <span class="str">"interval"</span>, seconds=<span class="num">30</span>)
+
+<span class="com"># Cron-style trigger (weekdays at 8:30 AM)</span>
+scheduler.add_job(job_cron, <span class="str">"cron"</span>, day_of_week=<span class="str">"mon-fri"</span>, hour=<span class="num">8</span>, minute=<span class="num">30</span>)
+
+<span class="com"># One-time run at a specific date/time</span>
+scheduler.add_job(
+    <span class="kw">lambda</span>: <span class="kw">print</span>(<span class="str">"One-time reminder!"</span>),
+    <span class="str">"date"</span>,
+    run_date=<span class="str">"2026-12-31 23:59:00"</span>,
+)
+
+<span class="kw">print</span>(<span class="str">"Starting APScheduler..."</span>)
+scheduler.start()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="scraping">
+      <h2>11. Web Scraping <span class="lib-tag">requests + BeautifulSoup</span></h2>
+      <p>For static HTML pages that don't require JavaScript rendering, this combo is fast and lightweight.</p>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+<span class="kw">from</span> bs4 <span class="kw">import</span> BeautifulSoup
+
+headers = {<span class="str">"User-Agent"</span>: <span class="str">"Mozilla/5.0 (automation-script/1.0)"</span>}
+response = requests.get(<span class="str">"https://example.com/articles"</span>, headers=headers, timeout=<span class="num">10</span>)
+response.raise_for_status()
+
+soup = BeautifulSoup(response.text, <span class="str">"lxml"</span>)
+
+<span class="com"># Find all article titles and links</span>
+<span class="kw">for</span> article <span class="kw">in</span> soup.select(<span class="str">"article.post"</span>):
+    title = article.select_one(<span class="str">"h2.title"</span>)
+    link = article.select_one(<span class="str">"a"</span>)
+    <span class="kw">if</span> title <span class="kw">and</span> link:
+        <span class="kw">print</span>(title.get_text(strip=<span class="kw">True</span>), <span class="str">"->"</span>, link[<span class="str">"href"</span>])
+
+<span class="com"># Extracting a table into rows of dicts</span>
+table = soup.find(<span class="str">"table"</span>, {<span class="str">"id"</span>: <span class="str">"price-table"</span>})
+headers_row = [th.get_text(strip=<span class="kw">True</span>) <span class="kw">for</span> th <span class="kw">in</span> table.find_all(<span class="str">"th"</span>)]
+rows = []
+<span class="kw">for</span> tr <span class="kw">in</span> table.find_all(<span class="str">"tr"</span>)[<span class="num">1</span>:]:
+    cells = [td.get_text(strip=<span class="kw">True</span>) <span class="kw">for</span> td <span class="kw">in</span> tr.find_all(<span class="str">"td"</span>)]
+    rows.append(<span class="fn">dict</span>(<span class="fn">zip</span>(headers_row, cells)))
+
+<span class="kw">print</span>(rows[:<span class="num">3</span>])
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Polite scraping: throttling + retries</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> time
+<span class="kw">import</span> requests
+<span class="kw">from</span> bs4 <span class="kw">import</span> BeautifulSoup
+
+<span class="kw">def</span> <span class="fn">scrape_pages</span>(urls, delay=<span class="num">1.5</span>):
+    session = requests.Session()
+    session.headers.update({<span class="str">"User-Agent"</span>: <span class="str">"automation-script/1.0 (contact: you@example.com)"</span>})
+
+    results = []
+    <span class="kw">for</span> url <span class="kw">in</span> urls:
+        <span class="kw">try</span>:
+            response = session.get(url, timeout=<span class="num">10</span>)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, <span class="str">"lxml"</span>)
+            results.append({<span class="str">"url"</span>: url, <span class="str">"title"</span>: soup.title.get_text(strip=<span class="kw">True</span>) <span class="kw">if</span> soup.title <span class="kw">else</span> <span class="kw">None</span>})
+        <span class="kw">except</span> requests.exceptions.RequestException <span class="kw">as</span> e:
+            <span class="kw">print</span>(<span class="fn">f"Failed </span>{url}<span class="str">: </span>{e}<span class="str">")
+        time.sleep(delay)   <span class="com"># be polite - don't hammer the server</span>
+
+    <span class="kw">return</span> results
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout warn">
+        <strong>Check <code>robots.txt</code> and terms of service</strong> before scraping any site, throttle your requests, and identify yourself with a real <code>User-Agent</code>. Never scrape content behind a login without authorization.
+      </div>
+    </section>
+
+    <section id="selenium">
+      <h2>12. Browser Automation <span class="lib-tag">Selenium</span></h2>
+      <p>Selenium drives a real browser — needed for JavaScript-heavy sites, logins, clicking, and form-filling.</p>
+      <div class="code-wrap"><pre><span class="kw">from</span> selenium <span class="kw">import</span> webdriver
+<span class="kw">from</span> selenium.webdriver.common.by <span class="kw">import</span> By
+<span class="kw">from</span> selenium.webdriver.support.ui <span class="kw">import</span> WebDriverWait
+<span class="kw">from</span> selenium.webdriver.support <span class="kw">import</span> expected_conditions <span class="kw">as</span> EC
+<span class="kw">from</span> selenium.webdriver.chrome.options <span class="kw">import</span> Options
+
+options = Options()
+options.add_argument(<span class="str">"--headless=new"</span>)   <span class="com"># run without opening a visible window</span>
+options.add_argument(<span class="str">"--window-size=1920,1080"</span>)
+
+driver = webdriver.Chrome(options=options)
+
+<span class="kw">try</span>:
+    driver.get(<span class="str">"https://example.com/login"</span>)
+
+    <span class="com"># Wait for an element instead of a fixed sleep() - much more reliable</span>
+    email_field = WebDriverWait(driver, <span class="num">10</span>).until(
+        EC.presence_of_element_located((By.NAME, <span class="str">"email"</span>))
+    )
+    email_field.send_keys(<span class="str">"user@example.com"</span>)
+    driver.find_element(By.NAME, <span class="str">"password"</span>).send_keys(<span class="str">"secret123"</span>)
+    driver.find_element(By.CSS_SELECTOR, <span class="str">"button[type='submit']"</span>).click()
+
+    WebDriverWait(driver, <span class="num">10</span>).until(EC.url_contains(<span class="str">"/dashboard"</span>))
+    <span class="kw">print</span>(<span class="str">"Logged in:"</span>, driver.current_url)
+
+    <span class="com"># Extract data from the rendered page</span>
+    items = driver.find_elements(By.CSS_SELECTOR, <span class="str">".order-row"</span>)
+    <span class="kw">for</span> item <span class="kw">in</span> items:
+        <span class="kw">print</span>(item.text)
+
+    driver.save_screenshot(<span class="str">"dashboard.png"</span>)
+
+<span class="kw">finally</span>:
+    driver.quit()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Common Selenium waits &amp; actions</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> selenium.webdriver.common.keys <span class="kw">import</span> Keys
+<span class="kw">from</span> selenium.webdriver.common.action_chains <span class="kw">import</span> ActionChains
+
+<span class="com"># Wait until an element is clickable, then click it</span>
+button = WebDriverWait(driver, <span class="num">10</span>).until(
+    EC.element_to_be_clickable((By.ID, <span class="str">"load-more"</span>))
+)
+button.click()
+
+<span class="com"># Send special keys</span>
+search_box = driver.find_element(By.NAME, <span class="str">"q"</span>)
+search_box.send_keys(<span class="str">"python automation"</span>)
+search_box.send_keys(Keys.RETURN)
+
+<span class="com"># Hover, drag, or perform complex mouse actions</span>
+menu = driver.find_element(By.ID, <span class="str">"menu"</span>)
+ActionChains(driver).move_to_element(menu).perform()
+
+<span class="com"># Execute raw JavaScript</span>
+driver.execute_script(<span class="str">"window.scrollTo(0, document.body.scrollHeight);"</span>)
+
+<span class="com"># Switch to an iframe</span>
+driver.switch_to.frame(<span class="str">"payment-frame"</span>)
+driver.switch_to.default_content()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="playwright">
+      <h2>13. Browser Automation <span class="lib-tag">Playwright</span></h2>
+      <p>Playwright is the modern alternative to Selenium — faster, built-in auto-waiting, and a cleaner API. Recommended for new projects.</p>
+      <div class="code-wrap"><pre><span class="kw">from</span> playwright.sync_api <span class="kw">import</span> sync_playwright
+
+<span class="kw">with</span> sync_playwright() <span class="kw">as</span> p:
+    browser = p.chromium.launch(headless=<span class="kw">True</span>)
+    page = browser.new_page()
+
+    page.goto(<span class="str">"https://example.com/login"</span>)
+    page.fill(<span class="str">"input[name='email']"</span>, <span class="str">"user@example.com"</span>)
+    page.fill(<span class="str">"input[name='password']"</span>, <span class="str">"secret123"</span>)
+    page.click(<span class="str">"button[type='submit']"</span>)
+
+    <span class="com"># Playwright auto-waits for navigation and elements - no manual sleeps needed</span>
+    page.wait_for_url(<span class="str">"**/dashboard"</span>)
+    <span class="kw">print</span>(<span class="str">"Logged in:"</span>, page.url)
+
+    <span class="com"># Extract text from multiple elements</span>
+    rows = page.locator(<span class="str">".order-row"</span>).all_text_contents()
+    <span class="kw">for</span> row <span class="kw">in</span> rows:
+        <span class="kw">print</span>(row)
+
+    page.screenshot(path=<span class="str">"dashboard.png"</span>, full_page=<span class="kw">True</span>)
+    browser.close()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Async Playwright for concurrent browser tasks</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> asyncio
+<span class="kw">from</span> playwright.async_api <span class="kw">import</span> async_playwright
+
+<span class="kw">async</span> <span class="kw">def</span> <span class="fn">check_page_title</span>(playwright, url):
+    browser = <span class="kw">await</span> playwright.chromium.launch(headless=<span class="kw">True</span>)
+    page = <span class="kw">await</span> browser.new_page()
+    <span class="kw">await</span> page.goto(url, timeout=<span class="num">15000</span>)
+    title = <span class="kw">await</span> page.title()
+    <span class="kw">await</span> browser.close()
+    <span class="kw">return</span> url, title
+
+<span class="kw">async</span> <span class="kw">def</span> <span class="fn">main</span>():
+    urls = [<span class="str">"https://example.com"</span>, <span class="str">"https://python.org"</span>, <span class="str">"https://github.com"</span>]
+    <span class="kw">async</span> <span class="kw">with</span> async_playwright() <span class="kw">as</span> p:
+        results = <span class="kw">await</span> asyncio.gather(*[check_page_title(p, u) <span class="kw">for</span> u <span class="kw">in</span> urls])
+    <span class="kw">for</span> url, title <span class="kw">in</span> results:
+        <span class="kw">print</span>(<span class="fn">f"</span>{url}<span class="str"> -> </span>{title}<span class="str">")
+
+asyncio.run(main())
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Downloading files &amp; handling dialogs</h3>
+      <div class="code-wrap"><pre><span class="kw">with</span> sync_playwright() <span class="kw">as</span> p:
+    browser = p.chromium.launch()
+    page = browser.new_page()
+    page.goto(<span class="str">"https://example.com/reports"</span>)
+
+    <span class="com"># Handle a JS confirm/alert dialog automatically</span>
+    page.on(<span class="str">"dialog"</span>, <span class="kw">lambda</span> dialog: dialog.accept())
+
+    <span class="com"># Capture a file download triggered by clicking a button</span>
+    <span class="kw">with</span> page.expect_download() <span class="kw">as</span> download_info:
+        page.click(<span class="str">"text=Download CSV"</span>)
+    download = download_info.value
+    download.save_as(<span class="str">f"./downloads/</span>{download.suggested_filename}<span class="str">")
+
+    browser.close()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="excel">
+      <h2>14. Excel Automation <span class="lib-tag">openpyxl</span></h2>
+      <h3>Reading and writing cells</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> openpyxl <span class="kw">import</span> Workbook, load_workbook
+
+<span class="com"># Create a new workbook</span>
+wb = Workbook()
+ws = wb.active
+ws.title = <span class="str">"Sales"</span>
+
+ws[<span class="str">"A1"</span>] = <span class="str">"Product"</span>
+ws[<span class="str">"B1"</span>] = <span class="str">"Units"</span>
+ws[<span class="str">"C1"</span>] = <span class="str">"Revenue"</span>
+
+data = [
+    (<span class="str">"Widget"</span>, <span class="num">120</span>, <span class="num">2400.00</span>),
+    (<span class="str">"Gadget"</span>, <span class="num">75</span>, <span class="num">3375.50</span>),
+]
+<span class="kw">for</span> row <span class="kw">in</span> data:
+    ws.append(row)
+
+wb.save(<span class="str">"sales_report.xlsx"</span>)
+
+<span class="com"># Reading an existing file</span>
+wb = load_workbook(<span class="str">"sales_report.xlsx"</span>)
+ws = wb[<span class="str">"Sales"</span>]
+
+<span class="kw">for</span> row <span class="kw">in</span> ws.iter_rows(min_row=<span class="num">2</span>, values_only=<span class="kw">True</span>):
+    product, units, revenue = row
+    <span class="kw">print</span>(<span class="fn">f"</span>{product}<span class="str">: </span>{units}<span class="str"> units, $</span>{revenue}<span class="str">")
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Formulas, formatting, and charts</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> openpyxl <span class="kw">import</span> Workbook
+<span class="kw">from</span> openpyxl.styles <span class="kw">import</span> Font, PatternFill, Alignment
+<span class="kw">from</span> openpyxl.chart <span class="kw">import</span> BarChart, Reference
+
+wb = Workbook()
+ws = wb.active
+
+ws.append([<span class="str">"Month"</span>, <span class="str">"Revenue"</span>])
+<span class="kw">for</span> month, revenue <span class="kw">in</span> [(<span class="str">"Jan"</span>, <span class="num">5000</span>), (<span class="str">"Feb"</span>, <span class="num">6200</span>), (<span class="str">"Mar"</span>, <span class="num">5800</span>)]:
+    ws.append([month, revenue])
+
+<span class="com"># Formula cell - Excel calculates this when opened</span>
+ws[<span class="str">"A5"</span>] = <span class="str">"Total"</span>
+ws[<span class="str">"B5"</span>] = <span class="str">"=SUM(B2:B4)"</span>
+
+<span class="com"># Styling</span>
+header_fill = PatternFill(start_color=<span class="str">"4472C4"</span>, end_color=<span class="str">"4472C4"</span>, fill_type=<span class="str">"solid"</span>)
+<span class="kw">for</span> cell <span class="kw">in</span> ws[<span class="num">1</span>]:
+    cell.font = Font(bold=<span class="kw">True</span>, color=<span class="str">"FFFFFF"</span>)
+    cell.fill = header_fill
+    cell.alignment = Alignment(horizontal=<span class="str">"center"</span>)
+
+<span class="com"># Add a bar chart</span>
+chart = BarChart()
+chart.title = <span class="str">"Monthly Revenue"</span>
+data_ref = Reference(ws, min_col=<span class="num">2</span>, min_row=<span class="num">1</span>, max_row=<span class="num">4</span>)
+categories = Reference(ws, min_col=<span class="num">1</span>, min_row=<span class="num">2</span>, max_row=<span class="num">4</span>)
+chart.add_data(data_ref, titles_from_data=<span class="kw">True</span>)
+chart.set_categories(categories)
+ws.add_chart(chart, <span class="str">"D2"</span>)
+
+wb.save(<span class="str">"revenue_chart.xlsx"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Bulk transform with pandas</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="com"># Read, transform, and write in a few lines</span>
+df = pd.read_excel(<span class="str">"raw_sales.xlsx"</span>, sheet_name=<span class="str">"Sheet1"</span>)
+
+df[<span class="str">"revenue"</span>] = df[<span class="str">"units"</span>] * df[<span class="str">"unit_price"</span>]
+summary = df.groupby(<span class="str">"region"</span>)[<span class="str">"revenue"</span>].<span class="fn">sum</span>().reset_index()
+
+summary.to_excel(<span class="str">"regional_summary.xlsx"</span>, index=<span class="kw">False</span>)
+<span class="kw">print</span>(summary)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="pdf">
+      <h2>15. PDF Automation</h2>
+      <h3>Extract text and tables</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> pdfplumber
+
+<span class="kw">with</span> pdfplumber.<span class="fn">open</span>(<span class="str">"invoice.pdf"</span>) <span class="kw">as</span> pdf:
+    <span class="kw">for</span> i, page <span class="kw">in</span> <span class="fn">enumerate</span>(pdf.pages):
+        text = page.extract_text()
+        <span class="kw">print</span>(<span class="fn">f"--- Page </span>{i+<span class="num">1</span>}<span class="str"> ---")
+        <span class="kw">print</span>(text)
+
+        <span class="kw">for</span> table <span class="kw">in</span> page.extract_tables():
+            <span class="kw">for</span> row <span class="kw">in</span> table:
+                <span class="kw">print</span>(row)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Merge, split, and watermark PDFs</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> pypdf <span class="kw">import</span> PdfReader, PdfWriter
+
+<span class="com"># Merge multiple PDFs into one</span>
+writer = PdfWriter()
+<span class="kw">for</span> filename <span class="kw">in</span> [<span class="str">"part1.pdf"</span>, <span class="str">"part2.pdf"</span>, <span class="str">"part3.pdf"</span>]:
+    reader = PdfReader(filename)
+    <span class="kw">for</span> page <span class="kw">in</span> reader.pages:
+        writer.add_page(page)
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"merged.pdf"</span>, <span class="str">"wb"</span>) <span class="kw">as</span> f:
+    writer.write(f)
+
+<span class="com"># Split a PDF into individual pages</span>
+reader = PdfReader(<span class="str">"merged.pdf"</span>)
+<span class="kw">for</span> i, page <span class="kw">in</span> <span class="fn">enumerate</span>(reader.pages):
+    writer = PdfWriter()
+    writer.add_page(page)
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="fn">f"page_</span>{i+<span class="num">1</span>}<span class="str">.pdf"</span>, <span class="str">"wb"</span>) <span class="kw">as</span> f:
+        writer.write(f)
+
+<span class="com"># Add a text watermark from another PDF onto every page</span>
+reader = PdfReader(<span class="str">"document.pdf"</span>)
+watermark = PdfReader(<span class="str">"watermark.pdf"</span>).pages[<span class="num">0</span>]
+writer = PdfWriter()
+<span class="kw">for</span> page <span class="kw">in</span> reader.pages:
+    page.merge_page(watermark)
+    writer.add_page(page)
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"watermarked.pdf"</span>, <span class="str">"wb"</span>) <span class="kw">as</span> f:
+    writer.write(f)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Generate a PDF report from scratch</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> reportlab.lib.pagesizes <span class="kw">import</span> letter
+<span class="kw">from</span> reportlab.pdfgen <span class="kw">import</span> canvas
+
+c = canvas.Canvas(<span class="str">"invoice_2026_08.pdf"</span>, pagesize=letter)
+width, height = letter
+
+c.setFont(<span class="str">"Helvetica-Bold"</span>, <span class="num">18</span>)
+c.drawString(<span class="num">50</span>, height - <span class="num">60</span>, <span class="str">"Invoice #2026-081"</span>)
+
+c.setFont(<span class="str">"Helvetica"</span>, <span class="num">11</span>)
+lines = [
+    <span class="str">"Bill To: Acme Corp"</span>,
+    <span class="str">"Date: 2026-08-16"</span>,
+    <span class="str">"Amount Due: $1,240.00"</span>,
+]
+y = height - <span class="num">100</span>
+<span class="kw">for</span> line <span class="kw">in</span> lines:
+    c.drawString(<span class="num">50</span>, y, line)
+    y -= <span class="num">20</span>
+
+c.save()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="csv-json">
+      <h2>16. CSV / JSON Pipelines</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> csv
+<span class="kw">import</span> json
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+<span class="com"># Read CSV into a list of dicts</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"contacts.csv"</span>, newline=<span class="str">""</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    reader = csv.DictReader(f)
+    contacts = <span class="fn">list</span>(reader)
+
+<span class="com"># Filter and write to a new CSV</span>
+active = [c <span class="kw">for</span> c <span class="kw">in</span> contacts <span class="kw">if</span> c[<span class="str">"status"</span>] == <span class="str">"active"</span>]
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"active_contacts.csv"</span>, <span class="str">"w"</span>, newline=<span class="str">""</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    writer = csv.DictWriter(f, fieldnames=[<span class="str">"name"</span>, <span class="str">"email"</span>, <span class="str">"status"</span>])
+    writer.writeheader()
+    writer.writerows(active)
+
+<span class="com"># Convert CSV to JSON</span>
+Path(<span class="str">"contacts.json"</span>).write_text(json.dumps(contacts, indent=<span class="num">2</span>), encoding=<span class="str">"utf-8"</span>)
+
+<span class="com"># Merge multiple JSON files into one</span>
+merged = []
+<span class="kw">for</span> file <span class="kw">in</span> Path(<span class="str">"./daily_exports"</span>).glob(<span class="str">"*.json"</span>):
+    merged.extend(json.loads(file.read_text()))
+Path(<span class="str">"merged_export.json"</span>).write_text(json.dumps(merged, indent=<span class="num">2</span>))
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="email">
+      <h2>17. Email Automation</h2>
+      <h3>Sending email with attachments</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> smtplib
+<span class="kw">from</span> email.mime.multipart <span class="kw">import</span> MIMEMultipart
+<span class="kw">from</span> email.mime.text <span class="kw">import</span> MIMEText
+<span class="kw">from</span> email.mime.base <span class="kw">import</span> MIMEBase
+<span class="kw">from</span> email <span class="kw">import</span> encoders
+<span class="kw">import</span> os
+
+<span class="kw">def</span> <span class="fn">send_email_with_attachment</span>(to_addr, subject, body, attachment_path=<span class="kw">None</span>):
+    sender = os.environ[<span class="str">"SMTP_USER"</span>]
+    password = os.environ[<span class="str">"SMTP_PASSWORD"</span>]   <span class="com"># never hardcode this</span>
+
+    msg = MIMEMultipart()
+    msg[<span class="str">"From"</span>] = sender
+    msg[<span class="str">"To"</span>] = to_addr
+    msg[<span class="str">"Subject"</span>] = subject
+    msg.attach(MIMEText(body, <span class="str">"plain"</span>))
+
+    <span class="kw">if</span> attachment_path:
+        <span class="kw">with</span> <span class="fn">open</span>(attachment_path, <span class="str">"rb"</span>) <span class="kw">as</span> f:
+            part = MIMEBase(<span class="str">"application"</span>, <span class="str">"octet-stream"</span>)
+            part.set_payload(f.read())
+        encoders.encode_base64(part)
+        part.add_header(
+            <span class="str">"Content-Disposition"</span>,
+            <span class="fn">f"attachment; filename=</span>{os.path.basename(attachment_path)}<span class="str">",
+        )
+        msg.attach(part)
+
+    <span class="kw">with</span> smtplib.SMTP(<span class="str">"smtp.gmail.com"</span>, <span class="num">587</span>) <span class="kw">as</span> server:
+        server.starttls()
+        server.login(sender, password)
+        server.send_message(msg)
+
+send_email_with_attachment(
+    <span class="str">"team@example.com"</span>,
+    <span class="str">"Daily Report - 2026-08-16"</span>,
+    <span class="str">"Attached is today's automated report."</span>,
+    <span class="str">"report.pdf"</span>,
+)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Reading unread emails (IMAP)</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> imaplib
+<span class="kw">import</span> email
+<span class="kw">import</span> os
+
+mail = imaplib.IMAP4_SSL(<span class="str">"imap.gmail.com"</span>)
+mail.login(os.environ[<span class="str">"IMAP_USER"</span>], os.environ[<span class="str">"IMAP_PASSWORD"</span>])
+mail.select(<span class="str">"inbox"</span>)
+
+status, message_ids = mail.search(<span class="kw">None</span>, <span class="str">"UNSEEN"</span>)
+
+<span class="kw">for</span> msg_id <span class="kw">in</span> message_ids[<span class="num">0</span>].split():
+    status, data = mail.fetch(msg_id, <span class="str">"(RFC822)"</span>)
+    msg = email.message_from_bytes(data[<span class="num">0</span>][<span class="num">1</span>])
+    <span class="kw">print</span>(<span class="str">"From:"</span>, msg[<span class="str">"From"</span>])
+    <span class="kw">print</span>(<span class="str">"Subject:"</span>, msg[<span class="str">"Subject"</span>])
+
+    <span class="kw">if</span> msg.is_multipart():
+        <span class="kw">for</span> part <span class="kw">in</span> msg.walk():
+            <span class="kw">if</span> part.get_content_type() == <span class="str">"text/plain"</span>:
+                <span class="kw">print</span>(part.get_payload(decode=<span class="kw">True</span>).decode(errors=<span class="str">"ignore"</span>))
+
+mail.logout()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout danger">
+        <strong>Use an app password, never your real account password</strong>, and store it in an environment variable — not in the script. Most providers (Gmail, Outlook) require this for SMTP/IMAP access, and it can be revoked independently of your login credentials.
+      </div>
+    </section>
+
+    <section id="gui-auto">
+      <h2>18. Desktop GUI Automation <span class="lib-tag">pyautogui</span></h2>
+      <p>For controlling legacy or non-scriptable desktop applications by simulating real mouse/keyboard input.</p>
+      <div class="code-wrap"><pre><span class="kw">import</span> pyautogui
+<span class="kw">import</span> time
+
+pyautogui.FAILSAFE = <span class="kw">True</span>   <span class="com"># move mouse to a screen corner to abort - keep this on</span>
+
+<span class="com"># Get current mouse position and screen size</span>
+<span class="kw">print</span>(pyautogui.position())
+<span class="kw">print</span>(pyautogui.size())
+
+<span class="com"># Move and click</span>
+pyautogui.moveTo(<span class="num">500</span>, <span class="num">300</span>, duration=<span class="num">0.5</span>)
+pyautogui.click()
+pyautogui.doubleClick(<span class="num">800</span>, <span class="num">400</span>)
+pyautogui.rightClick()
+
+<span class="com"># Type text and send key combinations</span>
+pyautogui.write(<span class="str">"Hello from automation"</span>, interval=<span class="num">0.05</span>)
+pyautogui.hotkey(<span class="str">"ctrl"</span>, <span class="str">"s"</span>)   <span class="com"># save</span>
+pyautogui.press(<span class="str">"enter"</span>)
+
+<span class="com"># Find an image on screen and click its center (great for automating</span>
+<span class="com"># apps with no accessible API - match a button screenshot you saved earlier)</span>
+location = pyautogui.locateCenterOnScreen(<span class="str">"submit_button.png"</span>, confidence=<span class="num">0.8</span>)
+<span class="kw">if</span> location:
+    pyautogui.click(location)
+<span class="kw">else</span>:
+    <span class="kw">print</span>(<span class="str">"Button not found on screen"</span>)
+
+<span class="com"># Take a screenshot</span>
+screenshot = pyautogui.screenshot()
+screenshot.save(<span class="str">"screen.png"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout warn">
+        <strong>GUI automation is brittle</strong> — it breaks if the window moves, resizes, or the OS theme changes. Prefer an API, CLI, or browser automation library whenever one exists; reach for <code>pyautogui</code> only when there's truly no programmatic alternative.
+      </div>
+    </section>
+
+    <section id="notifications">
+      <h2>19. Desktop &amp; Push Notifications</h2>
+      <div class="code-wrap"><pre><span class="kw">from</span> plyer <span class="kw">import</span> notification
+
+notification.notify(
+    title=<span class="str">"Backup Complete"</span>,
+    message=<span class="str">"Nightly backup finished successfully at 02:00."</span>,
+    app_name=<span class="str">"devforge automation"</span>,
+    timeout=<span class="num">10</span>,   <span class="com"># seconds</span>
+)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <h3>Sending a Slack/Discord webhook alert</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">notify_slack</span>(webhook_url, message):
+    response = requests.post(webhook_url, json={<span class="str">"text"</span>: message}, timeout=<span class="num">5</span>)
+    response.raise_for_status()
+
+notify_slack(
+    os.environ[<span class="str">"SLACK_WEBHOOK_URL"</span>],
+    <span class="fn">f"✅ Nightly job finished at </span>{datetime.now().strftime(<span class="str">'%H:%M'</span>)}<span class="str">",
+)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="logging-cli">
+      <h2>20. Logging &amp; Turning Scripts into CLI Tools</h2>
+      <h3>Proper logging instead of print()</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format=<span class="str">"%(asctime)s [%(levelname)s] %(message)s"</span>,
+    handlers=[
+        logging.FileHandler(<span class="str">"automation.log"</span>),
+        logging.StreamHandler(),   <span class="com"># also print to console</span>
+    ],
+)
+logger = logging.getLogger(<span class="str">"automation"</span>)
+
+logger.info(<span class="str">"Job started"</span>)
+<span class="kw">try</span>:
+    <span class="num">1</span> / <span class="num">0</span>
+<span class="kw">except</span> <span class="fn">ZeroDivisionError</span>:
+    logger.exception(<span class="str">"Job failed"</span>)   <span class="com"># logs the full traceback</span>
+logger.info(<span class="str">"Job finished"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Command-line arguments with argparse</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> argparse
+
+parser = argparse.ArgumentParser(description=<span class="str">"Organize files by extension."</span>)
+parser.add_argument(<span class="str">"folder"</span>, help=<span class="str">"Folder to organize"</span>)
+parser.add_argument(<span class="str">"--dry-run"</span>, action=<span class="str">"store_true"</span>, help=<span class="str">"Preview without moving files"</span>)
+parser.add_argument(<span class="str">"--verbose"</span>, <span class="str">"-v"</span>, action=<span class="str">"store_true"</span>)
+
+args = parser.parse_args()
+
+<span class="kw">if</span> args.verbose:
+    <span class="kw">print</span>(<span class="fn">f"Target folder: </span>{args.folder}<span class="str">")
+<span class="kw">if</span> args.dry_run:
+    <span class="kw">print</span>(<span class="str">"[DRY RUN] No files will actually be moved"</span>)
+
+<span class="com"># Run: python organize.py ./Downloads --dry-run -v</span>
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="patterns">
+      <h2>21. Real-World Automation Patterns</h2>
+
+      <div class="example-card">
+        <h4>Pattern: Nightly backup script (files + logging + notification)</h4>
+        <div class="code-wrap"><pre><span class="kw">import</span> shutil
+<span class="kw">import</span> logging
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+logging.basicConfig(level=logging.INFO, format=<span class="str">"%(asctime)s %(message)s"</span>)
+logger = logging.getLogger(<span class="str">"backup"</span>)
+
+<span class="kw">def</span> <span class="fn">run_backup</span>(source: Path, backup_root: Path, keep_last=<span class="num">7</span>):
+    timestamp = datetime.now().strftime(<span class="str">"%Y-%m-%d_%H%M%S"</span>)
+    dest = backup_root / <span class="fn">f"backup_</span>{timestamp}<span class="str">"
+
+    logger.info(<span class="fn">f"Backing up </span>{source}<span class="str"> -> </span>{dest}<span class="str">")
+    shutil.copytree(source, dest)
+
+    <span class="com"># prune old backups, keep only the most recent N</span>
+    backups = <span class="fn">sorted</span>(backup_root.glob(<span class="str">"backup_*"</span>), reverse=<span class="kw">True</span>)
+    <span class="kw">for</span> old_backup <span class="kw">in</span> backups[keep_last:]:
+        logger.info(<span class="fn">f"Removing old backup: </span>{old_backup}<span class="str">")
+        shutil.rmtree(old_backup)
+
+    logger.info(<span class="str">"Backup complete"</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    run_backup(Path(<span class="str">"/home/rwin/projects"</span>), Path(<span class="str">"/mnt/backups"</span>))
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      </div>
+
+      <div class="example-card">
+        <h4>Pattern: Price/availability monitor with alert</h4>
+        <div class="code-wrap"><pre><span class="kw">import</span> time
+<span class="kw">import</span> requests
+<span class="kw">from</span> bs4 <span class="kw">import</span> BeautifulSoup
+
+<span class="kw">def</span> <span class="fn">check_price</span>(url, selector, target_price):
+    response = requests.get(url, headers={<span class="str">"User-Agent"</span>: <span class="str">"price-monitor/1.0"</span>}, timeout=<span class="num">10</span>)
+    soup = BeautifulSoup(response.text, <span class="str">"lxml"</span>)
+    price_text = soup.select_one(selector).get_text(strip=<span class="kw">True</span>)
+    price = <span class="fn">float</span>(price_text.replace(<span class="str">"$"</span>, <span class="str">""</span>).replace(<span class="str">","</span>, <span class="str">""</span>))
+
+    <span class="kw">if</span> price <= target_price:
+        notify_slack(SLACK_WEBHOOK, <span class="fn">f"🔥 Price dropped to $</span>{price}<span class="str">! </span>{url}<span class="str">")
+        <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">print</span>(<span class="fn">f"Current price: $</span>{price}<span class="str"> (target: $</span>{target_price}<span class="str">)")
+    <span class="kw">return</span> <span class="kw">False</span>
+
+<span class="kw">while</span> <span class="kw">not</span> check_price(<span class="str">"https://example.com/product/123"</span>, <span class="str">".price"</span>, <span class="num">49.99</span>):
+    time.sleep(<span class="num">1800</span>)   <span class="com"># check every 30 minutes</span>
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      </div>
+
+      <div class="example-card">
+        <h4>Pattern: End-to-end report pipeline (scrape → Excel → email)</h4>
+        <div class="code-wrap"><pre><span class="kw">import</span> requests
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="kw">def</span> <span class="fn">fetch_data</span>():
+    response = requests.get(<span class="str">"https://api.example.com/daily-stats"</span>, timeout=<span class="num">10</span>)
+    response.raise_for_status()
+    <span class="kw">return</span> response.json()
+
+<span class="kw">def</span> <span class="fn">build_report</span>(data):
+    df = pd.DataFrame(data)
+    filename = <span class="fn">f"report_</span>{datetime.now().strftime(<span class="str">'%Y%m%d'</span>)}<span class="str">.xlsx"
+    df.to_excel(filename, index=<span class="kw">False</span>)
+    <span class="kw">return</span> filename
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    data = fetch_data()
+    report_file = build_report(data)
+    send_email_with_attachment(
+        <span class="str">"team@example.com"</span>,
+        <span class="fn">f"Daily Stats Report - </span>{datetime.now():%Y-%m-%d}<span class="str">",
+        <span class="str">"Attached is the automated daily stats report."</span>,
+        report_file,
+    )
+    <span class="kw">print</span>(<span class="str">"Report generated and sent."</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    main()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      </div>
+    </section>
+
+    <section id="security">
+      <h2>22. Security &amp; Safety Notes</h2>
+      <div class="grid-2">
+        <div class="callout">
+          <strong>Never hardcode credentials.</strong> Use environment variables or a secrets manager for SMTP passwords, API keys, and login credentials used by automation scripts.
+        </div>
+        <div class="callout warn">
+          <strong>Dry-run destructive scripts first.</strong> Any script that deletes, moves, or overwrites files should support a <code>--dry-run</code> flag that only prints what it would do.
+        </div>
+        <div class="callout danger">
+          <strong>Avoid <code>shell=True</code> and <code>os.system()</code> with dynamic input.</strong> Use <code>subprocess.run([...])</code> with a list of arguments to prevent command injection.
+        </div>
+        <div class="callout">
+          <strong>Rate-limit and identify scrapers.</strong> Add delays between requests and a real <code>User-Agent</code> so you don't get blocked — or accidentally DoS a small site.
+        </div>
+        <div class="callout warn">
+          <strong>Keep pyautogui's FAILSAFE on.</strong> It lets you abort a runaway GUI-automation script instantly by yanking the mouse to a screen corner.
+        </div>
+        <div class="callout">
+          <strong>Log everything a scheduled job does.</strong> Unattended scripts fail silently otherwise — a log file (and a notification on failure) is how you find out.
+        </div>
+      </div>
+    </section>
+
+    <section id="cheatsheet">
+      <h2>23. Quick Cheat Sheet</h2>
+      <table>
+        <tr><th>Task</th><th>Code</th></tr>
+        <tr><td>List files matching a pattern</td><td><code>Path(folder).glob("*.pdf")</code></td></tr>
+        <tr><td>Move a file</td><td><code>shutil.move(src, dst)</code></td></tr>
+        <tr><td>Zip a folder</td><td><code>shutil.make_archive(name, "zip", folder)</code></td></tr>
+        <tr><td>Run a shell command safely</td><td><code>subprocess.run([...], check=True)</code></td></tr>
+        <tr><td>Watch a folder for new files</td><td><code>watchdog.observers.Observer</code></td></tr>
+        <tr><td>Schedule a repeating job (in-process)</td><td><code>schedule.every(10).minutes.do(fn)</code></td></tr>
+        <tr><td>Schedule at OS level</td><td>cron / Task Scheduler</td></tr>
+        <tr><td>Scrape static HTML</td><td><code>BeautifulSoup(response.text, "lxml")</code></td></tr>
+        <tr><td>Automate a real browser</td><td><code>playwright.sync_api.sync_playwright()</code></td></tr>
+        <tr><td>Write an Excel file</td><td><code>openpyxl.Workbook()</code></td></tr>
+        <tr><td>Extract PDF text</td><td><code>pdfplumber.open(path)</code></td></tr>
+        <tr><td>Send an email</td><td><code>smtplib.SMTP(...).send_message(msg)</code></td></tr>
+        <tr><td>Simulate a click</td><td><code>pyautogui.click(x, y)</code></td></tr>
+        <tr><td>Desktop notification</td><td><code>plyer.notification.notify(...)</code></td></tr>
+      </table>
+    </section>
+
+    <section id="troubleshooting">
+      <h2>24. Troubleshooting Common Issues</h2>
+      <table>
+        <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+        <tr><td>Selenium: <code>WebDriverException: unable to find chromedriver</code></td><td>Driver binary missing or version mismatch</td><td>Use <code>webdriver-manager</code> to auto-install the matching driver</td></tr>
+        <tr><td>Playwright: <code>Executable doesn't exist</code></td><td>Browsers not installed</td><td>Run <code>playwright install</code> after pip install</td></tr>
+        <tr><td>Cron job never runs</td><td>Wrong PATH / relative paths / missing env vars</td><td>Use absolute paths for interpreter, script, and files; log to a file</td></tr>
+        <tr><td>Scraper gets empty/partial HTML</td><td>Page content is rendered by JavaScript</td><td>Switch to Playwright/Selenium instead of raw <code>requests</code></td></tr>
+        <tr><td><code>PermissionError</code> on file operations</td><td>File open in another program, or insufficient OS permissions</td><td>Close the file elsewhere; run with correct user permissions</td></tr>
+        <tr><td>SMTP <code>Authentication failed</code></td><td>Using account password instead of app password, or 2FA not configured for app access</td><td>Generate an app-specific password from the provider's security settings</td></tr>
+        <tr><td>pyautogui clicks the wrong spot</td><td>Screen resolution/DPI scaling differs from when coordinates were recorded</td><td>Use image-based locating (<code>locateCenterOnScreen</code>) instead of hardcoded coordinates</td></tr>
+        <tr><td>Script works locally but fails scheduled</td><td>Scheduled task runs with a different user/environment (no display, different env vars)</td><td>Test by running exactly the same command the scheduler uses; avoid GUI calls in headless cron jobs</td></tr>
+      </table>
+    </section>
+
+    <footer>
+      Complete Python Automation Guide — covers file/OS automation, scheduling, web scraping, browser automation (Selenium &amp; Playwright), Excel/PDF/CSV pipelines, email, desktop GUI automation, and notifications. Test destructive operations with a dry run before scheduling them unattended.
+    </footer>
+  </main>
+</div>
+
+<a href="#intro" class="top-link">↑ Top</a>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 1500);
+  });
+}
+</script>
+
+</body>
+</html>
