@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Python HTTP Requests Guide</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #161923;
+    --panel-2: #1c202c;
+    --border: #2a2f3d;
+    --text: #e4e6ee;
+    --text-dim: #9aa1b4;
+    --accent: #5eb0ff;
+    --accent-2: #7ee3b0;
+    --warn: #ffb454;
+    --danger: #ff6b6b;
+    --code-bg: #0b0d13;
+    --get: #5eb0ff;
+    --post: #7ee3b0;
+    --put: #ffb454;
+    --delete: #ff6b6b;
+    --patch: #c792ea;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  a { color: var(--accent); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  nav.sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  nav.sidebar h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin: 20px 0 8px;
+  }
+  nav.sidebar h2:first-child { margin-top: 0; }
+  nav.sidebar ul { list-style: none; padding: 0; margin: 0; }
+  nav.sidebar li { margin: 2px 0; }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  nav.sidebar a:hover { background: var(--panel-2); color: var(--text); }
+
+  main {
+    padding: 40px 56px 120px;
+    max-width: 980px;
+  }
+
+  header.hero {
+    padding: 8px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  header.hero h1 {
+    font-size: 34px;
+    margin: 0 0 8px;
+  }
+  header.hero p {
+    color: var(--text-dim);
+    font-size: 16px;
+    margin: 0;
+  }
+  .badges { margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  section { margin-bottom: 52px; scroll-margin-top: 20px; }
+  section h2 {
+    font-size: 24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  section h3 {
+    font-size: 18px;
+    margin-top: 28px;
+    color: var(--accent);
+  }
+  section p { color: #cfd2de; }
+
+  .method-tag {
+    display: inline-block;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 6px;
+    color: #0f1117;
+  }
+  .tag-get { background: var(--get); }
+  .tag-post { background: var(--post); }
+  .tag-put { background: var(--put); }
+  .tag-delete { background: var(--delete); }
+  .tag-patch { background: var(--patch); }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 13.5px;
+    position: relative;
+  }
+  code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  p code, li code, td code {
+    background: var(--panel-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent-2);
+    font-size: 13px;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a5e3a5; }
+  .com { color: #6a7185; font-style: italic; }
+  .fn { color: #82aaff; }
+  .num { color: #f78c6c; }
+  .builtin { color: #ffcb6b; }
+
+  .code-wrap { position: relative; }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--accent-2); border-color: var(--accent-2); }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--panel);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 14.5px;
+  }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout.danger { border-left-color: var(--danger); }
+  .callout strong { color: var(--text); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 12px 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th { background: var(--panel-2); color: var(--text-dim); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 900px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .layout { grid-template-columns: 1fr; }
+    nav.sidebar { position: relative; height: auto; }
+    main { padding: 24px; }
+  }
+
+  .toc-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  footer {
+    color: var(--text-dim);
+    font-size: 13px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .example-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .example-card h4 {
+    margin: 0 0 10px;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  ::selection { background: rgba(94,176,255,0.3); }
+
+  .top-link {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+  }
+  .top-link:hover { color: var(--text); border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <h2>Getting Started</h2>
+    <ul>
+      <li><a href="#intro">Introduction</a></li>
+      <li><a href="#install">Installation</a></li>
+      <li><a href="#stdlib-vs-requests">stdlib vs requests</a></li>
+    </ul>
+    <h2>Core Methods</h2>
+    <ul>
+      <li><a href="#get">GET requests</a></li>
+      <li><a href="#post">POST requests</a></li>
+      <li><a href="#put">PUT requests</a></li>
+      <li><a href="#patch">PATCH requests</a></li>
+      <li><a href="#delete">DELETE requests</a></li>
+      <li><a href="#head-options">HEAD / OPTIONS</a></li>
+    </ul>
+    <h2>Requests</h2>
+    <ul>
+      <li><a href="#params">Query parameters</a></li>
+      <li><a href="#headers">Headers</a></li>
+      <li><a href="#json-body">JSON bodies</a></li>
+      <li><a href="#form-data">Form data</a></li>
+      <li><a href="#files">File uploads</a></li>
+      <li><a href="#auth">Authentication</a></li>
+      <li><a href="#cookies">Cookies</a></li>
+      <li><a href="#timeouts">Timeouts</a></li>
+    </ul>
+    <h2>Responses</h2>
+    <ul>
+      <li><a href="#response-obj">Response object</a></li>
+      <li><a href="#status-errors">Status & error handling</a></li>
+      <li><a href="#streaming">Streaming</a></li>
+    </ul>
+    <h2>Advanced</h2>
+    <ul>
+      <li><a href="#sessions">Sessions</a></li>
+      <li><a href="#retries">Retries & backoff</a></li>
+      <li><a href="#proxies-ssl">Proxies & SSL</a></li>
+      <li><a href="#async-http">Async HTTP (httpx/aiohttp)</a></li>
+      <li><a href="#urllib">Pure stdlib (urllib)</a></li>
+    </ul>
+    <h2>Practical</h2>
+    <ul>
+      <li><a href="#patterns">Real-world patterns</a></li>
+      <li><a href="#security">Security notes</a></li>
+      <li><a href="#cheatsheet">Cheat sheet</a></li>
+      <li><a href="#troubleshooting">Troubleshooting</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <header class="hero" id="intro">
+      <h1>The Complete Python HTTP Requests Guide</h1>
+      <p>Everything you need to make HTTP requests in Python — from a single GET call to sessions, retries, streaming, async clients, and the raw <code>urllib</code> standard library. Full of runnable examples.</p>
+      <div class="badges">
+        <span class="badge">requests</span>
+        <span class="badge">httpx</span>
+        <span class="badge">aiohttp</span>
+        <span class="badge">urllib</span>
+        <span class="badge">Python 3.9+</span>
+      </div>
+    </header>
+
+    <section id="install">
+      <h2>1. Installation</h2>
+      <p>The <code>requests</code> library is the de facto standard for HTTP in Python. It is not part of the standard library, so install it first.</p>
+      <div class="code-wrap"><pre><span class="com"># Install requests</span>
+pip install requests
+
+<span class="com"># Optional: async-capable HTTP client (sync + async in one API)</span>
+pip install httpx
+
+<span class="com"># Optional: fully async client, popular for high-concurrency scraping</span>
+pip install aiohttp
+
+<span class="com"># Optional: automatic retries with backoff (used later in this guide)</span>
+pip install urllib3
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout">
+        <strong>Tip:</strong> Use a virtual environment (<code>python -m venv venv</code>) so these packages don't pollute your system Python.
+      </div>
+    </section>
+
+    <section id="stdlib-vs-requests">
+      <h2>2. requests vs urllib (stdlib)</h2>
+      <table>
+        <tr><th>Library</th><th>Built-in?</th><th>Ease of use</th><th>Async support</th><th>Best for</th></tr>
+        <tr><td><code>urllib</code></td><td>Yes</td><td>Verbose / low-level</td><td>No</td><td>Zero-dependency scripts</td></tr>
+        <tr><td><code>requests</code></td><td>No (pip)</td><td>Very simple, human-friendly</td><td>No</td><td>99% of everyday scripts &amp; tools</td></tr>
+        <tr><td><code>httpx</code></td><td>No (pip)</td><td>Simple, requests-like</td><td>Yes</td><td>Modern projects needing sync + async</td></tr>
+        <tr><td><code>aiohttp</code></td><td>No (pip)</td><td>Moderate</td><td>Yes (async-only)</td><td>High-concurrency clients &amp; servers</td></tr>
+      </table>
+      <p>This guide leads with <code>requests</code> since it covers almost every use case you'll hit as a developer, then covers <code>httpx</code>/<code>aiohttp</code> for async work and <code>urllib</code> for when you can't install anything.</p>
+    </section>
+
+    <section id="get">
+      <h2>3. GET Requests <span class="method-tag tag-get">GET</span></h2>
+      <p>GET retrieves data from a server. It should never modify server state.</p>
+
+      <h3>Basic GET</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+response = requests.get(<span class="str">"https://api.github.com/users/octocat"</span>)
+
+<span class="kw">print</span>(response.status_code)   <span class="com"># 200</span>
+<span class="kw">print</span>(response.json())          <span class="com"># parsed JSON as a dict</span>
+<span class="kw">print</span>(response.headers[<span class="str">"Content-Type"</span>])
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>GET with query parameters</h3>
+      <p>Pass a dict via <code>params</code> — requests handles URL encoding for you.</p>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+params = {
+    <span class="str">"q"</span>: <span class="str">"python http requests"</span>,
+    <span class="str">"sort"</span>: <span class="str">"stars"</span>,
+    <span class="str">"order"</span>: <span class="str">"desc"</span>,
+    <span class="str">"per_page"</span>: <span class="num">5</span>,
+}
+
+response = requests.get(<span class="str">"https://api.github.com/search/repositories"</span>, params=params)
+data = response.json()
+
+<span class="kw">for</span> repo <span class="kw">in</span> data[<span class="str">"items"</span>]:
+    <span class="kw">print</span>(repo[<span class="str">"full_name"</span>], <span class="str">"-"</span>, repo[<span class="str">"stargazers_count"</span>])
+
+<span class="com"># Requests built this URL automatically:</span>
+<span class="kw">print</span>(response.url)
+<span class="com"># https://api.github.com/search/repositories?q=python+http+requests&sort=stars&order=desc&per_page=5</span>
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>GET with custom headers</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+headers = {
+    <span class="str">"User-Agent"</span>: <span class="str">"my-app/1.0"</span>,
+    <span class="str">"Accept"</span>: <span class="str">"application/json"</span>,
+}
+
+response = requests.get(<span class="str">"https://api.github.com/repos/psf/requests"</span>, headers=headers)
+<span class="kw">print</span>(response.json()[<span class="str">"description"</span>])
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>List of duplicate query keys</h3>
+      <p>Some APIs expect repeated keys, e.g. <code>?tag=a&amp;tag=b</code>. Pass a list as the value.</p>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+params = {<span class="str">"tag"</span>: [<span class="str">"python"</span>, <span class="str">"networking"</span>, <span class="str">"http"</span>]}
+response = requests.get(<span class="str">"https://httpbin.org/get"</span>, params=params)
+<span class="kw">print</span>(response.url)
+<span class="com"># https://httpbin.org/get?tag=python&tag=networking&tag=http</span>
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="post">
+      <h2>4. POST Requests <span class="method-tag tag-post">POST</span></h2>
+      <p>POST creates a new resource or submits data. The two most common payload types are JSON and form-encoded.</p>
+
+      <h3>POST with JSON body</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+url = <span class="str">"https://httpbin.org/post"</span>
+payload = {
+    <span class="str">"username"</span>: <span class="str">"rwin"</span>,
+    <span class="str">"role"</span>: <span class="str">"admin"</span>,
+    <span class="str">"active"</span>: <span class="kw">True</span>,
+}
+
+<span class="com"># json= automatically sets Content-Type: application/json and serializes the dict</span>
+response = requests.post(url, json=payload)
+
+<span class="kw">print</span>(response.status_code)
+<span class="kw">print</span>(response.json()[<span class="str">"json"</span>])   <span class="com"># echoes back what the server received</span>
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>POST with form-encoded data</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+url = <span class="str">"https://httpbin.org/post"</span>
+form_data = {
+    <span class="str">"email"</span>: <span class="str">"user@example.com"</span>,
+    <span class="str">"password"</span>: <span class="str">"hunter2"</span>,
+}
+
+<span class="com"># data= sends application/x-www-form-urlencoded (classic HTML form behavior)</span>
+response = requests.post(url, data=form_data)
+<span class="kw">print</span>(response.json()[<span class="str">"form"</span>])
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>POST raw bytes / custom body</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+raw_body = <span class="str">b'{"raw": true, "note": "manually built JSON"}'</span>
+
+response = requests.post(
+    <span class="str">"https://httpbin.org/post"</span>,
+    data=raw_body,
+    headers={<span class="str">"Content-Type"</span>: <span class="str">"application/json"</span>},
+)
+<span class="kw">print</span>(response.json()[<span class="str">"json"</span>])
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <div class="callout warn">
+        <strong>data vs json:</strong> <code>json=payload</code> sets the header and serializes for you. <code>data=payload</code> (with a dict) form-encodes it. Never pass a dict to <code>data</code> when the API expects JSON — it'll be sent as a form, not JSON.
+      </div>
+    </section>
+
+    <section id="put">
+      <h2>5. PUT Requests <span class="method-tag tag-put">PUT</span></h2>
+      <p>PUT replaces a resource entirely (idempotent — calling it twice has the same effect as once).</p>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+url = <span class="str">"https://httpbin.org/put"</span>
+updated_resource = {
+    <span class="str">"id"</span>: <span class="num">42</span>,
+    <span class="str">"name"</span>: <span class="str">"Full Replacement"</span>,
+    <span class="str">"status"</span>: <span class="str">"active"</span>,
+}
+
+response = requests.put(url, json=updated_resource)
+<span class="kw">print</span>(response.status_code)
+<span class="kw">print</span>(response.json()[<span class="str">"json"</span>])
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="patch">
+      <h2>6. PATCH Requests <span class="method-tag tag-patch">PATCH</span></h2>
+      <p>PATCH applies a partial update — only the fields you send are changed.</p>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+url = <span class="str">"https://httpbin.org/patch"</span>
+partial_update = {<span class="str">"status"</span>: <span class="str">"inactive"</span>}
+
+response = requests.patch(url, json=partial_update)
+<span class="kw">print</span>(response.json()[<span class="str">"json"</span>])
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="delete">
+      <h2>7. DELETE Requests <span class="method-tag tag-delete">DELETE</span></h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+url = <span class="str">"https://httpbin.org/delete"</span>
+response = requests.delete(url, params={<span class="str">"id"</span>: <span class="num">42</span>})
+
+<span class="kw">if</span> response.status_code == <span class="num">200</span>:
+    <span class="kw">print</span>(<span class="str">"Resource deleted"</span>)
+<span class="kw">else</span>:
+    <span class="kw">print</span>(<span class="str">f"Delete failed: </span>{response.status_code}<span class="str">"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="head-options">
+      <h2>8. HEAD &amp; OPTIONS</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="com"># HEAD - same as GET but no response body. Great for checking a resource</span>
+<span class="com"># exists, its size, or its last-modified date without downloading it.</span>
+response = requests.head(<span class="str">"https://httpbin.org/get"</span>)
+<span class="kw">print</span>(response.headers.get(<span class="str">"Content-Length"</span>))
+
+<span class="com"># OPTIONS - ask the server which methods/headers are allowed (used heavily</span>
+<span class="com"># in CORS preflight checks)</span>
+response = requests.options(<span class="str">"https://httpbin.org/get"</span>)
+<span class="kw">print</span>(response.headers.get(<span class="str">"Allow"</span>))
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="params">
+      <h2>9. Query Parameters — Deep Dive</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="com"># None values are dropped automatically</span>
+params = {<span class="str">"active"</span>: <span class="kw">True</span>, <span class="str">"deleted"</span>: <span class="kw">None</span>, <span class="str">"limit"</span>: <span class="num">10</span>}
+response = requests.get(<span class="str">"https://httpbin.org/get"</span>, params=params)
+<span class="kw">print</span>(response.url)  <span class="com"># deleted= is omitted entirely</span>
+
+<span class="com"># You can also just pass a pre-built query string</span>
+response = requests.get(<span class="str">"https://httpbin.org/get?raw=1&sort=asc"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="headers">
+      <h2>10. Headers</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+headers = {
+    <span class="str">"Authorization"</span>: <span class="str">"Bearer YOUR_TOKEN_HERE"</span>,
+    <span class="str">"Accept"</span>: <span class="str">"application/json"</span>,
+    <span class="str">"User-Agent"</span>: <span class="str">"devforge-client/1.0 (+https://github.com/black8arch)"</span>,
+    <span class="str">"X-Request-ID"</span>: <span class="str">"a1b2c3d4"</span>,
+}
+
+response = requests.get(<span class="str">"https://httpbin.org/headers"</span>, headers=headers)
+<span class="kw">print</span>(response.json()[<span class="str">"headers"</span>])
+
+<span class="com"># Inspecting response headers (case-insensitive dict)</span>
+<span class="kw">print</span>(response.headers[<span class="str">"content-type"</span>])   <span class="com"># works</span>
+<span class="kw">print</span>(response.headers[<span class="str">"Content-Type"</span>])   <span class="com"># also works</span>
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="json-body">
+      <h2>11. Working with JSON</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+response = requests.get(<span class="str">"https://api.github.com/repos/psf/requests"</span>)
+
+<span class="com"># .json() parses the body into Python dicts/lists</span>
+data = response.json()
+<span class="kw">print</span>(data[<span class="str">"stargazers_count"</span>], data[<span class="str">"open_issues_count"</span>])
+
+<span class="com"># Handle malformed JSON safely</span>
+<span class="kw">try</span>:
+    data = response.json()
+<span class="kw">except</span> requests.exceptions.JSONDecodeError:
+    <span class="kw">print</span>(<span class="str">"Response was not valid JSON:"</span>, response.text[:<span class="num">200</span>])
+
+<span class="com"># Sending nested JSON structures works exactly like regular dicts/lists</span>
+nested_payload = {
+    <span class="str">"user"</span>: {<span class="str">"name"</span>: <span class="str">"Rwin"</span>, <span class="str">"roles"</span>: [<span class="str">"admin"</span>, <span class="str">"dev"</span>]},
+    <span class="str">"metadata"</span>: {<span class="str">"source"</span>: <span class="str">"cli"</span>, <span class="str">"version"</span>: <span class="num">2</span>},
+}
+requests.post(<span class="str">"https://httpbin.org/post"</span>, json=nested_payload)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="form-data">
+      <h2>12. Form Data</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="com"># application/x-www-form-urlencoded (single values)</span>
+requests.post(<span class="str">"https://httpbin.org/post"</span>, data={<span class="str">"key"</span>: <span class="str">"value"</span>})
+
+<span class="com"># Repeated keys: use a list of tuples instead of a dict</span>
+form = [
+    (<span class="str">"color"</span>, <span class="str">"red"</span>),
+    (<span class="str">"color"</span>, <span class="str">"blue"</span>),
+    (<span class="str">"size"</span>, <span class="str">"M"</span>),
+]
+response = requests.post(<span class="str">"https://httpbin.org/post"</span>, data=form)
+<span class="kw">print</span>(response.json()[<span class="str">"form"</span>])
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="files">
+      <h2>13. File Uploads (multipart/form-data)</h2>
+      <h3>Single file upload</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"report.pdf"</span>, <span class="str">"rb"</span>) <span class="kw">as</span> f:
+    files = {<span class="str">"file"</span>: (<span class="str">"report.pdf"</span>, f, <span class="str">"application/pdf"</span>)}
+    response = requests.post(<span class="str">"https://httpbin.org/post"</span>, files=files)
+
+<span class="kw">print</span>(response.json()[<span class="str">"files"</span>].keys())
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Multiple files + extra form fields together</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+files = {
+    <span class="str">"avatar"</span>: (<span class="str">"avatar.png"</span>, <span class="fn">open</span>(<span class="str">"avatar.png"</span>, <span class="str">"rb"</span>), <span class="str">"image/png"</span>),
+    <span class="str">"resume"</span>: (<span class="str">"resume.pdf"</span>, <span class="fn">open</span>(<span class="str">"resume.pdf"</span>, <span class="str">"rb"</span>), <span class="str">"application/pdf"</span>),
+}
+data = {<span class="str">"user_id"</span>: <span class="str">"1024"</span>, <span class="str">"note"</span>: <span class="str">"initial upload"</span>}
+
+response = requests.post(<span class="str">"https://httpbin.org/post"</span>, files=files, data=data)
+<span class="kw">print</span>(response.status_code)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Downloading a file</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+url = <span class="str">"https://httpbin.org/image/png"</span>
+response = requests.get(url, stream=<span class="kw">True</span>)
+response.raise_for_status()
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"downloaded.png"</span>, <span class="str">"wb"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> chunk <span class="kw">in</span> response.iter_content(chunk_size=<span class="num">8192</span>):
+        f.write(chunk)
+
+<span class="kw">print</span>(<span class="str">"Saved downloaded.png"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="auth">
+      <h2>14. Authentication</h2>
+
+      <h3>Bearer token (most common for APIs)</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+headers = {<span class="str">"Authorization"</span>: <span class="str">f"Bearer </span>{TOKEN}<span class="str">"</span>}
+response = requests.get(<span class="str">"https://api.example.com/me"</span>, headers=headers)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Basic auth</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+<span class="kw">from</span> requests.auth <span class="kw">import</span> HTTPBasicAuth
+
+<span class="com"># Shorthand tuple form</span>
+response = requests.get(<span class="str">"https://httpbin.org/basic-auth/user/pass"</span>, auth=(<span class="str">"user"</span>, <span class="str">"pass"</span>))
+
+<span class="com"># Explicit form (identical result)</span>
+response = requests.get(
+    <span class="str">"https://httpbin.org/basic-auth/user/pass"</span>,
+    auth=HTTPBasicAuth(<span class="str">"user"</span>, <span class="str">"pass"</span>),
+)
+<span class="kw">print</span>(response.status_code)  <span class="com"># 200</span>
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>API key in header or query param</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="com"># In a header (preferred - not logged in URL/proxy logs)</span>
+headers = {<span class="str">"X-API-Key"</span>: <span class="str">"sk_live_abc123"</span>}
+requests.get(<span class="str">"https://api.example.com/data"</span>, headers=headers)
+
+<span class="com"># In a query param (only when the API requires it)</span>
+requests.get(<span class="str">"https://api.example.com/data"</span>, params={<span class="str">"api_key"</span>: <span class="str">"sk_live_abc123"</span>})
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Custom auth class (OAuth-style signing)</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="kw">class</span> <span class="fn">TokenAuth</span>(requests.auth.AuthBase):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, token):
+        self.token = token
+
+    <span class="kw">def</span> <span class="fn">__call__</span>(self, r):
+        r.headers[<span class="str">"Authorization"</span>] = <span class="str">f"Token </span>{self.token}<span class="str">"</span>
+        <span class="kw">return</span> r
+
+response = requests.get(<span class="str">"https://api.example.com/me"</span>, auth=TokenAuth(<span class="str">"abc123"</span>))
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout danger">
+        <strong>Never hardcode secrets.</strong> Load tokens from environment variables (<code>os.environ["API_TOKEN"]</code>) or a secrets manager — never commit them to a repo like <code>devforge</code>.
+      </div>
+    </section>
+
+    <section id="cookies">
+      <h2>15. Cookies</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="com"># Sending cookies</span>
+cookies = {<span class="str">"session_id"</span>: <span class="str">"abc123xyz"</span>}
+response = requests.get(<span class="str">"https://httpbin.org/cookies"</span>, cookies=cookies)
+<span class="kw">print</span>(response.json())
+
+<span class="com"># Reading cookies the server set on you</span>
+response = requests.get(<span class="str">"https://httpbin.org/cookies/set?theme=dark"</span>)
+<span class="kw">print</span>(response.cookies.get_dict())
+
+<span class="com"># Using a persistent cookie jar across requests</span>
+jar = requests.cookies.RequestsCookieJar()
+jar.set(<span class="str">"session_id"</span>, <span class="str">"abc123"</span>, domain=<span class="str">"httpbin.org"</span>)
+response = requests.get(<span class="str">"https://httpbin.org/cookies"</span>, cookies=jar)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="timeouts">
+      <h2>16. Timeouts</h2>
+      <p>Always set a timeout. A request with no timeout can hang forever if the server never responds.</p>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="com"># Single value: applies to both connect and read timeout</span>
+response = requests.get(<span class="str">"https://httpbin.org/delay/2"</span>, timeout=<span class="num">5</span>)
+
+<span class="com"># Tuple: (connect_timeout, read_timeout)</span>
+response = requests.get(<span class="str">"https://httpbin.org/delay/2"</span>, timeout=(<span class="num">3.05</span>, <span class="num">10</span>))
+
+<span class="kw">try</span>:
+    response = requests.get(<span class="str">"https://httpbin.org/delay/10"</span>, timeout=<span class="num">2</span>)
+<span class="kw">except</span> requests.exceptions.Timeout:
+    <span class="kw">print</span>(<span class="str">"Request timed out after 2 seconds"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="response-obj">
+      <h2>17. The Response Object</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+response = requests.get(<span class="str">"https://api.github.com/repos/psf/requests"</span>)
+
+response.status_code     <span class="com"># 200</span>
+response.ok               <span class="com"># True if status_code < 400</span>
+response.reason           <span class="com"># "OK"</span>
+response.url               <span class="com"># final URL after redirects</span>
+response.headers          <span class="com"># dict-like, case-insensitive</span>
+response.encoding          <span class="com"># detected text encoding, e.g. "utf-8"</span>
+response.text               <span class="com"># body decoded as str</span>
+response.content           <span class="com"># body as raw bytes</span>
+response.json()             <span class="com"># body parsed as JSON</span>
+response.elapsed             <span class="com"># timedelta - how long the request took</span>
+response.history          <span class="com"># list of Response objects from redirects</span>
+response.request           <span class="com"># the PreparedRequest that was sent</span>
+
+<span class="kw">print</span>(<span class="str">f"</span>{response.request.method}<span class="str"> </span>{response.request.url}<span class="str"> -> </span>{response.status_code}<span class="str"> in </span>{response.elapsed.total_seconds()}<span class="str">s"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Inspecting redirects</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+response = requests.get(<span class="str">"http://github.com"</span>)  <span class="com"># http -> https redirect</span>
+<span class="kw">for</span> step <span class="kw">in</span> response.history:
+    <span class="kw">print</span>(step.status_code, step.url)
+<span class="kw">print</span>(<span class="str">"Final:"</span>, response.status_code, response.url)
+
+<span class="com"># Disable following redirects entirely</span>
+response = requests.get(<span class="str">"http://github.com"</span>, allow_redirects=<span class="kw">False</span>)
+<span class="kw">print</span>(response.status_code)  <span class="com"># 301</span>
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="status-errors">
+      <h2>18. Status Codes &amp; Error Handling</h2>
+      <table>
+        <tr><th>Range</th><th>Meaning</th><th>Examples</th></tr>
+        <tr><td>1xx</td><td>Informational</td><td>100 Continue</td></tr>
+        <tr><td>2xx</td><td>Success</td><td>200 OK, 201 Created, 204 No Content</td></tr>
+        <tr><td>3xx</td><td>Redirection</td><td>301 Moved, 302 Found, 304 Not Modified</td></tr>
+        <tr><td>4xx</td><td>Client error</td><td>400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 429 Too Many Requests</td></tr>
+        <tr><td>5xx</td><td>Server error</td><td>500 Internal Server Error, 502 Bad Gateway, 503 Service Unavailable</td></tr>
+      </table>
+
+      <h3>raise_for_status()</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+response = requests.get(<span class="str">"https://httpbin.org/status/404"</span>)
+
+<span class="kw">try</span>:
+    response.raise_for_status()   <span class="com"># raises HTTPError for 4xx/5xx</span>
+<span class="kw">except</span> requests.exceptions.HTTPError <span class="kw">as</span> e:
+    <span class="kw">print</span>(<span class="str">f"HTTP error: </span>{e}<span class="str">"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Full exception hierarchy</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="kw">try</span>:
+    response = requests.get(<span class="str">"https://api.example.com/data"</span>, timeout=<span class="num">5</span>)
+    response.raise_for_status()
+    data = response.json()
+
+<span class="kw">except</span> requests.exceptions.ConnectionError:
+    <span class="kw">print</span>(<span class="str">"Could not connect - check the network or DNS"</span>)
+
+<span class="kw">except</span> requests.exceptions.Timeout:
+    <span class="kw">print</span>(<span class="str">"Server took too long to respond"</span>)
+
+<span class="kw">except</span> requests.exceptions.HTTPError <span class="kw">as</span> e:
+    <span class="kw">print</span>(<span class="str">f"Bad status code: </span>{e.response.status_code}<span class="str">"</span>)
+
+<span class="kw">except</span> requests.exceptions.TooManyRedirects:
+    <span class="kw">print</span>(<span class="str">"Redirect loop detected"</span>)
+
+<span class="kw">except</span> requests.exceptions.RequestException <span class="kw">as</span> e:
+    <span class="com"># Base class - catches ANY requests-related exception</span>
+    <span class="kw">print</span>(<span class="str">f"Request failed: </span>{e}<span class="str">"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Handling rate limits (429)</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> time
+<span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">get_with_rate_limit_retry</span>(url, max_retries=<span class="num">5</span>):
+    <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(max_retries):
+        response = requests.get(url)
+        <span class="kw">if</span> response.status_code != <span class="num">429</span>:
+            <span class="kw">return</span> response
+
+        retry_after = <span class="fn">int</span>(response.headers.get(<span class="str">"Retry-After"</span>, <span class="num">2</span> ** attempt))
+        <span class="kw">print</span>(<span class="str">f"Rate limited. Waiting </span>{retry_after}<span class="str">s..."</span>)
+        time.sleep(retry_after)
+
+    <span class="kw">raise</span> <span class="fn">RuntimeError</span>(<span class="str">"Max retries exceeded"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="streaming">
+      <h2>19. Streaming Large Responses</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="com"># Stream instead of loading the whole body into memory at once</span>
+<span class="kw">with</span> requests.get(<span class="str">"https://httpbin.org/stream/20"</span>, stream=<span class="kw">True</span>) <span class="kw">as</span> response:
+    <span class="kw">for</span> line <span class="kw">in</span> response.iter_lines():
+        <span class="kw">if</span> line:
+            <span class="kw">print</span>(line.decode(<span class="str">"utf-8"</span>))
+
+<span class="com"># Streaming a large file download with progress</span>
+<span class="kw">def</span> <span class="fn">download_with_progress</span>(url, dest_path):
+    <span class="kw">with</span> requests.get(url, stream=<span class="kw">True</span>) <span class="kw">as</span> response:
+        response.raise_for_status()
+        total = <span class="fn">int</span>(response.headers.get(<span class="str">"Content-Length"</span>, <span class="num">0</span>))
+        downloaded = <span class="num">0</span>
+
+        <span class="kw">with</span> <span class="fn">open</span>(dest_path, <span class="str">"wb"</span>) <span class="kw">as</span> f:
+            <span class="kw">for</span> chunk <span class="kw">in</span> response.iter_content(chunk_size=<span class="num">1024</span> * <span class="num">64</span>):
+                f.write(chunk)
+                downloaded += <span class="fn">len</span>(chunk)
+                <span class="kw">if</span> total:
+                    pct = downloaded / total * <span class="num">100</span>
+                    <span class="kw">print</span>(<span class="str">f"\r</span>{pct:<span class="num">.1</span>f}<span class="str">% downloaded"</span>, end=<span class="str">""</span>)
+    <span class="kw">print</span>()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="sessions">
+      <h2>20. Sessions (Connection Reuse)</h2>
+      <p>A <code>Session</code> persists cookies, headers, and connection pools across requests — much faster for multiple calls to the same host, and needed for anything login-based.</p>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+session = requests.Session()
+session.headers.update({<span class="str">"Authorization"</span>: <span class="str">"Bearer YOUR_TOKEN"</span>})
+
+<span class="com"># Log in - the session automatically stores the returned cookies</span>
+session.post(<span class="str">"https://httpbin.org/post"</span>, data={<span class="str">"user"</span>: <span class="str">"rwin"</span>, <span class="str">"pass"</span>: <span class="str">"secret"</span>})
+
+<span class="com"># Subsequent requests reuse cookies, headers, and the TCP connection</span>
+r1 = session.get(<span class="str">"https://httpbin.org/get"</span>)
+r2 = session.get(<span class="str">"https://httpbin.org/headers"</span>)
+
+session.close()
+
+<span class="com"># Best practice: use as a context manager so it always closes</span>
+<span class="kw">with</span> requests.Session() <span class="kw">as</span> session:
+    session.headers.update({<span class="str">"User-Agent"</span>: <span class="str">"devforge/1.0"</span>})
+    response = session.get(<span class="str">"https://api.github.com/user"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <div class="callout">
+        <strong>Why sessions matter:</strong> without one, every <code>requests.get(...)</code> call opens a fresh TCP/TLS connection. A session pools connections via <code>urllib3</code>, cutting latency significantly for scripts making many calls to the same API.
+      </div>
+    </section>
+
+    <section id="retries">
+      <h2>21. Automatic Retries with Backoff</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+<span class="kw">from</span> requests.adapters <span class="kw">import</span> HTTPAdapter
+<span class="kw">from</span> urllib3.util.retry <span class="kw">import</span> Retry
+
+session = requests.Session()
+
+retry_strategy = Retry(
+    total=<span class="num">5</span>,                              <span class="com"># max retry attempts</span>
+    backoff_factor=<span class="num">1</span>,                     <span class="com"># wait 1s, 2s, 4s, 8s, 16s...</span>
+    status_forcelist=[<span class="num">429</span>, <span class="num">500</span>, <span class="num">502</span>, <span class="num">503</span>, <span class="num">504</span>],
+    allowed_methods=[<span class="str">"GET"</span>, <span class="str">"POST"</span>, <span class="str">"PUT"</span>, <span class="str">"DELETE"</span>],
+)
+
+adapter = HTTPAdapter(max_retries=retry_strategy)
+session.mount(<span class="str">"https://"</span>, adapter)
+session.mount(<span class="str">"http://"</span>, adapter)
+
+<span class="com"># Any request that hits a 500/502/503/504/429 is retried automatically</span>
+response = session.get(<span class="str">"https://httpbin.org/status/503"</span>)
+<span class="kw">print</span>(response.status_code)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Manual retry loop with exponential backoff</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> time
+<span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">fetch_with_retries</span>(url, max_attempts=<span class="num">5</span>, base_delay=<span class="num">1</span>):
+    <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, max_attempts + <span class="num">1</span>):
+        <span class="kw">try</span>:
+            response = requests.get(url, timeout=<span class="num">5</span>)
+            response.raise_for_status()
+            <span class="kw">return</span> response
+        <span class="kw">except</span> requests.exceptions.RequestException <span class="kw">as</span> e:
+            <span class="kw">if</span> attempt == max_attempts:
+                <span class="kw">raise</span>
+            delay = base_delay * (<span class="num">2</span> ** (attempt - <span class="num">1</span>))
+            <span class="kw">print</span>(<span class="str">f"Attempt </span>{attempt}<span class="str"> failed (</span>{e}<span class="str">), retrying in </span>{delay}<span class="str">s..."</span>)
+            time.sleep(delay)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="proxies-ssl">
+      <h2>22. Proxies &amp; SSL/TLS</h2>
+      <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="com"># Routing traffic through a proxy</span>
+proxies = {
+    <span class="str">"http"</span>: <span class="str">"http://10.10.1.10:3128"</span>,
+    <span class="str">"https"</span>: <span class="str">"http://10.10.1.10:1080"</span>,
+}
+response = requests.get(<span class="str">"https://httpbin.org/ip"</span>, proxies=proxies)
+
+<span class="com"># Custom CA bundle (e.g. corporate/self-signed certs)</span>
+response = requests.get(<span class="str">"https://internal.example.com"</span>, verify=<span class="str">"/path/to/ca-bundle.pem"</span>)
+
+<span class="com"># Disable SSL verification (ONLY for local dev/testing - never in production)</span>
+response = requests.get(<span class="str">"https://self-signed.example.com"</span>, verify=<span class="kw">False</span>)
+
+<span class="com"># Client certificate authentication (mutual TLS)</span>
+response = requests.get(
+    <span class="str">"https://secure.example.com"</span>,
+    cert=(<span class="str">"/path/to/client.crt"</span>, <span class="str">"/path/to/client.key"</span>),
+)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout danger">
+        <strong>verify=False disables certificate validation</strong> — this opens the door to man-in-the-middle attacks. Only use it against a trusted local/test endpoint, and it will spam <code>InsecureRequestWarning</code> unless you silence it deliberately.
+      </div>
+    </section>
+
+    <section id="async-http">
+      <h2>23. Async HTTP (httpx &amp; aiohttp)</h2>
+      <p><code>requests</code> is synchronous only. For concurrent requests (e.g. hitting hundreds of URLs at once), use <code>httpx</code> or <code>aiohttp</code>.</p>
+
+      <h3>httpx — sync (drop-in requests replacement)</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> httpx
+
+response = httpx.get(<span class="str">"https://httpbin.org/get"</span>)
+<span class="kw">print</span>(response.status_code, response.json())
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>httpx — async, single request</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> asyncio
+<span class="kw">import</span> httpx
+
+<span class="kw">async</span> <span class="kw">def</span> <span class="fn">main</span>():
+    <span class="kw">async</span> <span class="kw">with</span> httpx.AsyncClient() <span class="kw">as</span> client:
+        response = <span class="kw">await</span> client.get(<span class="str">"https://httpbin.org/get"</span>)
+        <span class="kw">print</span>(response.json())
+
+asyncio.run(main())
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>httpx — many concurrent requests</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> asyncio
+<span class="kw">import</span> httpx
+
+urls = [<span class="str">f"https://httpbin.org/delay/1?id=</span>{i}<span class="str">"</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>)]
+
+<span class="kw">async</span> <span class="kw">def</span> <span class="fn">fetch_all</span>(urls):
+    <span class="kw">async</span> <span class="kw">with</span> httpx.AsyncClient(timeout=<span class="num">10</span>) <span class="kw">as</span> client:
+        tasks = [client.get(url) <span class="kw">for</span> url <span class="kw">in</span> urls]
+        responses = <span class="kw">await</span> asyncio.gather(*tasks, return_exceptions=<span class="kw">True</span>)
+        <span class="kw">return</span> responses
+
+results = asyncio.run(fetch_all(urls))
+<span class="kw">for</span> r <span class="kw">in</span> results:
+    <span class="kw">if</span> <span class="fn">isinstance</span>(r, <span class="fn">Exception</span>):
+        <span class="kw">print</span>(<span class="str">"Failed:"</span>, r)
+    <span class="kw">else</span>:
+        <span class="kw">print</span>(r.status_code)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>aiohttp — many concurrent requests with a semaphore</h3>
+      <div class="code-wrap"><pre><span class="kw">import</span> asyncio
+<span class="kw">import</span> aiohttp
+
+<span class="kw">async</span> <span class="kw">def</span> <span class="fn">fetch</span>(session, url, semaphore):
+    <span class="kw">async</span> <span class="kw">with</span> semaphore:   <span class="com"># limit concurrency to avoid hammering the server</span>
+        <span class="kw">async</span> <span class="kw">with</span> session.get(url, timeout=aiohttp.ClientTimeout(total=<span class="num">10</span>)) <span class="kw">as</span> response:
+            <span class="kw">return</span> <span class="kw">await</span> response.json()
+
+<span class="kw">async</span> <span class="kw">def</span> <span class="fn">main</span>():
+    urls = [<span class="str">f"https://httpbin.org/get?id=</span>{i}<span class="str">"</span> <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">50</span>)]
+    semaphore = asyncio.Semaphore(<span class="num">10</span>)   <span class="com"># max 10 requests in flight at once</span>
+
+    <span class="kw">async</span> <span class="kw">with</span> aiohttp.ClientSession() <span class="kw">as</span> session:
+        tasks = [fetch(session, url, semaphore) <span class="kw">for</span> url <span class="kw">in</span> urls]
+        results = <span class="kw">await</span> asyncio.gather(*tasks)
+        <span class="kw">print</span>(<span class="fn">f"Fetched </span>{<span class="fn">len</span>(results)}<span class="str"> responses"</span>)
+
+asyncio.run(main())
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="callout">
+        <strong>When to reach for async:</strong> dozens/hundreds of independent HTTP calls (scraping, health checks, fan-out API calls). For a handful of sequential calls, plain synchronous <code>requests</code> is simpler and just as fast in practice.
+      </div>
+    </section>
+
+    <section id="urllib">
+      <h2>24. Pure Standard Library (urllib) — No Dependencies</h2>
+      <p>Useful when you can't install packages (locked-down environments, minimal Docker images, CTF/security constraints).</p>
+
+      <h3>GET request</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> urllib.request <span class="kw">import</span> urlopen, Request
+<span class="kw">from</span> urllib.error <span class="kw">import</span> HTTPError, URLError
+<span class="kw">import</span> json
+
+req = Request(
+    <span class="str">"https://httpbin.org/get"</span>,
+    headers={<span class="str">"User-Agent"</span>: <span class="str">"python-urllib/1.0"</span>},
+)
+
+<span class="kw">try</span>:
+    <span class="kw">with</span> urlopen(req, timeout=<span class="num">5</span>) <span class="kw">as</span> response:
+        status = response.status
+        body = json.loads(response.read().decode(<span class="str">"utf-8"</span>))
+        <span class="kw">print</span>(status, body)
+<span class="kw">except</span> HTTPError <span class="kw">as</span> e:
+    <span class="kw">print</span>(<span class="str">f"HTTP error: </span>{e.code}<span class="str"> </span>{e.reason}<span class="str">"</span>)
+<span class="kw">except</span> URLError <span class="kw">as</span> e:
+    <span class="kw">print</span>(<span class="str">f"Connection error: </span>{e.reason}<span class="str">"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>POST with JSON</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> urllib.request <span class="kw">import</span> urlopen, Request
+<span class="kw">import</span> json
+
+payload = json.dumps({<span class="str">"name"</span>: <span class="str">"Rwin"</span>, <span class="str">"role"</span>: <span class="str">"admin"</span>}).encode(<span class="str">"utf-8"</span>)
+
+req = Request(
+    <span class="str">"https://httpbin.org/post"</span>,
+    data=payload,
+    method=<span class="str">"POST"</span>,
+    headers={<span class="str">"Content-Type"</span>: <span class="str">"application/json"</span>},
+)
+
+<span class="kw">with</span> urlopen(req, timeout=<span class="num">5</span>) <span class="kw">as</span> response:
+    result = json.loads(response.read())
+    <span class="kw">print</span>(result[<span class="str">"json"</span>])
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+
+      <h3>Query string encoding</h3>
+      <div class="code-wrap"><pre><span class="kw">from</span> urllib.request <span class="kw">import</span> urlopen
+<span class="kw">from</span> urllib.parse <span class="kw">import</span> urlencode
+
+params = {<span class="str">"q"</span>: <span class="str">"http requests"</span>, <span class="str">"page"</span>: <span class="num">2</span>}
+url = <span class="str">f"https://httpbin.org/get?</span>{urlencode(params)}<span class="str">"</span>
+
+<span class="kw">with</span> urlopen(url, timeout=<span class="num">5</span>) <span class="kw">as</span> response:
+    <span class="kw">print</span>(response.read().decode())
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    </section>
+
+    <section id="patterns">
+      <h2>25. Real-World Patterns</h2>
+
+      <div class="example-card">
+        <h4>Pattern: Simple API client class</h4>
+        <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="kw">class</span> <span class="fn">GitHubClient</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, token=<span class="kw">None</span>):
+        self.base_url = <span class="str">"https://api.github.com"</span>
+        self.session = requests.Session()
+        self.session.headers.update({<span class="str">"Accept"</span>: <span class="str">"application/vnd.github+json"</span>})
+        <span class="kw">if</span> token:
+            self.session.headers[<span class="str">"Authorization"</span>] = <span class="str">f"Bearer </span>{token}<span class="str">"</span>
+
+    <span class="kw">def</span> <span class="fn">get_user</span>(self, username):
+        response = self.session.get(<span class="str">f"</span>{self.base_url}<span class="str">/users/</span>{username}<span class="str">"</span>, timeout=<span class="num">5</span>)
+        response.raise_for_status()
+        <span class="kw">return</span> response.json()
+
+    <span class="kw">def</span> <span class="fn">list_repos</span>(self, username, per_page=<span class="num">30</span>):
+        response = self.session.get(
+            <span class="str">f"</span>{self.base_url}<span class="str">/users/</span>{username}<span class="str">/repos"</span>,
+            params={<span class="str">"per_page"</span>: per_page, <span class="str">"sort"</span>: <span class="str">"updated"</span>},
+            timeout=<span class="num">5</span>,
+        )
+        response.raise_for_status()
+        <span class="kw">return</span> response.json()
+
+    <span class="kw">def</span> <span class="fn">close</span>(self):
+        self.session.close()
+
+
+client = GitHubClient()
+user = client.get_user(<span class="str">"octocat"</span>)
+<span class="kw">print</span>(user[<span class="str">"name"</span>], user[<span class="str">"public_repos"</span>])
+client.close()
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      </div>
+
+      <div class="example-card">
+        <h4>Pattern: Paginated API fetching</h4>
+        <div class="code-wrap"><pre><span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">get_all_pages</span>(url, params=<span class="kw">None</span>, session=<span class="kw">None</span>):
+    <span class="str">"""Follows GitHub-style Link headers until there is no 'next' page."""</span>
+    session = session <span class="kw">or</span> requests.Session()
+    results = []
+
+    <span class="kw">while</span> url:
+        response = session.get(url, params=params, timeout=<span class="num">5</span>)
+        response.raise_for_status()
+        results.extend(response.json())
+
+        <span class="com"># parse the Link header: <https://...&page=2>; rel="next"</span>
+        next_url = <span class="kw">None</span>
+        <span class="kw">for</span> link <span class="kw">in</span> response.links.values():
+            <span class="kw">if</span> link.get(<span class="str">"rel"</span>) == <span class="str">"next"</span>:
+                next_url = link[<span class="str">"url"</span>]
+
+        url = next_url
+        params = <span class="kw">None</span>   <span class="com"># params are already baked into next_url</span>
+
+    <span class="kw">return</span> results
+
+all_repos = get_all_pages(
+    <span class="str">"https://api.github.com/orgs/python/repos"</span>,
+    params={<span class="str">"per_page"</span>: <span class="num">100</span>},
+)
+<span class="kw">print</span>(<span class="fn">len</span>(all_repos), <span class="str">"repos fetched"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      </div>
+
+      <div class="example-card">
+        <h4>Pattern: Simple webhook / API health checker</h4>
+        <div class="code-wrap"><pre><span class="kw">import</span> requests
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="kw">def</span> <span class="fn">check_endpoint</span>(url, expected_status=<span class="num">200</span>, timeout=<span class="num">5</span>):
+    <span class="kw">try</span>:
+        response = requests.get(url, timeout=timeout)
+        healthy = response.status_code == expected_status
+        <span class="kw">return</span> {
+            <span class="str">"url"</span>: url,
+            <span class="str">"healthy"</span>: healthy,
+            <span class="str">"status_code"</span>: response.status_code,
+            <span class="str">"latency_ms"</span>: <span class="fn">round</span>(response.elapsed.total_seconds() * <span class="num">1000</span>, <span class="num">1</span>),
+            <span class="str">"checked_at"</span>: datetime.utcnow().isoformat(),
+        }
+    <span class="kw">except</span> requests.exceptions.RequestException <span class="kw">as</span> e:
+        <span class="kw">return</span> {
+            <span class="str">"url"</span>: url,
+            <span class="str">"healthy"</span>: <span class="kw">False</span>,
+            <span class="str">"error"</span>: <span class="fn">str</span>(e),
+            <span class="str">"checked_at"</span>: datetime.utcnow().isoformat(),
+        }
+
+endpoints = [
+    <span class="str">"https://httpbin.org/status/200"</span>,
+    <span class="str">"https://httpbin.org/status/500"</span>,
+]
+<span class="kw">for</span> ep <span class="kw">in</span> endpoints:
+    <span class="kw">print</span>(check_endpoint(ep))
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      </div>
+
+      <div class="example-card">
+        <h4>Pattern: Retrying + JSON schema validation for an unreliable API</h4>
+        <div class="code-wrap"><pre><span class="kw">import</span> time
+<span class="kw">import</span> requests
+
+REQUIRED_KEYS = {<span class="str">"id"</span>, <span class="str">"name"</span>, <span class="str">"status"</span>}
+
+<span class="kw">def</span> <span class="fn">fetch_valid_json</span>(url, max_attempts=<span class="num">3</span>):
+    <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, max_attempts + <span class="num">1</span>):
+        <span class="kw">try</span>:
+            response = requests.get(url, timeout=<span class="num">5</span>)
+            response.raise_for_status()
+            data = response.json()
+
+            <span class="kw">if</span> <span class="kw">not</span> REQUIRED_KEYS.issubset(data.keys()):
+                <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="str">f"Missing keys: </span>{REQUIRED_KEYS - data.keys()}<span class="str">"</span>)
+
+            <span class="kw">return</span> data
+
+        <span class="kw">except</span> (requests.exceptions.RequestException, <span class="fn">ValueError</span>) <span class="kw">as</span> e:
+            <span class="kw">print</span>(<span class="str">f"Attempt </span>{attempt}<span class="str"> failed: </span>{e}<span class="str">"</span>)
+            <span class="kw">if</span> attempt < max_attempts:
+                time.sleep(<span class="num">1.5</span> * attempt)
+
+    <span class="kw">raise</span> <span class="fn">RuntimeError</span>(<span class="str">f"Failed to fetch valid data from </span>{url}<span class="str"> after </span>{max_attempts}<span class="str"> attempts"</span>)
+</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      </div>
+    </section>
+
+    <section id="security">
+      <h2>26. Security Notes</h2>
+      <div class="grid-2">
+        <div class="callout">
+          <strong>Always validate SSL certs.</strong> Never ship code with <code>verify=False</code> against a production/internet-facing host.
+        </div>
+        <div class="callout warn">
+          <strong>Set timeouts on everything.</strong> An HTTP client with no timeout is a resource-exhaustion bug waiting to happen.
+        </div>
+        <div class="callout danger">
+          <strong>Never log full Authorization headers or tokens.</strong> Mask them (<code>Bearer ****abcd</code>) if you must log requests for debugging.
+        </div>
+        <div class="callout">
+          <strong>Sanitize user-supplied URLs</strong> before making server-side requests to them — unrestricted requests to user input is how SSRF vulnerabilities happen.
+        </div>
+        <div class="callout warn">
+          <strong>Respect rate limits and robots.txt</strong> when scraping. Add a real <code>User-Agent</code> and back off on 429s instead of hammering a server.
+        </div>
+        <div class="callout">
+          <strong>Store secrets in environment variables</strong> (<code>os.environ</code>) or a secrets manager — never hardcode API keys/tokens in source.
+        </div>
+      </div>
+    </section>
+
+    <section id="cheatsheet">
+      <h2>27. Quick Cheat Sheet</h2>
+      <table>
+        <tr><th>Task</th><th>Code</th></tr>
+        <tr><td>Simple GET</td><td><code>requests.get(url)</code></td></tr>
+        <tr><td>GET with query params</td><td><code>requests.get(url, params={...})</code></td></tr>
+        <tr><td>POST JSON</td><td><code>requests.post(url, json={...})</code></td></tr>
+        <tr><td>POST form</td><td><code>requests.post(url, data={...})</code></td></tr>
+        <tr><td>Upload file</td><td><code>requests.post(url, files={...})</code></td></tr>
+        <tr><td>Custom headers</td><td><code>requests.get(url, headers={...})</code></td></tr>
+        <tr><td>Bearer auth</td><td><code>headers={"Authorization": f"Bearer {token}"}</code></td></tr>
+        <tr><td>Basic auth</td><td><code>requests.get(url, auth=(user, pw))</code></td></tr>
+        <tr><td>Set timeout</td><td><code>requests.get(url, timeout=5)</code></td></tr>
+        <tr><td>Raise on error status</td><td><code>response.raise_for_status()</code></td></tr>
+        <tr><td>Parse JSON response</td><td><code>response.json()</code></td></tr>
+        <tr><td>Reusable session</td><td><code>with requests.Session() as s: ...</code></td></tr>
+        <tr><td>Stream download</td><td><code>requests.get(url, stream=True)</code></td></tr>
+        <tr><td>Skip SSL verify (dev only)</td><td><code>requests.get(url, verify=False)</code></td></tr>
+        <tr><td>Async request (httpx)</td><td><code>await client.get(url)</code></td></tr>
+      </table>
+    </section>
+
+    <section id="troubleshooting">
+      <h2>28. Troubleshooting Common Issues</h2>
+      <table>
+        <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+        <tr><td><code>requests.exceptions.SSLError</code></td><td>Invalid/self-signed cert, or corporate MITM proxy</td><td>Install proper CA bundle, or pass <code>verify="/path/ca.pem"</code></td></tr>
+        <tr><td><code>ConnectionError</code></td><td>DNS failure, no network, wrong port, firewall</td><td>Check the URL, ping the host, verify firewall/VPN rules</td></tr>
+        <tr><td>Request hangs forever</td><td>No timeout set</td><td>Always pass <code>timeout=</code></td></tr>
+        <tr><td>Server rejects JSON payload</td><td>Used <code>data=</code> instead of <code>json=</code> with a dict</td><td>Use <code>json=payload</code> for JSON APIs</td></tr>
+        <tr><td><code>JSONDecodeError</code> on <code>.json()</code></td><td>Server returned HTML/plain text (often an error page)</td><td>Check <code>response.status_code</code> and <code>response.text</code> first</td></tr>
+        <tr><td>Getting 403 from a site that works in browser</td><td>Missing/generic <code>User-Agent</code></td><td>Set a realistic <code>User-Agent</code> header</td></tr>
+        <tr><td>Memory blows up on large downloads</td><td>Loaded whole response into memory</td><td>Use <code>stream=True</code> + <code>iter_content()</code></td></tr>
+        <tr><td>Duplicate cookies / stale session state</td><td>Reusing a global <code>requests</code> call instead of a <code>Session</code></td><td>Use one <code>Session()</code> per logical client</td></tr>
+      </table>
+    </section>
+
+    <footer>
+      Complete Python HTTP Requests Guide — covers <code>requests</code>, <code>httpx</code>, <code>aiohttp</code>, and <code>urllib</code>. Generated for local reference; test all snippets against your own endpoints before using in production code.
+    </footer>
+  </main>
+</div>
+
+<a href="#intro" class="top-link">↑ Top</a>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 1500);
+  });
+}
+</script>
+
+</body>
+</html>
