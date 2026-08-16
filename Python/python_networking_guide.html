@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Python Networking // devforge</title>
+<style>
+:root{
+  --bg:#0a0d0f; --panel:#0f1417; --border:#1c2428; --border2:#2a3438;
+  --fg:#c8d6d6; --fg-dim:#5f7472; --cyan:#39ffc9; --cyan-dim:#1e8a6e;
+  --amber:#e0a840; --red:#e05a4a; --purple:#a68bff;
+  --mono:'JetBrains Mono','Fira Code',ui-monospace,monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--mono);
+  margin:0; padding:0; font-size:14px; line-height:1.6;
+}
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:999;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,0.15) 0px,transparent 1px,transparent 2px);
+  opacity:.25;
+}
+.wrap{display:flex; max-width:1400px; margin:0 auto;}
+nav{
+  position:sticky; top:0; height:100vh; width:250px; flex-shrink:0;
+  border-right:1px solid var(--border); padding:24px 0; overflow-y:auto;
+}
+nav::-webkit-scrollbar{width:4px;}
+nav::-webkit-scrollbar-thumb{background:var(--border2);}
+.brand{
+  padding:0 20px 20px; border-bottom:1px solid var(--border); margin-bottom:16px;
+}
+.brand .tag{color:var(--cyan); font-size:11px; letter-spacing:2px;}
+.brand h1{font-size:15px; margin:6px 0 2px; color:var(--fg); font-weight:400;}
+.brand .sub{color:var(--fg-dim); font-size:11px;}
+nav ul{list-style:none; padding:0; margin:0;}
+nav .grp{color:var(--fg-dim); font-size:10px; letter-spacing:1.5px; padding:14px 20px 6px; text-transform:uppercase;}
+nav a{
+  display:block; padding:5px 20px; color:var(--fg-dim); text-decoration:none;
+  font-size:12.5px; border-left:2px solid transparent; transition:.12s;
+}
+nav a:hover, nav a.active{ color:var(--cyan); border-left-color:var(--cyan); background:rgba(57,255,201,0.04); }
+main{flex:1; padding:32px 48px 120px; min-width:0;}
+.hero{border-bottom:1px solid var(--border); padding-bottom:20px; margin-bottom:32px;}
+.hero .path{color:var(--fg-dim); font-size:11px;}
+.hero h1{
+  font-size:26px; margin:8px 0; color:var(--fg); font-weight:400; letter-spacing:1px;
+}
+.hero h1 span{color:var(--cyan);}
+.hero p{color:var(--fg-dim); font-size:13px; margin:0; max-width:640px;}
+section{margin-bottom:44px; scroll-margin-top:20px;}
+h2{
+  font-size:13px; color:var(--cyan); text-transform:uppercase; letter-spacing:2px;
+  font-weight:400; margin:0 0 4px; display:flex; align-items:center; gap:10px;
+}
+h2::before{content:'//'; color:var(--border2);}
+h2 .n{color:var(--fg-dim); font-size:11px; letter-spacing:0; text-transform:none;}
+.desc{color:var(--fg-dim); font-size:12.5px; margin:0 0 14px; max-width:680px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media(max-width:900px){.grid2{grid-template-columns:1fr;}}
+.card{
+  background:var(--panel); border:1px solid var(--border); border-radius:3px; overflow:hidden;
+}
+.card-h{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 14px; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.015);
+}
+.card-h .t{color:var(--fg); font-size:12px;}
+.card-h .badge{
+  font-size:9.5px; color:var(--cyan-dim); border:1px solid var(--border2);
+  padding:1px 6px; border-radius:2px; letter-spacing:1px;
+}
+pre{
+  margin:0; padding:14px; overflow-x:auto; font-size:12.5px; line-height:1.65;
+  white-space:pre; tab-size:4;
+}
+pre::-webkit-scrollbar{height:5px;}
+pre::-webkit-scrollbar-thumb{background:var(--border2);}
+code{font-family:var(--mono);}
+.kw{color:var(--purple);} .str{color:var(--amber);} .cm{color:var(--fg-dim); font-style:italic;}
+.fn{color:var(--cyan);} .num{color:#f0857a;} .bi{color:#7fb0e0;}
+.note{
+  border-left:2px solid var(--cyan-dim); padding:8px 12px; margin-top:10px;
+  color:var(--fg-dim); font-size:11.5px; background:rgba(57,255,201,0.03);
+}
+.warn{border-left-color:var(--red); }
+.warn::before{content:'! '; color:var(--red);}
+table{width:100%; border-collapse:collapse; font-size:12px; margin-top:10px;}
+th,td{border:1px solid var(--border); padding:6px 10px; text-align:left;}
+th{color:var(--cyan-dim); font-weight:400; background:rgba(255,255,255,0.02);}
+td{color:var(--fg-dim);}
+td code{color:var(--fg);}
+.pillrow{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
+.pill{font-size:10px; color:var(--fg-dim); border:1px solid var(--border2); padding:2px 8px; border-radius:10px;}
+footer{border-top:1px solid var(--border); margin-top:60px; padding-top:16px; color:var(--fg-dim); font-size:11px; display:flex; justify-content:space-between;}
+.full{grid-column:1/-1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div class="brand">
+    <div class="tag">devforge / reference</div>
+    <h1>python::networking</h1>
+    <div class="sub">socket → packet → protocol</div>
+  </div>
+  <ul>
+    <li class="grp">core</li>
+    <li><a href="#sockets">sockets</a></li>
+    <li><a href="#tcp">tcp client/server</a></li>
+    <li><a href="#udp">udp</a></li>
+    <li><a href="#async">asyncio</a></li>
+    <li class="grp">http</li>
+    <li><a href="#http-client">requests / httpx</a></li>
+    <li><a href="#http-server">http server</a></li>
+    <li class="grp">packet-level</li>
+    <li><a href="#scapy">scapy</a></li>
+    <li><a href="#raw">raw sockets</a></li>
+    <li><a href="#sniff">sniffing</a></li>
+    <li class="grp">recon / security</li>
+    <li><a href="#portscan">port scanner</a></li>
+    <li><a href="#dns">dns tools</a></li>
+    <li><a href="#ssl">ssl/tls</a></li>
+    <li><a href="#ssh">ssh (paramiko)</a></li>
+    <li class="grp">utility</li>
+    <li><a href="#threading">concurrency</a></li>
+    <li><a href="#errors">error handling</a></li>
+    <li><a href="#ref">quick ref</a></li>
+  </ul>
+</nav>
+<main>
+  <div class="hero">
+    <div class="path">~/devforge/refs/networking.py</div>
+    <h1>python <span>networking</span> :: full stack guide</h1>
+    <p>socket primitives → protocol layers → packet crafting → recon tooling. copy-paste ready, stdlib-first, scapy where it matters.</p>
+  </div>
+
+  <section id="sockets">
+    <h2>socket fundamentals <span class="n">socket</span></h2>
+    <p class="desc">every network tool descends from this. AF_INET = IPv4, SOCK_STREAM = TCP, SOCK_DGRAM = UDP.</p>
+    <div class="card">
+      <div class="card-h"><span class="t">socket_basics.py</span><span class="badge">STDLIB</span></div>
+      <pre><code><span class="kw">import</span> socket
+
+<span class="cm"># create socket: (address_family, socket_type)</span>
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  <span class="cm"># TCP</span>
+u = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)   <span class="cm"># UDP</span>
+r = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)  <span class="cm"># RAW - needs root</span>
+
+<span class="cm"># options</span>
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, <span class="num">1</span>)
+s.settimeout(<span class="num">5.0</span>)
+
+<span class="cm"># resolve hostname</span>
+ip = socket.gethostbyname(<span class="str">'example.com'</span>)
+hostname = socket.gethostbyaddr(<span class="str">'93.184.216.34'</span>)
+
+<span class="cm"># local machine info</span>
+local_ip = socket.gethostbyname(socket.gethostname())</code></pre>
+    </div>
+  </section>
+
+  <section id="tcp">
+    <h2>tcp client / server <span class="n">socket</span></h2>
+    <p class="desc">blocking TCP. bind → listen → accept loop on server; connect → send/recv on client.</p>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h"><span class="t">tcp_server.py</span><span class="badge">SERVER</span></div>
+        <pre><code><span class="kw">import</span> socket
+
+HOST, PORT = <span class="str">'0.0.0.0'</span>, <span class="num">9999</span>
+
+<span class="kw">with</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM) <span class="kw">as</span> srv:
+    srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, <span class="num">1</span>)
+    srv.bind((HOST, PORT))
+    srv.listen(<span class="num">5</span>)
+    <span class="fn">print</span>(<span class="str">f"[+] listening on {PORT}"</span>)
+
+    <span class="kw">while</span> <span class="bi">True</span>:
+        conn, addr = srv.accept()
+        <span class="kw">with</span> conn:
+            <span class="fn">print</span>(<span class="str">f"[+] conn from {addr}"</span>)
+            <span class="kw">while</span> data := conn.recv(<span class="num">1024</span>):
+                conn.sendall(data)  <span class="cm"># echo</span></code></pre>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">tcp_client.py</span><span class="badge">CLIENT</span></div>
+        <pre><code><span class="kw">import</span> socket
+
+<span class="kw">with</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM) <span class="kw">as</span> s:
+    s.settimeout(<span class="num">3</span>)
+    s.connect((<span class="str">'127.0.0.1'</span>, <span class="num">9999</span>))
+    s.sendall(<span class="bi">b</span><span class="str">"hello server"</span>)
+    resp = s.recv(<span class="num">4096</span>)
+    <span class="fn">print</span>(resp.decode())</code></pre>
+      </div>
+    </div>
+    <div class="note">production servers: use <code>socketserver.ThreadingTCPServer</code> or asyncio instead of a manual accept loop.</div>
+  </section>
+
+  <section id="udp">
+    <h2>udp sockets <span class="n">socket</span></h2>
+    <p class="desc">connectionless. no accept()/listen() — just bind + recvfrom/sendto.</p>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h"><span class="t">udp_server.py</span><span class="badge">SERVER</span></div>
+        <pre><code><span class="kw">import</span> socket
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.bind((<span class="str">'0.0.0.0'</span>, <span class="num">9000</span>))
+<span class="kw">while</span> <span class="bi">True</span>:
+    data, addr = s.recvfrom(<span class="num">1024</span>)
+    <span class="fn">print</span>(<span class="str">f"{addr}: {data}"</span>)
+    s.sendto(<span class="bi">b</span><span class="str">"ack"</span>, addr)</code></pre>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">udp_client.py</span><span class="badge">CLIENT</span></div>
+        <pre><code><span class="kw">import</span> socket
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.settimeout(<span class="num">2</span>)
+s.sendto(<span class="bi">b</span><span class="str">"ping"</span>, (<span class="str">'127.0.0.1'</span>, <span class="num">9000</span>))
+data, _ = s.recvfrom(<span class="num">1024</span>)
+<span class="fn">print</span>(data)</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="async">
+    <h2>asyncio networking <span class="n">asyncio</span></h2>
+    <p class="desc">non-blocking, coroutine-based — scales to thousands of concurrent connections.</p>
+    <div class="card">
+      <div class="card-h"><span class="t">async_server.py</span><span class="badge">ASYNCIO</span></div>
+      <pre><code><span class="kw">import</span> asyncio
+
+<span class="kw">async def</span> <span class="fn">handle</span>(reader, writer):
+    addr = writer.get_extra_info(<span class="str">'peername'</span>)
+    data = <span class="kw">await</span> reader.read(<span class="num">1024</span>)
+    <span class="fn">print</span>(<span class="str">f"{addr}: {data.decode()}"</span>)
+    writer.write(data)  <span class="cm"># echo</span>
+    <span class="kw">await</span> writer.drain()
+    writer.close()
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    srv = <span class="kw">await</span> asyncio.start_server(handle, <span class="str">'0.0.0.0'</span>, <span class="num">8888</span>)
+    <span class="kw">async with</span> srv:
+        <span class="kw">await</span> srv.serve_forever()
+
+asyncio.run(main())
+
+<span class="cm"># --- client ---</span>
+<span class="kw">async def</span> <span class="fn">client</span>():
+    reader, writer = <span class="kw">await</span> asyncio.open_connection(<span class="str">'127.0.0.1'</span>, <span class="num">8888</span>)
+    writer.write(<span class="bi">b</span><span class="str">'hi'</span>)
+    <span class="kw">await</span> writer.drain()
+    data = <span class="kw">await</span> reader.read(<span class="num">100</span>)
+    writer.close()
+    <span class="kw">await</span> writer.wait_closed()</code></pre>
+    </div>
+    <div class="note">use <code>asyncio.gather()</code> to fan out concurrent scans/probes — this is your engine for high-throughput tooling (port scanners, OSINT checkers).</div>
+  </section>
+
+  <section id="http-client">
+    <h2>http clients <span class="n">requests / httpx</span></h2>
+    <p class="desc"><code>requests</code> = sync, dead simple. <code>httpx</code> = async-capable, HTTP/2, drop-in-similar API.</p>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h"><span class="t">requests_basics.py</span><span class="badge">SYNC</span></div>
+        <pre><code><span class="kw">import</span> requests
+
+r = requests.get(<span class="str">'https://api.example.com/data'</span>,
+                  headers={<span class="str">'User-Agent'</span>: <span class="str">'devforge'</span>},
+                  params={<span class="str">'q'</span>: <span class="str">'test'</span>}, timeout=<span class="num">5</span>)
+r.raise_for_status()
+<span class="fn">print</span>(r.status_code, r.json())
+
+<span class="cm"># POST with json body</span>
+r = requests.post(url, json={<span class="str">'key'</span>: <span class="str">'val'</span>})
+
+<span class="cm"># session (persists cookies/headers)</span>
+sess = requests.Session()
+sess.headers.update({<span class="str">'Authorization'</span>: <span class="str">f'Bearer {token}'</span>})</code></pre>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">httpx_async.py</span><span class="badge">ASYNC</span></div>
+        <pre><code><span class="kw">import</span> httpx, asyncio
+
+<span class="kw">async def</span> <span class="fn">fetch</span>(client, url):
+    r = <span class="kw">await</span> client.get(url, timeout=<span class="num">5</span>)
+    <span class="kw">return</span> r.status_code, len(r.content)
+
+<span class="kw">async def</span> <span class="fn">main</span>(urls):
+    <span class="kw">async with</span> httpx.AsyncClient() <span class="kw">as</span> c:
+        tasks = [fetch(c, u) <span class="kw">for</span> u <span class="kw">in</span> urls]
+        <span class="kw">return</span> <span class="kw">await</span> asyncio.gather(*tasks, return_exceptions=<span class="bi">True</span>)
+
+asyncio.run(main(urls))</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="http-server">
+    <h2>minimal http server <span class="n">http.server / FastAPI</span></h2>
+    <p class="desc">stdlib for quick file-serving/testing. FastAPI for real APIs.</p>
+    <div class="card">
+      <div class="card-h"><span class="t">quick_serve.py</span><span class="badge">STDLIB</span></div>
+      <pre><code><span class="cm"># one-liner: python3 -m http.server 8000</span>
+
+<span class="kw">from</span> http.server <span class="kw">import</span> HTTPServer, BaseHTTPRequestHandler
+
+<span class="kw">class</span> <span class="fn">Handler</span>(BaseHTTPRequestHandler):
+    <span class="kw">def</span> <span class="fn">do_GET</span>(<span class="bi">self</span>):
+        <span class="bi">self</span>.send_response(<span class="num">200</span>)
+        <span class="bi">self</span>.send_header(<span class="str">'Content-Type'</span>, <span class="str">'text/plain'</span>)
+        <span class="bi">self</span>.end_headers()
+        <span class="bi">self</span>.wfile.write(<span class="bi">b</span><span class="str">'ok'</span>)
+
+HTTPServer((<span class="str">'0.0.0.0'</span>, <span class="num">8000</span>), Handler).serve_forever()</code></pre>
+    </div>
+  </section>
+
+  <section id="scapy">
+    <h2>scapy — packet crafting <span class="n">scapy</span></h2>
+    <p class="desc">construct/send/sniff raw packets at any layer. requires root/CAP_NET_RAW. core of PacketForge/TraceForge-style tools.</p>
+    <div class="card">
+      <div class="card-h"><span class="t">scapy_craft.py</span><span class="badge">ROOT</span></div>
+      <pre><code><span class="kw">from</span> scapy.all <span class="kw">import</span> IP, TCP, UDP, ICMP, sr1, send, sniff, Raw
+
+<span class="cm"># build layered packet: IP / TCP</span>
+pkt = IP(dst=<span class="str">"192.168.1.1"</span>)/TCP(dport=<span class="num">80</span>, flags=<span class="str">"S"</span>)
+resp = sr1(pkt, timeout=<span class="num">2</span>, verbose=<span class="num">0</span>)   <span class="cm"># send + receive 1 reply</span>
+
+<span class="kw">if</span> resp <span class="kw">and</span> resp.haslayer(TCP):
+    flags = resp[TCP].flags
+    <span class="fn">print</span>(<span class="str">"open"</span> <span class="kw">if</span> flags == <span class="num">0x12</span> <span class="kw">else</span> <span class="str">"closed"</span>)  <span class="cm"># SYN-ACK vs RST</span>
+
+<span class="cm"># ICMP ping</span>
+icmp_resp = sr1(IP(dst=<span class="str">"8.8.8.8"</span>)/ICMP(), timeout=<span class="num">2</span>)
+
+<span class="cm"># custom payload</span>
+pkt = IP(dst=target)/UDP(dport=<span class="num">53</span>)/Raw(load=<span class="bi">b</span><span class="str">"\\xaa\\xbb"</span>)
+send(pkt, verbose=<span class="num">0</span>)  <span class="cm"># fire-and-forget, no response expected</span>
+
+<span class="cm"># TTL manipulation (traceroute logic)</span>
+<span class="kw">for</span> ttl <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">30</span>):
+    p = sr1(IP(dst=target, ttl=ttl)/ICMP(), timeout=<span class="num">1</span>, verbose=<span class="num">0</span>)
+    <span class="kw">if</span> p <span class="kw">is None</span>: <span class="kw">continue</span>
+    <span class="fn">print</span>(ttl, p.src)
+    <span class="kw">if</span> p.src == target: <span class="kw">break</span></code></pre>
+    </div>
+    <div class="note warn">raw packet ops require elevated privileges. run with sudo or grant CAP_NET_RAW via setcap.</div>
+  </section>
+
+  <section id="raw">
+    <h2>raw sockets (no scapy) <span class="n">socket + struct</span></h2>
+    <p class="desc">manual packet construction for when you need zero dependencies or full control.</p>
+    <div class="card">
+      <div class="card-h"><span class="t">raw_icmp.py</span><span class="badge">ROOT</span></div>
+      <pre><code><span class="kw">import</span> socket, struct, os
+
+<span class="kw">def</span> <span class="fn">checksum</span>(data):
+    <span class="kw">if</span> len(data) % <span class="num">2</span>: data += <span class="bi">b</span><span class="str">'\\0'</span>
+    s = <span class="fn">sum</span>(struct.unpack(<span class="str">f"!{len(data)//2}H"</span>, data))
+    s = (s >> <span class="num">16</span>) + (s & <span class="num">0xffff</span>)
+    <span class="kw">return</span> ~s & <span class="num">0xffff</span>
+
+<span class="kw">def</span> <span class="fn">build_icmp_echo</span>(<span class="bi">id_</span>=<span class="num">1</span>, seq=<span class="num">1</span>):
+    header = struct.pack(<span class="str">'!BBHHH'</span>, <span class="num">8</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="bi">id_</span>, seq)  <span class="cm"># type=8 echo request</span>
+    payload = <span class="bi">b</span><span class="str">'devforge-ping'</span>
+    cksum = checksum(header + payload)
+    header = struct.pack(<span class="str">'!BBHHH'</span>, <span class="num">8</span>, <span class="num">0</span>, cksum, <span class="bi">id_</span>, seq)
+    <span class="kw">return</span> header + payload
+
+s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
+s.sendto(build_icmp_echo(), (<span class="str">'8.8.8.8'</span>, <span class="num">0</span>))
+print(s.recvfrom(<span class="num">1024</span>))</code></pre>
+    </div>
+  </section>
+
+  <section id="sniff">
+    <h2>packet sniffing <span class="n">scapy</span></h2>
+    <p class="desc">capture and filter live traffic. BPF filter syntax = same as tcpdump.</p>
+    <div class="card">
+      <div class="card-h"><span class="t">sniffer.py</span><span class="badge">ROOT</span></div>
+      <pre><code><span class="kw">from</span> scapy.all <span class="kw">import</span> sniff, IP, TCP, Ether
+
+<span class="kw">def</span> <span class="fn">on_packet</span>(pkt):
+    <span class="kw">if</span> pkt.haslayer(IP):
+        src, dst = pkt[IP].src, pkt[IP].dst
+        proto = <span class="str">"TCP"</span> <span class="kw">if</span> pkt.haslayer(TCP) <span class="kw">else</span> <span class="str">"?"</span>
+        <span class="fn">print</span>(<span class="str">f"{src} -> {dst} [{proto}]"</span>)
+
+sniff(
+    <span class="bi">filter</span>=<span class="str">"tcp port 80 or tcp port 443"</span>,   <span class="cm"># BPF syntax</span>
+    prn=on_packet,
+    store=<span class="num">0</span>,                                <span class="cm"># don't hold packets in memory</span>
+    iface=<span class="str">"eth0"</span>,                            <span class="cm"># None = all interfaces</span>
+    count=<span class="num">100</span>,                               <span class="cm"># 0 = infinite</span>
+    timeout=<span class="num">30</span>
+)</code></pre>
+    </div>
+  </section>
+
+  <section id="portscan">
+    <h2>port scanner <span class="n">socket + threading</span></h2>
+    <p class="desc">TCP connect scan — no root needed. threaded for speed.</p>
+    <div class="card">
+      <div class="card-h"><span class="t">portscan.py</span><span class="badge">TOOL</span></div>
+      <pre><code><span class="kw">import</span> socket
+<span class="kw">from</span> concurrent.futures <span class="kw">import</span> ThreadPoolExecutor
+
+<span class="kw">def</span> <span class="fn">scan_port</span>(host, port, timeout=<span class="num">0.5</span>):
+    <span class="kw">with</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM) <span class="kw">as</span> s:
+        s.settimeout(timeout)
+        <span class="kw">if</span> s.connect_ex((host, port)) == <span class="num">0</span>:
+            <span class="kw">try</span>:
+                banner = s.recv(<span class="num">128</span>).decode(errors=<span class="str">'ignore'</span>).strip()
+            <span class="kw">except</span> Exception:
+                banner = <span class="str">''</span>
+            <span class="kw">return</span> port, banner
+    <span class="kw">return None</span>
+
+<span class="kw">def</span> <span class="fn">scan_range</span>(host, ports, workers=<span class="num">200</span>):
+    open_ports = []
+    <span class="kw">with</span> ThreadPoolExecutor(max_workers=workers) <span class="kw">as</span> ex:
+        futures = {ex.submit(scan_port, host, p): p <span class="kw">for</span> p <span class="kw">in</span> ports}
+        <span class="kw">for</span> f <span class="kw">in</span> futures:
+            result = f.result()
+            <span class="kw">if</span> result: open_ports.append(result)
+    <span class="kw">return</span> <span class="fn">sorted</span>(open_ports)
+
+<span class="fn">print</span>(scan_range(<span class="str">"scanme.nmap.org"</span>, <span class="fn">range</span>(<span class="num">1</span>, <span class="num">1025</span>)))</code></pre>
+    </div>
+    <div class="note">for stealth (SYN) scans use scapy: send SYN, check for SYN-ACK, send RST manually — never completes the handshake, doesn't hit application logs as easily.</div>
+  </section>
+
+  <section id="dns">
+    <h2>dns tools <span class="n">socket / dnspython</span></h2>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h"><span class="t">dns_stdlib.py</span><span class="badge">STDLIB</span></div>
+        <pre><code><span class="kw">import</span> socket
+<span class="fn">print</span>(socket.gethostbyname(<span class="str">'example.com'</span>))
+<span class="fn">print</span>(socket.getaddrinfo(<span class="str">'example.com'</span>, <span class="num">443</span>))</code></pre>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">dns_full.py</span><span class="badge">dnspython</span></div>
+        <pre><code><span class="kw">import</span> dns.resolver
+
+<span class="kw">for</span> rtype <span class="kw">in</span> [<span class="str">'A'</span>, <span class="str">'MX'</span>, <span class="str">'TXT'</span>, <span class="str">'NS'</span>]:
+    <span class="kw">try</span>:
+        ans = dns.resolver.resolve(<span class="str">'example.com'</span>, rtype)
+        <span class="kw">for</span> r <span class="kw">in</span> ans: <span class="fn">print</span>(rtype, r.to_text())
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        <span class="fn">print</span>(rtype, <span class="str">"none"</span>)</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="ssl">
+    <h2>ssl / tls <span class="n">ssl</span></h2>
+    <p class="desc">wrap sockets in TLS, inspect certs — core of cert-checking and MITM-detection tooling.</p>
+    <div class="card">
+      <div class="card-h"><span class="t">ssl_inspect.py</span><span class="badge">STDLIB</span></div>
+      <pre><code><span class="kw">import</span> ssl, socket
+
+<span class="kw">def</span> <span class="fn">get_cert_info</span>(host, port=<span class="num">443</span>):
+    ctx = ssl.create_default_context()
+    <span class="kw">with</span> socket.create_connection((host, port), timeout=<span class="num">5</span>) <span class="kw">as</span> sock:
+        <span class="kw">with</span> ctx.wrap_socket(sock, server_hostname=host) <span class="kw">as</span> ssock:
+            cert = ssock.getpeercert()
+            <span class="fn">print</span>(<span class="str">"subject:"</span>, cert[<span class="str">'subject'</span>])
+            <span class="fn">print</span>(<span class="str">"expires:"</span>, cert[<span class="str">'notAfter'</span>])
+            <span class="fn">print</span>(<span class="str">"cipher:"</span>, ssock.cipher())
+            <span class="fn">print</span>(<span class="str">"tls ver:"</span>, ssock.version())
+
+<span class="cm"># server-side (self-signed for testing)</span>
+ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ctx.load_cert_chain(<span class="str">'cert.pem'</span>, <span class="str">'key.pem'</span>)
+<span class="kw">with</span> socket.socket() <span class="kw">as</span> sock:
+    sock.bind((<span class="str">'0.0.0.0'</span>, <span class="num">8443</span>))
+    sock.listen(<span class="num">1</span>)
+    <span class="kw">with</span> ctx.wrap_socket(sock, server_side=<span class="bi">True</span>) <span class="kw">as</span> ssock:
+        conn, addr = ssock.accept()</code></pre>
+    </div>
+  </section>
+
+  <section id="ssh">
+    <h2>ssh automation <span class="n">paramiko</span></h2>
+    <p class="desc">programmatic ssh — remote exec, file transfer, brute-testing (auth only).</p>
+    <div class="card">
+      <div class="card-h"><span class="t">ssh_client.py</span><span class="badge">paramiko</span></div>
+      <pre><code><span class="kw">import</span> paramiko
+
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client.connect(<span class="str">'192.168.1.10'</span>, username=<span class="str">'user'</span>,
+                password=<span class="str">'pass'</span>, timeout=<span class="num">5</span>)
+
+stdin, stdout, stderr = client.exec_command(<span class="str">'uname -a'</span>)
+<span class="fn">print</span>(stdout.read().decode())
+client.close()
+
+<span class="cm"># key-based auth</span>
+key = paramiko.RSAKey.from_private_key_file(<span class="str">'/path/id_rsa'</span>)
+client.connect(<span class="str">'host'</span>, username=<span class="str">'user'</span>, pkey=key)
+
+<span class="cm"># sftp file transfer</span>
+sftp = client.open_sftp()
+sftp.put(<span class="str">'local.txt'</span>, <span class="str">'/remote/path.txt'</span>)
+sftp.close()</code></pre>
+    </div>
+  </section>
+
+  <section id="threading">
+    <h2>concurrency patterns <span class="n">threading / asyncio</span></h2>
+    <p class="desc">networking is I/O-bound → threads or async both work well. GIL doesn't matter here (it's not CPU-bound).</p>
+    <table>
+      <tr><th>approach</th><th>use when</th><th>module</th></tr>
+      <tr><td><code>ThreadPoolExecutor</code></td><td>simple, blocking libs (requests, socket)</td><td><code>concurrent.futures</code></td></tr>
+      <tr><td><code>asyncio</code></td><td>1000s of connections, need max throughput</td><td><code>asyncio</code></td></tr>
+      <tr><td><code>multiprocessing</code></td><td>CPU-heavy post-processing (crypto, parsing)</td><td><code>multiprocessing</code></td></tr>
+    </table>
+  </section>
+
+  <section id="errors">
+    <h2>error handling essentials</h2>
+    <div class="card">
+      <div class="card-h"><span class="t">exceptions.py</span><span class="badge">PATTERN</span></div>
+      <pre><code><span class="kw">import</span> socket
+
+<span class="kw">try</span>:
+    s = socket.create_connection((host, port), timeout=<span class="num">3</span>)
+<span class="kw">except</span> socket.timeout:
+    <span class="fn">print</span>(<span class="str">"timed out"</span>)
+<span class="kw">except</span> ConnectionRefusedError:
+    <span class="fn">print</span>(<span class="str">"port closed / refused"</span>)
+<span class="kw">except</span> socket.gaierror:
+    <span class="fn">print</span>(<span class="str">"dns resolution failed"</span>)
+<span class="kw">except</span> OSError <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">f"os error: {e}"</span>)  <span class="cm"># e.g. network unreachable</span></code></pre>
+    </div>
+  </section>
+
+  <section id="ref" class="full">
+    <h2>quick reference</h2>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h"><span class="t">library map</span></div>
+        <pre><code>socket        - stdlib, TCP/UDP/raw
+ssl           - stdlib, TLS wrapping
+asyncio       - stdlib, async I/O
+struct        - stdlib, binary packing (for raw packets)
+requests      - sync HTTP client
+httpx         - async-capable HTTP client
+scapy         - packet crafting/sniffing (root)
+paramiko      - SSH client/server
+dnspython     - full DNS record queries
+python-nmap   - nmap wrapper
+fastapi       - async web framework
+socketserver  - stdlib threaded/forking servers</code></pre>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">tcp flags (scapy)</span></div>
+        <pre><code>S   SYN
+A   ACK
+F   FIN
+R   RST
+P   PSH
+U   URG
+SA  0x12  - SYN-ACK (port open)
+RA  0x14  - RST-ACK (port closed)</code></pre>
+      </div>
+    </div>
+    <div class="pillrow">
+      <span class="pill">pip install scapy</span>
+      <span class="pill">pip install paramiko</span>
+      <span class="pill">pip install httpx</span>
+      <span class="pill">pip install dnspython</span>
+      <span class="pill">sudo setcap cap_net_raw+ep $(which python3)</span>
+    </div>
+  </section>
+
+  <footer>
+    <span>devforge :: networking.py</span>
+    <span>stdlib-first · scapy for packet-level · async for scale</span>
+  </footer>
+</main>
+</div>
+<script>
+const links = document.querySelectorAll('nav a');
+const sections = document.querySelectorAll('section');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if(window.scrollY >= s.offsetTop - 100) cur = s.id; });
+  links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#'+cur));
+});
+</script>
+</body>
+</html>
