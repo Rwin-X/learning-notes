@@ -8,3 +8,4 @@ ai and notes and pdf i created
 >---
 + lord
 + wrin
+- lord
