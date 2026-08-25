@@ -11,3 +11,4 @@ ai and notes and pdf i created
 - rwin
 ---
 #operator
+>> opp
