@@ -9,3 +9,4 @@ ai and notes and pdf i created
 + lord
 
 - rwin
+\ lord
