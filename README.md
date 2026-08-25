@@ -7,3 +7,4 @@ ai and notes and pdf i created
 >and fun something
 >---
 + lord
++ wrin
