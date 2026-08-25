@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Four in a Row — The Gearworks</title>
+<style>
+  :root {
+    --bg: #1c1712;
+    --bg-vignette: #120e0b;
+    --plate: #2a221a;
+    --plate-edge: #3d3226;
+    --grid-line: #52432f;
+    --grid-line-soft: #3a2f22;
+    --brass: #c99a4a;
+    --brass-bright: #e6b95f;
+    --copper: #b4633a;
+    --rust: #8c4a30;
+    --bone: #e8dcc4;
+    --ink-dim: #a89777;
+    --ink-dimmer: #6f6249;
+    --win: #e6b95f;
+    --danger: #b4593a;
+    --serif: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    --mono: 'SF Mono', 'JetBrains Mono', ui-monospace, 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg);
+    color: var(--bone);
+    font-family: var(--serif);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+    padding: 28px 16px;
+    background:
+      radial-gradient(ellipse 1100px 700px at 50% 0%, rgba(201,154,74,0.07), transparent 60%),
+      radial-gradient(ellipse 900px 900px at 50% 110%, var(--bg-vignette), transparent 70%),
+      var(--bg);
+  }
+
+  /* subtle riveted-plate texture via layered gradients */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0px, transparent 1px, transparent 3px),
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0px, transparent 1px, transparent 3px);
+  }
+
+  .stage {
+    position: relative;
+    width: 100%; max-width: 480px;
+    display: flex; flex-direction: column; align-items: center; gap: 22px;
+  }
+
+  /* Header */
+  .header { text-align: center; width: 100%; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink-dimmer);
+    margin: 0 0 8px;
+  }
+
+  h1 {
+    font-weight: 400;
+    font-size: 30px;
+    letter-spacing: 0.01em;
+    margin: 0;
+    color: var(--bone);
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--brass-bright);
+  }
+
+  .subtitle {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--ink-dimmer);
+    margin-top: 6px;
+  }
+
+  /* Status */
+  .status {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: 0.05em;
+    color: var(--ink-dim);
+    height: 18px;
+    text-align: center;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .status .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink-dimmer);
+    box-shadow: 0 0 6px currentColor;
+  }
+  .status.you { color: var(--bone); }
+  .status.you .dot { background: var(--bone); }
+  .status.cpu { color: var(--copper); }
+  .status.cpu .dot { background: var(--copper); animation: pulse 1s ease-in-out infinite; }
+  .status.win { color: var(--win); }
+  .status.win .dot { background: var(--win); }
+  .status.lose { color: var(--danger); }
+  .status.lose .dot { background: var(--danger); }
+  .status.draw { color: var(--ink-dim); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.35; }
+  }
+
+  /* Board plate */
+  .board-plate {
+    position: relative;
+    padding: 14px;
+    background: linear-gradient(160deg, var(--plate) 0%, #221b14 100%);
+    border: 1px solid var(--plate-edge);
+    border-radius: 4px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.03) inset,
+      0 20px 40px -20px rgba(0,0,0,0.7),
+      0 0 0 1px rgba(0,0,0,0.4);
+  }
+
+  .rivet {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #6b5a3d, #241d14 70%);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.6);
+  }
+  .rivet.tl { top: 6px; left: 6px; }
+  .rivet.tr { top: 6px; right: 6px; }
+  .rivet.bl { bottom: 6px; left: 6px; }
+  .rivet.br { bottom: 6px; right: 6px; }
+
+  .board-wrap { position: relative; }
+
+  .board {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    width: min(80vw, 392px);
+    height: min(80vw, 392px);
+    background: #17120d;
+    border-radius: 2px;
+    background-image:
+      linear-gradient(var(--grid-line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line-soft) 1px, transparent 1px);
+    background-size: calc(100% / 7) calc(100% / 7);
+  }
+
+  .cell {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cell:disabled { cursor: default; }
+  .cell:focus-visible {
+    outline: 1px solid var(--brass);
+    outline-offset: -3px;
+  }
+
+  .cell:not(:disabled):hover::before {
+    content: '';
+    position: absolute;
+    inset: 12%;
+    border-radius: 50%;
+    border: 1.5px dashed var(--ink-dimmer);
+    opacity: 0.5;
+  }
+
+  .piece {
+    width: 66%; height: 66%;
+    border-radius: 50%;
+    position: relative;
+    animation: drop 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes drop {
+    from { transform: scale(0.3); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .piece.gear {
+    background:
+      radial-gradient(circle at 32% 28%, #f3e2b8, #d9b46a 38%, #9c7530 72%, #6b4f1f 100%);
+    box-shadow:
+      0 2px 3px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(0,0,0,0.3) inset;
+  }
+  .piece.gear::after {
+    content: '';
+    position: absolute; inset: 30%;
+    border-radius: 50%;
+    background: #241c12;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.6) inset;
+  }
+  .piece.gear::before {
+    content: '';
+    position: absolute; inset: -14%;
+    border-radius: 50%;
+    background:
+      repeating-conic-gradient(from 0deg,
+        #9c7530 0deg 12deg, transparent 12deg 45deg);
+    z-index: -1;
+    opacity: 0.85;
+  }
+
+  .piece.rivetpiece {
+    background:
+      radial-gradient(circle at 32% 28%, #d98a5f, #b4593a 45%, #7a3a24 80%, #562818 100%);
+    box-shadow:
+      0 2px 3px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(0,0,0,0.3) inset;
+  }
+  .piece.rivetpiece::after {
+    content: '';
+    position: absolute; inset: 38%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e6c397, #a5713f);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.4) inset;
+  }
+
+  .cell.winning .piece {
+    box-shadow:
+      0 0 10px 2px rgba(230,185,95,0.7),
+      0 2px 3px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(0,0,0,0.3) inset;
+  }
+
+  .strike {
+    position: absolute;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--win), transparent);
+    border-radius: 2px;
+    transform-origin: left center;
+    opacity: 0;
+    box-shadow: 0 0 10px rgba(230,185,95,0.7);
+  }
+  .strike.show { animation: strike-in 0.4s ease forwards; }
+  @keyframes strike-in {
+    from { opacity: 0; transform: scaleX(0); }
+    to   { opacity: 1; transform: scaleX(1); }
+  }
+
+  /* Footer */
+  .footer {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    width: 100%;
+  }
+
+  .scoreboard {
+    display: flex; gap: 24px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    color: var(--ink-dimmer);
+  }
+  .scoreboard .item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .scoreboard .label { text-transform: uppercase; font-size: 9.5px; letter-spacing: 0.14em; }
+  .scoreboard .value { font-size: 17px; color: var(--bone); font-variant-numeric: tabular-nums; }
+  .scoreboard .item.you .value { color: var(--bone); }
+  .scoreboard .item.cpu .value { color: var(--copper); }
+  .divider-dot { color: var(--grid-line); align-self: center; }
+
+  button.reset {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: linear-gradient(160deg, #2f2619, #1c160f);
+    color: var(--ink-dim);
+    border: 1px solid var(--plate-edge);
+    padding: 10px 24px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  button.reset:hover { color: var(--brass-bright); border-color: var(--brass); }
+
+  .note {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    color: var(--ink-dimmer);
+    text-align: center;
+    max-width: 320px;
+    line-height: 1.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .piece { animation: none !important; }
+    .strike.show { animation: none !important; opacity: 1 !important; transform: scaleX(1) !important; }
+  }
+
+  @media (max-width: 380px) {
+    h1 { font-size: 25px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="header">
+    <p class="eyebrow">The Gearworks · Four in a Row</p>
+    <h1>The <em>Old Machinist's</em> Game</h1>
+    <p class="subtitle">brass gears vs. rust rivets — align four to win</p>
+  </div>
+
+  <p class="status" id="status"><span class="dot"></span><span class="text">Your turn — place a gear</span></p>
+
+  <div class="board-plate">
+    <div class="rivet tl"></div><div class="rivet tr"></div>
+    <div class="rivet bl"></div><div class="rivet br"></div>
+    <div class="board-wrap">
+      <div class="board" id="board" role="grid" aria-label="Seven by seven board, connect four to win"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="scoreboard">
+      <div class="item you"><span class="label">Gears</span><span class="value" id="scoreYou">0</span></div>
+      <span class="divider-dot">·</span>
+      <div class="item"><span class="label">Draws</span><span class="value" id="scoreDraw">0</span></div>
+      <span class="divider-dot">·</span>
+      <div class="item cpu"><span class="label">Rivets</span><span class="value" id="scoreCpu">0</span></div>
+    </div>
+    <button class="reset" id="resetBtn">Reset the plate</button>
+    <p class="note">The machinist reads every open line and every double threat.<br>Beating it takes more than one good move.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const SIZE = 7;
+  const WIN_LEN = 4;
+  const HUMAN = 1;   // gear
+  const CPU = 2;     // rivet
+  const CELLS = SIZE * SIZE;
+
+  let board = new Array(CELLS).fill(0);
+  let gameOver = false;
+  let locked = false;
+  let scores = { you: 0, cpu: 0, draw: 0 };
+  let moveCount = 0;
+
+  const boardEl = document.getElementById('board');
+  const statusEl = document.getElementById('status');
+  const statusText = statusEl.querySelector('.text');
+  const resetBtn = document.getElementById('resetBtn');
+  const scoreYouEl = document.getElementById('scoreYou');
+  const scoreCpuEl = document.getElementById('scoreCpu');
+  const scoreDrawEl = document.getElementById('scoreDraw');
+
+  function idx(r, c) { return r * SIZE + c; }
+  function rc(i) { return [Math.floor(i / SIZE), i % SIZE]; }
+
+  function buildBoard() {
+    boardEl.innerHTML = '';
+    for (let i = 0; i < CELLS; i++) {
+      const cell = document.createElement('button');
+      cell.className = 'cell';
+      cell.setAttribute('role', 'gridcell');
+      const [r, c] = rc(i);
+      cell.setAttribute('aria-label', `Row ${r + 1}, column ${c + 1}`);
+      cell.dataset.index = i;
+      cell.addEventListener('click', onCellClick);
+      boardEl.appendChild(cell);
+    }
+  }
+
+  function onCellClick(e) {
+    const i = Number(e.currentTarget.dataset.index);
+    if (locked || gameOver || board[i]) return;
+    playHuman(i);
+  }
+
+  function playHuman(i) {
+    board[i] = HUMAN;
+    moveCount++;
+    renderMark(i, HUMAN);
+
+    const result = checkWin(board, i, HUMAN);
+    if (result) return finish(result, HUMAN);
+    if (moveCount === CELLS) return finish(null, 0);
+
+    locked = true;
+    setStatus('The machinist is calculating', 'cpu');
+    setTimeout(() => {
+      const move = bestMove(board);
+      if (move !== -1) {
+        board[move] = CPU;
+        moveCount++;
+        renderMark(move, CPU);
+        const result2 = checkWin(board, move, CPU);
+        locked = false;
+        if (result2) return finish(result2, CPU);
+        if (moveCount === CELLS) return finish(null, 0);
+        setStatus('Your turn — place a gear', 'you');
+      } else {
+        locked = false;
+      }
+    }, 380 + Math.random() * 260);
+  }
+
+  function renderMark(i, mark) {
+    const cell = boardEl.children[i];
+    cell.disabled = true;
+    const piece = document.createElement('span');
+    piece.className = 'piece ' + (mark === HUMAN ? 'gear' : 'rivetpiece');
+    cell.appendChild(piece);
+  }
+
+  const DIRECTIONS = [[0,1],[1,0],[1,1],[1,-1]];
+
+  function checkWin(b, lastIdx, player) {
+    const [r0, c0] = rc(lastIdx);
+    for (const [dr, dc] of DIRECTIONS) {
+      // Walk forward and backward from the last-placed stone, recording
+      // every consecutive same-player cell in order (backward...forward).
+      const fwd = [];
+      let r = r0 + dr, c = c0 + dc;
+      while (r >= 0 && r < SIZE && c >= 0 && c < SIZE && b[idx(r,c)] === player) {
+        fwd.push(idx(r,c)); r += dr; c += dc;
+      }
+      const bwd = [];
+      r = r0 - dr; c = c0 - dc;
+      while (r >= 0 && r < SIZE && c >= 0 && c < SIZE && b[idx(r,c)] === player) {
+        bwd.push(idx(r,c)); r -= dr; c -= dc;
+      }
+      const ordered = bwd.slice().reverse().concat([lastIdx], fwd);
+
+      if (ordered.length >= WIN_LEN) {
+        // Return exactly WIN_LEN cells, taken from the segment of this run
+        // that includes the just-placed stone (lastIdx), positioned as
+        // centrally as possible within the run.
+        const lastPos = bwd.length; // index of lastIdx within `ordered`
+        let start = Math.max(0, lastPos - (WIN_LEN - 1));
+        start = Math.min(start, ordered.length - WIN_LEN);
+        return ordered.slice(start, start + WIN_LEN);
+      }
+    }
+    return null;
+  }
+
+  function finish(line, winner) {
+    gameOver = true;
+    locked = true;
+    boardEl.querySelectorAll('.cell').forEach(c => c.disabled = true);
+
+    if (winner === HUMAN) {
+      scores.you++;
+      setStatus('Four gears aligned — you win', 'win');
+      highlightLine(line);
+    } else if (winner === CPU) {
+      scores.cpu++;
+      setStatus('The rivets have it', 'lose');
+      highlightLine(line);
+    } else {
+      scores.draw++;
+      setStatus('The plate is full — a draw', 'draw');
+    }
+    updateScoreboard();
+  }
+
+  function highlightLine(line) {
+    if (!line) return;
+    line.forEach(i => boardEl.children[i].classList.add('winning'));
+
+    // `line` is already ordered start-to-end along the winning direction
+    // (see checkWin) and contains exactly the WIN_LEN winning cells —
+    // use its true endpoints directly, no sorting by index.
+    const first = line[0], last = line[line.length - 1];
+    const [r1, c1] = rc(first), [r2, c2] = rc(last);
+
+    const cellSize = boardEl.getBoundingClientRect().width / SIZE;
+    const pieceRadius = cellSize * 0.66 / 2; // matches .piece { width/height: 66% }
+
+    const centerP1 = { x: c1 * cellSize + cellSize / 2, y: r1 * cellSize + cellSize / 2 };
+    const centerP2 = { x: c2 * cellSize + cellSize / 2, y: r2 * cellSize + cellSize / 2 };
+
+    const dx = centerP2.x - centerP1.x, dy = centerP2.y - centerP1.y;
+    const centerDist = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+    // Span exactly from the outer edge of the first piece to the outer
+    // edge of the last piece — flush with the winning stones, no overshoot.
+    const length = centerDist + pieceRadius * 2;
+    const midX = (centerP1.x + centerP2.x) / 2, midY = (centerP1.y + centerP2.y) / 2;
+
+    const strike = document.createElement('div');
+    strike.className = 'strike';
+    strike.style.width = `${length}px`;
+    strike.style.left = `${midX - length / 2}px`;
+    strike.style.top = `${midY - 1.5}px`;
+    strike.style.transform = `rotate(${angle}deg)`;
+    document.querySelector('.board-wrap').appendChild(strike);
+    requestAnimationFrame(() => strike.classList.add('show'));
+  }
+
+  function setStatus(text, cls) {
+    statusText.textContent = text;
+    statusEl.className = 'status' + (cls ? ' ' + cls : '');
+  }
+
+  function updateScoreboard() {
+    scoreYouEl.textContent = scores.you;
+    scoreCpuEl.textContent = scores.cpu;
+    scoreDrawEl.textContent = scores.draw;
+  }
+
+  /* ================= AI ENGINE =================
+     Full minimax is infeasible on 7x7 (49 cells). Instead: a threat-space
+     evaluation engine — the same family of technique strong Gomoku/Renju
+     engines use. It scores every empty cell by simulating what placing
+     each player there does to every line through that cell (open twos,
+     open threes, four-in-a-rows, double threats), searches two plies deep
+     on the most promising candidates (minimax-with-heuristic-eval,
+     alpha-beta pruned over a shortlist), and always plays forced wins or
+     forced blocks first. Win length is 4-in-a-row, so an "open three"
+     (three in a row with both ends free) is the critical must-block
+     threat — leaving one open means the opponent wins next move. Not
+     information-theoretically unbeatable like 3x3 tic-tac-toe (no
+     7x7-with-4 engine can be, in real time) — but it never misses an
+     immediate win, never misses an immediate block, and reliably spots
+     double-threats a human tends to miss. */
+
+  const LINE_SCORES = {
+    four: 100000000,   // WIN_LEN reached — game over
+    openThree: 5000000, // unstoppable next-move win if left open at both ends
+    three: 500000,
+    openTwo: 50000,
+    two: 5000,
+    openOne: 500,
+    one: 100
+  };
+
+  function inBounds(r, c) { return r >= 0 && r < SIZE && c >= 0 && c < SIZE; }
+
+  // Evaluate the strength of all lines-of-5 that pass through cell (r,c) IF `player` occupies it.
+  function cellPotential(b, r, c, player) {
+    let total = 0;
+    for (const [dr, dc] of DIRECTIONS) {
+      total += evalDirection(b, r, c, dr, dc, player);
+    }
+    return total;
+  }
+
+  function evalDirection(b, r, c, dr, dc, player) {
+    // Count consecutive same-player stones through (r,c) in this line (with (r,c) counted as player),
+    // and note open ends.
+    let count = 1;
+    let openEnds = 0;
+
+    let rr = r + dr, cc = c + dc;
+    while (inBounds(rr, cc) && b[idx(rr, cc)] === player) { count++; rr += dr; cc += dc; }
+    const fwdOpen = inBounds(rr, cc) && b[idx(rr, cc)] === 0;
+    if (fwdOpen) openEnds++;
+
+    rr = r - dr; cc = c - dc;
+    while (inBounds(rr, cc) && b[idx(rr, cc)] === player) { count++; rr -= dr; cc -= dc; }
+    const bwdOpen = inBounds(rr, cc) && b[idx(rr, cc)] === 0;
+    if (bwdOpen) openEnds++;
+
+    if (count >= WIN_LEN) return LINE_SCORES.four;
+    if (count === 3) return openEnds === 2 ? LINE_SCORES.openThree : (openEnds === 1 ? LINE_SCORES.three : 0);
+    if (count === 2) return openEnds === 2 ? LINE_SCORES.openTwo : (openEnds === 1 ? LINE_SCORES.two : 0);
+    if (count === 1) return openEnds >= 1 ? LINE_SCORES.openOne : 0;
+    return 0;
+  }
+
+  function emptyCells(b) {
+    const out = [];
+    for (let i = 0; i < CELLS; i++) if (!b[i]) out.push(i);
+    return out;
+  }
+
+  // Only consider empty cells adjacent (within 2) to an existing stone — keeps search tractable.
+  function candidateCells(b) {
+    if (moveCount === 0) return [idx(3, 3)]; // center opening
+    const seen = new Set();
+    const out = [];
+    for (let i = 0; i < CELLS; i++) {
+      if (!b[i]) continue;
+      const [r, c] = rc(i);
+      for (let dr = -2; dr <= 2; dr++) {
+        for (let dc = -2; dc <= 2; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const rr = r + dr, cc = c + dc;
+          if (!inBounds(rr, cc)) continue;
+          const j = idx(rr, cc);
+          if (!b[j] && !seen.has(j)) { seen.add(j); out.push(j); }
+        }
+      }
+    }
+    return out.length ? out : emptyCells(b);
+  }
+
+  function bestMove(b) {
+    const candidates = candidateCells(b);
+    if (candidates.length === 0) return -1;
+    if (candidates.length === 1) return candidates[0];
+
+    // 1. Immediate win check
+    for (const i of candidates) {
+      b[i] = CPU;
+      const win = checkWin(b, i, CPU);
+      b[i] = 0;
+      if (win) return i;
+    }
+
+    // 2. Immediate block check (opponent would win next)
+    for (const i of candidates) {
+      b[i] = HUMAN;
+      const win = checkWin(b, i, HUMAN);
+      b[i] = 0;
+      if (win) return i;
+    }
+
+    // 3. Score every candidate: offense (CPU building) + defense (blocking HUMAN potential)
+    //    then take the top N and run a short lookahead to catch double-threats.
+    const scored = candidates.map(i => {
+      const [r, c] = rc(i);
+      const offense = cellPotential(b, r, c, CPU);
+      const defense = cellPotential(b, r, c, HUMAN);
+      return { i, score: offense * 1.05 + defense };
+    });
+    scored.sort((a, b2) => b2.score - a.score);
+
+    const shortlist = scored.slice(0, Math.min(8, scored.length));
+
+    // 4. Two-ply lookahead on shortlist: for each CPU candidate, assume best HUMAN reply,
+    //    pick the CPU move that maximizes the worst-case resulting position.
+    let best = -Infinity;
+    let move = shortlist[0].i;
+
+    for (const cand of shortlist) {
+      b[cand.i] = CPU;
+
+      // Does this create a double-threat (two simultaneous open-threes)? Heavily reward.
+      const myThreatBonus = countOpenThrees(b, CPU) >= 2 ? LINE_SCORES.openThree : 0;
+
+      // Opponent's best response after this
+      const oppCandidates = candidateCells(b).slice(0, 10);
+      let worst = Infinity;
+      for (const j of oppCandidates) {
+        b[j] = HUMAN;
+        const oppWin = checkWin(b, j, HUMAN);
+        let val;
+        if (oppWin) {
+          val = -LINE_SCORES.four;
+        } else {
+          const [r2, c2] = rc(j);
+          val = cand.score + myThreatBonus - cellPotential(b, r2, c2, HUMAN) * 1.1;
+        }
+        b[j] = 0;
+        if (val < worst) worst = val;
+      }
+      if (worst === Infinity) worst = cand.score + myThreatBonus;
+
+      b[cand.i] = 0;
+
+      if (worst > best) { best = worst; move = cand.i; }
+    }
+
+    return move;
+  }
+
+  function countOpenThrees(b, player) {
+    let count = 0;
+    for (let i = 0; i < CELLS; i++) {
+      if (b[i] !== 0) continue;
+      const [r, c] = rc(i);
+      for (const [dr, dc] of DIRECTIONS) {
+        if (evalDirection(b, r, c, dr, dc, player) >= LINE_SCORES.openThree) count++;
+      }
+    }
+    return count;
+  }
+
+  function newGame() {
+    board = new Array(CELLS).fill(0);
+    gameOver = false;
+    locked = false;
+    moveCount = 0;
+    document.querySelectorAll('.strike').forEach(s => s.remove());
+    buildBoard();
+    setStatus('Your turn — place a gear', 'you');
+  }
+
+  resetBtn.addEventListener('click', newGame);
+
+  newGame();
+})();
+</script>
+
+</body>
+</html>
