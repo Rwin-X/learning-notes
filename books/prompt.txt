@@ -1,0 +1,598 @@
+You are an expert book analyst, research synthesizer, and academic editor.
+
+I will give you the title of a book.
+
+Your task is NOT to produce a conventional chapter-by-chapter summary.
+
+Instead, create a compact but intellectually rich "Critical Practical Guide" to the book that allows a reader to understand the book's central intellectual architecture, most important ideas, arguments, concepts, and practical implications without reading every page.
+
+BOOK:
+[BOOK TITLE]
+
+AUTHOR:
+[AUTHOR, if known]
+
+LANGUAGE OF OUTPUT:
+English
+
+PRIMARY OBJECTIVE:
+Maximize intellectual coverage while minimizing unnecessary length.
+
+The final document should feel like an intelligent compressed reconstruction of the book's ideas — not a generic summary, review, or collection of quotes.
+
+==================================================
+1. CORE PRINCIPLES
+==================================================
+
+Follow these rules:
+
+- Prioritize ideas over prose.
+- Prioritize concepts over anecdotes.
+- Prioritize arguments over chapter narration.
+- Remove repetition.
+- Do not summarize every chapter mechanically.
+- Do not pad the document to make it longer.
+- Do not include filler, motivational fluff, or generic statements.
+- Preserve the author's actual intellectual framework.
+- Clearly distinguish the author's claims from modern interpretation.
+- Do not invent arguments, examples, studies, quotations, or conclusions.
+- If something cannot be verified, explicitly mark it as uncertain.
+- Do not pretend that an idea is scientifically established merely because the author presents it confidently.
+- Preserve important disagreements, contradictions, limitations, and controversial claims.
+- Prefer high information density over high word count.
+
+The goal is:
+
+MAXIMUM CONCEPTUAL COVERAGE
+with
+MINIMUM NECESSARY LENGTH.
+
+==================================================
+2. DOCUMENT PHILOSOPHY
+==================================================
+
+Think of the document as:
+
+BOOK → CONCEPT MAP → COMPRESSED KNOWLEDGE SYSTEM
+
+rather than:
+
+BOOK → CHAPTER SUMMARY
+
+The reader should finish the document understanding:
+
+1. What the book is fundamentally about.
+2. What problem the author is trying to solve.
+3. The author's central worldview.
+4. The 5–12 most important concepts.
+5. How those concepts connect.
+6. The author's strongest arguments.
+7. The author's practical methods or recommendations.
+8. What the book gets right.
+9. What the book gets wrong or oversimplifies.
+10. What remains useful today.
+11. What should NOT be taken literally.
+12. What the reader should actually remember.
+
+==================================================
+3. TARGET LENGTH
+==================================================
+
+Keep the final document compact.
+
+Default target:
+
+8–15 pages for a normal book.
+
+Ideal range:
+
+2,500–5,000 words.
+
+Do NOT exceed 6,000 words unless the book is unusually dense and genuinely requires it.
+
+If the book can be accurately represented in fewer words, use fewer words.
+
+Never increase length merely to reach the target.
+
+==================================================
+4. REQUIRED STRUCTURE
+==================================================
+
+Create the document using the following structure:
+
+# [BOOK TITLE]
+
+## A Critical Practical Guide
+
+Author:
+Original publication:
+Genre:
+Core subject:
+
+---
+
+# 1. Executive Thesis
+
+Explain the entire book in approximately 150–250 words.
+
+Answer:
+
+"What is this book fundamentally trying to tell the reader?"
+
+Do not list chapters here.
+
+---
+
+# 2. The Problem the Book Is Trying to Solve
+
+Explain:
+
+- What problem motivated the book?
+- What does the author believe is wrong with conventional thinking?
+- What question is the book attempting to answer?
+
+Keep this concise.
+
+---
+
+# 3. The Author's Core Worldview
+
+Compress the author's worldview into 5–8 fundamental propositions.
+
+Format:
+
+### Proposition 1
+Explanation.
+
+### Proposition 2
+Explanation.
+
+etc.
+
+These should represent the intellectual skeleton of the book.
+
+---
+
+# 4. Core Concept Map
+
+Create a compact conceptual map.
+
+For every major concept include:
+
+**Concept**
+- Definition
+- Why it matters
+- Relationship to other concepts
+
+Then explain the overall relationship between the concepts.
+
+Use arrows where useful:
+
+Concept A → Concept B → Concept C → Outcome
+
+The purpose is to reconstruct the architecture of the book.
+
+---
+
+# 5. The Core Concepts
+
+Identify approximately 5–12 concepts.
+
+For each:
+
+### [Concept Name]
+
+**What it means**
+Concise explanation.
+
+**What the author claims**
+The author's position.
+
+**Why it matters**
+Its role in the larger framework.
+
+**Practical implication**
+What changes if the reader accepts it.
+
+**Important limitation**
+Where the concept may be incomplete, controversial, or misleading.
+
+Do not give every concept equal space.
+
+Spend more space on the concepts that carry the book's actual intellectual weight.
+
+---
+
+# 6. The Book's Main Arguments
+
+Identify the strongest arguments made by the author.
+
+For each argument:
+
+### Argument 1
+**Claim → Reasoning → Conclusion**
+
+Explain the logical chain rather than merely describing it.
+
+If the argument has a weakness, state it.
+
+Avoid unnecessary examples unless they are essential to understanding the argument.
+
+---
+
+# 7. Practical Framework
+
+Extract the actionable framework from the book.
+
+Convert abstract ideas into:
+
+**Principle → Method → Application → Expected effect**
+
+Only include practical methods genuinely supported by the book.
+
+Do not invent modern productivity techniques and attribute them to the author.
+
+---
+
+# 8. What the Book Gets Right
+
+Identify the strongest and most durable insights.
+
+Separate:
+
+- historically insightful ideas
+- psychologically useful ideas
+- practically useful ideas
+- ideas later supported by research, if evidence exists
+
+Do not exaggerate.
+
+---
+
+# 9. What the Book Gets Wrong
+
+This section is mandatory.
+
+Identify:
+
+- unsupported claims
+- oversimplifications
+- outdated assumptions
+- logical weaknesses
+- questionable causal claims
+- contradictions
+- ideas that modern research challenges
+
+Use calibrated language:
+
+"supported"
+
+"partially supported"
+
+"plausible but uncertain"
+
+"controversial"
+
+"weakly supported"
+
+"unsupported"
+
+"contradicted by later evidence"
+
+Do not attack the author unfairly.
+
+---
+
+# 10. Modern Context
+
+Explain how the book compares with later developments in the relevant field.
+
+Only include comparisons that materially improve understanding.
+
+Examples:
+
+- psychology
+- neuroscience
+- economics
+- philosophy
+- management
+- behavioral science
+- sociology
+- technology
+
+Clearly distinguish:
+
+AUTHOR'S ORIGINAL IDEA
+
+from
+
+LATER RESEARCH / MODERN INTERPRETATION
+
+Do not claim that the author "predicted modern science" unless there is strong evidence for that claim.
+
+---
+
+# 11. What Should Be Taken Literally vs. Metaphorically
+
+Create a compact table:
+
+| Idea | Take literally? | Why |
+|---|---|---|
+| ... | Yes / Partially / No | ... |
+
+This section is especially important for books that use metaphors, psychological models, philosophical abstractions, or scientific terminology.
+
+---
+
+# 12. High-Value Lessons
+
+Extract approximately 10–15 lessons.
+
+Each lesson should be:
+
+**Lesson → Explanation → Practical meaning**
+
+Avoid generic motivational sentences.
+
+Every lesson must trace back to an actual idea in the book.
+
+---
+
+# 13. The Book in One Mental Model
+
+Compress the entire book into one conceptual model.
+
+Example:
+
+Problem
+↓
+Underlying mechanism
+↓
+Author's proposed intervention
+↓
+Behavioral consequence
+↓
+Long-term outcome
+
+Make this section extremely concise.
+
+The goal is to make the entire book mentally retrievable in 30 seconds.
+
+---
+
+# 14. What to Remember
+
+End with:
+
+### The 10 Things Worth Remembering
+
+List only the most important ideas.
+
+If the reader remembers these ten points, they should retain the intellectual core of the book.
+
+---
+
+# 15. Final Assessment
+
+Give the book a concise evaluation.
+
+Rate:
+
+- Intellectual depth: /10
+- Practical usefulness: /10
+- Evidence quality: /10
+- Originality: /10
+- Modern relevance: /10
+- Overall value: /10
+
+Then give a short verdict:
+
+"Who should read this book?"
+
+"Who probably doesn't need to read it?"
+
+==================================================
+5. INFORMATION DENSITY RULE
+==================================================
+
+Every paragraph must earn its place.
+
+Before writing a paragraph, ask:
+
+"Does removing this paragraph cause the reader to lose an important idea?"
+
+If NO → remove it.
+
+Do not repeat the same idea in different wording.
+
+When two sections contain overlapping information, merge them.
+
+Use tables, bullets, conceptual diagrams, and compact comparisons when they communicate information more efficiently than prose.
+
+==================================================
+6. CHAPTER HANDLING
+==================================================
+
+Do NOT produce:
+
+Chapter 1 summary
+Chapter 2 summary
+Chapter 3 summary
+...
+
+unless the chapter structure itself is essential to understanding the book.
+
+Instead:
+
+extract the ideas from the chapters
+→ merge overlapping concepts
+→ reconstruct the book's intellectual architecture.
+
+At the end, optionally provide a very short:
+
+"Chapter-to-Concept Map"
+
+showing which major concepts originate from which parts of the book.
+
+Maximum 1 page.
+
+==================================================
+7. EVIDENCE STANDARD
+==================================================
+
+Separate three layers:
+
+LEVEL 1 — AUTHOR'S CLAIM
+
+What the author actually argues.
+
+LEVEL 2 — INTERPRETATION
+
+What the argument means conceptually.
+
+LEVEL 3 — EXTERNAL EVIDENCE
+
+What later research, historical evidence, or expert consensus says.
+
+Never merge these layers.
+
+If external research is used, identify it clearly.
+
+Do not fabricate citations.
+
+If reliable external sources are unavailable, say so.
+
+==================================================
+8. QUOTATIONS
+==================================================
+
+Do not fill the document with quotations.
+
+Use quotations only when:
+
+- the exact wording is historically important,
+- the wording is central to the author's philosophy,
+- or the quotation communicates something that cannot be efficiently paraphrased.
+
+Otherwise paraphrase.
+
+Never fabricate quotations.
+
+==================================================
+9. WRITING STYLE
+==================================================
+
+Style:
+
+- intellectually serious
+- concise
+- analytical
+- neutral
+- clear
+- modern
+- precise
+- slightly editorial
+- no motivational fluff
+- no excessive academic jargon
+
+The document should feel like:
+
+"An intelligent researcher compressed this book into a compact knowledge system."
+
+NOT:
+
+"A student wrote a book report."
+
+==================================================
+10. PDF DESIGN SPECIFICATION
+==================================================
+
+Design the final PDF as a premium academic/editorial document.
+
+Visual direction:
+
+- minimalist
+- monochrome or restrained color palette
+- strong typography
+- generous whitespace
+- clean hierarchy
+- professional tables
+- consistent headers and footers
+- page numbers
+- clear section numbering
+- no decorative clutter
+- no stock images unless genuinely useful
+- no giant title pages consuming unnecessary space
+
+Use visual elements only when they improve comprehension.
+
+Prefer:
+
+concept maps
+tables
+framework diagrams
+comparison blocks
+callout boxes
+
+over decorative graphics.
+
+The PDF should feel like:
+
+premium research brief
++
+intelligent book guide
++
+editorial knowledge system
+
+==================================================
+11. FINAL QUALITY CONTROL
+==================================================
+
+Before finalizing, perform an internal audit.
+
+Check:
+
+[ ] Did I capture the central thesis?
+[ ] Did I identify the author's real worldview?
+[ ] Did I capture the major concepts?
+[ ] Did I explain how the concepts connect?
+[ ] Did I capture the strongest arguments?
+[ ] Did I extract practical applications?
+[ ] Did I distinguish claims from evidence?
+[ ] Did I identify unsupported or outdated ideas?
+[ ] Did I avoid inventing information?
+[ ] Did I remove repetition?
+[ ] Is the document compact?
+[ ] Can someone understand most of the book's intellectual core without reading the full book?
+[ ] Does the document remain useful after the reader forgets the details?
+[ ] Is every section necessary?
+
+If the document is becoming too long, compress it.
+
+Do NOT sacrifice important concepts merely to reduce page count.
+
+Sacrifice repetition, anecdotes, filler, and redundant explanation first.
+
+==================================================
+FINAL INSTRUCTION
+==================================================
+
+Produce the final guide now.
+
+Remember:
+
+This is NOT a chapter summary.
+
+It is a compressed reconstruction of the book's intellectual system.
+
+The goal is:
+
+HIGH INFORMATION DENSITY
++
+CONCEPTUAL COVERAGE
++
+PRACTICAL VALUE
++
+CRITICAL THINKING
+-
+UNNECESSARY LENGTH
