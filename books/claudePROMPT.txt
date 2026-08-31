@@ -1,0 +1,92 @@
+# Prompt Template: In-Depth Educational Summary of a Book
+
+## How to use this
+1. In the text below, replace the "Full Book Title" and "Full Author Name" placeholders with your book's actual details.
+2. Copy everything inside the code block and send it as the first message of a new conversation with an AI (Claude, ChatGPT, or any other model).
+3. If the book is lesser-known or highly specialized and you're worried about accuracy, it's best to also send the book's actual table of contents or a few sample pages along with the prompt, so the AI grounds itself in the real content instead of relying only on its memory.
+4. This same prompt is reusable for any other book — just swap out the "Book Details" section.
+
+---
+
+```
+# Role and Objective
+You are a professional educational editor and expert in summarizing non-fiction books. Your task is to produce an "in-depth educational summary" of the book below, such that a reader who studies only this summary comes away with nearly all of the key concepts, mental models, core arguments, and practical applications of the book — without needing to read the full text. This summary should substitute for "understanding" the book, not for the complete text itself.
+
+## Book Details
+- Full book title: [Insert the book title here]
+- Full author name(s): [Insert the author's name here]
+- (Optional) Translator/edition this should be based on: [Insert if applicable]
+- Summary output language: Clear, plain English (unless I specify otherwise)
+
+## Critical Accuracy Warning (do not skip this section)
+Before writing anything, honestly answer this question to yourself: do you have accurate, reliable knowledge of this specific book's actual content (its chapter structure, arguments, examples, specific frameworks)?
+- If yes, proceed according to the instructions below.
+- If your knowledge is limited, generic, or uncertain, state this explicitly at the very start of your response, and write only based on what you actually know rather than fabricating precise-sounding details you aren't sure actually appear in this book. Never invent a chapter, statistic, study, example, or quote whose presence in this specific book you are not confident about. Fabricating details is worse than admitting a gap in knowledge.
+
+## Summary Structure (follow this structure exactly)
+
+### 1. Introduction Page
+- Book title, author name, subject area/genre
+- "The book's essence in one paragraph": the central problem or question the book is organized around, and the author's overall answer to it
+- Who this book (and this summary) is useful for
+
+### 2. Table of Contents
+List every chapter or major section of the book, in the same order and using roughly the same titles as the book itself — not a structure you invent. If the book has no clear chapter divisions, create a logical thematic structure, but explicitly state that this reorganization is your own, not the author's.
+
+### 3. Chapter-by-Chapter Summary (the main, most substantial section)
+For every single chapter or section of the book — do not skip any chapter, including short or closing ones — write the following:
+
+a) Chapter purpose: What question is this chapter meant to answer, or what stage of the book's overall argument does it represent?
+b) Core ideas and arguments: The most important points the author makes, along with the reasoning and evidence they present (studies, statistics, personal experience). Rewrite everything in your own words — do not copy text directly.
+c) Key frameworks and models: If the chapter introduces a model, formula, checklist, or multi-step process, list every step/component fully and in order — not just a passing mention.
+d) Key examples and stories: Briefly retell one or two examples/case studies the author uses that carry significant explanatory weight — not every example in the book.
+e) Nuances and distinctions: If the author challenges a common assumption, carves out an exception to their own claim, or draws a distinction between two closely related concepts, be sure to include these nuances. The summary should not flatten complex ideas into oversimplifications.
+f) Practical application: What specific recommendation or actionable step does this chapter offer the reader?
+g) Key terms in this chapter: Bold any concept the author gives a specific definition to, and include a short definition in parentheses (these will also be gathered into the glossary at the end).
+
+Note: The length devoted to each chapter should be proportional to that chapter's importance and richness within the actual book, not uniform across all chapters — the book's most pivotal chapters should receive more detailed treatment.
+
+### 4. Overall Book Synthesis
+- How do the ideas across chapters connect into a single, coherent framework?
+- What is the single most important message or shift in thinking the author wants to produce in the reader?
+
+### 5. Cheat Sheet (one dense page for quick review)
+Compile every model, formula, checklist, and key principle from the entire book into extremely dense bullet points with no extra explanation — for quick review only, after having read the full summary.
+
+### 6. Glossary
+Bring together all the bolded terms from throughout the text in one place, each with a one-line definition.
+
+### 7. Should I Still Read the Original Book?
+In two to four honest sentences, explain what this summary can and cannot substitute for, and for which kind of reader the full book is still worth reading.
+
+### 8. Reflection Questions for Internalizing the Material
+Three to five reflective or applied questions that help the reader put the book's concepts into practice in their own life or work.
+
+## Writing Style Rules
+- Write in clear, direct, instructional prose; avoid long, convoluted sentences.
+- Whenever you use a technical term, explain it in plain language at that same moment.
+- Do not mix your own personal opinions in with the author's ideas; if you want to add a note of your own, clearly separate it from the book's actual content with the label "Side note:".
+- Avoid unnecessarily repeating the same idea across multiple sections.
+- Use at most one very short direct quote (one sentence maximum) per chapter; everywhere else, rewrite the idea in your own words rather than closely paraphrasing the original text.
+- Only use precise numbers and statistics when you're confident of their accuracy in this specific book; otherwise, write generally (e.g., "according to a study the author references...").
+
+## Length Constraint (very important)
+The output must be a summary, not a full rewrite of the book. Total length should be between 3,500 and 5,000 words (roughly equivalent to 10-15 A4 pages at standard font size and line spacing). Before delivering your final answer, mentally estimate the length of the text; if it exceeds the ceiling or falls well short, condense or expand the content so it stays within this range. If the book is genuinely long and has many chapters, allocate a smaller share of this word budget to each individual chapter so that all chapters still fit — never omit or reduce the book's final chapters to a single line just because of the length constraint.
+
+## Output Format
+Write the entire output in Markdown with clear headings (#, ##, ###) so it can later be easily converted to Word or PDF. Use numbered or bulleted lists for frameworks and step-by-step processes.
+
+## Final Step — Self-Check
+Before delivering your final response, run this checklist against what you've written:
+1. Have all chapters or major sections of the book been covered?
+2. Is the text length within the requested range?
+3. Have I written any detail, statistic, or quote that I'm not actually confident is accurate for this specific book? If so, remove it or make it more general.
+At the end of the text, under the heading "Limitations of This Summary," write two or three honest sentences about which parts of the book you summarized with lower confidence (if any).
+```
+
+---
+
+## Additional Tips
+- If the response on a particular chapter feels too generic or shallow, you can separately ask: "Rewrite chapter 4 only, to the same standard but with more detail."
+- To convert the final output into a Word file, send me this same Markdown text and I'll prepare a .docx file for you; or just ask me directly to build this summary for your chosen book myself.
+- After receiving the output, be sure to read the "Limitations of This Summary" section at the end — it shows which parts the AI wrote with lower confidence.
