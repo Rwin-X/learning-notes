@@ -1,4 +1,4 @@
-[Authorization.md](https://github.com/user-attachments/files/32103842/Authorization.md)
+
 ---
 tags: [week0, concept]
 ---
