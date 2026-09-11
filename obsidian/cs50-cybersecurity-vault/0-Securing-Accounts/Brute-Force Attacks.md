@@ -1,4 +1,3 @@
-[Brute-Force Attacks.md](https://github.com/user-attachments/files/32103848/Brute-Force.Attacks.md)
 ---
 tags: [week0, week1, attack]
 ---
