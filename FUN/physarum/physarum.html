@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Physarum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060709;
+    --ink: #ebe6db;
+    --mute: #858a94;
+    --line: rgba(235,230,219,0.16);
+    --ice: #78aedb;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; background: var(--bg); scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    height: 100%; margin: 0; overflow: hidden;
+    background: var(--bg); color: var(--ink);
+    font-family: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 300; -webkit-font-smoothing: antialiased;
+  }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+
+  .title {
+    position: fixed; left: 0; top: 0; pointer-events: none;
+    padding: calc(env(safe-area-inset-top, 0px) + 22px) 26px 0;
+  }
+  .title h1 { margin: 0; font-size: 20px; font-weight: 400; letter-spacing: 0.01em; }
+  .title p { margin: 6px 0 0; font-size: 13px; color: var(--mute); font-variant-numeric: tabular-nums; }
+
+  .dock {
+    position: fixed; right: 0; bottom: 0;
+    padding: 0 18px calc(env(safe-area-inset-bottom, 0px) + 18px) 18px;
+  }
+  .panel {
+    width: 272px; max-height: 72vh; overflow-y: auto;
+    background: rgba(6,7,9,0.74);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    padding: 14px 16px; font-size: 13px;
+  }
+  .panel summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 400; }
+  .panel summary::-webkit-details-marker { display: none; }
+  .panel summary::after { content: "+"; color: var(--mute); }
+  .panel[open] summary::after { content: "\2212"; }
+  .group { margin-top: 16px; }
+  .group > .cap { color: var(--mute); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .row { margin-top: 12px; }
+  .row label { display: flex; justify-content: space-between; color: var(--mute); margin-bottom: 7px; }
+  .row output { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  button, select {
+    font: inherit; font-size: 13px; color: var(--ink);
+    background: transparent; border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 10px; cursor: pointer;
+  }
+  select { background: #0b0c0f; }
+  .textin {
+    width: 100%; font: inherit; font-size: 14px; color: var(--ink);
+    background: #0b0c0f; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px;
+  }
+  .textin::placeholder { color: var(--mute); }
+  .textin:hover { border-color: rgba(235,230,219,0.5); }
+  button[hidden] { display: none; }
+  button:hover, select:hover { border-color: rgba(235,230,219,0.5); }
+  button[aria-pressed="true"] { border-color: var(--ink); background: rgba(235,230,219,0.08); }
+  button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--ice); outline-offset: 3px; }
+  .swatch { width: 34px; height: 26px; padding: 0; }
+  .swatch i { display: block; width: 100%; height: 100%; border-radius: 4px; }
+
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 1px; background: rgba(235,230,219,0.28); margin: 6px 0; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: var(--ink); cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 11px; height: 11px; border-radius: 50%; background: var(--ink); border: 0; cursor: pointer; }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 12px; color: var(--mute); cursor: pointer; }
+  .check input { accent-color: #ebe6db; }
+  .hint { margin: 16px 0 0; color: var(--mute); line-height: 1.55; }
+
+  #fallback { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 32px; text-align: center; color: var(--mute); font-size: 15px; line-height: 1.6; }
+  #fallback[hidden] { display: none; }
+  body.ui-hidden .title, body.ui-hidden .dock { display: none; }
+
+  @media (max-width: 560px) {
+    .dock { left: 0; }
+    .panel { width: auto; }
+  }
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="Simulation of three competing slime-mold species forming networks"></canvas>
+<div id="fallback" hidden>This simulation needs WebGL 2 with floating-point render targets. Try a recent desktop browser.</div>
+
+<div class="title">
+  <h1>Physarum</h1>
+  <p id="hud">Starting</p>
+</div>
+
+<div class="dock">
+  <details class="panel" id="panel">
+    <summary>Controls</summary>
+
+    <div class="group">
+      <div class="cap"><label for="food">Grow text</label></div>
+      <input class="textin" type="text" id="food" dir="auto" placeholder="Type a word" autocomplete="off" spellcheck="false" maxlength="24">
+    </div>
+
+    <div class="group">
+      <div class="cap">Behavior</div>
+      <div class="chips" id="presets"></div>
+    </div>
+
+    <div class="group">
+      <div class="cap">Ecology</div>
+      <div class="chips" id="eco"></div>
+    </div>
+
+    <div id="rows"></div>
+
+    <label class="check"><input type="checkbox" id="chaos"> Chaos, drift the parameters over time</label>
+    <label class="check"><input type="checkbox" id="mono"> Monochrome</label>
+    <label class="check"><input type="checkbox" id="showfood" checked> Show the text outline</label>
+
+    <div class="group">
+      <div class="cap">Brush species</div>
+      <div class="chips" id="brush"></div>
+    </div>
+
+    <div class="group">
+      <div class="cap">Agents</div>
+      <select id="count" aria-label="Agent count">
+        <option value="256">65,536</option>
+        <option value="512">262,144</option>
+        <option value="768">589,824</option>
+        <option value="1024">1,048,576</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <div class="chips">
+        <button type="button" id="reseed">Reseed</button>
+        <button type="button" id="pause" aria-pressed="false">Pause</button>
+        <button type="button" id="save">Save frame</button>
+      </div>
+      <p class="hint" id="startLabel"></p>
+    </div>
+
+    <p class="hint">Type a word above and the colony grows into it. Hover to scatter agents, hold to attract them and feed the selected species. Keys: space pauses, R reseeds, 1 to 5 pick a behavior, B changes the brush, E changes the ecology, S saves a frame, H hides the interface.</p>
+  </details>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const canvas = $("#gl");
+  const fallback = $("#fallback");
+  const DEG = Math.PI / 180;
+
+  function fail(msg) {
+    fallback.hidden = false;
+    if (msg) fallback.textContent = msg;
+    $(".title").style.display = "none";
+    $(".dock").style.display = "none";
+  }
+
+  const gl = canvas.getContext("webgl2", {
+    antialias: false, alpha: false, depth: false, stencil: false,
+    powerPreference: "high-performance"
+  });
+  if (!gl || !gl.getExtension("EXT_color_buffer_float")) { fail(); return; }
+
+  /* ---------------- shaders ---------------- */
+  const HEAD = "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n";
+
+  const VS_QUAD = HEAD + `
+    out vec2 vUv;
+    void main() {
+      vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+      vUv = p;
+      gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+    }`;
+
+  const FS_AGENT = HEAD + `
+    uniform sampler2D uAgents;
+    uniform sampler2D uTrail;
+    uniform sampler2D uFood;
+    uniform vec2 uSize;
+    uniform float uSA, uRA, uSO, uSpeed, uFoodK, uPers, uVision, uCur, uFeedK;
+    uniform vec3 uEco0, uEco1, uEco2;
+    uniform int uFrame;
+    uniform vec4 uPointer;
+    out vec4 o;
+
+    uint pcg(uint v) {
+      uint s = v * 747796405u + 2891336453u;
+      uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u;
+      return (w >> 22u) ^ w;
+    }
+
+    float pick(vec3 v, int sp) { return sp == 0 ? v.x : (sp == 1 ? v.y : v.z); }
+
+    // How attractive the world looks from p when facing angle a, at a given range.
+    float scoreAt(vec2 p, float a, float dist, vec3 wv) {
+      vec2 uv = (p + dist * vec2(cos(a), sin(a))) / uSize;
+      vec3 t = texture(uTrail, uv).rgb;
+      float food = uFoodK > 0.0 ? texture(uFood, uv).r : 0.0;
+      return dot(wv, t) + uFoodK * food;
+    }
+
+    // Two-scale vision: a near look plus a weighted far look.
+    float sense(vec2 p, float a, float so, vec3 wv) {
+      float s = scoreAt(p, a, so, wv);
+      if (uVision > 0.0) s += uVision * scoreAt(p, a, so * 2.6, wv);
+      return s;
+    }
+
+    void main() {
+      ivec2 ip = ivec2(gl_FragCoord.xy);
+      vec4 a = texelFetch(uAgents, ip, 0);
+      vec2 pos = a.xy;
+      float ang = a.z;
+      int sp = int(floor(a.w));
+      float e = clamp(fract(a.w), 0.0, 0.999);
+      vec3 wv = sp == 0 ? uEco0 : (sp == 1 ? uEco1 : uEco2);
+
+      // Species temperament, blended in by uPers.
+      float sa = uSA    * mix(1.0, pick(vec3(1.0, 1.40, 0.70), sp), uPers);
+      float ra = uRA    * mix(1.0, pick(vec3(1.0, 0.85, 1.20), sp), uPers);
+      float so = uSO    * mix(1.0, pick(vec3(1.0, 0.75, 1.35), sp), uPers);
+      float sd = uSpeed * mix(1.0, pick(vec3(1.0, 1.15, 0.90), sp), uPers);
+
+      uint id = uint(ip.x) + uint(ip.y) * uint(textureSize(uAgents, 0).x);
+      uint h = pcg(id * 1664525u + uint(uFrame) * 1013904223u);
+      float k = float(h) / 4294967295.0;
+      float k2 = float(pcg(h ^ 2654435769u)) / 4294967295.0;
+
+      // Energy: agents on rich ground (their own network, or food) feed, others starve.
+      vec2 huv = pos / uSize;
+      float fed = 1.0 - exp(-pick(texture(uTrail, huv).rgb, sp) * uFeedK);
+      if (uFoodK > 0.0) fed = clamp(fed + texture(uFood, huv).r * 0.8, 0.0, 1.0);
+      e = clamp(e + (fed - 0.45) * 0.04, 0.0, 0.999);
+      float curious = (1.0 - e) * uCur;
+
+      float f = sense(pos, ang, so, wv);
+      float l = sense(pos, ang + sa, so, wv);
+      float r = sense(pos, ang - sa, so, wv);
+
+      if (k2 < curious * 0.55) {
+        // Hungry agents stop trusting the map and scout.
+        ang += (k - 0.5) * 3.2 * ra;
+      } else if (f > l && f > r) {
+      } else if (f < l && f < r) {
+        ang += (k < 0.5 ? 1.0 : -1.0) * ra;
+      } else if (l > r) {
+        ang += ra;
+      } else if (r > l) {
+        ang -= ra;
+      }
+
+      if (uPointer.z > 0.0) {
+        vec2 d = uPointer.xy - pos;
+        float dist = length(d);
+        if (dist < uPointer.z) {
+          float fall = 1.0 - dist / uPointer.z;
+          float target = atan(d.y, d.x) + (uPointer.w < 0.0 ? 3.14159265 : 0.0);
+          float diff = mod(target - ang + 3.14159265, 6.2831853) - 3.14159265;
+          ang += diff * clamp(abs(uPointer.w) * fall, 0.0, 1.0);
+        }
+      }
+
+      pos += sd * (1.0 + 0.7 * curious) * vec2(cos(ang), sin(ang));
+      pos = mod(pos, uSize);
+      ang = mod(ang, 6.2831853);
+      o = vec4(pos, ang, float(sp) + e);
+    }`;
+
+  const VS_DEPOSIT = HEAD + `
+    uniform sampler2D uAgents;
+    uniform vec2 uSize;
+    uniform float uCur;
+    flat out int vSp;
+    flat out float vDep;
+    void main() {
+      int aw = textureSize(uAgents, 0).x;
+      ivec2 ip = ivec2(gl_VertexID % aw, gl_VertexID / aw);
+      vec4 a = texelFetch(uAgents, ip, 0);
+      gl_Position = vec4(a.xy / uSize * 2.0 - 1.0, 0.0, 1.0);
+      gl_PointSize = 1.0;
+      vSp = int(floor(a.w));
+      // Well-fed agents reinforce the network, scouts leave faint marks.
+      vDep = mix(1.0, 0.35 + 0.9 * fract(a.w), uCur);
+    }`;
+
+  const FS_DEPOSIT = HEAD + `
+    flat in int vSp;
+    flat in float vDep;
+    out vec4 o;
+    void main() {
+      o = vec4(vSp == 0 ? 1.0 : 0.0, vSp == 1 ? 1.0 : 0.0, vSp == 2 ? 1.0 : 0.0, 0.0) * vDep;
+    }`;
+
+  const FS_DIFFUSE = HEAD + `
+    uniform sampler2D uTrail;
+    uniform float uDiff, uDecay;
+    uniform vec4 uSplat;
+    uniform vec3 uSplatCol;
+    out vec4 o;
+    void main() {
+      ivec2 p = ivec2(gl_FragCoord.xy);
+      ivec2 s = textureSize(uTrail, 0);
+      vec3 sum = vec3(0.0);
+      for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++) {
+          sum += texelFetch(uTrail, (p + ivec2(i, j) + s) % s, 0).rgb;
+        }
+      }
+      vec3 c = texelFetch(uTrail, p, 0).rgb;
+      vec3 v = mix(c, sum / 9.0, uDiff) * (1.0 - uDecay);
+      if (uSplat.w > 0.0) {
+        float d = distance(vec2(p) + 0.5, uSplat.xy);
+        v += uSplatCol * uSplat.w * smoothstep(uSplat.z, 0.0, d);
+      }
+      o = vec4(v, 0.0);
+    }`;
+
+  const FS_DISPLAY = HEAD + `
+    uniform sampler2D uTrail;
+    uniform sampler2D uFood;
+    uniform vec2 uRes, uTrailSize;
+    uniform float uGain, uTime, uFoodShow;
+    uniform int uMono;
+    in vec2 vUv;
+    out vec4 o;
+
+    float hash(vec2 p) {
+      p = fract(p * vec2(123.34, 456.21));
+      p += dot(p, p + 45.32);
+      return fract(p.x * p.y);
+    }
+
+    void main() {
+      vec3 t = texture(uTrail, vUv).rgb;
+      vec2 px = 4.0 / uTrailSize;
+      vec3 g = texture(uTrail, vUv + vec2( px.x,  px.y)).rgb
+             + texture(uTrail, vUv + vec2(-px.x,  px.y)).rgb
+             + texture(uTrail, vUv + vec2( px.x, -px.y)).rgb
+             + texture(uTrail, vUv + vec2(-px.x, -px.y)).rgb;
+      t += g * 0.15;
+      vec3 e = 1.0 - exp(-t * uGain);
+
+      vec3 c0 = vec3(0.92, 0.90, 0.86);
+      vec3 c1 = vec3(0.47, 0.68, 0.86);
+      vec3 c2 = vec3(0.50, 0.42, 0.80);
+      vec3 col = e.r * c0 + e.g * c1 + e.b * c2;
+      if (uMono == 1) col = (e.r + e.g + e.b) * 0.62 * c0;
+
+      col = 1.0 - exp(-col * 1.15);
+      col += vec3(0.022, 0.025, 0.032);
+      col += vec3(0.05, 0.056, 0.07) * texture(uFood, vUv).r * uFoodShow;
+
+      vec2 q = (vUv - 0.5) * vec2(uRes.x / uRes.y, 1.0);
+      col *= mix(0.5, 1.0, smoothstep(1.2, 0.2, length(q)));
+      col += (hash(gl_FragCoord.xy + uTime) - 0.5) * 0.018;
+      o = vec4(col, 1.0);
+    }`;
+
+  /* ---------------- gl helpers ---------------- */
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  function program(vs, fs) {
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER, vs));
+    gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    const u = {};
+    const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < n; i++) {
+      const info = gl.getActiveUniform(p, i);
+      u[info.name] = gl.getUniformLocation(p, info.name);
+    }
+    return { p, u };
+  }
+  function makeTex(w, h, internal, format, type, filter, wrap) {
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, internal, w, h, 0, format, type, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
+    return t;
+  }
+  function makeFbo(tex) {
+    const f = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) throw new Error("Framebuffer incomplete");
+    return f;
+  }
+  function bindTex(unit, tex) {
+    gl.activeTexture(gl.TEXTURE0 + unit);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+  }
+
+  let progAgent, progDeposit, progDiffuse, progDisplay;
+  try {
+    progAgent = program(VS_QUAD, FS_AGENT);
+    progDeposit = program(VS_DEPOSIT, FS_DEPOSIT);
+    progDiffuse = program(VS_QUAD, FS_DIFFUSE);
+    progDisplay = program(VS_QUAD, FS_DISPLAY);
+  } catch (err) {
+    fail("Shader setup failed: " + err.message);
+    return;
+  }
+  gl.bindVertexArray(gl.createVertexArray());
+
+  /* ---------------- state ---------------- */
+  const P = { sa: 30, ra: 35, so: 14, speed: 1.1, decay: 0.09, diff: 0.55, rival: 0.5, exposure: 0.45, steps: 1, pers: 0.4, food: 1.0, vision: 0.6, cur: 0.5, eco: "Rivals", showFood: true, chaos: false, mono: false };
+  const PRESETS = {
+    Veins: { sa: 22, ra: 40, so: 16, speed: 1.0, decay: 0.08, diff: 0.60, rival: 0.5 },
+    Cells: { sa: 70, ra: 38, so: 12, speed: 1.2, decay: 0.07, diff: 0.50, rival: 0.4 },
+    Web:   { sa: 14, ra: 16, so: 30, speed: 1.4, decay: 0.06, diff: 0.40, rival: 0.6 },
+    Bloom: { sa: 45, ra: 28, so: 9,  speed: 0.9, decay: 0.03, diff: 0.80, rival: 0.3 },
+    Storm: { sa: 38, ra: 70, so: 22, speed: 2.3, decay: 0.14, diff: 0.30, rival: 0.7 }
+  };
+  const PRESET_NAMES = Object.keys(PRESETS);
+  // Row i is how species i feels about the trails of species 0, 1 and 2 (the diagonal is always 1).
+  const ECO = {
+    Rivals:    [[0, -1, -1], [-1, 0, -1], [-1, -1, 0]],
+    Chase:     [[0, -1,  1], [ 1, 0, -1], [-1,  1, 0]],
+    Symbiosis: [[0,  1,  1], [ 1, 0,  1], [ 1,  1, 0]],
+    Ignore:    [[0,  0,  0], [ 0, 0,  0], [ 0,  0, 0]]
+  };
+  const ECO_NAMES = Object.keys(ECO);
+  const START_NAMES = ["Scatter", "Ring facing inward", "Burst from the center", "Three clusters"];
+  const BRUSH = [
+    { name: "Bone", css: "#ebe6db", vec: [1, 0, 0] },
+    { name: "Ice", css: "#78aedb", vec: [0, 1, 0] },
+    { name: "Dusk", css: "#806bcc", vec: [0, 0, 1] }
+  ];
+
+  let AW = window.matchMedia("(pointer: coarse)").matches ? 256 : 512;
+  let cw = 0, ch = 0, tw = 0, th = 0;
+  let agents = [null, null], agentFbo = [null, null], aCur = 0;
+  let trails = [null, null], trailFbo = [null, null], tCur = 0;
+  let food = null, hasFood = false, saveNow = false;
+  let frame = 0, paused = false, startMode = 0, brush = 0, activePreset = "Veins";
+  const ptr = { x: 0, y: 0, in: false, down: false };
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function sizeCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    cw = Math.max(2, Math.floor(window.innerWidth * dpr));
+    ch = Math.max(2, Math.floor(window.innerHeight * dpr));
+    canvas.width = cw; canvas.height = ch;
+    const s = Math.min(1, Math.sqrt(1300000 / (cw * ch)));
+    tw = Math.max(256, Math.floor(cw * s));
+    th = Math.max(256, Math.floor(ch * s));
+  }
+
+  function freeAll() {
+    for (const t of agents.concat(trails, [food])) if (t) gl.deleteTexture(t);
+    for (const f of agentFbo.concat(trailFbo)) if (f) gl.deleteFramebuffer(f);
+  }
+
+  function allocate() {
+    freeAll();
+    for (let i = 0; i < 2; i++) {
+      agents[i] = makeTex(AW, AW, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, gl.CLAMP_TO_EDGE);
+      agentFbo[i] = makeFbo(agents[i]);
+      trails[i] = makeTex(tw, th, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, gl.LINEAR, gl.REPEAT);
+      trailFbo[i] = makeFbo(trails[i]);
+    }
+    food = makeTex(tw, th, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, gl.LINEAR, gl.CLAMP_TO_EDGE);
+  }
+
+  /* Text is drawn on a 2D canvas and uploaded as an attractant map. */
+  const foodCanvas = document.createElement("canvas");
+  function renderFood() {
+    if (!food) return;
+    const txt = $("#food").value.trim();
+    hasFood = txt.length > 0;
+    foodCanvas.width = tw; foodCanvas.height = th;
+    const c = foodCanvas.getContext("2d");
+    c.fillStyle = "#000";
+    c.fillRect(0, 0, tw, th);
+    if (hasFood) {
+      const face = '"Geist", system-ui, -apple-system, "Segoe UI", sans-serif';
+      c.fillStyle = "#fff";
+      c.textAlign = "center";
+      c.textBaseline = "middle";
+      let size = Math.floor(th * 0.42);
+      c.font = "600 " + size + "px " + face;
+      const w = c.measureText(txt).width, maxW = tw * 0.78;
+      if (w > maxW) {
+        size = Math.max(12, Math.floor(size * maxW / w));
+        c.font = "600 " + size + "px " + face;
+      }
+      if ("filter" in c) c.filter = "blur(1.5px)";
+      c.fillText(txt, tw / 2, th / 2);
+    }
+    bindTex(2, food);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, foodCanvas);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+  }
+
+  function seedAgents(mode) {
+    const n = AW * AW, d = new Float32Array(n * 4), m = Math.min(tw, th);
+    for (let i = 0; i < n; i++) {
+      const sp = i % 3, o = i * 4, r1 = Math.random(), r2 = Math.random();
+      let x, y, a;
+      if (mode === 0) {
+        x = r1 * tw; y = r2 * th; a = Math.random() * 6.2832;
+      } else if (mode === 1) {
+        const t = r1 * 6.2832, rad = m * (0.40 + 0.03 * (r2 - 0.5));
+        x = tw / 2 + Math.cos(t) * rad; y = th / 2 + Math.sin(t) * rad; a = t + Math.PI;
+      } else if (mode === 2) {
+        const t = r1 * 6.2832, rad = m * 0.03 * Math.sqrt(r2);
+        x = tw / 2 + Math.cos(t) * rad; y = th / 2 + Math.sin(t) * rad; a = t + (Math.random() - 0.5) * 0.4;
+      } else {
+        const c = sp * 2.0944 + 0.5;
+        const cx = tw / 2 + Math.cos(c) * m * 0.28, cy = th / 2 + Math.sin(c) * m * 0.28;
+        const t = r1 * 6.2832, rad = m * 0.09 * Math.sqrt(r2);
+        x = cx + Math.cos(t) * rad; y = cy + Math.sin(t) * rad; a = Math.random() * 6.2832;
+      }
+      d[o] = x; d[o + 1] = y; d[o + 2] = a; d[o + 3] = sp + 0.5;
+    }
+    bindTex(0, agents[aCur]);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, AW, AW, gl.RGBA, gl.FLOAT, d);
+    for (let i = 0; i < 2; i++) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, trailFbo[i]);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
+    $("#startLabel").textContent = "Start: " + START_NAMES[mode].toLowerCase() + ".";
+  }
+
+  /* ---------------- simulation ---------------- */
+  function currentAngles() {
+    const c = P.chaos ? 1 : 0, t = frame * 0.002;
+    return {
+      sa: (P.sa + c * 12 * Math.sin(t * 1.3)) * DEG,
+      ra: (P.ra + c * 10 * Math.sin(t * 0.9 + 1.7)) * DEG
+    };
+  }
+
+  function step() {
+    const k = Math.max(0.5, Math.min(1.6, tw / 1100));
+    const ang = currentAngles();
+    const R = 0.11 * Math.min(tw, th);
+
+    gl.disable(gl.BLEND);
+    gl.useProgram(progAgent.p);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, agentFbo[1 - aCur]);
+    gl.viewport(0, 0, AW, AW);
+    bindTex(0, agents[aCur]);
+    bindTex(1, trails[tCur]);
+    const a = progAgent.u;
+    gl.uniform1i(a.uAgents, 0);
+    gl.uniform1i(a.uTrail, 1);
+    bindTex(2, food);
+    gl.uniform1i(a.uFood, 2);
+    gl.uniform1f(a.uFoodK, hasFood ? P.food * 8 : 0);
+    gl.uniform1f(a.uPers, P.pers);
+    gl.uniform2f(a.uSize, tw, th);
+    gl.uniform1f(a.uSA, ang.sa);
+    gl.uniform1f(a.uRA, ang.ra);
+    gl.uniform1f(a.uSO, P.so * k);
+    gl.uniform1f(a.uSpeed, P.speed * k);
+    const M = ECO[P.eco];
+    for (let i = 0; i < 3; i++) {
+      gl.uniform3f(a["uEco" + i],
+        i === 0 ? 1 : P.rival * M[i][0],
+        i === 1 ? 1 : P.rival * M[i][1],
+        i === 2 ? 1 : P.rival * M[i][2]);
+    }
+    gl.uniform1f(a.uVision, P.vision);
+    gl.uniform1f(a.uCur, P.cur);
+    const meanTrail = (AW * AW) / (3 * tw * th * Math.max(P.decay, 0.005));
+    gl.uniform1f(a.uFeedK, 0.7 / meanTrail);
+    gl.uniform1i(a.uFrame, frame);
+    gl.uniform4f(a.uPointer, ptr.x, ptr.y, ptr.in ? R : 0, ptr.down ? 0.4 : -0.25);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    aCur = 1 - aCur;
+
+    gl.useProgram(progDeposit.p);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, trailFbo[tCur]);
+    gl.viewport(0, 0, tw, th);
+    bindTex(0, agents[aCur]);
+    gl.uniform1i(progDeposit.u.uAgents, 0);
+    gl.uniform2f(progDeposit.u.uSize, tw, th);
+    gl.uniform1f(progDeposit.u.uCur, P.cur);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.drawArrays(gl.POINTS, 0, AW * AW);
+    gl.disable(gl.BLEND);
+
+    gl.useProgram(progDiffuse.p);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, trailFbo[1 - tCur]);
+    gl.viewport(0, 0, tw, th);
+    bindTex(0, trails[tCur]);
+    const d = progDiffuse.u;
+    gl.uniform1i(d.uTrail, 0);
+    gl.uniform1f(d.uDiff, P.diff);
+    gl.uniform1f(d.uDecay, P.decay);
+    gl.uniform4f(d.uSplat, ptr.x, ptr.y, R * 0.35, ptr.down ? 1.2 : 0);
+    const v = BRUSH[brush].vec;
+    gl.uniform3f(d.uSplatCol, v[0], v[1], v[2]);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    tCur = 1 - tCur;
+    frame++;
+  }
+
+  function display(now) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, cw, ch);
+    gl.disable(gl.BLEND);
+    gl.useProgram(progDisplay.p);
+    bindTex(0, trails[tCur]);
+    const u = progDisplay.u;
+    bindTex(1, food);
+    gl.uniform1i(u.uFood, 1);
+    gl.uniform1f(u.uFoodShow, hasFood && P.showFood ? 1 : 0);
+    gl.uniform1i(u.uTrail, 0);
+    gl.uniform2f(u.uRes, cw, ch);
+    gl.uniform2f(u.uTrailSize, tw, th);
+    gl.uniform1f(u.uGain, P.exposure);
+    gl.uniform1f(u.uTime, (now || 0) * 0.001);
+    gl.uniform1i(u.uMono, P.mono ? 1 : 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  /* ---------------- interface ---------------- */
+  const CONTROLS = [
+    { k: "sa", label: "Sensor angle", min: 5, max: 90, step: 1, unit: "\u00b0" },
+    { k: "ra", label: "Turn angle", min: 5, max: 90, step: 1, unit: "\u00b0" },
+    { k: "so", label: "Sensor distance", min: 3, max: 50, step: 1, unit: " px" },
+    { k: "speed", label: "Speed", min: 0.3, max: 3, step: 0.1, unit: "" },
+    { k: "decay", label: "Decay", min: 0.01, max: 0.3, step: 0.01, unit: "" },
+    { k: "diff", label: "Diffusion", min: 0, max: 1, step: 0.05, unit: "" },
+    { k: "rival", label: "Interaction", min: 0, max: 1.5, step: 0.05, unit: "" },
+    { k: "vision", label: "Vision", min: 0, max: 1.5, step: 0.05, unit: "" },
+    { k: "cur", label: "Curiosity", min: 0, max: 1, step: 0.05, unit: "" },
+    { k: "pers", label: "Personalities", min: 0, max: 1, step: 0.05, unit: "" },
+    { k: "food", label: "Food strength", min: 0, max: 3, step: 0.1, unit: "" },
+    { k: "exposure", label: "Exposure", min: 0.1, max: 1.2, step: 0.05, unit: "" },
+    { k: "steps", label: "Time scale", min: 1, max: 4, step: 1, unit: "\u00d7" }
+  ];
+  const ctl = {};
+
+  function fmt(c, v) {
+    const dec = String(c.step).includes(".") ? String(c.step).split(".")[1].length : 0;
+    return v.toFixed(dec) + c.unit;
+  }
+
+  const rowsEl = $("#rows");
+  for (const c of CONTROLS) {
+    const row = document.createElement("div");
+    row.className = "row";
+    const lab = document.createElement("label");
+    const id = "c-" + c.k;
+    lab.htmlFor = id;
+    const name = document.createElement("span");
+    name.textContent = c.label;
+    const out = document.createElement("output");
+    lab.append(name, out);
+    const inp = document.createElement("input");
+    inp.type = "range"; inp.id = id;
+    inp.min = c.min; inp.max = c.max; inp.step = c.step;
+    inp.addEventListener("input", () => { P[c.k] = +inp.value; out.textContent = fmt(c, P[c.k]); });
+    row.append(lab, inp);
+    rowsEl.append(row);
+    ctl[c.k] = { inp, out, c };
+  }
+  function syncControls() {
+    for (const k in ctl) {
+      ctl[k].inp.value = P[k];
+      ctl[k].out.textContent = fmt(ctl[k].c, P[k]);
+    }
+  }
+
+  const presetEl = $("#presets");
+  const presetBtns = {};
+  function applyPreset(name) {
+    Object.assign(P, PRESETS[name]);
+    activePreset = name;
+    syncControls();
+    for (const n in presetBtns) presetBtns[n].setAttribute("aria-pressed", String(n === name));
+  }
+  for (const n of PRESET_NAMES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = n;
+    b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => applyPreset(n));
+    presetEl.append(b);
+    presetBtns[n] = b;
+  }
+
+  const ecoEl = $("#eco");
+  const ecoBtns = {};
+  function setEco(name) {
+    P.eco = name;
+    for (const n in ecoBtns) ecoBtns[n].setAttribute("aria-pressed", String(n === name));
+  }
+  for (const n of ECO_NAMES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = n;
+    b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => setEco(n));
+    ecoEl.append(b);
+    ecoBtns[n] = b;
+  }
+
+  const brushEl = $("#brush");
+  const brushBtns = [];
+  function setBrush(i) {
+    brush = i;
+    brushBtns.forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
+  }
+  BRUSH.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "swatch";
+    b.setAttribute("aria-label", "Brush species " + s.name);
+    b.setAttribute("aria-pressed", "false");
+    const sw = document.createElement("i");
+    sw.style.background = s.css;
+    b.append(sw);
+    b.addEventListener("click", () => setBrush(i));
+    brushEl.append(b);
+    brushBtns.push(b);
+  });
+
+  $("#chaos").addEventListener("change", (e) => { P.chaos = e.target.checked; });
+  $("#mono").addEventListener("change", (e) => { P.mono = e.target.checked; });
+  $("#showfood").addEventListener("change", (e) => { P.showFood = e.target.checked; });
+
+  let foodTimer = 0;
+  $("#food").addEventListener("input", () => {
+    clearTimeout(foodTimer);
+    foodTimer = setTimeout(renderFood, 180);
+  });
+
+  // Downloads only work outside the sandboxed viewer, so the button hides itself when embedded.
+  const saveBtn = $("#save");
+  if (window.top !== window.self) saveBtn.hidden = true;
+  saveBtn.addEventListener("click", () => { saveNow = true; });
+
+  const countEl = $("#count");
+  countEl.value = String(AW);
+  countEl.addEventListener("change", () => { AW = +countEl.value; rebuild(); });
+
+  function setPaused(v) {
+    paused = v;
+    const b = $("#pause");
+    b.textContent = v ? "Play" : "Pause";
+    b.setAttribute("aria-pressed", String(v));
+  }
+  function reseed(next) {
+    if (next) startMode = (startMode + 1) % START_NAMES.length;
+    seedAgents(startMode);
+  }
+  $("#reseed").addEventListener("click", () => reseed(true));
+  $("#pause").addEventListener("click", () => setPaused(!paused));
+
+  window.addEventListener("keydown", (e) => {
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "SELECT")) return;
+    if (e.code === "Space") { e.preventDefault(); setPaused(!paused); }
+    else if (e.key === "r" || e.key === "R") reseed(true);
+    else if (e.key === "h" || e.key === "H") document.body.classList.toggle("ui-hidden");
+    else if (e.key === "b" || e.key === "B") setBrush((brush + 1) % BRUSH.length);
+    else if (e.key === "e" || e.key === "E") setEco(ECO_NAMES[(ECO_NAMES.indexOf(P.eco) + 1) % ECO_NAMES.length]);
+    else if ((e.key === "s" || e.key === "S") && !saveBtn.hidden) saveNow = true;
+    else if (e.key >= "1" && e.key <= "5") applyPreset(PRESET_NAMES[+e.key - 1]);
+  });
+
+  function toTrail(e) {
+    const r = canvas.getBoundingClientRect();
+    ptr.x = (e.clientX - r.left) / r.width * tw;
+    ptr.y = (1 - (e.clientY - r.top) / r.height) * th;
+  }
+  canvas.addEventListener("pointermove", (e) => { toTrail(e); ptr.in = true; });
+  canvas.addEventListener("pointerdown", (e) => { canvas.setPointerCapture(e.pointerId); toTrail(e); ptr.in = true; ptr.down = true; });
+  canvas.addEventListener("pointerup", (e) => { ptr.down = false; if (e.pointerType !== "mouse") ptr.in = false; });
+  canvas.addEventListener("pointercancel", () => { ptr.down = false; ptr.in = false; });
+  canvas.addEventListener("pointerleave", () => { if (!ptr.down) ptr.in = false; });
+
+  /* ---------------- lifecycle ---------------- */
+  function rebuild() {
+    sizeCanvas();
+    allocate();
+    renderFood();
+    seedAgents(startMode);
+  }
+
+  let resizeTimer = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(rebuild, 220);
+  });
+
+  const hud = $("#hud");
+  let frames = 0, fpsT = performance.now(), fps = 0;
+  function tick(now) {
+    requestAnimationFrame(tick);
+    if (!paused) for (let s = 0; s < P.steps; s++) step();
+    display(now);
+    if (saveNow) {
+      saveNow = false;
+      try {
+        const link = document.createElement("a");
+        link.download = "physarum-" + Date.now() + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } catch (err) { /* ignore */ }
+    }
+    frames++;
+    if (now - fpsT > 500) {
+      fps = Math.round(frames * 1000 / (now - fpsT));
+      frames = 0; fpsT = now;
+      hud.textContent = (AW * AW).toLocaleString("en-US") + " agents, " + fps + " fps";
+    }
+  }
+
+  try {
+    applyPreset(activePreset);
+    setEco(P.eco);
+    setBrush(0);
+    if (window.innerWidth > 560) $("#panel").open = true;
+    rebuild();
+    if (reduceMotion) {
+      for (let i = 0; i < 500; i++) step();
+      setPaused(true);
+    }
+    requestAnimationFrame(tick);
+  } catch (err) {
+    fail("Simulation setup failed: " + err.message);
+  }
+})();
+</script>
+</body>
+</html>
