@@ -2,7 +2,6 @@
 
 A complete, self-contained networking course — foundations through Network+ fluency into professional practice — built as a single interactive HTML file. No build step, no backend, no dependencies to install.
 
-**[Open the live version →](https://claude.ai/artifact/VAEjwMx9nRzB4d6Xr7Rbob)**
 
 ## What's inside
 
@@ -29,12 +28,6 @@ A complete, self-contained networking course — foundations through Network+ fl
 
 No installation required.
 
-```bash
-git clone <this-repo>
-cd <this-repo>
-open networking-network-plus-zero-to-professional.html   # macOS
-# or just double-click the file / drag it into a browser tab
-```
 
 To host it (GitHub Pages, Netlify, S3, anywhere static): drop the single `.html` file in and point your host at it. There's nothing else to deploy.
 
@@ -52,11 +45,3 @@ Any evergreen browser (Chrome, Firefox, Safari, Edge). Uses `IntersectionObserve
 ## Content accuracy
 
 Protocol behavior, ports, and command syntax are written to be technically accurate at time of writing. Certification specifics (exam codes, objectives, pricing) change — the Resources section links to CompTIA's official Network+ page directly rather than restating details that might go stale.
-
-## License
-
-No license has been applied yet — add a `LICENSE` file (MIT is a common choice for educational content like this) before treating this as open for reuse.
-
-## Contributing
-
-This is a single-file project by design. If you extend it, keep new content inside the existing `DATA` arrays in the `<script>` block rather than hand-writing new HTML blocks, so search, progress tracking, and styling stay consistent automatically.
