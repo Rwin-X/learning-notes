@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Lenia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060709; --ink: #ebe6db; --mute: #858a94; --line: rgba(235,230,219,0.16); --ice: #78aedb;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; background: var(--bg); scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--ink);
+    font-family: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-weight: 300; -webkit-font-smoothing: antialiased; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+
+  .title { position: fixed; left: 0; top: 0; pointer-events: none; padding: calc(env(safe-area-inset-top, 0px) + 22px) 26px 0; text-shadow: 0 1px 12px rgba(0,0,0,0.85); }
+  .title h1 { margin: 0; font-size: 20px; font-weight: 400; letter-spacing: 0.01em; }
+  .title p { margin: 6px 0 0; font-size: 13px; color: #b4b8c0; font-variant-numeric: tabular-nums; max-width: 38ch; line-height: 1.5; }
+
+  .dock { position: fixed; right: 0; bottom: 0; padding: 0 18px calc(env(safe-area-inset-bottom, 0px) + 18px) 18px; }
+  .panel { width: 272px; max-height: 76vh; overflow-y: auto; background: rgba(6,7,9,0.74); border: 1px solid var(--line); border-radius: 10px;
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); padding: 14px 16px; font-size: 13px; }
+  .panel summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 400; }
+  .panel summary::-webkit-details-marker { display: none; }
+  .panel summary::after { content: "+"; color: var(--mute); }
+  .panel[open] summary::after { content: "\2212"; }
+  .group { margin-top: 16px; }
+  .group > .cap { color: var(--mute); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .row { margin-top: 12px; }
+  .row label { display: flex; justify-content: space-between; color: var(--mute); margin-bottom: 7px; }
+  .row output { color: var(--ink); font-variant-numeric: tabular-nums; }
+  button, select { font: inherit; font-size: 13px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+  select { background: #0b0c0f; }
+  button:hover, select:hover { border-color: rgba(235,230,219,0.5); }
+  button[aria-pressed="true"] { border-color: var(--ink); background: rgba(235,230,219,0.08); }
+  button[hidden] { display: none; }
+  button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--ice); outline-offset: 3px; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 1px; background: rgba(235,230,219,0.28); margin: 6px 0; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: var(--ink); cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 11px; height: 11px; border-radius: 50%; background: var(--ink); border: 0; cursor: pointer; }
+  .hint { margin: 14px 0 0; color: var(--mute); line-height: 1.55; }
+  #fallback { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 32px; text-align: center; color: var(--mute); font-size: 15px; line-height: 1.6; }
+  #fallback[hidden] { display: none; }
+  body.ui-hidden .title, body.ui-hidden .dock { display: none; }
+  @media (max-width: 560px) { .dock { left: 0; } .panel { width: auto; } }
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="Lenia, a continuous cellular automaton with gliding creatures"></canvas>
+<div id="fallback" hidden>This page needs WebGL 2 with floating-point render targets. Try a recent desktop browser.</div>
+
+<div class="title">
+  <h1>Lenia</h1>
+  <p id="hud">Starting</p>
+</div>
+
+<div class="dock">
+  <details class="panel" id="panel">
+    <summary>Controls</summary>
+
+    <div class="group"><div class="cap">Pointer</div><div class="chips" id="tools"></div></div>
+
+    <div id="rows"></div>
+
+    <div class="group">
+      <div class="cap">Resolution</div>
+      <select id="res" aria-label="Simulation resolution">
+        <option value="128">Coarse, 128</option>
+        <option value="192">Medium, 192</option>
+        <option value="256" selected>Fine, 256</option>
+        <option value="384">Very fine, 384</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <div class="chips">
+        <button type="button" id="colony">Colony</button>
+        <button type="button" id="soup">Soup</button>
+        <button type="button" id="clear">Clear</button>
+        <button type="button" id="pause" aria-pressed="false">Pause</button>
+        <button type="button" id="save">Save frame</button>
+      </div>
+      <p class="hint" id="startLabel"></p>
+    </div>
+
+    <p class="hint">Each cell holds a value from 0 to 1. A ring-shaped neighborhood decides whether it grows or shrinks. Click to place a glider, or switch the pointer to paint or erase. Try nudging mu and sigma: a narrow band between an empty world and a flooded one is where creatures live. Keys: space pauses, 1 to 3 pick a pointer tool, C colony, R soup, S saves a frame, H hides the interface.</p>
+  </details>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const canvas = $("#gl"), fallback = $("#fallback");
+  function fail(msg) { fallback.hidden = false; if (msg) fallback.textContent = msg; $(".title").style.display = "none"; $(".dock").style.display = "none"; }
+
+  const gl = canvas.getContext("webgl2", { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: "high-performance" });
+  if (!gl || !gl.getExtension("EXT_color_buffer_float")) { fail(); return; }
+  const linearOK = !!gl.getExtension("OES_texture_float_linear");
+
+  /* A glider found by searching random starts (mu 0.15, sigma 0.015, R 13), 22 x 22, two digits per cell. */
+  const ORB_N = 22;
+  const ORB = "00000000000000000000000000000000000000000000000000000000000003111516151309040000000000000000000000000016222325293230251810020000000000000000000026201214233646454033231202000000000000000034170000032351636154463524100000000000000025270000000038777766635945332105000000000000660000000005729872647070503326130000000000491700000000299997626380774425231900000000008600000000006798906580996823121622020000004725000000001076928086999933000009230300000046200100000047686969949450000000042602000026001707000000435845637767000000000530000000000013160200173529345957040000000016260000000000061814041924143341190000000000490000000000000010193133151327210000000000204300000000000000001040412634190000000000038600000000000000000013332537422306020003136402000000000000000000050609353117181617201855000000000000000000000000021400060809080346000000000000000000000000000000000000000000000000000000000000000000000000000000000000150000000000000000000000000000000000000000000000000000000000";
+  const orbCell = (i, j) => parseInt(ORB.substr((j * ORB_N + i) * 2, 2), 10) / 99;
+
+  const HEAD = "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n";
+  const VS = HEAD + `
+    out vec2 vUv;
+    void main() {
+      vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+      vUv = p;
+      gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+    }`;
+
+  const FS_STEP = HEAD + `
+    uniform sampler2D uState;
+    uniform sampler2D uKernel;
+    uniform vec2 uSim;
+    uniform int uR;
+    uniform float uMu, uSigma, uDt;
+    uniform vec4 uPaint;
+    out vec4 o;
+    void main() {
+      ivec2 p = ivec2(gl_FragCoord.xy);
+      ivec2 s = ivec2(uSim);
+      float a = texelFetch(uState, p, 0).r;
+      float sum = 0.0;
+      for (int j = -uR; j <= uR; j++) {
+        for (int i = -uR; i <= uR; i++) {
+          float k = texelFetch(uKernel, ivec2(i + uR, j + uR), 0).r;
+          if (k > 0.0) sum += k * texelFetch(uState, (p + ivec2(i, j) + s) % s, 0).r;
+        }
+      }
+      float d = sum - uMu;
+      float g = 2.0 * exp(-(d * d) / (2.0 * uSigma * uSigma)) - 1.0;
+      a = clamp(a + uDt * g, 0.0, 1.0);
+      if (uPaint.w != 0.0) {
+        float dist = distance(vec2(p) + 0.5, uPaint.xy);
+        if (dist < uPaint.z) { a = uPaint.w > 0.0 ? min(1.0, a + 0.35) : 0.0; }
+      }
+      o = vec4(a, 0.0, 0.0, 1.0);
+    }`;
+
+  const FS_DISPLAY = HEAD + `
+    uniform sampler2D uState;
+    uniform vec2 uSim;
+    uniform float uTime;
+    in vec2 vUv;
+    out vec4 o;
+    float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+    void main() {
+      vec2 px = 1.0 / uSim;
+      float a  = texture(uState, vUv).r;
+      float hL = texture(uState, vUv - vec2(px.x, 0.0)).r;
+      float hR = texture(uState, vUv + vec2(px.x, 0.0)).r;
+      float hD = texture(uState, vUv - vec2(0.0, px.y)).r;
+      float hU = texture(uState, vUv + vec2(0.0, px.y)).r;
+      float glow = 0.0;
+      glow += texture(uState, vUv + px * vec2( 2.5,  2.5)).r + texture(uState, vUv + px * vec2(-2.5,  2.5)).r;
+      glow += texture(uState, vUv + px * vec2( 2.5, -2.5)).r + texture(uState, vUv + px * vec2(-2.5, -2.5)).r;
+      glow += texture(uState, vUv + px * vec2( 4.5, 0.0)).r + texture(uState, vUv + px * vec2(-4.5, 0.0)).r;
+      glow += texture(uState, vUv + px * vec2(0.0,  4.5)).r + texture(uState, vUv + px * vec2(0.0, -4.5)).r;
+      glow /= 8.0;
+
+      float t = clamp(a * 1.1, 0.0, 1.0);
+      vec3 c0 = vec3(0.024, 0.027, 0.036);
+      vec3 c1 = vec3(0.10, 0.17, 0.26);
+      vec3 c2 = vec3(0.47, 0.68, 0.86);
+      vec3 c3 = vec3(0.94, 0.91, 0.86);
+      vec3 col = mix(c0, c1, smoothstep(0.0, 0.3, t));
+      col = mix(col, c2, smoothstep(0.25, 0.7, t));
+      col = mix(col, c3, smoothstep(0.7, 1.0, t));
+      col += glow * vec3(0.05, 0.10, 0.17);
+
+      vec3 n = normalize(vec3((hL - hR) * 3.0, (hD - hU) * 3.0, 1.0));
+      vec3 L = normalize(vec3(-0.5, 0.6, 0.65));
+      float diff = clamp(dot(n, L), 0.0, 1.0);
+      float spec = pow(clamp(dot(reflect(-L, n), vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 22.0);
+      col *= 0.72 + 0.5 * diff * step(0.02, a);
+      col += spec * 0.18 * vec3(0.9, 0.95, 1.0);
+
+      vec2 q = (vUv - 0.5) * 1.15;
+      col *= mix(0.55, 1.0, smoothstep(1.15, 0.2, length(q)));
+      col += (hash(gl_FragCoord.xy + uTime) - 0.5) * 0.016;
+      o = vec4(col, 1.0);
+    }`;
+
+  function compile(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+  function program(vs, fs) {
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER, vs)); gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    const u = {}, n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); u[info.name] = gl.getUniformLocation(p, info.name); }
+    return { p, u };
+  }
+  function bindTex(unit, tex) { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tex); }
+
+  let pStep, pDisp;
+  try { pStep = program(VS, FS_STEP); pDisp = program(VS, FS_DISPLAY); }
+  catch (err) { fail("Shader setup failed: " + err.message); return; }
+  gl.bindVertexArray(gl.createVertexArray());
+
+  /* ---------------- state ---------------- */
+  const P = { mu: 0.15, sigma: 0.015, R: 13, dt: 0.1, speed: window.matchMedia("(pointer: coarse)").matches ? 1 : 2 };
+  const TOOLS = ["Glider", "Paint", "Erase"];
+  let tool = "Glider", res = window.matchMedia("(pointer: coarse)").matches ? 192 : 256;
+  let simW = 0, simH = 0, cw = 0, ch = 0;
+  let tex = [null, null], fbo = [null, null], cur = 0, kernelTex = null;
+  let paused = false, saveNow = false, lastStamp = { x: -999, y: -999 };
+  const ptr = { x: 0, y: 0, in: false, down: false };
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function sizeAll() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    cw = Math.max(2, Math.floor(window.innerWidth * dpr)); ch = Math.max(2, Math.floor(window.innerHeight * dpr));
+    canvas.width = cw; canvas.height = ch;
+    const asp = window.innerWidth / window.innerHeight;
+    if (asp >= 1) { simH = res; simW = Math.min(768, Math.round(res * asp)); } else { simW = res; simH = Math.min(768, Math.round(res / asp)); }
+  }
+
+  function allocate() {
+    for (let i = 0; i < 2; i++) {
+      if (tex[i]) gl.deleteTexture(tex[i]);
+      if (fbo[i]) gl.deleteFramebuffer(fbo[i]);
+      const t = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, simW, simH, 0, gl.RGBA, gl.FLOAT, null);
+      const f = linearOK ? gl.LINEAR : gl.NEAREST;
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, f); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, f);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      const fb = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+      if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) throw new Error("Framebuffer incomplete");
+      tex[i] = t; fbo[i] = fb;
+    }
+  }
+
+  /* Ring kernel: K(r) = exp(4 - 1 / (r (1 - r))) for 0 < r < 1, normalized to sum 1. */
+  function buildKernel() {
+    const R = P.R, n = 2 * R + 1, d = new Float32Array(n * n);
+    let sum = 0;
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      const r = Math.hypot(i - R, j - R) / R;
+      if (r > 0 && r < 1) { const v = Math.exp(4 - 1 / (r * (1 - r))); d[j * n + i] = v; sum += v; }
+    }
+    for (let i = 0; i < d.length; i++) d[i] /= sum;
+    if (kernelTex) gl.deleteTexture(kernelTex);
+    kernelTex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, kernelTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, n, n, 0, gl.RED, gl.FLOAT, d);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  }
+
+  /* ---------------- seeding and stamping ---------------- */
+  function upload(data, x, y, w, h) {
+    bindTex(0, tex[cur]);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, w, h, gl.RGBA, gl.FLOAT, data);
+  }
+  function clearWorld() { upload(new Float32Array(simW * simH * 4), 0, 0, simW, simH); }
+
+  function stamp(cx, cy, rot, flip) {
+    const n = ORB_N, d = new Float32Array(n * n * 4);
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      let a = i, b = j;
+      if (flip) a = n - 1 - a;
+      for (let k = 0; k < rot; k++) { const t = a; a = b; b = n - 1 - t; }
+      d[(j * n + i) * 4] = orbCell(a, b); d[(j * n + i) * 4 + 3] = 1;
+    }
+    const x0 = Math.max(0, Math.min(simW - n, Math.round(cx - n / 2)));
+    const y0 = Math.max(0, Math.min(simH - n, Math.round(cy - n / 2)));
+    // keep whatever is already there where the glider is empty
+    const cur0 = new Float32Array(n * n * 4);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[cur]);
+    gl.readPixels(x0, y0, n, n, gl.RGBA, gl.FLOAT, cur0);
+    for (let i = 0; i < n * n; i++) d[i * 4] = Math.max(d[i * 4], cur0[i * 4]);
+    upload(d, x0, y0, n, n);
+  }
+  const randStamp = (x, y) => stamp(x, y, Math.floor(Math.random() * 4), Math.random() < 0.5);
+
+  function colony() {
+    clearWorld();
+    const cols = Math.max(2, Math.round(simW / 70)), rows = Math.max(2, Math.round(simH / 70));
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      if (Math.random() < 0.55) randStamp((c + 0.5 + (Math.random() - 0.5) * 0.4) * simW / cols, (r + 0.5 + (Math.random() - 0.5) * 0.4) * simH / rows);
+    }
+    $("#startLabel").textContent = "Start: a colony of gliders.";
+  }
+  function soup() {
+    const d = new Float32Array(simW * simH * 4), rad = P.R * 2;
+    for (let y = 0; y < simH; y++) for (let x = 0; x < simW; x++) {
+      if (Math.hypot(x - simW / 2, y - simH / 2) < rad) d[(y * simW + x) * 4] = Math.random() * (0.6 + Math.random() * 0.4);
+      d[(y * simW + x) * 4 + 3] = 1;
+    }
+    upload(d, 0, 0, simW, simH);
+    $("#startLabel").textContent = "Start: random noise. Depending on mu and sigma it dies, floods the world or leaves creatures.";
+  }
+
+  /* ---------------- frame ---------------- */
+  function stepFrame() {
+    gl.useProgram(pStep.p);
+    gl.disable(gl.BLEND);
+    const u = pStep.u;
+    gl.uniform2f(u.uSim, simW, simH);
+    gl.uniform1i(u.uR, P.R);
+    gl.uniform1f(u.uMu, P.mu); gl.uniform1f(u.uSigma, P.sigma); gl.uniform1f(u.uDt, P.dt);
+    gl.uniform1i(u.uState, 0); gl.uniform1i(u.uKernel, 1);
+    bindTex(1, kernelTex);
+    gl.viewport(0, 0, simW, simH);
+    const paintMode = ptr.down ? (tool === "Paint" ? 1 : tool === "Erase" ? -1 : 0) : 0;
+    for (let i = 0; i < P.speed; i++) {
+      gl.uniform4f(u.uPaint, ptr.x, ptr.y, Math.max(4, P.R * 0.8), i === 0 ? paintMode : 0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[1 - cur]);
+      bindTex(0, tex[cur]);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      cur = 1 - cur;
+    }
+  }
+  function display(now) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, cw, ch);
+    gl.useProgram(pDisp.p);
+    bindTex(0, tex[cur]);
+    gl.uniform1i(pDisp.u.uState, 0);
+    gl.uniform2f(pDisp.u.uSim, simW, simH);
+    gl.uniform1f(pDisp.u.uTime, (now || 0) * 0.001);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  /* ---------------- interface ---------------- */
+  const CONTROLS = [
+    { k: "mu", label: "Growth center, mu", min: 0.1, max: 0.3, step: 0.001, dec: 3 },
+    { k: "sigma", label: "Growth width, sigma", min: 0.008, max: 0.06, step: 0.0005, dec: 4 },
+    { k: "R", label: "Neighborhood radius", min: 8, max: 20, step: 1, dec: 0, unit: " cells", kernel: true },
+    { k: "dt", label: "Time step", min: 0.02, max: 0.2, step: 0.01, dec: 2 },
+    { k: "speed", label: "Speed", min: 1, max: 6, step: 1, dec: 0, unit: "\u00d7" }
+  ];
+  const ctl = {};
+  const rowsEl = $("#rows"), hud = $("#hud");
+  function updateHud() { hud.textContent = "mu " + P.mu.toFixed(3) + ", sigma " + P.sigma.toFixed(4) + ", radius " + P.R; }
+  for (const c of CONTROLS) {
+    const row = document.createElement("div"); row.className = "row";
+    const lab = document.createElement("label"); const id = "c-" + c.k; lab.htmlFor = id;
+    const name = document.createElement("span"); name.textContent = c.label;
+    const out = document.createElement("output"); lab.append(name, out);
+    const inp = document.createElement("input");
+    inp.type = "range"; inp.id = id; inp.min = c.min; inp.max = c.max; inp.step = c.step; inp.value = P[c.k];
+    const show = () => { out.textContent = P[c.k].toFixed(c.dec) + (c.unit || ""); };
+    inp.addEventListener("input", () => { P[c.k] = +inp.value; show(); if (c.kernel) buildKernel(); updateHud(); });
+    show(); row.append(lab, inp); rowsEl.append(row); ctl[c.k] = inp;
+  }
+
+  const toolsEl = $("#tools"), toolBtns = {};
+  function setTool(n) { tool = n; for (const k in toolBtns) toolBtns[k].setAttribute("aria-pressed", String(k === n)); }
+  for (const n of TOOLS) {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = n; b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => setTool(n)); toolsEl.append(b); toolBtns[n] = b;
+  }
+
+  function setPaused(v) { paused = v; const b = $("#pause"); b.textContent = v ? "Play" : "Pause"; b.setAttribute("aria-pressed", String(v)); }
+  $("#colony").addEventListener("click", colony);
+  $("#soup").addEventListener("click", () => { clearWorld(); soup(); });
+  $("#clear").addEventListener("click", () => { clearWorld(); $("#startLabel").textContent = "Start: an empty world."; });
+  $("#pause").addEventListener("click", () => setPaused(!paused));
+  $("#res").addEventListener("change", (e) => { res = +e.target.value; rebuild(); });
+  const saveBtn = $("#save");
+  if (window.top !== window.self) saveBtn.hidden = true;
+  saveBtn.addEventListener("click", () => { saveNow = true; });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "SELECT")) return;
+    if (e.code === "Space") { e.preventDefault(); setPaused(!paused); }
+    else if (e.key === "c" || e.key === "C") colony();
+    else if (e.key === "r" || e.key === "R") { clearWorld(); soup(); }
+    else if (e.key === "h" || e.key === "H") document.body.classList.toggle("ui-hidden");
+    else if ((e.key === "s" || e.key === "S") && !saveBtn.hidden) saveNow = true;
+    else if (e.key >= "1" && e.key <= "3") setTool(TOOLS[+e.key - 1]);
+  });
+
+  function toSim(e) {
+    const r = canvas.getBoundingClientRect();
+    ptr.x = (e.clientX - r.left) / r.width * simW; ptr.y = (1 - (e.clientY - r.top) / r.height) * simH;
+  }
+  canvas.addEventListener("pointermove", (e) => {
+    toSim(e); ptr.in = true;
+    if (ptr.down && tool === "Glider" && Math.hypot(ptr.x - lastStamp.x, ptr.y - lastStamp.y) > 46) { randStamp(ptr.x, ptr.y); lastStamp = { x: ptr.x, y: ptr.y }; }
+  });
+  canvas.addEventListener("pointerdown", (e) => {
+    canvas.setPointerCapture(e.pointerId); toSim(e); ptr.in = true; ptr.down = true;
+    if (tool === "Glider") { randStamp(ptr.x, ptr.y); lastStamp = { x: ptr.x, y: ptr.y }; }
+  });
+  canvas.addEventListener("pointerup", () => { ptr.down = false; });
+  canvas.addEventListener("pointercancel", () => { ptr.down = false; });
+  canvas.addEventListener("pointerleave", () => { if (!ptr.down) ptr.in = false; });
+
+  function rebuild() { sizeAll(); allocate(); clearWorld(); colony(); }
+  let rt = 0;
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(rebuild, 220); });
+
+  function tick(now) {
+    requestAnimationFrame(tick);
+    if (!paused) stepFrame();
+    display(now);
+    if (saveNow) {
+      saveNow = false;
+      try { const a = document.createElement("a"); a.download = "lenia-" + Date.now() + ".png"; a.href = canvas.toDataURL("image/png"); a.click(); } catch (err) { /* ignore */ }
+    }
+  }
+
+  try {
+    setTool("Glider"); updateHud(); buildKernel();
+    if (window.innerWidth > 560) $("#panel").open = true;
+    $("#res").value = String(res);
+    rebuild();
+    if (reduceMotion) setPaused(true);
+    /*DEBUG*/
+    requestAnimationFrame(tick);
+  } catch (err) { fail("Setup failed: " + err.message); }
+})();
+</script>
+</body>
+</html>
