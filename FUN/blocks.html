@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Blocks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07080a; --ink: #ece8df; --mute: #8a909b; --faint: #5b616c;
+    --line: rgba(236,232,223,0.14); --ice: #7fb0d6;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { background: var(--bg); scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 300; font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 56px 24px 96px; }
+  h1 { margin: 0; font-weight: 300; font-size: clamp(44px, 8vw, 92px); line-height: 1; letter-spacing: -0.035em; }
+  h2 { margin: 0 0 6px; font-weight: 400; font-size: 20px; }
+  p { margin: 0; }
+  .lede { margin-top: 22px; max-width: 60ch; font-size: 18px; color: var(--mute); }
+  .sec { margin-top: 64px; }
+  .note { margin-top: 10px; max-width: 72ch; font-size: 14px; color: var(--mute); }
+
+  .controls { display: flex; flex-wrap: wrap; align-items: end; gap: 14px 18px; margin-top: 40px; }
+  .controls .item label { display: block; font-size: 13px; color: var(--mute); margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { font: 400 14px "Geist", system-ui, sans-serif; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; cursor: pointer; }
+  button:hover { border-color: rgba(236,232,223,0.5); }
+  button[aria-pressed="true"] { border-color: var(--ink); background: rgba(236,232,223,0.08); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--ice); outline-offset: 3px; }
+  #msg { width: 260px; max-width: 100%; background: transparent; color: var(--ink); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; font: 300 20px "Geist", system-ui, sans-serif; padding: 6px 0 8px; }
+  #msg:hover { border-bottom-color: rgba(236,232,223,0.4); }
+  #file { display: none; }
+  .key { margin-top: 14px; font: 400 12px "Geist Mono", ui-monospace, Menlo, Consolas, monospace; color: var(--faint); word-break: break-all; }
+
+  .figs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 28px; }
+  figure { margin: 0; }
+  figure canvas { display: block; width: 100%; height: auto; aspect-ratio: 256 / 160; image-rendering: pixelated; background: #000; border: 1px solid var(--line); }
+  figure.pick canvas { cursor: crosshair; }
+  figcaption { margin-top: 10px; font-size: 14px; }
+  figcaption b { font-weight: 400; display: block; }
+  figcaption .stat { display: block; margin-top: 2px; color: var(--ice); font-variant-numeric: tabular-nums; }
+  figcaption .why { display: block; margin-top: 4px; color: var(--mute); font-size: 13px; line-height: 1.5; }
+  .figs.three { grid-template-columns: repeat(3, 1fr); }
+  .foot { margin-top: 64px; font-size: 13px; color: var(--faint); }
+  @media (max-width: 820px) { .figs { grid-template-columns: repeat(2, 1fr); } .figs.three { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Blocks</h1>
+    <p class="lede">Encrypt the same picture with AES in three modes. In one of them the picture survives the encryption.</p>
+  </header>
+
+  <div class="controls">
+    <div class="item"><label>Picture</label><div class="chips" id="src"></div></div>
+    <div class="item" id="msgwrap"><label for="msg">Text</label><input id="msg" type="text" dir="auto" value="ECB" maxlength="16" autocomplete="off" spellcheck="false"></div>
+    <div class="item"><label>&nbsp;</label><button type="button" id="newkey">New key</button></div>
+  </div>
+  <input type="file" id="file" accept="image/*">
+  <p class="key" id="keyline"></p>
+
+  <section class="sec" aria-labelledby="h1">
+    <h2 id="h1">Same key, same picture</h2>
+    <div class="figs">
+      <figure><canvas id="cP" width="256" height="160"></canvas><figcaption><b>Original</b><span class="stat" id="sP"></span><span class="why">8-bit grayscale, one byte per pixel.</span></figcaption></figure>
+      <figure class="pick"><canvas id="cE" width="256" height="160"></canvas><figcaption><b>ECB</b><span class="stat" id="sE"></span><span class="why">Equal plaintext blocks give equal ciphertext blocks, so the outline shows through.</span></figcaption></figure>
+      <figure class="pick"><canvas id="cB" width="256" height="160"></canvas><figcaption><b>CBC</b><span class="stat" id="sB"></span><span class="why">Each block is mixed with the previous ciphertext block first, so repeats vanish.</span></figcaption></figure>
+      <figure class="pick"><canvas id="cC" width="256" height="160"></canvas><figcaption><b>CTR</b><span class="stat" id="sC"></span><span class="why">A keystream is XORed in, so repeats vanish.</span></figcaption></figure>
+    </div>
+    <p class="note">A block is 16 bytes, which here is 16 pixels in a row. The count is how many different 16-byte blocks each image contains.</p>
+  </section>
+
+  <section class="sec" aria-labelledby="h2">
+    <h2 id="h2">Now tamper with the ciphertext</h2>
+    <p class="note">Click any of the three encrypted images to flip one bit at that spot, then decrypt with the right key. The marked square shows where the bit was flipped, and every byte that ends up different from the original is drawn in blue.</p>
+    <div class="figs three" style="margin-top:22px">
+      <figure><canvas id="dE" width="256" height="160"></canvas><figcaption><b>ECB, decrypted</b><span class="stat" id="tE"></span><span class="why" id="wE"></span></figcaption></figure>
+      <figure><canvas id="dB" width="256" height="160"></canvas><figcaption><b>CBC, decrypted</b><span class="stat" id="tB"></span><span class="why" id="wB"></span></figcaption></figure>
+      <figure><canvas id="dC" width="256" height="160"></canvas><figcaption><b>CTR, decrypted</b><span class="stat" id="tC"></span><span class="why" id="wC"></span></figcaption></figure>
+    </div>
+    <p class="note">Nothing here notices the damage. Encryption alone hides content but does not protect it from change, which is why real systems use an authenticated mode such as GCM.</p>
+  </section>
+
+  <p class="foot" id="verify">Checking the implementation</p>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+/* CORE START */
+  function rotl8(x, n) { return ((x << n) | (x >> (8 - n))) & 0xff; }
+  const SBOX = new Uint8Array(256), INV = new Uint8Array(256);
+  (function () {
+    let p = 1, q = 1;
+    do {
+      p = (p ^ (p << 1) ^ (p & 0x80 ? 0x11b : 0)) & 0xff;
+      q = (q ^ (q << 1)) & 0xff; q = (q ^ (q << 2)) & 0xff; q = (q ^ (q << 4)) & 0xff;
+      if (q & 0x80) q ^= 0x09;
+      SBOX[p] = (q ^ rotl8(q, 1) ^ rotl8(q, 2) ^ rotl8(q, 3) ^ rotl8(q, 4) ^ 0x63) & 0xff;
+    } while (p !== 1);
+    SBOX[0] = 0x63;
+    for (let i = 0; i < 256; i++) INV[SBOX[i]] = i;
+  })();
+
+  const xt = (a) => ((a << 1) ^ (a & 0x80 ? 0x1b : 0)) & 0xff;
+  function gmul(a, b) { let r = 0; while (b) { if (b & 1) r ^= a; a = xt(a); b >>= 1; } return r; }
+
+  function expandKey(key) {
+    const w = new Uint8Array(176); w.set(key);
+    let rcon = 1;
+    for (let i = 16; i < 176; i += 4) {
+      let t0 = w[i - 4], t1 = w[i - 3], t2 = w[i - 2], t3 = w[i - 1];
+      if (i % 16 === 0) { const a = SBOX[t1] ^ rcon, b = SBOX[t2], c = SBOX[t3], d = SBOX[t0]; t0 = a; t1 = b; t2 = c; t3 = d; rcon = xt(rcon); }
+      w[i] = w[i - 16] ^ t0; w[i + 1] = w[i - 15] ^ t1; w[i + 2] = w[i - 14] ^ t2; w[i + 3] = w[i - 13] ^ t3;
+    }
+    return w;
+  }
+
+  function shiftRows(s) { const t = s.slice(); for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) s[r + 4 * c] = t[r + 4 * ((c + r) % 4)]; }
+  function invShiftRows(s) { const t = s.slice(); for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) s[r + 4 * ((c + r) % 4)] = t[r + 4 * c]; }
+  function mixColumns(s) {
+    for (let i = 0; i < 16; i += 4) {
+      const a0 = s[i], a1 = s[i + 1], a2 = s[i + 2], a3 = s[i + 3];
+      s[i]     = xt(a0) ^ (xt(a1) ^ a1) ^ a2 ^ a3;
+      s[i + 1] = a0 ^ xt(a1) ^ (xt(a2) ^ a2) ^ a3;
+      s[i + 2] = a0 ^ a1 ^ xt(a2) ^ (xt(a3) ^ a3);
+      s[i + 3] = (xt(a0) ^ a0) ^ a1 ^ a2 ^ xt(a3);
+    }
+  }
+  function invMixColumns(s) {
+    for (let i = 0; i < 16; i += 4) {
+      const a0 = s[i], a1 = s[i + 1], a2 = s[i + 2], a3 = s[i + 3];
+      s[i]     = gmul(a0, 14) ^ gmul(a1, 11) ^ gmul(a2, 13) ^ gmul(a3, 9);
+      s[i + 1] = gmul(a0, 9) ^ gmul(a1, 14) ^ gmul(a2, 11) ^ gmul(a3, 13);
+      s[i + 2] = gmul(a0, 13) ^ gmul(a1, 9) ^ gmul(a2, 14) ^ gmul(a3, 11);
+      s[i + 3] = gmul(a0, 11) ^ gmul(a1, 13) ^ gmul(a2, 9) ^ gmul(a3, 14);
+    }
+  }
+
+  function encryptBlock(rk, inp, io, out, oo) {
+    const s = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) s[i] = inp[io + i] ^ rk[i];
+    for (let r = 1; r <= 10; r++) {
+      for (let i = 0; i < 16; i++) s[i] = SBOX[s[i]];
+      shiftRows(s);
+      if (r < 10) mixColumns(s);
+      for (let i = 0; i < 16; i++) s[i] ^= rk[r * 16 + i];
+    }
+    out.set(s, oo);
+  }
+  function decryptBlock(rk, inp, io, out, oo) {
+    const s = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) s[i] = inp[io + i] ^ rk[160 + i];
+    for (let r = 9; r >= 0; r--) {
+      invShiftRows(s);
+      for (let i = 0; i < 16; i++) s[i] = INV[s[i]];
+      for (let i = 0; i < 16; i++) s[i] ^= rk[r * 16 + i];
+      if (r > 0) invMixColumns(s);
+    }
+    out.set(s, oo);
+  }
+
+  function ecb(rk, data, dec) {
+    const out = new Uint8Array(data.length);
+    for (let o = 0; o < data.length; o += 16) (dec ? decryptBlock : encryptBlock)(rk, data, o, out, o);
+    return out;
+  }
+  function cbcEnc(rk, data, iv) {
+    const out = new Uint8Array(data.length), tmp = new Uint8Array(16);
+    let prev = iv.slice();
+    for (let o = 0; o < data.length; o += 16) {
+      for (let i = 0; i < 16; i++) tmp[i] = data[o + i] ^ prev[i];
+      encryptBlock(rk, tmp, 0, out, o);
+      prev = out.slice(o, o + 16);
+    }
+    return out;
+  }
+  function cbcDec(rk, data, iv) {
+    const out = new Uint8Array(data.length), tmp = new Uint8Array(16);
+    for (let o = 0; o < data.length; o += 16) {
+      decryptBlock(rk, data, o, tmp, 0);
+      for (let i = 0; i < 16; i++) out[o + i] = tmp[i] ^ (o === 0 ? iv[i] : data[o - 16 + i]);
+    }
+    return out;
+  }
+  function ctr(rk, data, iv) {
+    const out = new Uint8Array(data.length), counter = iv.slice(), ks = new Uint8Array(16);
+    for (let o = 0; o < data.length; o += 16) {
+      encryptBlock(rk, counter, 0, ks, 0);
+      for (let i = 0; i < 16 && o + i < data.length; i++) out[o + i] = data[o + i] ^ ks[i];
+      for (let j = 15; j >= 8; j--) { counter[j] = (counter[j] + 1) & 0xff; if (counter[j] !== 0) break; }
+    }
+    return out;
+  }
+
+  function blockStats(data) {
+    const seen = new Map();
+    for (let o = 0; o + 16 <= data.length; o += 16) {
+      const k = String.fromCharCode.apply(null, data.subarray(o, o + 16));
+      seen.set(k, (seen.get(k) || 0) + 1);
+    }
+    let max = 0;
+    for (const v of seen.values()) if (v > max) max = v;
+    return { total: Math.floor(data.length / 16), unique: seen.size, maxRepeat: max };
+  }
+/* CORE END */
+
+  const $ = (s) => document.querySelector(s);
+  const W = 256, H = 160, N = W * H;
+  const hex = (u8) => Array.from(u8, (x) => x.toString(16).padStart(2, "0")).join("");
+
+  /* ---------------- pictures ---------------- */
+  const work = document.createElement("canvas");
+  work.width = W; work.height = H;
+  const wctx = work.getContext("2d", { willReadFrequently: true });
+
+  function toGray(quantize) {
+    const d = wctx.getImageData(0, 0, W, H).data, g = new Uint8Array(N);
+    for (let i = 0; i < N; i++) {
+      let v = Math.round(0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]);
+      if (quantize) v = Math.min(3, Math.round(v / 85)) * 85;
+      g[i] = v;
+    }
+    return g;
+  }
+
+  const SOURCES = ["Text", "Penguin", "Rings", "Upload"];
+  let source = "Text", uploaded = null;
+
+  function drawSource() {
+    const c = wctx;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.fillStyle = "#000"; c.fillRect(0, 0, W, H);
+    if (source === "Text") {
+      const txt = ($("#msg").value || " ").trim() || " ";
+      c.fillStyle = "#fff"; c.textAlign = "center"; c.textBaseline = "middle";
+      const face = '"Geist", system-ui, -apple-system, "Segoe UI", sans-serif';
+      let size = 120; c.font = "700 " + size + "px " + face;
+      const w = c.measureText(txt).width;
+      if (w > W * 0.86) { size = Math.max(10, Math.floor(size * W * 0.86 / w)); c.font = "700 " + size + "px " + face; }
+      c.fillText(txt, W / 2, H / 2 + size * 0.04);
+      return true;
+    }
+    if (source === "Penguin") {
+      c.fillStyle = "#555"; c.fillRect(0, 0, W, H);
+      c.fillStyle = "#222"; c.beginPath(); c.ellipse(128, 92, 52, 58, 0, 0, 6.2832); c.fill();
+      c.beginPath(); c.arc(128, 38, 26, 0, 6.2832); c.fill();
+      c.beginPath(); c.ellipse(80, 96, 14, 40, 0.35, 0, 6.2832); c.fill();
+      c.beginPath(); c.ellipse(176, 96, 14, 40, -0.35, 0, 6.2832); c.fill();
+      c.fillStyle = "#fff"; c.beginPath(); c.ellipse(128, 100, 34, 44, 0, 0, 6.2832); c.fill();
+      c.beginPath(); c.arc(118, 34, 6, 0, 6.2832); c.arc(138, 34, 6, 0, 6.2832); c.fill();
+      c.fillStyle = "#000"; c.beginPath(); c.arc(119, 35, 2.4, 0, 6.2832); c.arc(137, 35, 2.4, 0, 6.2832); c.fill();
+      c.fillStyle = "#aaa"; c.beginPath(); c.moveTo(118, 46); c.lineTo(138, 46); c.lineTo(128, 58); c.closePath(); c.fill();
+      c.beginPath(); c.ellipse(108, 150, 16, 7, 0, 0, 6.2832); c.ellipse(148, 150, 16, 7, 0, 0, 6.2832); c.fill();
+      return true;
+    }
+    if (source === "Rings") {
+      for (let r = 150, k = 0; r > 0; r -= 14, k++) { c.fillStyle = k % 2 ? "#000" : "#fff"; c.beginPath(); c.arc(128, 80, r, 0, 6.2832); c.fill(); }
+      return true;
+    }
+    if (uploaded) {
+      const s = Math.max(W / uploaded.width, H / uploaded.height);
+      const w = uploaded.width * s, h = uploaded.height * s;
+      c.drawImage(uploaded, (W - w) / 2, (H - h) / 2, w, h);
+      return false;
+    }
+    c.fillStyle = "#333"; c.fillRect(0, 0, W, H);
+    return true;
+  }
+
+  /* ---------------- state ---------------- */
+  let key = null, rk = null, iv = null, ctrIV = null;
+  let plain = null, cE = null, cB = null, cC = null, tamper = 0;
+
+  function rnd(n) {
+    const a = new Uint8Array(n);
+    if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(a); else for (let i = 0; i < n; i++) a[i] = Math.floor(Math.random() * 256);
+    return a;
+  }
+  function newKey() {
+    key = rnd(16); rk = expandKey(key); iv = rnd(16); ctrIV = rnd(16); ctrIV.fill(0, 8);
+    $("#keyline").textContent = "Key " + hex(key) + "   IV " + hex(iv);
+  }
+
+  function paint(id, bytes, mark, ref) {
+    const cv = $(id), ctx = cv.getContext("2d"), img = ctx.createImageData(W, H);
+    for (let i = 0; i < N; i++) {
+      const v = bytes[i];
+      if (ref && v !== ref[i]) { img.data[i * 4] = 127; img.data[i * 4 + 1] = 176; img.data[i * 4 + 2] = 214; }
+      else { img.data[i * 4] = v; img.data[i * 4 + 1] = v; img.data[i * 4 + 2] = v; }
+      img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    if (mark != null) {
+      const x = mark % W, y = Math.floor(mark / W);
+      ctx.strokeStyle = "#7fb0d6"; ctx.lineWidth = 2; ctx.strokeRect(x - 5, y - 5, 10, 10);
+    }
+  }
+
+  function statText(data) {
+    const s = blockStats(data);
+    return s.unique.toLocaleString("en-US") + " unique of " + s.total.toLocaleString("en-US") + " blocks";
+  }
+
+  function tamperView() {
+    const specs = [["E", cE, (c) => ecb(rk, c, true)], ["B", cB, (c) => cbcDec(rk, c, iv)], ["C", cC, (c) => ctr(rk, c, ctrIV)]];
+    const why = {
+      E: (n) => "One 16-byte block turns to noise. The others are untouched.",
+      B: (n) => "One block turns to noise and the next has a single bit flipped, at the same spot.",
+      C: (n) => "Exactly the bit you chose flips. An attacker who knows the plaintext can edit it precisely."
+    };
+    for (const [k, c, dec] of specs) {
+      const t = c.slice(); t[tamper] ^= 1;
+      const p = dec(t);
+      let diff = 0;
+      for (let i = 0; i < N; i++) if (p[i] !== plain[i]) diff++;
+      paint("#d" + k, p, tamper, plain);
+      paint("#c" + k, c, tamper);
+      $("#t" + k).textContent = diff + (diff === 1 ? " byte" : " bytes") + " changed";
+      $("#w" + k).textContent = why[k](diff);
+    }
+  }
+
+  function recompute() {
+    const quant = drawSource();
+    plain = toGray(quant);
+    cE = ecb(rk, plain, false); cB = cbcEnc(rk, plain, iv); cC = ctr(rk, plain, ctrIV);
+    paint("#cP", plain);
+    $("#sP").textContent = statText(plain);
+    $("#sE").textContent = statText(cE); $("#sB").textContent = statText(cB); $("#sC").textContent = statText(cC);
+    tamperView();
+    verify();
+  }
+
+  /* ---------------- verification ---------------- */
+  let vToken = 0;
+  async function verify() {
+    const token = ++vToken, el = $("#verify");
+    const fk = Uint8Array.from({ length: 16 }, (_, i) => i), fp = Uint8Array.from({ length: 16 }, (_, i) => i * 17);
+    const frk = expandKey(fk), fo = new Uint8Array(16), back = new Uint8Array(16);
+    encryptBlock(frk, fp, 0, fo, 0); decryptBlock(frk, fo, 0, back, 0);
+    const fipsOk = hex(fo) === "69c4e0d86a7b0430d8cdb78070b4c55a" && hex(back) === hex(fp);
+    if (!fipsOk) { el.textContent = "Warning: the FIPS-197 test vector does not match."; return; }
+    try {
+      if (!(window.crypto && crypto.subtle)) throw new Error("no subtle");
+      const kc = await crypto.subtle.importKey("raw", key, "AES-CBC", false, ["encrypt"]);
+      const kt = await crypto.subtle.importKey("raw", key, "AES-CTR", false, ["encrypt"]);
+      const [a, b] = await Promise.all([
+        crypto.subtle.encrypt({ name: "AES-CBC", iv }, kc, plain),
+        crypto.subtle.encrypt({ name: "AES-CTR", counter: ctrIV, length: 64 }, kt, plain)
+      ]);
+      if (token !== vToken) return;
+      const same = (x, y) => { const u = new Uint8Array(x); for (let i = 0; i < y.length; i++) if (u[i] !== y[i]) return false; return true; };
+      el.textContent = same(a, cB) && same(b, cC)
+        ? "AES matches the FIPS-197 test vector, and CBC and CTR output matches the browser's Web Crypto. ECB is not offered by Web Crypto, so it is checked through the same block function."
+        : "Warning: output differs from the browser's Web Crypto.";
+    } catch (e) {
+      if (token !== vToken) return;
+      el.textContent = "AES matches the FIPS-197 test vector. Web Crypto is unavailable here for a second check.";
+    }
+  }
+
+  /* ---------------- interface ---------------- */
+  const srcEl = $("#src"), btns = {};
+  function setSource(name) {
+    source = name;
+    for (const n in btns) btns[n].setAttribute("aria-pressed", String(n === name));
+    $("#msgwrap").style.display = name === "Text" ? "" : "none";
+    if (name === "Upload" && !uploaded) { $("#file").click(); }
+    recompute();
+  }
+  for (const n of SOURCES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = n; b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => setSource(n));
+    srcEl.append(b); btns[n] = b;
+  }
+  $("#file").addEventListener("change", (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = () => { uploaded = img; source = "Upload"; setSource("Upload"); URL.revokeObjectURL(url); };
+    img.src = url;
+  });
+  let mt = 0;
+  $("#msg").addEventListener("input", () => { clearTimeout(mt); mt = setTimeout(recompute, 120); });
+  $("#newkey").addEventListener("click", () => { newKey(); recompute(); });
+
+  for (const id of ["#cE", "#cB", "#cC"]) {
+    $(id).addEventListener("click", (e) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      const x = Math.min(W - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * W)));
+      const y = Math.min(H - 1, Math.max(0, Math.floor((e.clientY - r.top) / r.height * H)));
+      tamper = y * W + x;
+      tamperView();
+    });
+  }
+
+  newKey();
+  tamper = Math.floor(Math.random() * N);
+  setSource("Text");
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (source === "Text") recompute(); });
+})();
+</script>
+</body>
+</html>
