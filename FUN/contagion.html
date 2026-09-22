@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Contagion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060709;
+    --ink: #ebe6db;
+    --mute: #858a94;
+    --line: rgba(235,230,219,0.16);
+    --ice: #78aedb;
+    --dusk: #8a78d6;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; background: var(--bg); scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--ink);
+    font-family: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 300; -webkit-font-smoothing: antialiased;
+  }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+
+  .title { position: fixed; left: 0; top: 0; pointer-events: none; padding: calc(env(safe-area-inset-top, 0px) + 22px) 26px 0; text-shadow: 0 1px 12px rgba(0,0,0,0.85); }
+  .title h1 { margin: 0; font-size: 20px; font-weight: 400; letter-spacing: 0.01em; }
+  .stats { margin: 10px 0 0; display: grid; grid-template-columns: auto auto; gap: 3px 18px; font-size: 13px; color: #b4b8c0; font-variant-numeric: tabular-nums; }
+  .stats dt { color: var(--mute); }
+  .stats dd { margin: 0; color: var(--ink); text-align: right; }
+  .status { margin: 10px 0 0; font-size: 13px; color: var(--ice); min-height: 1.4em; }
+
+  .chartbox { position: fixed; left: 0; bottom: 0; padding: 0 0 calc(env(safe-area-inset-bottom, 0px) + 20px) 26px; pointer-events: none; }
+  #chart { width: 300px; height: 92px; display: block; }
+  .legend { display: flex; gap: 14px; margin-top: 6px; font-size: 12px; color: var(--mute); }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+  .dock { position: fixed; right: 0; bottom: 0; padding: 0 18px calc(env(safe-area-inset-bottom, 0px) + 18px) 18px; }
+  .panel {
+    width: 284px; max-height: 80vh; overflow-y: auto;
+    background: rgba(6,7,9,0.76); border: 1px solid var(--line); border-radius: 10px;
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    padding: 14px 16px; font-size: 13px;
+  }
+  .panel summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 400; }
+  .panel summary::-webkit-details-marker { display: none; }
+  .panel summary::after { content: "+"; color: var(--mute); }
+  .panel[open] summary::after { content: "\2212"; }
+  .group { margin-top: 16px; }
+  .group > .cap { color: var(--mute); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .row { margin-top: 12px; }
+  .row label { display: flex; justify-content: space-between; color: var(--mute); margin-bottom: 7px; }
+  .row output { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  button { font: inherit; font-size: 13px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+  button:hover { border-color: rgba(235,230,219,0.5); }
+  button[aria-pressed="true"] { border-color: var(--ink); background: rgba(235,230,219,0.08); }
+  button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--ice); outline-offset: 3px; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 1px; background: rgba(235,230,219,0.28); margin: 6px 0; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: var(--ink); cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 11px; height: 11px; border-radius: 50%; background: var(--ink); border: 0; cursor: pointer; }
+  .hint { margin: 14px 0 0; color: var(--mute); line-height: 1.55; }
+
+  .cmp { margin-top: 12px; }
+  .cmp .r { display: grid; grid-template-columns: 78px 1fr 40px; align-items: center; gap: 8px; margin-top: 6px; color: var(--mute); }
+  .cmp .bar { height: 6px; background: rgba(235,230,219,0.08); border-radius: 3px; overflow: hidden; }
+  .cmp .bar i { display: block; height: 100%; background: var(--ice); }
+  .cmp .v { color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
+
+  .tip { position: fixed; z-index: 3; pointer-events: none; background: #0d0f13; border: 1px solid var(--line); border-radius: 6px; padding: 5px 9px; font-size: 12px; white-space: nowrap; transform: translate(12px, -130%); }
+  .tip[hidden] { display: none; }
+  body.ui-hidden .title, body.ui-hidden .dock, body.ui-hidden .chartbox { display: none; }
+  @media (max-width: 720px) { .dock { left: 0; } .panel { width: auto; } .chartbox { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Network of devices with a spreading infection"></canvas>
+
+<div class="title">
+  <h1>Contagion</h1>
+  <dl class="stats">
+    <dt>Tick</dt><dd id="sTick">0</dd>
+    <dt>Infected now</dt><dd id="sNow">0%</dd>
+    <dt>Ever infected</dt><dd id="sEver">0%</dd>
+    <dt>Estimated R<sub>0</sub></dt><dd id="sR0">0</dd>
+  </dl>
+  <p class="status" id="status"></p>
+</div>
+
+<div class="chartbox">
+  <canvas id="chart" role="img" aria-label="Stacked chart of infected, quarantined, immune and healthy devices over time"></canvas>
+  <div class="legend">
+    <span><i style="background:#78aedb"></i>Infected</span>
+    <span><i style="background:#ebe6db"></i>Quarantined</span>
+    <span><i style="background:#8a78d6"></i>Immune</span>
+    <span><i style="background:#4a4f59"></i>Healthy</span>
+  </div>
+</div>
+
+<div class="dock">
+  <details class="panel" id="panel">
+    <summary>Controls</summary>
+
+    <div class="group"><div class="cap">Network</div><div class="chips" id="topo"></div></div>
+    <div class="group"><div class="cap">Defense</div><div class="chips" id="policy"></div></div>
+    <div id="rows"></div>
+
+    <div class="group">
+      <div class="chips">
+        <button type="button" id="outbreak">Outbreak</button>
+        <button type="button" id="reset">Reset</button>
+        <button type="button" id="newnet">New network</button>
+        <button type="button" id="pause" aria-pressed="false">Pause</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <button type="button" id="compare">Compare defenses</button>
+      <div class="cmp" id="cmp" aria-live="polite"></div>
+    </div>
+
+    <p class="hint">Ring and Quarantine only notice an infected device 30% of the time each tick, so they react late. Click a device to patch it. Shift-click to quarantine it. Keys: space pauses, O starts an outbreak, N builds a new network, H hides the interface.</p>
+  </details>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(() => {
+  "use strict";
+
+/* CORE START */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildGraph(type, n, rand) {
+    const sets = Array.from({ length: n }, () => new Set());
+    const add = (a, b) => {
+      if (a === b || sets[a].has(b)) return false;
+      sets[a].add(b); sets[b].add(a); return true;
+    };
+    const del = (a, b) => { sets[a].delete(b); sets[b].delete(a); };
+
+    if (type === "random") {
+      const p = 4 / (n - 1);
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) if (rand() < p) add(i, j);
+    } else if (type === "smallworld") {
+      const lattice = [];
+      for (let i = 0; i < n; i++) for (let d = 1; d <= 2; d++) { add(i, (i + d) % n); lattice.push([i, (i + d) % n]); }
+      for (const [a, b] of lattice) {
+        if (rand() < 0.08) {
+          for (let tries = 0; tries < 20; tries++) {
+            const c = Math.floor(rand() * n);
+            if (c !== a && !sets[a].has(c)) { del(a, b); add(a, c); break; }
+          }
+        }
+      }
+    } else if (type === "scalefree") {
+      const m = 2, bag = [];
+      for (let i = 0; i <= m; i++) for (let j = i + 1; j <= m; j++) { add(i, j); bag.push(i, j); }
+      for (let v = m + 1; v < n; v++) {
+        const targets = new Set();
+        while (targets.size < m) targets.add(bag[Math.floor(rand() * bag.length)]);
+        for (const t of targets) { add(v, t); bag.push(v, t); }
+      }
+    } else {
+      const groups = 6, size = n / groups, pin = Math.min(1, 5 / size);
+      const grp = (i) => Math.min(groups - 1, Math.floor(i / size));
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+        if (grp(i) === grp(j) && rand() < pin) add(i, j);
+      }
+      for (let gi = 0; gi < groups; gi++) {
+        const gj = (gi + 1) % groups;
+        for (let e = 0; e < Math.max(2, Math.round(n / 90)); e++) {
+          const a = Math.min(n - 1, Math.floor((gi + rand()) * size));
+          const b = Math.min(n - 1, Math.floor((gj + rand()) * size));
+          add(a, b);
+        }
+      }
+    }
+
+    // connect any stray components to the largest one
+    const comp = new Int32Array(n).fill(-1);
+    const compNodes = [];
+    for (let s = 0; s < n; s++) {
+      if (comp[s] !== -1) continue;
+      const id = compNodes.length, queue = [s]; comp[s] = id;
+      for (let qi = 0; qi < queue.length; qi++) for (const w of sets[queue[qi]]) if (comp[w] === -1) { comp[w] = id; queue.push(w); }
+      compNodes.push(queue);
+    }
+    if (compNodes.length > 1) {
+      let big = 0;
+      for (let i = 1; i < compNodes.length; i++) if (compNodes[i].length > compNodes[big].length) big = i;
+      for (let i = 0; i < compNodes.length; i++) {
+        if (i === big) continue;
+        add(compNodes[i][0], compNodes[big][Math.floor(rand() * compNodes[big].length)]);
+      }
+    }
+
+    const adj = sets.map((s) => Int32Array.from(s));
+    const edges = [];
+    for (let i = 0; i < n; i++) for (const j of adj[i]) if (i < j) edges.push([i, j]);
+    const deg = adj.map((a) => a.length);
+    const order = Array.from({ length: n }, (_, i) => i).sort((a, b) => deg[b] - deg[a]);
+    return { n, adj, edges, deg, order };
+  }
+
+  function layout(g, rand, iters) {
+    const n = g.n, x = new Float32Array(n), y = new Float32Array(n);
+    for (let i = 0; i < n; i++) { const a = rand() * 6.2832, r = Math.sqrt(rand()) * 0.5; x[i] = 0.5 + Math.cos(a) * r; y[i] = 0.5 + Math.sin(a) * r; }
+    const k = 0.9 / Math.sqrt(n), dx = new Float32Array(n), dy = new Float32Array(n);
+    let temp = 0.1;
+    for (let it = 0; it < iters; it++) {
+      dx.fill(0); dy.fill(0);
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+        let ex = x[i] - x[j], ey = y[i] - y[j], d2 = ex * ex + ey * ey;
+        if (d2 < 1e-9) { ex = (rand() - 0.5) * 1e-3; ey = (rand() - 0.5) * 1e-3; d2 = ex * ex + ey * ey; }
+        const f = (k * k) / d2;
+        dx[i] += ex * f; dy[i] += ey * f; dx[j] -= ex * f; dy[j] -= ey * f;
+      }
+      for (const [a, b] of g.edges) {
+        const ex = x[a] - x[b], ey = y[a] - y[b], f = Math.sqrt(ex * ex + ey * ey) / k;
+        dx[a] -= ex * f; dy[a] -= ey * f; dx[b] += ex * f; dy[b] += ey * f;
+      }
+      for (let i = 0; i < n; i++) {
+        const d = Math.sqrt(dx[i] * dx[i] + dy[i] * dy[i]) + 1e-9, m = Math.min(d, temp);
+        x[i] += dx[i] / d * m; y[i] += dy[i] / d * m;
+      }
+      temp = Math.max(0.002, temp * 0.985);
+    }
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (let i = 0; i < n; i++) { x0 = Math.min(x0, x[i]); x1 = Math.max(x1, x[i]); y0 = Math.min(y0, y[i]); y1 = Math.max(y1, y[i]); }
+    for (let i = 0; i < n; i++) { x[i] = (x[i] - x0) / (x1 - x0 || 1); y[i] = (y[i] - y0) / (y1 - y0 || 1); }
+    return { x, y };
+  }
+
+  // States: 0 healthy, 1 infected, 2 patched (immune), 3 quarantined
+  function newSim(n) { return { st: new Uint8Array(n), ever: 0, t: 0, hubPtr: 0, hist: [] }; }
+
+  function counts(sim) {
+    const c = [0, 0, 0, 0];
+    for (let i = 0; i < sim.st.length; i++) c[sim.st[i]]++;
+    return [c[0], c[1], c[2], c[3]];
+  }
+
+  function seedInfection(sim, rand, howMany) {
+    const n = sim.st.length;
+    for (let done = 0, tries = 0; done < howMany && tries < 1000; tries++) {
+      const i = Math.floor(rand() * n);
+      if (sim.st[i] === 0) { sim.st[i] = 1; sim.ever++; done++; }
+    }
+    sim.hist.push(counts(sim));
+  }
+
+  function applyDefense(g, sim, P, rand) {
+    const st = sim.st, n = g.n;
+    let b = P.budget;
+    if (b <= 0 || P.policy === "none") return;
+    if (P.policy === "random") {
+      for (let tries = 0; b > 0 && tries < b * 8 + 8; tries++) {
+        const i = Math.floor(rand() * n);
+        if (st[i] === 0) { st[i] = 2; b--; }
+      }
+    } else if (P.policy === "hubs") {
+      while (b > 0 && sim.hubPtr < n) {
+        const i = g.order[sim.hubPtr++];
+        if (st[i] === 0) { st[i] = 2; b--; }
+      }
+    } else if (P.policy === "ring") {
+      const cand = new Set();
+      for (let i = 0; i < n; i++) if (st[i] === 1 && rand() < 0.3) for (const j of g.adj[i]) if (st[j] === 0) cand.add(j);
+      const arr = Array.from(cand);
+      for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+      for (let i = 0; i < arr.length && b > 0; i++, b--) st[arr[i]] = 2;
+    } else if (P.policy === "quarantine") {
+      const inf = [];
+      for (let i = 0; i < n; i++) if (st[i] === 1 && rand() < 0.3) inf.push(i);
+      for (let i = inf.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [inf[i], inf[j]] = [inf[j], inf[i]]; }
+      for (let i = 0; i < inf.length && b > 0; i++, b--) st[inf[i]] = 3;
+    }
+  }
+
+  function stepSim(g, sim, P, rand) {
+    const st = sim.st, n = g.n, infected = [], hits = [];
+    for (let i = 0; i < n; i++) if (st[i] === 1) infected.push(i);
+    for (const i of infected) {
+      const nb = g.adj[i];
+      for (let q = 0; q < nb.length; q++) { const j = nb[q]; if (st[j] === 0 && rand() < P.beta) hits.push([i, j]); }
+    }
+    for (const i of infected) if (rand() < P.gamma) st[i] = 2;
+    const fresh = [];
+    for (const [i, j] of hits) if (st[j] === 0) { st[j] = 1; sim.ever++; fresh.push([i, j]); }
+    applyDefense(g, sim, P, rand);
+    sim.t++;
+    sim.hist.push(counts(sim));
+    return fresh;
+  }
+
+  function estimateR0(g, P) {
+    let k1 = 0, k2 = 0;
+    for (let i = 0; i < g.n; i++) { k1 += g.deg[i]; k2 += g.deg[i] * g.deg[i]; }
+    k1 /= g.n; k2 /= g.n;
+    const T = P.beta / (P.beta + P.gamma - P.beta * P.gamma);
+    return T * (k2 - k1) / k1;
+  }
+
+  function runTrial(g, P, rand) {
+    const sim = newSim(g.n);
+    seedInfection(sim, rand, 1);
+    while (sim.t < 500 && sim.hist[sim.hist.length - 1][1] > 0) stepSim(g, sim, P, rand);
+    return sim.ever / g.n;
+  }
+/* CORE END */
+
+  /* ---------------- interface state ---------------- */
+  const $ = (s) => document.querySelector(s);
+  const canvas = $("#c"), ctx = canvas.getContext("2d");
+  const chart = $("#chart"), cctx = chart.getContext("2d");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const P = { beta: 0.12, gamma: 0.05, budget: 2, speed: 8, n: 350, topo: "scalefree", policy: "none" };
+  const TOPO = { random: "Random", smallworld: "Small world", scalefree: "Scale-free", clusters: "Clusters" };
+  const POLICY = { none: "None", random: "Random", hubs: "Hubs first", ring: "Ring", quarantine: "Quarantine" };
+  const COLORS = { S: "#9aa0aa", I: "#78aedb", R: "#8a78d6", Q: "#ebe6db" };
+
+  let seed = Math.floor(Math.random() * 1e6);
+  let rand = mulberry32(seed);
+  let g = null, sim = null, pos = null, pos0 = null;
+  let W = 0, H = 0, DPR = 1, area = { x: 0, y: 0, w: 0, h: 0 };
+  let sx = null, sy = null, radius = null;
+  let paused = false, acc = 0, lastT = 0, animStart = 0, finished = false;
+  let pulses = [], hover = -1;
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const cw = 300, chh = 92;
+    chart.width = Math.round(cw * DPR); chart.height = Math.round(chh * DPR);
+    cctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const right = W > 900 ? 320 : 30, left = W > 900 ? 60 : 30;
+    const top = 130, bottom = W > 720 ? 150 : 40;
+    area = { x: left, y: top, w: Math.max(200, W - left - right), h: Math.max(200, H - top - bottom) };
+    if (g) computeRadii();
+  }
+
+  function computeRadii() {
+    radius = new Float32Array(g.n);
+    const sc = Math.max(0.7, Math.min(1.4, Math.min(W, H) / 800)) * Math.pow(350 / g.n, 0.25);
+    for (let i = 0; i < g.n; i++) radius[i] = (1.7 + 0.62 * Math.sqrt(g.deg[i])) * sc;
+  }
+
+  function buildNetwork() {
+    seed = Math.floor(Math.random() * 1e6);
+    rand = mulberry32(seed);
+    g = buildGraph(P.topo, P.n, rand);
+    pos = layout(g, rand, g.n > 500 ? 130 : 200);
+    pos0 = { x: new Float32Array(g.n), y: new Float32Array(g.n) };
+    for (let i = 0; i < g.n; i++) { const a = rand() * 6.2832, r = Math.sqrt(rand()) * 0.5; pos0.x[i] = 0.5 + Math.cos(a) * r; pos0.y[i] = 0.5 + Math.sin(a) * r; }
+    sx = new Float32Array(g.n); sy = new Float32Array(g.n);
+    computeRadii();
+    animStart = reduceMotion ? -10000 : performance.now();
+    $("#cmp").textContent = "";
+    startOutbreak();
+  }
+
+  function startOutbreak() {
+    sim = newSim(g.n);
+    seedInfection(sim, rand, 1);
+    pulses = []; finished = false; acc = 0;
+    $("#status").textContent = "";
+    updateStats();
+  }
+
+  function resetOutbreak() { startOutbreak(); }
+
+  /* ---------------- ticking ---------------- */
+  function doTick() {
+    if (finished) return;
+    const fresh = stepSim(g, sim, P, rand);
+    if (!reduceMotion) { const now = performance.now(); for (let i = 0; i < fresh.length && pulses.length < 500; i++) pulses.push([fresh[i][0], fresh[i][1], now]); }
+    const c = sim.hist[sim.hist.length - 1];
+    if (c[1] === 0) {
+      finished = true;
+      $("#status").textContent = "Outbreak over. " + Math.round(sim.ever / g.n * 100) + "% of devices were infected at some point.";
+    }
+    updateStats();
+  }
+
+  function updateStats() {
+    const c = sim.hist[sim.hist.length - 1];
+    $("#sTick").textContent = String(sim.t);
+    $("#sNow").textContent = Math.round(c[1] / g.n * 100) + "%";
+    $("#sEver").textContent = Math.round(sim.ever / g.n * 100) + "%";
+    $("#sR0").textContent = estimateR0(g, P).toFixed(1);
+    drawChart();
+  }
+
+  /* ---------------- drawing ---------------- */
+  function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+  function place(now) {
+    const p = Math.min(1, (now - animStart) / 1100), e = ease(Math.max(0, p));
+    for (let i = 0; i < g.n; i++) {
+      const x = pos0.x[i] + (pos.x[i] - pos0.x[i]) * e, y = pos0.y[i] + (pos.y[i] - pos0.y[i]) * e;
+      sx[i] = area.x + x * area.w; sy[i] = area.y + y * area.h;
+    }
+  }
+
+  function draw(now) {
+    ctx.clearRect(0, 0, W, H);
+    place(now);
+    const st = sim.st;
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(235,230,219,0.07)";
+    ctx.beginPath();
+    for (const [a, b] of g.edges) {
+      const sa = st[a], sb = st[b];
+      if ((sa === 1 && sb === 0) || (sa === 0 && sb === 1)) continue;
+      ctx.moveTo(sx[a], sy[a]); ctx.lineTo(sx[b], sy[b]);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(120,174,219,0.34)";
+    ctx.beginPath();
+    for (const [a, b] of g.edges) {
+      const sa = st[a], sb = st[b];
+      if (!((sa === 1 && sb === 0) || (sa === 0 && sb === 1))) continue;
+      ctx.moveTo(sx[a], sy[a]); ctx.lineTo(sx[b], sy[b]);
+    }
+    ctx.stroke();
+
+    const passes = [[0, COLORS.S, 0.62], [2, COLORS.R, 0.95]];
+    for (const [state, color, alpha] of passes) {
+      ctx.fillStyle = color; ctx.globalAlpha = alpha; ctx.beginPath();
+      for (let i = 0; i < g.n; i++) if (st[i] === state) { ctx.moveTo(sx[i] + radius[i], sy[i]); ctx.arc(sx[i], sy[i], radius[i], 0, 6.2832); }
+      ctx.fill();
+    }
+    ctx.globalAlpha = 0.16; ctx.fillStyle = COLORS.I; ctx.beginPath();
+    for (let i = 0; i < g.n; i++) if (st[i] === 1) {
+      const rr = radius[i] * (2.4 + 0.5 * Math.sin(now / 230 + i));
+      ctx.moveTo(sx[i] + rr, sy[i]); ctx.arc(sx[i], sy[i], rr, 0, 6.2832);
+    }
+    ctx.fill();
+    ctx.globalAlpha = 1; ctx.beginPath();
+    for (let i = 0; i < g.n; i++) if (st[i] === 1) { ctx.moveTo(sx[i] + radius[i] * 1.1, sy[i]); ctx.arc(sx[i], sy[i], radius[i] * 1.1, 0, 6.2832); }
+    ctx.fill();
+    ctx.strokeStyle = COLORS.Q; ctx.lineWidth = 1.4; ctx.beginPath();
+    for (let i = 0; i < g.n; i++) if (st[i] === 3) { ctx.moveTo(sx[i] + radius[i] + 2, sy[i]); ctx.arc(sx[i], sy[i], radius[i] + 2, 0, 6.2832); }
+    ctx.stroke();
+
+    if (pulses.length) {
+      ctx.fillStyle = "#ffffff";
+      const keep = [];
+      for (const p of pulses) {
+        const age = (now - p[2]) / 380;
+        if (age >= 1) continue;
+        keep.push(p);
+        const x = sx[p[0]] + (sx[p[1]] - sx[p[0]]) * age, y = sy[p[0]] + (sy[p[1]] - sy[p[0]]) * age;
+        ctx.globalAlpha = 1 - age * 0.6;
+        ctx.beginPath(); ctx.arc(x, y, 1.8, 0, 6.2832); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      pulses = keep;
+    }
+
+    if (hover >= 0) {
+      ctx.strokeStyle = "rgba(235,230,219,0.8)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(sx[hover], sy[hover], radius[hover] + 5, 0, 6.2832); ctx.stroke();
+    }
+  }
+
+  function drawChart() {
+    const w = 300, h = 92, hist = sim.hist, n = g.n;
+    cctx.clearRect(0, 0, w, h);
+    const span = Math.max(120, hist.length - 1);
+    const cols = [["#78aedb", 1], ["#ebe6db", 3], ["#8a78d6", 2], ["#3f444e", 0]];
+    const xAt = (t) => t / span * w;
+    // stack order from the bottom: infected, quarantined, patched, healthy
+    for (let layer = 0; layer < 4; layer++) {
+      cctx.beginPath();
+      const top = (k) => { let s = 0; for (let l = 0; l <= layer; l++) s += hist[k][cols[l][1]]; return s; };
+      const bot = (k) => { let s = 0; for (let l = 0; l < layer; l++) s += hist[k][cols[l][1]]; return s; };
+      for (let k = 0; k < hist.length; k++) { const y = h - top(k) / n * h; if (k === 0) cctx.moveTo(xAt(k), y); else cctx.lineTo(xAt(k), y); }
+      for (let k = hist.length - 1; k >= 0; k--) cctx.lineTo(xAt(k), h - bot(k) / n * h);
+      cctx.closePath();
+      cctx.fillStyle = cols[layer][0]; cctx.globalAlpha = layer === 0 ? 0.95 : layer === 3 ? 0.5 : 0.75;
+      cctx.fill();
+    }
+    cctx.globalAlpha = 1;
+  }
+
+  /* ---------------- loop ---------------- */
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dt = Math.min(200, now - (lastT || now)); lastT = now;
+    if (!paused && !finished && now - animStart > 700) {
+      acc += dt;
+      const interval = 1000 / P.speed;
+      let guard = 0;
+      while (acc >= interval && guard++ < 6) { acc -= interval; doTick(); }
+    }
+    draw(now);
+  }
+
+  /* ---------------- interaction ---------------- */
+  function nearest(e) {
+    let best = -1, bd = 16 * 16;
+    for (let i = 0; i < g.n; i++) { const dx = sx[i] - e.clientX, dy = sy[i] - e.clientY, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = i; } }
+    return best;
+  }
+  const tip = $("#tip");
+  const STATE_NAMES = ["Healthy", "Infected", "Immune", "Quarantined"];
+  canvas.addEventListener("pointermove", (e) => {
+    hover = nearest(e);
+    if (hover >= 0) {
+      tip.hidden = false;
+      tip.textContent = "Device " + hover + ", " + g.deg[hover] + " links, " + STATE_NAMES[sim.st[hover]].toLowerCase();
+      tip.style.left = e.clientX + "px"; tip.style.top = e.clientY + "px";
+    } else tip.hidden = true;
+  });
+  canvas.addEventListener("pointerleave", () => { hover = -1; tip.hidden = true; });
+  canvas.addEventListener("pointerdown", (e) => {
+    const i = nearest(e);
+    if (i < 0) return;
+    if (e.shiftKey) { if (sim.st[i] === 0 || sim.st[i] === 1) sim.st[i] = 3; }
+    else if (sim.st[i] === 0 || sim.st[i] === 1) sim.st[i] = 2;
+    sim.hist[sim.hist.length - 1] = counts(sim);
+    if (sim.hist[sim.hist.length - 1][1] === 0) { finished = true; $("#status").textContent = "Outbreak over. " + Math.round(sim.ever / g.n * 100) + "% of devices were infected at some point."; }
+    updateStats();
+  });
+
+  /* ---------------- panel ---------------- */
+  function chips(el, map, key, onSet) {
+    const btns = {};
+    for (const k in map) {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = map[k]; b.setAttribute("aria-pressed", String(P[key] === k));
+      b.addEventListener("click", () => { P[key] = k; for (const q in btns) btns[q].setAttribute("aria-pressed", String(q === k)); onSet && onSet(k); });
+      el.append(b); btns[k] = b;
+    }
+  }
+  chips($("#topo"), TOPO, "topo", () => buildNetwork());
+  chips($("#policy"), POLICY, "policy", () => { if (sim) sim.hubPtr = 0; updateStats(); });
+
+  const CONTROLS = [
+    { k: "n", label: "Devices", min: 100, max: 800, step: 50, dec: 0, rebuild: true },
+    { k: "beta", label: "Transmission", min: 0.02, max: 0.6, step: 0.01, dec: 2 },
+    { k: "gamma", label: "Cleanup rate", min: 0.01, max: 0.3, step: 0.01, dec: 2 },
+    { k: "budget", label: "Defense per tick", min: 0, max: 10, step: 1, dec: 0 },
+    { k: "speed", label: "Speed", min: 1, max: 30, step: 1, dec: 0, unit: " ticks/s" }
+  ];
+  const rowsEl = $("#rows");
+  for (const c of CONTROLS) {
+    const row = document.createElement("div"); row.className = "row";
+    const lab = document.createElement("label"); const id = "c-" + c.k; lab.htmlFor = id;
+    const name = document.createElement("span"); name.textContent = c.label;
+    const out = document.createElement("output");
+    lab.append(name, out);
+    const inp = document.createElement("input");
+    inp.type = "range"; inp.id = id; inp.min = c.min; inp.max = c.max; inp.step = c.step; inp.value = P[c.k];
+    const show = () => { out.textContent = (+P[c.k]).toFixed(c.dec) + (c.unit || ""); };
+    inp.addEventListener("input", () => { P[c.k] = +inp.value; show(); if (sim) updateStats(); });
+    if (c.rebuild) inp.addEventListener("change", () => buildNetwork());
+    show();
+    row.append(lab, inp); rowsEl.append(row);
+  }
+
+  $("#outbreak").addEventListener("click", () => resetOutbreak());
+  $("#reset").addEventListener("click", () => resetOutbreak());
+  $("#newnet").addEventListener("click", () => buildNetwork());
+  $("#pause").addEventListener("click", () => setPaused(!paused));
+  function setPaused(v) { paused = v; const b = $("#pause"); b.textContent = v ? "Play" : "Pause"; b.setAttribute("aria-pressed", String(v)); }
+
+  $("#compare").addEventListener("click", () => {
+    const box = $("#cmp");
+    box.textContent = "Running trials";
+    setTimeout(() => {
+      const trials = 40, res = [];
+      for (const pol in POLICY) {
+        const Q = { beta: P.beta, gamma: P.gamma, budget: P.budget, policy: pol };
+        let tot = 0;
+        for (let t = 0; t < trials; t++) tot += runTrial(g, Q, mulberry32(seed * 131 + t * 977 + pol.length));
+        res.push([pol, tot / trials]);
+      }
+      box.textContent = "";
+      const cap = document.createElement("div");
+      cap.style.color = "var(--mute)";
+      cap.textContent = "Average share ever infected, " + trials + " outbreaks each, defense budget " + P.budget + " per tick.";
+      box.append(cap);
+      for (const [pol, v] of res) {
+        const r = document.createElement("div"); r.className = "r";
+        const a = document.createElement("span"); a.textContent = POLICY[pol];
+        const bar = document.createElement("span"); bar.className = "bar";
+        const fill = document.createElement("i"); fill.style.width = Math.round(v * 100) + "%"; bar.append(fill);
+        const val = document.createElement("span"); val.className = "v"; val.textContent = Math.round(v * 100) + "%";
+        r.append(a, bar, val); box.append(r);
+      }
+    }, 30);
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.target && e.target.tagName === "INPUT") return;
+    if (e.code === "Space") { e.preventDefault(); setPaused(!paused); }
+    else if (e.key === "o" || e.key === "O") resetOutbreak();
+    else if (e.key === "n" || e.key === "N") buildNetwork();
+    else if (e.key === "h" || e.key === "H") document.body.classList.toggle("ui-hidden");
+  });
+
+  let rt = 0;
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(resize, 150); });
+
+  resize();
+  if (window.innerWidth > 720) $("#panel").open = true;
+  buildNetwork();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
