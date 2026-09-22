@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Turing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060709;
+    --ink: #ebe6db;
+    --mute: #858a94;
+    --line: rgba(235,230,219,0.16);
+    --ice: #78aedb;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; background: var(--bg); scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    height: 100%; margin: 0; overflow: hidden;
+    background: var(--bg); color: var(--ink);
+    font-family: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 300; -webkit-font-smoothing: antialiased;
+  }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+
+  .title { position: fixed; left: 0; top: 0; pointer-events: none; padding: calc(env(safe-area-inset-top, 0px) + 22px) 26px 0; }
+  .title { text-shadow: 0 1px 12px rgba(0,0,0,0.85); }
+  .title h1 { margin: 0; font-size: 20px; font-weight: 400; letter-spacing: 0.01em; }
+  .title p { margin: 6px 0 0; font-size: 13px; color: #b4b8c0; font-variant-numeric: tabular-nums; max-width: 34ch; }
+
+  .dock { position: fixed; right: 0; bottom: 0; padding: 0 18px calc(env(safe-area-inset-bottom, 0px) + 18px) 18px; }
+  .panel {
+    width: 272px; max-height: 72vh; overflow-y: auto;
+    background: rgba(6,7,9,0.74); border: 1px solid var(--line); border-radius: 10px;
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    padding: 14px 16px; font-size: 13px;
+  }
+  .panel summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 400; }
+  .panel summary::-webkit-details-marker { display: none; }
+  .panel summary::after { content: "+"; color: var(--mute); }
+  .panel[open] summary::after { content: "\2212"; }
+  .group { margin-top: 16px; }
+  .group > .cap { color: var(--mute); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .row { margin-top: 12px; }
+  .row label { display: flex; justify-content: space-between; color: var(--mute); margin-bottom: 7px; }
+  .row output { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .row.off { opacity: 0.4; }
+
+  button { font: inherit; font-size: 13px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+  button:hover { border-color: rgba(235,230,219,0.5); }
+  button[aria-pressed="true"] { border-color: var(--ink); background: rgba(235,230,219,0.08); }
+  button[hidden] { display: none; }
+  button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--ice); outline-offset: 3px; }
+  .textin { width: 100%; font: inherit; font-size: 14px; color: var(--ink); background: #0b0c0f; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+  .textin::placeholder { color: var(--mute); }
+  .textin:hover { border-color: rgba(235,230,219,0.5); }
+
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 1px; background: rgba(235,230,219,0.28); margin: 6px 0; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: var(--ink); cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 11px; height: 11px; border-radius: 50%; background: var(--ink); border: 0; cursor: pointer; }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 12px; color: var(--mute); cursor: pointer; }
+  .check input { accent-color: #ebe6db; }
+  .hint { margin: 14px 0 0; color: var(--mute); line-height: 1.55; }
+
+  #fallback { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 32px; text-align: center; color: var(--mute); font-size: 15px; line-height: 1.6; }
+  #fallback[hidden] { display: none; }
+  body.ui-hidden .title, body.ui-hidden .dock { display: none; }
+  @media (max-width: 560px) { .dock { left: 0; } .panel { width: auto; } }
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="Reaction-diffusion patterns growing and branching"></canvas>
+<div id="fallback" hidden>This page needs WebGL 2 with floating-point render targets. Try a recent desktop browser.</div>
+
+<div class="title">
+  <h1>Turing</h1>
+  <p id="hud">Starting</p>
+</div>
+
+<div class="dock">
+  <details class="panel" id="panel">
+    <summary>Controls</summary>
+
+    <div class="group">
+      <div class="cap"><label for="seedtext">Seed text</label></div>
+      <input class="textin" type="text" id="seedtext" dir="auto" placeholder="Type a word to grow it" autocomplete="off" spellcheck="false" maxlength="24">
+    </div>
+
+    <div class="group">
+      <div class="cap">Regime</div>
+      <div class="chips" id="modes"></div>
+    </div>
+
+    <div id="rows"></div>
+
+    <label class="check"><input type="checkbox" id="mono"> Monochrome</label>
+
+    <div class="group">
+      <div class="chips">
+        <button type="button" id="reseed">Reseed</button>
+        <button type="button" id="pause" aria-pressed="false">Pause</button>
+        <button type="button" id="save">Save frame</button>
+      </div>
+      <p class="hint" id="startLabel"></p>
+    </div>
+
+    <p class="hint">Hold to paint reagent. Hold Shift or use the right button to erase. Keys: space pauses, R reseeds, 1 to 5 pick a regime, S saves a frame, H hides the interface.</p>
+  </details>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const canvas = $("#gl");
+  const fallback = $("#fallback");
+
+  function fail(msg) {
+    fallback.hidden = false;
+    if (msg) fallback.textContent = msg;
+    $(".title").style.display = "none";
+    $(".dock").style.display = "none";
+  }
+
+  const gl = canvas.getContext("webgl2", { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: "high-performance" });
+  if (!gl || !gl.getExtension("EXT_color_buffer_float")) { fail(); return; }
+  const linearOK = !!gl.getExtension("OES_texture_float_linear");
+
+  /* ---------------- shaders ---------------- */
+  const HEAD = "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n";
+
+  const VS = HEAD + `
+    out vec2 vUv;
+    void main() {
+      vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+      vUv = p;
+      gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+    }`;
+
+  // Gray-Scott: u is the feed chemical, v the autocatalyst.
+  const FS_STEP = HEAD + `
+    uniform sampler2D uState;
+    uniform vec2 uSim, uFR, uKR;
+    uniform float uF, uK, uDu, uDv;
+    uniform int uMap;
+    uniform vec4 uPaint;
+    out vec4 o;
+
+    vec2 at(ivec2 p, ivec2 s, int dx, int dy) {
+      return texelFetch(uState, (p + ivec2(dx, dy) + s) % s, 0).rg;
+    }
+
+    void main() {
+      ivec2 p = ivec2(gl_FragCoord.xy);
+      ivec2 s = ivec2(uSim);
+      vec2 c = texelFetch(uState, p, 0).rg;
+      vec2 lap = -c
+        + 0.2  * (at(p, s, 1, 0) + at(p, s, -1, 0) + at(p, s, 0, 1) + at(p, s, 0, -1))
+        + 0.05 * (at(p, s, 1, 1) + at(p, s, -1, 1) + at(p, s, 1, -1) + at(p, s, -1, -1));
+      vec2 uv = (vec2(p) + 0.5) / uSim;
+      float F = uMap == 1 ? mix(uFR.x, uFR.y, uv.y) : uF;
+      float K = uMap == 1 ? mix(uKR.x, uKR.y, uv.x) : uK;
+      float r = c.x * c.y * c.y;
+      float u = c.x + uDu * lap.x - r + F * (1.0 - c.x);
+      float v = c.y + uDv * lap.y + r - (F + K) * c.y;
+      if (uPaint.w != 0.0 && distance(vec2(p) + 0.5, uPaint.xy) < uPaint.z) {
+        if (uPaint.w > 0.0) { v = max(v, 0.9); u = min(u, 0.5); }
+        else { v = 0.0; u = 1.0; }
+      }
+      o = vec4(clamp(u, 0.0, 1.0), clamp(v, 0.0, 1.0), 0.0, 1.0);
+    }`;
+
+  const FS_DISPLAY = HEAD + `
+    uniform sampler2D uState;
+    uniform vec2 uSim;
+    uniform float uContrast, uRelief, uTime;
+    uniform int uMono;
+    in vec2 vUv;
+    out vec4 o;
+
+    float hash(vec2 p) {
+      p = fract(p * vec2(123.34, 456.21));
+      p += dot(p, p + 45.32);
+      return fract(p.x * p.y);
+    }
+
+    void main() {
+      vec2 px = 1.0 / uSim;
+      float h  = texture(uState, vUv).g;
+      float hL = texture(uState, vUv - vec2(px.x, 0.0)).g;
+      float hR = texture(uState, vUv + vec2(px.x, 0.0)).g;
+      float hD = texture(uState, vUv - vec2(0.0, px.y)).g;
+      float hU = texture(uState, vUv + vec2(0.0, px.y)).g;
+
+      float t = clamp(h * uContrast, 0.0, 1.0);
+      vec3 c0 = vec3(0.024, 0.027, 0.036);
+      vec3 c1 = vec3(0.13, 0.20, 0.28);
+      vec3 c2 = vec3(0.47, 0.68, 0.86);
+      vec3 c3 = vec3(0.93, 0.90, 0.86);
+      vec3 col = mix(c0, c1, smoothstep(0.0, 0.35, t));
+      col = mix(col, c2, smoothstep(0.30, 0.75, t));
+      col = mix(col, c3, smoothstep(0.72, 1.0, t));
+      if (uMono == 1) col = vec3(dot(col, vec3(0.33))) * vec3(1.0, 0.98, 0.95) * 1.15;
+
+      vec3 n = normalize(vec3((hL - hR) * uRelief, (hD - hU) * uRelief, 1.0));
+      vec3 L = normalize(vec3(-0.5, 0.6, 0.65));
+      float diff = clamp(dot(n, L), 0.0, 1.0);
+      float spec = pow(clamp(dot(reflect(-L, n), vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 26.0);
+      col *= 0.70 + 0.55 * diff;
+      col += spec * 0.22 * vec3(0.9, 0.95, 1.0);
+
+      vec2 q = (vUv - 0.5) * 1.15;
+      col *= mix(0.55, 1.0, smoothstep(1.15, 0.2, length(q)));
+      col += (hash(gl_FragCoord.xy + uTime) - 0.5) * 0.016;
+      o = vec4(col, 1.0);
+    }`;
+
+  /* ---------------- gl helpers ---------------- */
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  function program(vs, fs) {
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER, vs));
+    gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    const u = {};
+    const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); u[info.name] = gl.getUniformLocation(p, info.name); }
+    return { p, u };
+  }
+  function bindTex(unit, tex) { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tex); }
+
+  let pStep, pDisp;
+  try { pStep = program(VS, FS_STEP); pDisp = program(VS, FS_DISPLAY); }
+  catch (err) { fail("Shader setup failed: " + err.message); return; }
+  gl.bindVertexArray(gl.createVertexArray());
+
+  /* ---------------- state ---------------- */
+  const FR = [0.012, 0.078], KR = [0.054, 0.069];
+  const P = { f: 0.0545, k: 0.062, speed: window.matchMedia("(pointer: coarse)").matches ? 6 : 10, brush: 10, contrast: 1.9, relief: 2.5, mono: false, map: true };
+  const MODES = {
+    Map:     null,
+    Coral:   { f: 0.0545, k: 0.062 },
+    Mitosis: { f: 0.0367, k: 0.0649 },
+    Maze:    { f: 0.029,  k: 0.057 },
+    Worms:   { f: 0.078,  k: 0.061 }
+  };
+  const MODE_NAMES = Object.keys(MODES);
+  const START_NAMES = ["Scattered seeds", "Single seed at the center", "Fine dust"];
+
+  let simW = 0, simH = 0, cw = 0, ch = 0;
+  let tex = [null, null], fbo = [null, null], cur = 0;
+  let paused = false, startMode = 0, saveNow = false, activeMode = "Map";
+  const ptr = { x: 0, y: 0, in: false, down: false, erase: false, cx: 0, cy: 0 };
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function sizeAll() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    cw = Math.max(2, Math.floor(window.innerWidth * dpr));
+    ch = Math.max(2, Math.floor(window.innerHeight * dpr));
+    canvas.width = cw; canvas.height = ch;
+    simW = Math.max(320, Math.min(1100, Math.round(window.innerWidth * 0.7)));
+    simH = Math.max(200, Math.round(simW * window.innerHeight / window.innerWidth));
+  }
+
+  function allocate() {
+    for (let i = 0; i < 2; i++) {
+      if (tex[i]) gl.deleteTexture(tex[i]);
+      if (fbo[i]) gl.deleteFramebuffer(fbo[i]);
+      const t = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, simW, simH, 0, gl.RGBA, gl.FLOAT, null);
+      const filter = linearOK ? gl.LINEAR : gl.NEAREST;
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      const f = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+      if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) throw new Error("Framebuffer incomplete");
+      tex[i] = t; fbo[i] = f;
+    }
+  }
+
+  /* ---------------- seeding ---------------- */
+  const maskCanvas = document.createElement("canvas");
+  function textMask(txt) {
+    maskCanvas.width = simW; maskCanvas.height = simH;
+    const c = maskCanvas.getContext("2d", { willReadFrequently: true });
+    c.fillStyle = "#000"; c.fillRect(0, 0, simW, simH);
+    c.fillStyle = "#fff"; c.textAlign = "center"; c.textBaseline = "middle";
+    const face = '"Geist", system-ui, -apple-system, "Segoe UI", sans-serif';
+    let size = Math.floor(simH * 0.42);
+    c.font = "700 " + size + "px " + face;
+    const w = c.measureText(txt).width, maxW = simW * 0.78;
+    if (w > maxW) { size = Math.max(12, Math.floor(size * maxW / w)); c.font = "700 " + size + "px " + face; }
+    c.fillText(txt, simW / 2, simH / 2);
+    return c.getImageData(0, 0, simW, simH).data;
+  }
+
+  function seedState(mode) {
+    const W = simW, H = simH, d = new Float32Array(W * H * 4);
+    for (let i = 0; i < W * H; i++) { d[i * 4] = 1; d[i * 4 + 3] = 1; }
+    const dot = (cx, cy, r) => {
+      const y0 = Math.max(0, Math.floor(cy - r)), y1 = Math.min(H - 1, Math.ceil(cy + r));
+      const x0 = Math.max(0, Math.floor(cx - r)), x1 = Math.min(W - 1, Math.ceil(cx + r));
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+        if ((x - cx) * (x - cx) + (y - cy) * (y - cy) <= r * r) { const i = (y * W + x) * 4; d[i] = 0.5; d[i + 1] = 1; }
+      }
+    };
+    const txt = $("#seedtext").value.trim();
+    if (txt) {
+      const m = textMask(txt);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const lum = m[(y * W + x) * 4] / 255;
+        if (lum > 0.5) { const i = ((H - 1 - y) * W + x) * 4; d[i] = 0.5; d[i + 1] = 1; }
+      }
+    } else if (mode === 0) {
+      for (let i = 0; i < 9; i++) dot(Math.random() * W, Math.random() * H, 4 + Math.random() * 10);
+    } else if (mode === 1) {
+      dot(W / 2, H / 2, 14);
+    } else {
+      for (let i = 0; i < W * H * 0.004; i++) dot(Math.random() * W, Math.random() * H, 1.5);
+    }
+    for (let i = 0; i < W * H * 0.0006; i++) dot(Math.random() * W, Math.random() * H, 2);
+    bindTex(0, tex[cur]);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, W, H, gl.RGBA, gl.FLOAT, d);
+    $("#startLabel").textContent = txt ? "Start: your text." : "Start: " + START_NAMES[mode].toLowerCase() + ".";
+  }
+
+  /* ---------------- frame ---------------- */
+  function stepFrame() {
+    gl.useProgram(pStep.p);
+    gl.disable(gl.BLEND);
+    const u = pStep.u;
+    gl.uniform2f(u.uSim, simW, simH);
+    gl.uniform2f(u.uFR, FR[0], FR[1]);
+    gl.uniform2f(u.uKR, KR[0], KR[1]);
+    gl.uniform1f(u.uF, P.f);
+    gl.uniform1f(u.uK, P.k);
+    gl.uniform1f(u.uDu, 1.0);
+    gl.uniform1f(u.uDv, 0.5);
+    gl.uniform1i(u.uMap, P.map ? 1 : 0);
+    gl.uniform1i(u.uState, 0);
+    const paintMode = ptr.down ? (ptr.erase ? -1 : 1) : 0;
+    gl.viewport(0, 0, simW, simH);
+    for (let i = 0; i < P.speed; i++) {
+      gl.uniform4f(u.uPaint, ptr.x, ptr.y, P.brush, i === 0 ? paintMode : 0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[1 - cur]);
+      bindTex(0, tex[cur]);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      cur = 1 - cur;
+    }
+  }
+
+  function display(now) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, cw, ch);
+    gl.useProgram(pDisp.p);
+    bindTex(0, tex[cur]);
+    const u = pDisp.u;
+    gl.uniform1i(u.uState, 0);
+    gl.uniform2f(u.uSim, simW, simH);
+    gl.uniform1f(u.uContrast, P.contrast);
+    gl.uniform1f(u.uRelief, P.relief);
+    gl.uniform1f(u.uTime, (now || 0) * 0.001);
+    gl.uniform1i(u.uMono, P.mono ? 1 : 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  /* ---------------- interface ---------------- */
+  const CONTROLS = [
+    { k: "f", label: "Feed rate", min: 0.01, max: 0.1, step: 0.0005, dec: 4, gated: true },
+    { k: "k", label: "Kill rate", min: 0.04, max: 0.075, step: 0.0005, dec: 4, gated: true },
+    { k: "speed", label: "Speed", min: 1, max: 24, step: 1, dec: 0, unit: "\u00d7" },
+    { k: "brush", label: "Brush size", min: 3, max: 40, step: 1, dec: 0, unit: " px" },
+    { k: "contrast", label: "Contrast", min: 0.5, max: 5, step: 0.1, dec: 1 },
+    { k: "relief", label: "Relief", min: 0, max: 6, step: 0.25, dec: 2 }
+  ];
+  const ctl = {};
+  const rowsEl = $("#rows");
+  for (const c of CONTROLS) {
+    const row = document.createElement("div");
+    row.className = "row";
+    const lab = document.createElement("label");
+    const id = "c-" + c.k;
+    lab.htmlFor = id;
+    const name = document.createElement("span"); name.textContent = c.label;
+    const out = document.createElement("output");
+    lab.append(name, out);
+    const inp = document.createElement("input");
+    inp.type = "range"; inp.id = id; inp.min = c.min; inp.max = c.max; inp.step = c.step;
+    inp.addEventListener("input", () => { P[c.k] = +inp.value; out.textContent = P[c.k].toFixed(c.dec) + (c.unit || ""); updateHud(); });
+    row.append(lab, inp);
+    rowsEl.append(row);
+    ctl[c.k] = { inp, out, c, row };
+  }
+  function syncControls() {
+    for (const k in ctl) {
+      const { inp, out, c, row } = ctl[k];
+      inp.value = P[k];
+      out.textContent = P[k].toFixed(c.dec) + (c.unit || "");
+      if (c.gated) { inp.disabled = P.map; row.classList.toggle("off", P.map); }
+    }
+  }
+
+  const hud = $("#hud");
+  function updateHud(e) {
+    if (P.map) {
+      if (e && ptr.in) {
+        const fx = FR[0] + (FR[1] - FR[0]) * (1 - e.clientY / window.innerHeight);
+        const kx = KR[0] + (KR[1] - KR[0]) * (e.clientX / window.innerWidth);
+        hud.textContent = "Feed " + fx.toFixed(4) + ", kill " + kx.toFixed(4);
+      } else if (!ptr.in) {
+        hud.textContent = "Parameter map. Feed rises upward, kill rises to the right. Move the pointer to read them.";
+      }
+    } else {
+      hud.textContent = "Feed " + P.f.toFixed(4) + ", kill " + P.k.toFixed(4);
+    }
+  }
+
+  const modesEl = $("#modes");
+  const modeBtns = {};
+  function setMode(name) {
+    activeMode = name;
+    if (MODES[name]) { P.map = false; P.f = MODES[name].f; P.k = MODES[name].k; } else { P.map = true; }
+    syncControls();
+    for (const n in modeBtns) modeBtns[n].setAttribute("aria-pressed", String(n === name));
+    updateHud();
+  }
+  for (const n of MODE_NAMES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = n; b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => setMode(n));
+    modesEl.append(b); modeBtns[n] = b;
+  }
+
+  $("#mono").addEventListener("change", (e) => { P.mono = e.target.checked; });
+  function setPaused(v) { paused = v; const b = $("#pause"); b.textContent = v ? "Play" : "Pause"; b.setAttribute("aria-pressed", String(v)); }
+  function reseed(next) { if (next) startMode = (startMode + 1) % START_NAMES.length; seedState(startMode); }
+  $("#reseed").addEventListener("click", () => reseed(true));
+  $("#pause").addEventListener("click", () => setPaused(!paused));
+  let seedTimer = 0;
+  $("#seedtext").addEventListener("input", () => { clearTimeout(seedTimer); seedTimer = setTimeout(() => reseed(false), 350); });
+
+  const saveBtn = $("#save");
+  if (window.top !== window.self) saveBtn.hidden = true;
+  saveBtn.addEventListener("click", () => { saveNow = true; });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "SELECT")) return;
+    if (e.code === "Space") { e.preventDefault(); setPaused(!paused); }
+    else if (e.key === "r" || e.key === "R") reseed(true);
+    else if (e.key === "h" || e.key === "H") document.body.classList.toggle("ui-hidden");
+    else if ((e.key === "s" || e.key === "S") && !saveBtn.hidden) saveNow = true;
+    else if (e.key >= "1" && e.key <= "5") setMode(MODE_NAMES[+e.key - 1]);
+  });
+
+  function toSim(e) {
+    const r = canvas.getBoundingClientRect();
+    ptr.x = (e.clientX - r.left) / r.width * simW;
+    ptr.y = (1 - (e.clientY - r.top) / r.height) * simH;
+  }
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  canvas.addEventListener("pointermove", (e) => { toSim(e); ptr.in = true; updateHud(e); });
+  canvas.addEventListener("pointerdown", (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    toSim(e); ptr.in = true; ptr.down = true; ptr.erase = e.shiftKey || e.button === 2;
+  });
+  canvas.addEventListener("pointerup", (e) => { ptr.down = false; if (e.pointerType !== "mouse") ptr.in = false; });
+  canvas.addEventListener("pointercancel", () => { ptr.down = false; ptr.in = false; });
+  canvas.addEventListener("pointerleave", () => { if (!ptr.down) { ptr.in = false; updateHud(); } });
+
+  /* ---------------- lifecycle ---------------- */
+  function rebuild() { sizeAll(); allocate(); seedState(startMode); }
+  let resizeTimer = 0;
+  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(rebuild, 220); });
+
+  function tick(now) {
+    requestAnimationFrame(tick);
+    if (!paused) stepFrame();
+    display(now);
+    if (saveNow) {
+      saveNow = false;
+      try {
+        const a = document.createElement("a");
+        a.download = "turing-" + Date.now() + ".png";
+        a.href = canvas.toDataURL("image/png");
+        a.click();
+      } catch (err) { /* ignore */ }
+    }
+  }
+
+  try {
+    setMode("Map");
+    if (window.innerWidth > 560) $("#panel").open = true;
+    rebuild();
+    if (reduceMotion) { for (let i = 0; i < 60; i++) stepFrame(); setPaused(true); }
+    requestAnimationFrame(tick);
+  } catch (err) {
+    fail("Setup failed: " + err.message);
+  }
+})();
+</script>
+</body>
+</html>
