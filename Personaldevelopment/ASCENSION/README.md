@@ -52,23 +52,6 @@ Sealing a day locks it and links it to the previous sealed day, forming an appen
 
 ---
 
-## Quick start
-
-```bash
-git clone https://github.com/<your-username>/ascension.git
-cd ascension
-# open the file in your browser
-open ascension.html        # macOS
-xdg-open ascension.html    # Linux
-start ascension.html       # Windows
-```
-
-No build step, no server, no install.
-
-To host it on **GitHub Pages**, rename `ascension.html` to `index.html`, then enable Pages from the repository settings.
-
----
-
 ## Data & storage
 
 All data is stored in the browser's `localStorage` under the key `ascension-journal-v1`. It never leaves your device unless you export it.
@@ -161,7 +144,3 @@ The hash chain relies on the Web Crypto API (`crypto.subtle`), which requires a 
 Designed around a printable "Ascension 2026" daily planner page, then rebuilt as a yearly dashboard app. The hash-chained ledger and the Signal analytics were added to move it from a plain journal toward a personal operating system.
 
 ---
-
-## License
-
-Choose a license before publishing (for example MIT) and add a `LICENSE` file.
