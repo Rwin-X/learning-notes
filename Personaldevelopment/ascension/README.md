@@ -58,20 +58,6 @@ The page background renders your year as a rotating 3D helix on a `<canvas>` (pu
 - **Theme**: follows the system light/dark setting, with a manual toggle
 
 ---
-
-## Quick start
-
-```bash
-git clone https://github.com/<your-username>/ascension.git
-cd ascension
-# open the file in your browser
-open ascension.html        # macOS
-xdg-open ascension.html    # Linux
-start ascension.html       # Windows
-```
-
-No build step, no server, no install.
-
 To host it on **GitHub Pages**, rename `ascension.html` to `index.html`, then enable Pages from the repository settings.
 
 ---
