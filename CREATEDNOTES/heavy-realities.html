@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>واقعیت‌های سنگین</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Arabic:wght@400;600;700&family=Vazirmatn:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:    #111110;
+    --paper-2:  #1a1a18;
+    --ink:      #f7f6f2;
+    --ink-soft: #d8d6d0;
+    --mid:      #78766e;
+    --faint:    #48463e;
+    --line:     #2a2a26;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-padding-top: 24px; }
+
+  html{ background: var(--paper); }
+
+  body{
+    margin: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 17px;
+    line-height: 1.95;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #bg-field{
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .wrap{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 64px 28px 96px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead{
+    position: relative;
+    padding: 34px 32px;
+    margin-bottom: 56px;
+  }
+  .masthead::before,
+  .masthead::after{
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+  }
+  .masthead::before{
+    top: 0; right: 0;
+    border-top: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+  .masthead::after{
+    bottom: 0; left: 0;
+    border-bottom: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+  }
+
+  .eyebrow{
+    font-size: 0.82rem;
+    color: var(--mid);
+    margin: 0 0 18px;
+  }
+
+  .tag{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--faint);
+    direction: ltr;
+    display: inline-block;
+  }
+
+  h1{
+    font-family: 'Noto Serif Arabic', serif;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 2.3rem;
+    line-height: 1.35;
+    margin: 0 0 16px;
+  }
+
+  .dek{
+    color: var(--mid);
+    font-size: 0.98rem;
+    line-height: 1.85;
+    max-width: 58ch;
+    margin: 0;
+  }
+
+  /* ---------- sections ---------- */
+
+  section{ margin-bottom: 52px; }
+
+  .section-head{
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 6px;
+  }
+
+  .sec-num{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--faint);
+    direction: ltr;
+  }
+
+  h2{
+    font-family: 'Vazirmatn', sans-serif;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 1.25rem;
+    margin: 0;
+  }
+
+  /* ---------- items ---------- */
+
+  .item{
+    display: flex;
+    gap: 18px;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--line);
+    border-inline-start: 1px solid transparent;
+    padding-inline-start: 14px;
+    margin-inline-start: -14px;
+    transition: border-color .5s ease;
+  }
+  .item:hover{
+    border-inline-start: 1px solid var(--faint);
+  }
+  section .item:last-child{ border-bottom: none; }
+
+  .item-num{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--faint);
+    padding-top: 3px;
+    min-width: 1.6rem;
+    direction: ltr;
+  }
+
+  .item-title{
+    font-family: 'Vazirmatn', sans-serif;
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 1.03rem;
+    margin: 0 0 8px;
+    line-height: 1.6;
+  }
+
+  .item p{
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.97rem;
+  }
+
+  /* ---------- closing note ---------- */
+
+  .note{
+    padding: 28px 26px;
+    background: var(--paper-2);
+    border-inline-start: 1px solid var(--faint);
+  }
+  .note h3{
+    font-family: 'Vazirmatn', sans-serif;
+    font-weight: 600;
+    color: var(--mid);
+    font-size: 0.85rem;
+    margin: 0 0 14px;
+  }
+  .note p{
+    margin: 0 0 14px;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+  .note p:last-child{ margin-bottom: 0; }
+
+  /* ---------- footer ---------- */
+
+  footer{
+    margin-top: 64px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--faint);
+    direction: ltr;
+  }
+
+  @media (max-width: 480px){
+    .wrap{ padding: 40px 18px 72px; }
+    h1{ font-size: 1.8rem; }
+    .masthead{ padding: 26px 20px; }
+    .item{ gap: 12px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="bg-field" aria-hidden="true"></canvas>
+<div class="wrap">
+
+  <div class="masthead">
+    <p class="eyebrow">یادداشت‌های میدانی</p>
+    <h1>واقعیت‌های سنگین</h1>
+    <p class="dek">۳۶ گزاره از فلسفه، زیست‌شناسیِ تکاملی، عصب‌شناسی، ترمودینامیک، روان‌شناسیِ اجتماعی، اقتصادِ رفتاری، ژنتیکِ رفتاری و نظریه‌ی بازی. هرکدام با استدلال یا شاهدِ پشتش. بدونِ تعارف، بدونِ تسلی.</p>
+    <br>
+    <span class="tag">LOG — 04 SECTIONS / 36 ENTRIES</span>
+  </div>
+
+  <section>
+    <div class="section-head">
+      <span class="sec-num">01</span>
+      <h2>فلسفه‌های سخت</h2>
+    </div>
+
+    <div class="item">
+      <span class="item-num">01</span>
+      <div>
+        <h3 class="item-title">شوپنهاور — اراده و رنج</h3>
+        <p>هستی محکوم به یک اراده‌ی کور و بی‌هدف است که هرگز ارضا نمی‌شود. هر خواستنی که برآورده شود، فوراً جای خود را به خواستنِ بعدی می‌دهد یا به ملال بدل می‌شود. خوشبختی حالتی مثبت نیست؛ فقط غیابِ موقتِ درد است. زندگی آونگی‌ست میان رنج و کسالت.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">02</span>
+      <div>
+        <h3 class="item-title">نیچه — مرگِ خدا و بازگشتِ جاودان</h3>
+        <p>معنای متعالی از بین رفته و کسی جز خودت جایگزینش نمی‌کند. آزمونِ نیچه تسلی نیست: اگر مجبور بودی همینِ دقیقاً همین زندگی را — با تمامِ دردها و شکست‌هایش — بی‌نهایت بار تکرار کنی، آیا می‌توانستی بگویی «آری»؟ اگر نتوانی، هنوز داری خودت را با دروغ نگه می‌داری.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">03</span>
+      <div>
+        <h3 class="item-title">کامو — پوچی</h3>
+        <p>تو از جهان معنا می‌خواهی؛ جهان سکوت می‌کند. این شکاف، ابزورد است. تنها پاسخِ صادقانه شورشِ بدونِ توهم است — ادامه‌دادن با علمِ کامل به بی‌معنایی، درست مثلِ سیزیف که باید تصورش کرد خوشحال است، نه چون سنگ معنا پیدا کرده، بلکه چون خودِ حمل‌کردن را انتخاب کرده.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">04</span>
+      <div>
+        <h3 class="item-title">بودا — حقیقتِ رنج</h3>
+        <p>خودِ هستیِ شرطی‌شده ذاتاً ناقص است؛ حتی لذت‌ها چون ناپایدارند رنج‌آورند. علتش میل و دلبستگی است، و راه‌حلش تغییرِ شرایطِ بیرونی نیست — انحلالِ توهمِ «خودِ» ثابت است.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">05</span>
+      <div>
+        <h3 class="item-title">زاپف — آخرین مسیح</h3>
+        <p>آگاهیِ انسان بیش از نیازِ بیولوژیکی‌اش تکامل یافته؛ ما تنها موجودی هستیم که می‌فهمیم بی‌اهمیت، فانی و بی‌معنا هستیم. برای زنده‌ماندنِ روانی، چهار مکانیسمِ دفاعی به کار می‌بریم: انزوا (سرکوبِ این دانش)، تثبیت (چسبیدن به یک ارزشِ مطلقِ دروغین)، حواس‌پرتی (اشتغالِ دائمی) و والایش (تبدیلِ وحشت به فلسفه یا هنر).</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">06</span>
+      <div>
+        <h3 class="item-title">بنیتار — عدم‌تقارنِ وجود</h3>
+        <p>حضور، رنج را ممکن می‌کند؛ عدمِ حضور نه رنج دارد و نه فقدانِ لذتی که کسی برایش غم بخورد. از این نامتقارنی نتیجه می‌گیرد: به‌وجودآمدن همیشه ضرر است، هرگز سودِ خالص.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">07</span>
+      <div>
+        <h3 class="item-title">فروید — غریزه‌ی مرگ</h3>
+        <p>اگو ارباب خانه‌ی خودش نیست. بیشترِ رفتار را نیرویی ناخودآگاه هدایت می‌کند، از جمله تاناتوس — گرایش به تخریب و بازگشت به سکون. تمدن با سرکوبِ این غرایز ساخته می‌شود؛ ناخشنودیِ ساختاری قیمتِ اجتناب‌ناپذیرِ زندگیِ اجتماعی است.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">08</span>
+      <div>
+        <h3 class="item-title">جبرگراییِ سخت — اسپینوزا تا ساپولسکی</h3>
+        <p>هر انتخابی که «آزادانه» حس می‌کنی، پیامدِ ضروریِ زنجیره‌ای از علت‌هاست که پیش از تولدت شروع شده — ژن، تربیت، شیمیِ مغز. حسِ اراده‌ی آزاد، توهمِ پس‌ساخته‌ی مغز است، نه علتِ تصمیم.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">09</span>
+      <div>
+        <h3 class="item-title">هایدگر — بودن-به-سویِ-مرگ</h3>
+        <p>اکثرِ آدم‌ها هویتشان را از «آن‌ها»یِ گمنامِ جمع قرض می‌گیرند تا مجبور نباشند با مرگِ خودشان — غیرقابل‌جایگزین و غیرقابل‌مقایسه — روبه‌رو شوند. اصالت یعنی پذیرفتنِ این‌که هیچ‌کس نمی‌تواند مرگت را برایت تجربه کند.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">10</span>
+      <div>
+        <h3 class="item-title">رواقیون (اپیکتتوس) — دوگانگیِ کنترل</h3>
+        <p>تقریباً هر چیزی که برایش می‌جنگی — آبرو، نتیجه، نظرِ دیگران، حتی سلامتی — خارج از کنترلِ توست. تنها چیزِ واقعاً از آنِ تو، داوری و اراده‌ی توست.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <span class="sec-num">02</span>
+      <h2>زیست‌شناسی، مغز و ترمودینامیک</h2>
+    </div>
+
+    <div class="item">
+      <span class="item-num">01</span>
+      <div>
+        <h3 class="item-title">تو برای شادی طراحی نشده‌ای، برای بقا طراحی شده‌ای</h3>
+        <p>مغزت محصولِ انتخابِ طبیعی است، نه محصولِ طراحی برای رفاهِ تو. حسادت، اضطرابِ منزلت، وسواسِ مقایسه — این‌ها باگ نیستند؛ در محیطِ اجدادی دقیقاً همان چیزهایی بودند که بقا را تضمین می‌کردند، و اکنون در دنیایی هزاران‌برابر پیچیده‌تر اجرا می‌شوند.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">02</span>
+      <div>
+        <h3 class="item-title">تصمیم‌هایت را قبل از این‌که تصمیم بگیری گرفته‌ای</h3>
+        <p>فعالیتِ مغزیِ مرتبط با یک تصمیم، پیش از لحظه‌ای که آگاهانه احساس می‌کنی «انتخاب کردم» شروع می‌شود. آنچه «استدلالِ آگاهانه» تجربه می‌کنی، اغلب گزارشگریِ پسینی‌ست.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">03</span>
+      <div>
+        <h3 class="item-title">رابطه‌ی انسانی، در ریشه، مبادله است</h3>
+        <p>اکثرِ روابط بر پایه‌ی تعادلِ سود و هزینه ادامه پیدا می‌کنند: امنیت، منزلت، منابع، اطلاعات. وقتی این تعادل به‌هم بخورد، سرمایه‌گذاریِ عاطفیِ طرفین هم افت می‌کند.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">04</span>
+      <div>
+        <h3 class="item-title">عدمِ تقارنِ اطلاعات، همان قدرت است</h3>
+        <p>هرکس یک سیستم را بهتر از شرکت‌کننده‌هایش بفهمد، می‌تواند بدونِ این‌که آن‌ها بفهمند نتیجه را هدایت کند. مهندسیِ اجتماعی، تبلیغات و اقناعِ سیاسی همه همین مکانیزم‌اند.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">05</span>
+      <div>
+        <h3 class="item-title">هیچ‌چیز خودش را نگه نمی‌دارد</h3>
+        <p>افتِ آنتروپی یک استعاره نیست، قانون است. رابطه، بدن، مهارت، شرکت، تمدن — هرچیزِ سازمان‌یافته بدونِ تزریقِ مداومِ انرژی و توجه، تجزیه می‌شود.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">06</span>
+      <div>
+        <h3 class="item-title">بیشترِ نتیجه، شانس است، نه شایستگی</h3>
+        <p>همبستگیِ آماریِ بینِ تلاش و نتیجه بسیار ضعیف‌تر از داستانی‌ست که برای خودمان تعریف می‌کنیم. تورشِ بازمانده باعث می‌شود فقط موفق‌ها را ببینیم و روایتشان را باور کنیم.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">07</span>
+      <div>
+        <h3 class="item-title">تو ساختاری تنها هستی، نه فقط احساساً</h3>
+        <p>هیچ‌کس دسترسیِ مستقیم به تجربه‌ی ذهنیِ تو ندارد؛ هر ارتباطی استنتاجی‌ست از رفتار و زبان — فشرده‌سازیِ ناقص.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">08</span>
+      <div>
+        <h3 class="item-title">فراموشی قطعی‌ست</h3>
+        <p>بیشترِ آدم‌ها ظرفِ دو تا سه نسل از حافظه‌ی زنده محو می‌شوند. اگر داری برای «باقی‌ماندن در ذهنِ دیگران» کار می‌کنی، داری برای چیزی کار می‌کنی که آماری علیه‌ات است.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <span class="sec-num">03</span>
+      <h2>روان‌شناسیِ اجتماعی و رفتارِ جمعی</h2>
+    </div>
+
+    <div class="item">
+      <span class="item-num">01</span>
+      <div>
+        <h3 class="item-title">آدم‌ها به‌طورِ پیش‌بینی‌پذیر به فرمانِ اقتدار آسیب می‌زنند</h3>
+        <p>آزمایشِ میلگرم نشان داد حدودِ ۶۵٪ از افرادِ معمولی، وقتی یک مرجعِ به‌ظاهر مقتدر دستور بدهد، حاضرند به یک غریبه آسیبِ به‌ظاهر جدی وارد کنند — چون مسئولیت را به مرجعِ بالادست منتقل می‌کنند.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">02</span>
+      <div>
+        <h3 class="item-title">قدرت، همدلی را از بین می‌برد</h3>
+        <p>افزایشِ قدرت با کاهشِ توانِ خواندنِ احساساتِ دیگران و افزایشِ رفتارِ خلاف‌قاعده همراه است. آدمِ باقدرت برای دیگران سخت‌گیرتر قضاوت می‌کند و برای خودش استثنا قائل می‌شود.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">03</span>
+      <div>
+        <h3 class="item-title">گروه‌بندیِ کاملاً بی‌معنا هم رفتار را عوض می‌کند</h3>
+        <p>تقسیمِ آدم‌ها با معیاری کاملاً دلبخواهی به دو گروه، بلافاصله طرفداریِ درون‌گروهی و بی‌انصافیِ برون‌گروهی ایجاد می‌کند — بدونِ هیچ منفعتِ واقعی.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">04</span>
+      <div>
+        <h3 class="item-title">مغزت زمان را غیرخطی تخفیف می‌زند</h3>
+        <p>در تخفیفِ هذلولی، ارزشِ یک پاداشِ دورتر نامتناسب کمتر برآورد می‌شود؛ به همین دلیل «فردا شروع می‌کنم» همیشه منطقی‌تر از «امروز» به‌نظر می‌رسد.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">05</span>
+      <div>
+        <h3 class="item-title">رسیدن به هدف، خطِ پایان را جابه‌جا می‌کند</h3>
+        <p>تطابقِ لذت‌گرایانه یعنی بعد از هر دستاوردِ بزرگ، سطحِ پایه‌ی رضایت ظرفِ چند ماه به همان‌جای قبل برمی‌گردد — در برنده‌های لاتاری و قربانیانِ ضایعه‌ی نخاعی به یک اندازه دیده شده.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">06</span>
+      <div>
+        <h3 class="item-title">توزیع‌ها اکثراً ناعادلانه‌اند، نه نرمال</h3>
+        <p>در شبکه‌های توجه، ثروت و استنادِ علمی، توزیع توانی‌ست: درصدِ کوچکی از گره‌ها بخشِ اعظمِ نتیجه را می‌بلعند — نه لزوماً از سرِ شایستگیِ برتر، بلکه به‌خاطرِ اثرِ «برنده همه‌چیز می‌گیرد».</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">07</span>
+      <div>
+        <h3 class="item-title">خودفریبی یک استراتژیِ تکاملیِ کارآمد است</h3>
+        <p>باورِ صادقانه به تصویری اغراق‌شده از خودت، در متقاعدکردنِ دیگران مؤثرتر عمل می‌کند — چون خودت هم باورش داری و دیگر نیازی به بازیگری نیست.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">08</span>
+      <div>
+        <h3 class="item-title">انزوا، فیزیولوژیک می‌کشد</h3>
+        <p>انزوایِ اجتماعیِ مزمن، ریسکِ مرگ‌ومیر را به‌اندازه‌ای بالا می‌برد که با کشیدنِ حدودِ پانزده نخ سیگار در روز قابل‌مقایسه است.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <span class="sec-num">04</span>
+      <h2>تورشِ شناختی، ژنتیک، نظریه‌ی بازی و مقیاسِ کیهانی</h2>
+    </div>
+
+    <div class="item">
+      <span class="item-num">01</span>
+      <div>
+        <h3 class="item-title">تعصبِ تأییدی در باهوش‌ترها ماهرانه‌تر می‌شود</h3>
+        <p>افرادِ با توانِ استدلالِ عددیِ بالاتر، وقتی داده‌ای با باورشان تضاد دارد بهتر می‌توانند خطای آماری در آن پیدا کنند — اما فقط وقتی نتیجه به ضررِ باورشان باشد. هوش سپرِ تعصب نیست، سلاحِ توجیهِ پیچیده‌تر است.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">02</span>
+      <div>
+        <h3 class="item-title">خطای اسنادِ بنیادین</h3>
+        <p>وقتی دیگری شکست می‌خورد، آن را به شخصیتش نسبت می‌دهی؛ وقتی خودت شکست می‌خوری، به موقعیت نسبت می‌دهی. این الگو در ده‌ها فرهنگ تکرار شده.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">03</span>
+      <div>
+        <h3 class="item-title">بخشِ بزرگی از «خودِ» تو انتخاب نشده، به ارث رسیده</h3>
+        <p>وراثت‌پذیریِ هوش در بزرگسالی حدودِ ۵۰ تا ۸۰٪ است و صفاتِ شخصیتی حدودِ ۴۰ تا ۶۰٪. حتی جهت‌گیریِ سیاسی و میزانِ مذهبی‌بودن وراثت‌پذیریِ قابلِ‌توجه دارند.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">04</span>
+      <div>
+        <h3 class="item-title">الگوی دلبستگیِ سال‌های اول، نقشه‌ی رابطه‌های بزرگسالی‌ست</h3>
+        <p>شیوه‌ی تعامل با مراقبِ اصلی در سال‌های اول، در آزمایش‌های طولی تا دهه‌ها بعد، رفتارِ تو در رابطه‌های عاشقانه را پیش‌بینی می‌کند.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">05</span>
+      <div>
+        <h3 class="item-title">رضایتِ تو از جایگاهِ نسبی می‌آید، نه مطلق</h3>
+        <p>پارادوکسِ ایسترلین: افزایشِ درآمد بعد از یک سطحِ معین، رضایتِ کلی را بالا نمی‌برد، چون مغز رفاه را با گروهِ مرجعِ اطراف می‌سنجد.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">06</span>
+      <div>
+        <h3 class="item-title">هرچه شاهد بیشتر، کمکِ کمتر</h3>
+        <p>احتمالِ کمک به فردِ در خطر با افزایشِ تعدادِ ناظرانِ حاضر کاهش می‌یابد، چون مسئولیت بینِ همه پخش می‌شود.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">07</span>
+      <div>
+        <h3 class="item-title">اوجِ شناختیِ تو زودتر از چیزی‌ست که فکر می‌کنی</h3>
+        <p>سرعتِ پردازشِ ذهنی و حافظه‌ی کاری در اواخرِ دهه‌ی بیست‌سالگی به اوج می‌رسند و از آن به بعد کاهشِ تدریجی شروع می‌شود.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">08</span>
+      <div>
+        <h3 class="item-title">رفتارِ اخلاقی، مجوزِ رفتارِ غیراخلاقیِ بعدی می‌شود</h3>
+        <p>وقتی کسی یک کارِ خوب انجام می‌دهد، در تصمیمِ بعدی‌اش احتمالِ رفتارِ خودخواهانه بالا می‌رود، چون ناخودآگاه حسِ اعتبارِ کافی کسب کرده.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">09</span>
+      <div>
+        <h3 class="item-title">همکاریِ عقلانی بدونِ فشارِ بیرونی فرو می‌پاشد</h3>
+        <p>در معمای زندانی و تراژدیِ مشاع، بهترین استراتژیِ فردی دقیقاً همان چیزی‌ست که نتیجه را برای همه بدتر می‌کند. همکاری فقط با تعاملِ تکراری، رصدِ شهرت یا مجازات پایدار می‌ماند.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span class="item-num">10</span>
+      <div>
+        <h3 class="item-title">جهان در مقیاسِ کافی به سکونِ کامل می‌رسد</h3>
+        <p>طبقِ قانونِ دومِ ترمودینامیک، آنتروپیِ کیهان رو به افزایش است تا به مرگِ گرمایی برسد — حالتی که هیچ فرآیندی، از جمله حیات، دیگر ممکن نیست.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="note">
+    <h3>یادداشتِ پایانی</h3>
+    <p>اثرِ دانینگ-کروگر عمداً در فهرستِ اصلی نیامد: بخشِ زیادی از الگویی که در فرهنگِ عامه معروف شده، در بررسیِ آماریِ دقیق‌تر احتمالاً محصولِ رگرسیون به میانگین است، نه یک سازوکارِ روان‌شناختیِ مستقل — نمونه‌ای از این‌که شهرتِ یک یافته با استحکامِ آن یکی نیست.</p>
+    <p>این فهرست حوزه‌های اصلیِ فلسفه، روان‌شناسیِ تکاملی، عصب‌شناسی، جامعه‌شناسی، اقتصادِ رفتاری، ژنتیک، نظریه‌ی بازی و فیزیک را پوشش می‌دهد. ادامه از این نقطه یا تکرارِ همین موارد با کلماتِ دیگر است، یا رفتن به‌سمتِ یافته‌های حاشیه‌ای و کم‌تکرارشده که دیگر سنگین و مستحکم نیستند، فقط عجیب‌اند. این‌جا مرزِ صادقانه‌ی توقف است.</p>
+  </div>
+
+  <footer>04 SECTIONS · 36 ENTRIES</footer>
+
+</div>
+
+<script>
+(function(){
+  var canvas = document.getElementById('bg-field');
+  if(!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext('2d');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0;
+  var particles = [];
+  var COUNT = 90;
+
+  function resize(){
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+
+  function seed(){
+    particles = [];
+    for(var i = 0; i < COUNT; i++){
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: 0.4 + Math.random() * 1.3,
+        base: 0.06 + Math.random() * 0.28,
+        speed: 0.006 + Math.random() * 0.018,
+        drift: (Math.random() - 0.5) * 0.01,
+        phase: Math.random() * Math.PI * 2,
+        rate: 0.0004 + Math.random() * 0.0006
+      });
+    }
+  }
+
+  function drawStatic(){
+    ctx.clearRect(0, 0, W, H);
+    for(var i = 0; i < particles.length; i++){
+      var p = particles[i];
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(247,246,242,' + (p.base * 0.7).toFixed(3) + ')';
+      ctx.fill();
+    }
+  }
+
+  function tick(t){
+    ctx.clearRect(0, 0, W, H);
+    for(var i = 0; i < particles.length; i++){
+      var p = particles[i];
+      var flicker = 0.5 + 0.5 * Math.sin(t * p.rate + p.phase);
+      var alpha = p.base * (0.35 + 0.65 * flicker);
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(247,246,242,' + alpha.toFixed(3) + ')';
+      ctx.fill();
+
+      p.y -= p.speed;
+      p.x += p.drift;
+      if(p.y < -4){ p.y = H + 4; p.x = Math.random() * W; }
+      if(p.x < -4) p.x = W + 4;
+      if(p.x > W + 4) p.x = -4;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  resize();
+  seed();
+
+  if(reduceMotion){
+    drawStatic();
+  } else {
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize', function(){
+    resize();
+    seed();
+    if(reduceMotion) drawStatic();
+  });
+})();
+</script>
+</body>
+</html>
