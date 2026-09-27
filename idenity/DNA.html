@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ASCENSION — Backdrop</title>
+<style>
+:root{--bg:#f6f6f4;--fg:#0c0c0c;--mut:#8a8a86;--line:#d9d9d5;--card:#fff;--soft:#ecece8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}}
+:root[data-theme="dark"]{--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font:400 14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;cursor:default}
+#bg.hoverable{cursor:pointer}
+
+/* ---- note modal: an identity-card sheet for a single day ---- */
+#scrim{
+  position:fixed;inset:0;z-index:5;
+  background:color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  padding:22px;
+  opacity:0;pointer-events:none;
+  transition:opacity .18s ease;
+}
+#scrim.open{opacity:1;pointer-events:auto}
+#note{
+  width:100%;max-width:440px;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:22px 22px 18px;
+  transform:translateY(8px) scale(.985);
+  transition:transform .18s ease;
+}
+#scrim.open #note{transform:translateY(0) scale(1)}
+.note-head{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  border-bottom:1px solid var(--fg);
+  padding-bottom:14px;margin-bottom:16px;
+}
+.note-id{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut)}
+.note-date{font-size:11px;letter-spacing:.05em;color:var(--mut);margin-top:6px}
+#noteClose{
+  font:inherit;color:var(--mut);background:none;border:1px solid var(--line);
+  border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;
+  display:flex;align-items:center;justify-content:center;flex:none;
+}
+#noteClose:hover{border-color:var(--fg);color:var(--fg)}
+.note-title-lab, .note-body-lab{
+  font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--mut);
+  margin-bottom:7px;display:block;
+}
+#noteTitle{
+  width:100%;font:700 20px/1.25 Inter,system-ui,sans-serif;letter-spacing:-.02em;
+  color:var(--fg);background:none;border:none;outline:none;padding:0 0 12px;
+  border-bottom:1px solid var(--line);margin-bottom:14px;
+}
+#noteTitle::placeholder{color:var(--mut);font-weight:400}
+#noteBody{
+  width:100%;min-height:140px;resize:vertical;
+  font:400 13.5px/1.6 Inter,system-ui,sans-serif;color:var(--fg);
+  background:none;border:none;outline:none;padding:0;
+}
+#noteBody::placeholder{color:var(--mut)}
+.note-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+}
+.note-status{font-size:11px;color:var(--mut)}
+.note-badge{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);
+  border:1px solid var(--line);border-radius:6px;padding:3px 8px;
+}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div id="scrim">
+  <div id="note" role="dialog" aria-modal="true" aria-labelledby="noteId">
+    <div class="note-head">
+      <div>
+        <div class="note-id" id="noteId">DAY —</div>
+        <div class="note-date" id="noteDate">—</div>
+      </div>
+      <button id="noteClose" aria-label="Close">✕</button>
+    </div>
+    <span class="note-title-lab">Title</span>
+    <input id="noteTitle" type="text" placeholder="Untitled" maxlength="80">
+    <span class="note-body-lab">Entry</span>
+    <textarea id="noteBody" placeholder="Write something for this day…"></textarea>
+    <div class="note-foot">
+      <span class="note-status" id="noteStatus">Saved</span>
+      <span class="note-badge" id="noteBadge">Empty</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+
+/* ---- demo data standing in for a year's journal entries ---- */
+const year=new Date().getFullYear();
+const n = (new Date(year,1,29).getMonth()===1) ? 366 : 365;
+const dayOfYear = (()=>{const now=new Date();const start=new Date(now.getFullYear(),0,0);return Math.floor((now-start)/864e5);})();
+const store={};
+(function seedDemo(){
+  for(let i=0;i<n;i++){
+    if(i>dayOfYear) continue;
+    const r = Math.sin(i*12.9898)*43758.5453 % 1, rr = Math.abs(r);
+    if(rr>0.985) store[i]={s:1,m:Math.floor(Math.abs(Math.sin(i))*10)};
+    else if(rr>0.4) store[i]={m:Math.floor(Math.abs(Math.cos(i*1.7))*10)};
+  }
+})();
+
+/* ---- 3D backdrop: the year as an ascending helix. Lightweight — no filter blur, no per-node shadows. ---- */
+const cv=$("#bg"),cx=cv.getContext("2d"),RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let W=0,H=0,mx=0,my=0,tx=0,ty=0,fg=[12,12,12],bgc=[246,246,244],fr=0,nodes=[],yaw=0,pit=.3,zoom=1,sx=.5,spin=1,pulses=[],breathM=0,lastT=0;
+let glowSoft=null,glowSharp=null,vignette=null;
+const R=250,HH=1500;
+const CUBE=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+const EDG=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+const dust=Array.from({length:52},()=>[(Math.random()-.5)*1600,(Math.random()-.5)*1900,(Math.random()-.5)*1600,Math.random(),Math.random()*.6+.4]);
+
+// screen-space hit targets for each day node, rebuilt every frame from actual projected positions
+let hitTargets=[]; // {i, x, y, r}
+
+
+function fit(){
+  const d=Math.min(devicePixelRatio||1,1.5);
+  W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+  sx=W>820?.7:.5;
+  zoom=Math.max(.55,Math.min(1.3,Math.min(W,H)/800+.28));
+  vignette=null;
+}
+function fgc(){
+  const cs=getComputedStyle(document.documentElement),h=cs.getPropertyValue("--fg").trim(),b=cs.getPropertyValue("--bg").trim();
+  if(/^#[0-9a-f]{6}$/i.test(h))fg=[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+  if(/^#[0-9a-f]{6}$/i.test(b))bgc=[1,3,5].map(i=>parseInt(b.substr(i,2),16));
+  glowSoft=null;glowSharp=null;vignette=null;
+}
+function scan(){
+  const tk=dayOfYear;
+  nodes=[];const seals=[];let tm=0;
+  for(let i=0;i<n;i++){
+    const v=store[i];
+    const nd={f:v?1:0,s:(v&&v.s)?1:0,t:(i===tk)?1:0,m:v?v.m:0};
+    nodes.push(nd);
+    if(nd.s)seals.push(i);
+    if(nd.t)tm=nd.m;
+  }
+  pulses=seals.slice(1).map((idx,j)=>({a:seals[j],b:idx,p:Math.random(),spd:.0022+Math.random()*.002}));
+  spin=.55+Math.min(1,n/365)*.6;breathM=tm;
+}
+function P(x,y,z){
+  const c=Math.cos(yaw),s=Math.sin(yaw);
+  let X=x*c+z*s,Z=-x*s+z*c;
+  const cp=Math.cos(pit),sp=Math.sin(pit),Y=y*cp-Z*sp;Z=y*sp+Z*cp;
+  const f=zoom*900/(1400+Z);
+  return[W*sx+X*f,H*.5+Y*f,f,Z];
+}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rgba=a=>"rgba("+fg[0]+","+fg[1]+","+fg[2]+","+clamp(a,0,1).toFixed(3)+")";
+function line(a,b,al,w){cx.lineWidth=w||1;cx.strokeStyle=rgba(al);cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.stroke()}
+
+// two pre-rendered radial sprites: a wide soft ambient halo and a tight bright core — layering both
+// reads as a much richer glow than one sprite alone, at a fixed, cheap cost.
+function buildGlows(){
+  if(glowSoft&&glowSharp)return;
+  function sprite(stops,size){
+    const g=document.createElement("canvas");g.width=g.height=size;const gc=g.getContext("2d");
+    const rg=gc.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+    stops.forEach(([pos,a])=>rg.addColorStop(pos,"rgba("+fg[0]+","+fg[1]+","+fg[2]+","+a+")"));
+    gc.fillStyle=rg;gc.fillRect(0,0,size,size);return g;
+  }
+  glowSoft=sprite([[0,.5],[.4,.16],[1,0]],80);
+  glowSharp=sprite([[0,.95],[.3,.4],[1,0]],48);
+}
+function glowDot(p,r,al){
+  buildGlows();
+  const s1=r*7,s2=r*4.2;
+  cx.globalAlpha=clamp(al*.8,0,1);cx.drawImage(glowSoft,p[0]-s1/2,p[1]-s1/2,s1,s1);
+  cx.globalAlpha=clamp(al,0,1);cx.drawImage(glowSharp,p[0]-s2/2,p[1]-s2/2,s2,s2);
+  cx.globalAlpha=1;
+  cx.fillStyle=rgba(al);cx.beginPath();cx.arc(p[0],p[1],r*.4,0,7);cx.fill();
+}
+
+// a single cached vignette gradient (built once per resize/theme, never per-frame) —
+// deepens the corners subtly so the scene reads as it has real depth beyond the helix.
+function buildVignette(){
+  if(vignette)return vignette;
+  const g=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.72);
+  g.addColorStop(0,"rgba("+bgc[0]+","+bgc[1]+","+bgc[2]+",0)");
+  g.addColorStop(1,"rgba("+bgc[0]*0.5+","+bgc[1]*0.5+","+bgc[2]*0.5+",0.22)");
+  vignette=g;return g;
+}
+
+function frame(ts){
+  if(!RM)requestAnimationFrame(frame);
+  if(ts-lastT<33)return;
+  lastT=ts;
+  const t=RM?0:ts/1000;fr++;
+  if(fr%20===1){fgc();scan()}
+
+  // easing toward pointer target is slightly slower than before — reads as more physical, less jittery
+  tx+=(mx-tx)*.05;ty+=(my-ty)*.05;
+  const breath=.5+.5*Math.sin(t*.6)*(.4+breathM*.06);
+  const sc=scrollY;
+  yaw=t*.075*spin+sc*.0016+tx*.55;
+  pit=clamp(.28+ty*.2,-.35,.85);
+  const off=-sc*.34,nn=nodes.length||365;
+
+  cx.fillStyle="rgb("+bgc.join(",")+")";cx.fillRect(0,0,W,H);
+
+  // receding floor grid — slightly finer fade at the edges than before
+  const y0=HH/2+40+off;
+  for(let j=-6;j<=6;j+=2){
+    const al=.085-Math.abs(j)*.009;
+    line(P(j*190,y0,-1140),P(j*190,y0,1140),al);
+    line(P(-1140,y0,j*190),P(1140,y0,j*190),al);
+  }
+  // central axis, very slightly brighter near the "today" marker's height
+  line(P(0,-HH/2+off,0),P(0,HH/2+off,0),.12);
+
+  // sparse dust — depth-varying size in addition to alpha, for a touch more richness at near cost
+  dust.forEach(d=>{
+    const y=((d[1]+t*16*(.4+d[3])+950)%1900)-950+off*.5,p=P(d[0],y,d[2]);
+    const near=1-clamp((p[3]+R*3)/(R*6),0,1);
+    cx.fillStyle=rgba(.06+.24*near);
+    const sz=(0.8+near*1.1)*d[4];
+    cx.fillRect(p[0],p[1],sz,sz);
+  });
+
+  // pulses: lead point plus one faint trailing point (two draws, not a redraw loop) for a sense of motion
+  pulses.forEach(pl=>{
+    pl.p+=pl.spd;if(pl.p>1)pl.p-=1;
+    const i=pl.a+(pl.b-pl.a)*pl.p,a=i*.2,y=(i/nn-.5)*HH+off,p=P(Math.cos(a)*R,y,Math.sin(a)*R);
+    const trailP=Math.max(0,pl.p-.03),ti=pl.a+(pl.b-pl.a)*trailP,ta=ti*.2,ty2=(ti/nn-.5)*HH+off,tp=P(Math.cos(ta)*R,ty2,Math.sin(ta)*R);
+    if(tp[1]>-20&&tp[1]<H+20)glowDot(tp,1.1*tp[2],.18);
+    if(p[1]>-20&&p[1]<H+20)glowDot(p,1.9*p[2],.55);
+  });
+
+  // helix: chain of days — filled days get a radial bar whose height reads the day's Mode score
+  hitTargets=[];
+  let prev=null,prevNear=0;
+  for(let i=0;i<nodes.length;i++){
+    const a=i*.2,y=(i/nn-.5)*HH+off,cA=Math.cos(a),sA=Math.sin(a),p=P(cA*R,y,sA*R);
+    const dep=clamp((p[3]+R)/(2*R),0,1),near=1-dep,nd=nodes[i];
+    if(prev&&p[1]>-40&&p[1]<H+40)line(prev,p,.035+.22*Math.min(near,prevNear));
+    prev=p;prevNear=near;
+    if(p[1]<-40||p[1]>H+40)continue;
+    // register a click target for every visible day node — generous radius, biased toward near/front nodes
+    if(near>0.06){
+      hitTargets.push({i, x:p[0], y:p[1], r:Math.max(9, 6*p[2])+near*6});
+    }
+
+    if(nd.s){
+      // sealed day: spinning wireframe cube with faint corner glow — reads as a "locked" marker
+      const sz=8+near*2,r=t*.85+i*.6,cr=Math.cos(r),sr=Math.sin(r);
+      const pts=CUBE.map(v=>P(cA*R+(v[0]*cr+v[2]*sr)*sz,y+v[1]*sz,sA*R+(-v[0]*sr+v[2]*cr)*sz));
+      EDG.forEach(e=>line(pts[e[0]],pts[e[1]],.28+.5*near));
+      if(near>.5)glowDot(pts[6],1.1*p[2],.16*near);
+    }else if(nd.f){
+      // filled day: radial bar rising outward, height = Mode/10, tip glow layered with both sprites
+      const bh=6+nd.m*3.4,tip=P(cA*(R+bh),y,sA*(R+bh));
+      line(p,tip,.2+.5*near*(.4+.06*nd.m),1.5*p[2]);
+      glowDot(tip,1.5*p[2],.28+.42*near*(.5+.05*nd.m));
+    }else{
+      cx.fillStyle=rgba(.065+.22*near);
+      cx.beginPath();cx.arc(p[0],p[1],1*p[2]*1.05,0,7);cx.fill();
+    }
+    if(nd.t){
+      const pr=8+3*Math.sin(t*3)*(1+.15*breath);
+      glowDot(p,pr*p[2]*.6,.42+.26*breath);
+      cx.strokeStyle=rgba(.9);cx.lineWidth=1.1;
+      cx.beginPath();cx.arc(p[0],p[1],pr*p[2]*1.2,0,7);cx.stroke();
+      // a second, larger, fainter ring for a bit more presence on "today" without another glow sprite pass
+      cx.strokeStyle=rgba(.22+.12*breath);cx.lineWidth=.8;
+      cx.beginPath();cx.arc(p[0],p[1],pr*p[2]*1.9,0,7);cx.stroke();
+    }
+  }
+
+  // cached vignette, drawn last, once per frame as a single fillRect with a pre-built gradient
+  cx.fillStyle=buildVignette();cx.fillRect(0,0,W,H);
+}
+fit();fgc();scan();
+addEventListener("resize",()=>{fit();if(RM)requestAnimationFrame(frame)});
+addEventListener("pointermove",e=>{
+  mx=(e.clientX/W-.5)*2;my=(e.clientY/H-.5)*2;
+  if(!noteOpen){
+    const hit=findHit(e.clientX,e.clientY);
+    cv.classList.toggle("hoverable", !!hit);
+  }
+},{passive:true});
+addEventListener("pointerleave",()=>{mx=0;my=0},{passive:true});
+if(RM){addEventListener("scroll",()=>requestAnimationFrame(frame),{passive:true});}
+requestAnimationFrame(frame);
+
+/* ---- notes: each day node opens an identity-card sheet — date + title, then the entry body ---- */
+const notesStore={}; // { dayIndex: {title, body} } — kept for this session
+let noteOpen=false, activeDay=null;
+const scrimEl=$("#scrim"), noteIdEl=$("#noteId"), noteDateEl=$("#noteDate"),
+      titleEl=$("#noteTitle"), bodyEl=$("#noteBody"), statusEl=$("#noteStatus"), badgeEl=$("#noteBadge");
+
+function findHit(clientX,clientY){
+  let best=null,bestD=Infinity;
+  for(const h of hitTargets){
+    const dx=clientX-h.x, dy=clientY-h.y, d=Math.hypot(dx,dy);
+    if(d<=h.r+6 && d<bestD){bestD=d;best=h;}
+  }
+  return best;
+}
+function dateForDay(i){
+  const d=new Date(year,0,1+i);
+  return d.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+}
+function openNote(i){
+  activeDay=i;
+  const existing=notesStore[i]||{title:"",body:""};
+  noteIdEl.textContent="DAY "+String(i+1).padStart(3,"0");
+  noteDateEl.textContent=dateForDay(i);
+  titleEl.value=existing.title;
+  bodyEl.value=existing.body;
+  updateBadge();
+  statusEl.textContent=existing.title||existing.body ? "Saved" : "Empty";
+  scrimEl.classList.add("open");
+  noteOpen=true;
+  cv.classList.remove("hoverable");
+  setTimeout(()=>titleEl.focus(),180);
+}
+function closeNote(){
+  scrimEl.classList.remove("open");
+  noteOpen=false;
+}
+function updateBadge(){
+  const has=titleEl.value.trim()||bodyEl.value.trim();
+  badgeEl.textContent = has ? "Filled" : "Empty";
+}
+function persist(){
+  if(activeDay===null)return;
+  const title=titleEl.value, body=bodyEl.value;
+  if(title.trim()||body.trim()){
+    notesStore[activeDay]={title,body};
+    if(!store[activeDay])store[activeDay]={};
+    store[activeDay].f=1; // writing a note marks the day as filled on the helix
+    scan();
+    statusEl.textContent="Saved";
+  }else{
+    delete notesStore[activeDay];
+    statusEl.textContent="Empty";
+  }
+  updateBadge();
+}
+let saveTimer=null;
+function scheduleSave(){
+  statusEl.textContent="Saving…";
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(persist,350);
+}
+titleEl.addEventListener("input",scheduleSave);
+bodyEl.addEventListener("input",scheduleSave);
+$("#noteClose").addEventListener("click",()=>{persist();closeNote();});
+scrimEl.addEventListener("click",e=>{ if(e.target===scrimEl){persist();closeNote();} });
+addEventListener("keydown",e=>{ if(e.key==="Escape"&&noteOpen){persist();closeNote();} });
+
+cv.addEventListener("click",e=>{
+  if(noteOpen)return;
+  const hit=findHit(e.clientX,e.clientY);
+  if(hit)openNote(hit.i);
+});
+cv.addEventListener("touchend",e=>{
+  if(noteOpen||!e.changedTouches||!e.changedTouches[0])return;
+  const t=e.changedTouches[0], hit=findHit(t.clientX,t.clientY);
+  if(hit){e.preventDefault();openNote(hit.i);}
+},{passive:false});
+</script>
+</body>
+</html>
