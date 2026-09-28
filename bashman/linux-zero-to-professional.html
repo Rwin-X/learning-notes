@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux — Zero to Professional</title>
+<style>
+:root{--bg:#0d1117;--bg-raised:#12181f;--panel:#161d26;--panel-2:#1c2530;--border:#26313d;--text:#d5dde5;--text-dim:#93a1af;--text-faint:#5f6d7b;--accent:#e0b04a;--accent-dim:#3a3120;--success:#5fb37c;--warning:#d9a441;--danger:#e0685f;--terminal:#7fd1a0;--kernel:#b394e8;--network:#5aaee0}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:60px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}
+code,pre,.m{font-family:ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace}
+a{color:var(--network)}:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+nav{position:sticky;top:0;z-index:20;background:var(--bg-raised);border-bottom:1px solid var(--border);display:flex;gap:2px;overflow-x:auto;padding:0 12px;align-items:center}
+nav a{color:var(--text-dim);text-decoration:none;padding:14px 10px;font-size:13px;white-space:nowrap;border-bottom:2px solid transparent}
+nav a.on{color:var(--accent);border-color:var(--accent)}nav button{margin-left:auto}
+button{font:inherit;cursor:pointer;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 10px;font-size:13px}
+button:hover{border-color:var(--accent)}
+main{max-width:980px;margin:0 auto;padding:0 18px 80px}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:48px 0 8px}h1 span{color:var(--terminal)}
+h2{margin:0 0 6px;font-size:24px}section{padding-top:44px}
+.sub,.dim{color:var(--text-dim)}
+.bar{height:6px;background:var(--panel-2);border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.road{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:18px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px;text-decoration:none;color:var(--text);display:block}
+.card b{display:block;font-size:14px;margin-bottom:4px}.card small{color:var(--text-dim);display:block;margin-bottom:8px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--text-dim);margin:6px 0 14px}
+.lesson{border:1px solid var(--border);border-radius:6px;background:var(--panel);margin:8px 0}
+.lesson>button.h{width:100%;text-align:left;background:none;border:0;padding:12px 14px;display:flex;gap:10px;font-size:15px}
+.lesson>button.h:before{content:"+";color:var(--accent);font-family:ui-monospace,monospace}.lesson.open>button.h:before{content:"−"}
+.lesson.done>button.h span:after{content:" ✓";color:var(--success)}
+.body{display:none;padding:0 14px 14px}.lesson.open .body{display:block}
+.tag{font-size:12px;color:var(--kernel);margin:12px 0 2px}
+pre{position:relative;background:#0a0e13;border:1px solid var(--border);border-radius:4px;padding:10px 60px 10px 12px;overflow-x:auto;margin:6px 0;font-size:13px;color:var(--terminal);white-space:pre}
+pre.out{color:var(--text-dim)}pre button{position:absolute;top:6px;right:6px;font-size:11px;padding:2px 6px}
+.bad{border-left:3px solid var(--danger);padding-left:10px;color:var(--text-dim)}
+.sol{display:none;margin-top:8px}.sol.show{display:block}
+.chal{border:1px dashed var(--border);border-radius:6px;padding:12px;margin-top:10px;background:var(--bg-raised)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0;font-size:13px}
+.flow span{background:var(--panel-2);border:1px solid var(--border);border-radius:4px;padding:3px 9px;font-family:ui-monospace,monospace}
+.flow span+span:before{content:"→ ";color:var(--accent)}
+table{border-collapse:collapse;width:100%;font-size:13px}td,th{border-bottom:1px solid var(--border);padding:6px 8px;text-align:left;vertical-align:top}
+.tw{overflow-x:auto}
+.chk label{display:flex;gap:8px;padding:4px 0;font-size:14px}
+#ov{position:fixed;inset:0;background:#000a;display:none;z-index:50;padding:10vh 14px}#ov.on{display:block}
+#ov div.b{max-width:640px;margin:auto;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px}
+#q{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:10px;font:inherit}
+#res a{display:block;padding:8px;color:var(--text);text-decoration:none;border-radius:4px}#res a:hover,#res a:focus{background:var(--panel-2)}#res small{color:var(--text-dim);display:block}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#111;padding:6px 14px;border-radius:4px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}#toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style></head><body>
+<nav id="nav" aria-label="Sections"></nav>
+<main>
+<section id="course" style="padding-top:0"><h1>Linux — <span>Zero to Professional</span></h1>
+<p class="sub">Linux fundamentals, CLI, Bash, administration, networking, security and troubleshooting. Loop for every topic: read, run, observe, predict, break, debug, automate. Use a disposable VM or container; never practice destructive commands on a production server.</p>
+<div class="bar" aria-hidden="true"><i id="gbar"></i></div><p class="m dim" id="gtxt"></p></section>
+<section id="roadmap"><h2>Roadmap</h2><div class="road" id="road"></div></section>
+<div id="levels"></div>
+<section id="projects"><h2>Projects</h2><p class="sub">Each project reuses earlier levels. Lay out purpose, requirements, script, tests, failure modes, security and documentation.</p><div id="plist"></div></section>
+<section id="scen"><h2>Troubleshooting scenarios</h2><p class="sub">Method: symptom, hypothesis, test, evidence, root cause, fix, verify, document.</p><div id="slist"></div></section>
+<section id="cheatsheet"><h2>Cheat sheet</h2><div class="tw"><table id="cs"></table></div></section>
+<section id="resources"><h2>Readiness checklist</h2><div class="chk" id="chk"></div>
+<h2 style="margin-top:28px">Resources</h2><p class="sub">Your best first sources: <code>man</code>, <code>--help</code>, <code>info</code>, <code>systemctl status</code>, <code>journalctl</code>. Distribution documentation: Debian, Ubuntu, Fedora and Arch Wiki sites. Kernel docs: kernel.org.</p></section>
+</main>
+<div id="ov" role="dialog" aria-label="Search"><div class="b"><input id="q" placeholder="Search concepts, commands, paths…" aria-label="Search"><div id="res"></div></div></div>
+<div id="toast" role="status"></div>
+<script>
+const L=[
+{n:"Linux Foundation",d:"Beginner",t:"2h",o:"Separate kernel, distribution, shell and terminal.",c:[
+["Kernel vs GNU/Linux vs distribution","Linux is the kernel: it manages CPU, memory, devices and processes. A distribution (Debian, Ubuntu, Fedora, Arch) bundles the kernel with userspace: GNU tools, libraries, a package manager, init system and defaults. A desktop environment is a GUI layer. A terminal emulator is a window; the shell (bash, zsh) runs inside it and interprets commands.","uname -r\ncat /etc/os-release","6.8.0-45-generic\nPRETTY_NAME=\"Ubuntu 24.04 LTS\"","Calling the whole OS 'the kernel'. uname reports the kernel; os-release reports the distribution."],
+["Kernel → system call → process","Programs never touch hardware directly. They ask the kernel through system calls (open, read, write, fork). Each running program is a process; resources are files, memory, sockets. Flow: application → system call → kernel → resource.","strace -c ls /tmp","% time  calls  syscall\n...","strace may need installing and, on some systems, extra privileges."]],
+ch:["Which command shows your kernel version and which shows your distribution?","uname -r for the kernel; cat /etc/os-release for the distribution."]},
+{n:"Terminal & Shell",d:"Beginner",t:"3h",o:"Understand what the shell does before a program runs.",c:[
+["Shell: parse → expand → execute","The shell splits the line into words, expands variables, globs and substitutions, then starts the program with the result. The program never sees your quotes or the * itself.","echo \"$HOME\" '$HOME' *.txt\ntype cd ls echo","/home/ana $HOME a.txt b.txt\ncd is a shell builtin\nls is /usr/bin/ls","Unquoted variables split on spaces. Use \"$var\". Single quotes block all expansion; double quotes block splitting and globbing but allow $var and $(cmd)."],
+["Finding help without the web","man shows the manual, --help is a quick summary, type/which show how a name resolves (alias, builtin, file in PATH). Read the synopsis and flags before guessing.","man -k copy | head\nls --help | head -5\ntype -a ls","","Running 'man' on a shell builtin: use help cd (bash) instead."]],
+ch:["Predict: touch 'a b'; rm a b — what happens and why?","The shell passes two words (a, b). rm looks for files a and b, not 'a b'. Quote: rm 'a b'. Verify with ls first."]},
+{n:"Filesystem & File Operations",d:"Beginner",t:"4h",o:"Navigate the tree; understand inodes and links.",c:[
+["Filesystem hierarchy","One tree rooted at /. /etc config, /home users, /var logs and changing data, /usr installed software, /tmp temporary, /proc and /sys are virtual kernel views, /dev device files, /boot kernel and bootloader. Exact layout varies by distribution (for example /bin is often a symlink to /usr/bin).","ls /\nls -ld /bin\npwd","bin boot dev etc home ...\nlrwxrwxrwx 1 root root 7 ... /bin -> usr/bin","Assuming relative paths start at /. Relative paths start at the current directory (pwd)."],
+["Inodes, hard links, symlinks","A filename is a directory entry pointing to an inode, which holds metadata and data location. A hard link is another name for the same inode; a symlink is a small file containing a path and can dangle.","echo hi > a\nln a hard\nln -s a soft\nls -li a hard soft\nstat a","1234 -rw-r--r-- 2 ... a\n1234 -rw-r--r-- 2 ... hard\n5678 lrwxrwxrwx 1 ... soft -> a","Deleting a does not delete the data while hard remains. soft would break."]],
+ch:["Why can df show free space yet touch fails?","Inodes may be exhausted. Check df -i."]},
+{n:"Permissions, Users & Groups",d:"Beginner–Intermediate",t:"5h",o:"Read and change permissions; use sudo safely.",c:[
+["rwx for user, group, others","In ls -l the first field is type plus three triplets. Numeric: r=4 w=2 x=1, so 640 is rw- r-- ---. For directories, r lists names, w creates/deletes entries, x lets you enter and access entries; r without x is nearly useless.","ls -l notes.txt\nchmod 640 notes.txt\nchmod u+x run.sh\numask","-rw-r----- 1 ana dev 120 Jan 3 notes.txt\n0022","chmod -R 777 to 'fix' errors. It hides the cause and exposes files. Find the owner and group with ls -l and id first."],
+["sudo and least privilege","Authentication proves who you are; authorization decides what you may do. sudo runs one command with elevated rights, logged. Prefer targeted commands over a root shell, and read the command before pressing Enter. Edit sudoers with visudo.","id\nsudo -l\nsudo systemctl restart nginx","uid=1000(ana) gid=1000(ana) groups=1000(ana),27(sudo)","sudo on a whole pipeline: redirects (>) are done by your shell, not by sudo. Use sudo tee."]],
+ch:["A user cannot read /srv/data/report.txt. Which evidence do you gather?","id user; ls -l on the file; ls -ld on every parent directory (x needed on each); namei -l /srv/data/report.txt."]},
+{n:"Processes, Jobs & System State",d:"Intermediate",t:"4h",o:"Inspect processes and send signals correctly.",c:[
+["Processes and signals","Every process has a PID, a parent (PPID), an owner and a state. Signals ask or force: SIGTERM (15) asks to exit cleanly, SIGINT (2) is Ctrl+C, SIGHUP (1) hangup/reload, SIGKILL (9) cannot be caught and skips cleanup.","ps aux | head -3\nps -ef --forest | head\npgrep -a sshd\nkill -TERM 4242","USER PID %CPU %MEM ... COMMAND\nroot 1 0.0 0.1 ... /sbin/init","Reaching for kill -9 first. Try TERM, wait, then investigate; KILL leaves temp files and locks."],
+["Load and memory","Load average counts runnable and uninterruptible tasks, not CPU percent. Compare it to the CPU count. For memory read 'available' in free, not 'free'.","uptime\nnproc\nfree -h\ntop","load average: 0.52, 0.48, 0.40","Panic over low 'free': Linux uses spare RAM as cache."]],
+ch:["Which command finds the process listening on TCP 8080?","ss -ltnp | grep :8080 (root shows process names for other users)."]},
+{n:"Bash, Pipes & Text Processing",d:"Intermediate",t:"8h",o:"Combine small tools; write safe scripts.",c:[
+["File descriptors, redirection, pipes","0 stdin, 1 stdout, 2 stderr. > overwrites, >> appends, 2> redirects errors, 2>&1 merges errors into stdout (order matters). | connects stdout of one process to stdin of the next.","ls /nope > out.txt 2>&1\nps aux | awk '{print $1}' | sort | uniq -c | sort -rn | head","      42 root\n      11 ana","cmd 2>&1 > file vs cmd > file 2>&1: the first leaves errors on the terminal."],
+["Text pipeline: problem → data → command → result","Problem: which IPs fail SSH logins most? Data: auth log. grep selects lines, awk extracts a field, sort and uniq count, head trims. Build it one stage at a time and inspect each output.","grep 'Failed password' /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head -5","  87 203.0.113.9","Log path and field position vary: journalctl on systemd distributions, /var/log/secure on RHEL family."],
+["Defensive script skeleton","Quote everything, check arguments, fail loudly. set -euo pipefail helps but has edge cases; know them rather than trusting it blindly. Debug with bash -x and shellcheck.","#!/usr/bin/env bash\nset -euo pipefail\n[[ $# -eq 1 ]] || { echo \"usage: $0 DIR\" >&2; exit 2; }\ndu -sh -- \"$1\"","4.0K\t/tmp/x","Unquoted $1 breaks on spaces. 'sh script.sh' may lack bash features like [[ ]]."]],
+ch:["Rewrite: for f in $(ls *.log); do rm $f; done — safely.","for f in ./*.log; do [ -e \"$f\" ] && rm -- \"$f\"; done. Do ls ./*.log or echo first. Never parse ls."]},
+{n:"Packages, Environment & Configuration",d:"Intermediate",t:"4h",o:"Manage software across distributions; understand PATH.",c:[
+["Package managers by family","A package has files, metadata and dependencies from a signed repository. Debian/Ubuntu: apt (dpkg underneath). Fedora/RHEL: dnf (rpm). Arch: pacman. Never assume apt.","apt update && apt install tree\ndnf install tree\npacman -S tree\ndpkg -S /bin/ls","coreutils: /usr/bin/ls","Piping install scripts from unknown sites to a root shell. Third-party repos widen your supply-chain risk."],
+["Environment and PATH","Environment variables are inherited by child processes only if exported. The shell searches PATH left to right for the command name.","echo $PATH\nexport EDITOR=vim\nenv | grep EDITOR\ncp /etc/ssh/sshd_config{,.bak}","/usr/local/bin:/usr/bin:/bin","Un-exported variable invisible to a script. Always back up config before editing and validate after."]],
+ch:["Which package owns /usr/bin/ssh on Debian and on Fedora?","dpkg -S /usr/bin/ssh; rpm -qf /usr/bin/ssh."]},
+{n:"Services, systemd, Logs & Storage",d:"Intermediate–Advanced",t:"6h",o:"Manage services, read logs, understand mounts.",c:[
+["systemd: start vs enable","systemd is PID 1 and manages units. start/stop change the service now; enable/disable control start at boot. A service can be running but disabled, or enabled but failed.","systemctl status nginx\nsudo systemctl enable --now nginx\nsystemctl is-enabled nginx\njournalctl -u nginx -b --no-pager | tail","Active: active (running)\nenabled","Service works manually but not at boot: check enablement, dependencies, and environment differences in the unit."],
+["Disk → partition → filesystem → mount","A block device holds partitions, a partition holds a filesystem, a mount attaches it to a directory. /etc/fstab mounts at boot; prefer UUIDs. A wrong fstab entry can block boot, so test with mount -a.","lsblk -f\ndf -h\ndf -i\nsudo du -xh / --max-depth=1 | sort -h | tail","sda1 ext4 ... /boot","Deleting a big file but space stays used: a process still holds it open. Check lsof +L1."]],
+ch:["Disk 100% full; how do you find the cause safely?","df -h to find the filesystem, then du -xh --max-depth=1 downward; check df -i and deleted-but-open files. Verify before deleting anything."]},
+{n:"Networking & SSH",d:"Advanced",t:"7h",o:"Trace a connection and use SSH properly.",c:[
+["Network stack tools","Application → socket → port → IP → interface → route. Use ip and ss, not ifconfig and netstat (legacy).","ip -br addr\nip route\nss -tuln\ndig example.com +short\ncurl -I https://example.com","eth0 UP 192.168.1.20/24\ndefault via 192.168.1.1 dev eth0","Testing with ping only: ICMP may be blocked while TCP works. Test the actual port."],
+["SSH keys and host verification","The server proves identity with a host key (stored in known_hosts); you prove yours with a private key matched by authorized_keys. Permissions matter: private key 600, ~/.ssh 700.","ssh-keygen -t ed25519 -C lab\nssh-copy-id user@host\nssh -v user@host","","'Connection refused' means nothing listens or a reject rule; 'timed out' suggests filtering or routing. 'Permission denied (publickey)': check key, permissions, and sshd logs."]],
+ch:["Client says connection timed out; server's sshd is running. First three checks?","Server: ss -tlnp for :22, firewall rules. Path: ip route, traceroute. Client: ssh -v for where it stalls."]},
+{n:"Security, Hardening & Troubleshooting",d:"Advanced",t:"6h",o:"Reduce attack surface with verified changes.",c:[
+["Hardening loop: risk → control → tradeoff → verification","Example: risk is password guessing over SSH. Control: keys only (PasswordAuthentication no). Tradeoff: lockout if key setup is wrong, so keep a second session open. Verify: sshd -t, then a test login.","sudo sshd -t\nsudo ss -tlnp\nsudo journalctl -u ssh --since today | tail","","Editing sshd_config and closing your only session."],
+["Firewalls and exposure","Packet filtering runs in the kernel (nftables; iptables is legacy). ufw (Ubuntu) and firewalld (Fedora/RHEL) are front ends. List listening ports first, then decide what should be reachable.","sudo ss -tulnp\nsudo ufw status\nsudo firewall-cmd --list-all","","Enabling a firewall remotely without allowing SSH first."]],
+ch:["Give risk/control/tradeoff/verify for removing an unused service.","Risk: exposed unused port. Control: systemctl disable --now. Tradeoff: another app may depend on it. Verify: ss -tlnp and systemctl list-dependencies --reverse."]},
+{n:"Automation & Administration",d:"Advanced",t:"5h",o:"Schedule and log repeatable jobs.",c:[
+["cron and its environment","cron runs jobs with a minimal environment and no terminal. Use absolute paths, redirect output, and test the command as the same user with env -i.","crontab -e\n0 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1\ncrontab -l","","Works in your shell, fails in cron: PATH and cwd differ. systemd timers are a modern alternative with journald logging."],
+["tar and gzip","tar archives (many files into one); gzip compresses. They are separate steps that tar can combine.","tar -czf backup.tgz -C /srv data\ntar -tzf backup.tgz | head","data/\ndata/a.txt","Extracting untrusted archives into an important directory. List with -t first."]],
+ch:["Job runs by hand but not from cron. Diagnose.","Capture output to a log; use absolute paths; compare env; check script permissions and the cron log via journalctl -u cron (or crond)."]},
+{n:"Projects & Capstone",d:"Professional",t:"20h+",o:"Integrate every level into a documented server.",c:[
+["Capstone: deploy, secure, monitor, troubleshoot a Linux server","Server role: one web service on a VM. Plan users and permissions, SSH keys, packages, systemd unit, firewall, logging, backup automation and a monitoring script. Break it on purpose, then recover. Deliver a change record.","# change record\nDate/Who: ...\nChange: ...\nReason: ...\nVerification: ...\nRollback: ...","","Making changes without observing state first or documenting afterwards."]],
+ch:["Write your verification list for the capstone.","Listening ports match the plan, only key SSH works, service enabled and active, backup restores, logs show the events, rollback steps tested."]}
+];
+const P=[["Environment Explorer","Beginner"],["File Organizer","Beginner"],["Backup Script","Beginner"],["Disk Usage Reporter","Beginner"],["Log Analyzer","Intermediate"],["User/Group Lab","Intermediate"],["Process Monitor","Intermediate"],["Service Health Checker","Intermediate"],["System Info Dashboard","Intermediate"],["Automated Backup System","Advanced"],["SSH Admin Utility","Advanced"],["Network Diagnostics Toolkit","Advanced"],["Security Audit Script","Advanced"],["Hardening Checklist Tool","Advanced"],["Multi-Service Lab","Professional"],["Server Capstone","Capstone"]];
+const S=[["Permission denied","Symptom: cannot read/execute. Test: id; ls -l file; ls -ld parents; namei -l path. Causes: owner/group/mode, missing x on a directory, mount option noexec, SELinux/AppArmor. Fix the narrowest thing. Verify as the affected user."],["Disk has space but writes fail","Test: df -h, df -i, mount | grep ro. Causes: inodes exhausted, read-only remount, quota. Fix the cause, verify with touch, document."],["Service won't start","Test: systemctl status, journalctl -u NAME -b. Causes: config error, port already used (ss -tlnp), permissions, missing dependency. Fix, restart, verify with status and a client request."],["SSH authentication fails","Test: ssh -v; server journalctl -u ssh (or sshd). Causes: wrong key, ~/.ssh mode, wrong user, PasswordAuthentication disabled. Fix permissions/keys; verify login."],["Web server running but unreachable","Walk the stack: ip addr, ip route, ss -tlnp (bound to 127.0.0.1?), firewall, then curl from local and remote hosts."],["Cron job does not run","Test: crontab -l, cron logs, run script with env -i. Causes: PATH, permissions, missing newline, output ignored."]];
+const C=[["Basics","pwd ls cd mkdir touch cp mv rm ln cat less head tail file stat"],["Permissions","chmod 640 f · chown user:grp f · umask · id · sudo -l"],["Processes","ps aux · top · pgrep -a x · kill -TERM PID · jobs bg fg · nice"],["Pipes","cmd > f · >> f · 2> f · 2>&1 · a | b · tee f"],["Text","grep -rn pat dir · sed 's/a/b/' · awk '{print $1}' · cut -d: -f1 · sort | uniq -c"],["find","find . -type f -name '*.log' -mtime +7 (preview before -delete or -exec)"],["Packages","apt · dnf · pacman (families differ) · dpkg -S · rpm -qf"],["Storage","lsblk -f · df -h · df -i · du -xh --max-depth=1 · mount · findmnt"],["systemd","systemctl status|start|stop|restart|enable|disable NAME · journalctl -u NAME -b"],["Network","ip -br addr · ip route · ss -tuln · dig · curl -I · ping"],["SSH","ssh-keygen -t ed25519 · ssh-copy-id · ssh -v · scp · sftp"],["Archive","tar -czf a.tgz dir · tar -tzf a.tgz · tar -xzf a.tgz"],["Firewall","ufw status · firewall-cmd --list-all · nft list ruleset"]];
+const K=["I can explain kernel vs distribution vs shell vs terminal","I can navigate with absolute and relative paths","I understand inodes and links","I can read and set permissions","I understand sudo and least privilege","I can inspect processes and send signals","I understand stdin/stdout/stderr and pipes","I can process text with grep/sed/awk","I can write and debug a safe Bash script","I understand start vs enable in systemd","I can read logs with journalctl","I can trace a network problem layer by layer","I can use SSH with keys","I can harden a basic server and verify it","I can document a change"];
+const $=s=>document.querySelector(s),esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let st={};try{st=JSON.parse(localStorage.getItem("lzp")||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem("lzp",JSON.stringify(st))}catch(e){}};
+const pre=(t,cls)=>t?`<pre class="${cls||""}"><code>${esc(t)}</code>${cls?"":'<button class="cp">Copy</button>'}</pre>`:"";
+const idx=[];let total=0;
+let h="";
+L.forEach((lv,i)=>{const n=String(i+1).padStart(2,"0"),lid="level-"+n;
+ h+=`<section id="${lid}"><h2>Level ${n}: ${lv.n}</h2><div class="meta"><span>${lv.d}</span><span>${lv.t}</span><span>${i?"Prerequisite: Level "+String(i).padStart(2,"0"):"No prerequisites"}</span></div><p>${lv.o}</p>`;
+ lv.c.forEach((c,j)=>{total++;const id=`concept-${String(total).padStart(2,"0")}`;idx.push([c[0],"Level "+n,c[1].slice(0,90),id,c[2]]);
+  h+=`<div class="lesson" id="${id}" data-l="${i}"><button class="h" aria-expanded="false"><span>${c[0]}</span></button><div class="body"><div class="tag">What and why</div><p>${c[1]}</p>${c[2]?'<div class="tag">Run</div>'+pre(c[2]):""}${c[3]?'<div class="tag">Expected output</div>'+pre(c[3],"out"):""}<div class="tag">Common mistake</div><p class="bad">${c[4]}</p><button class="dn">Mark done</button></div></div>`});
+ h+=`<div class="chal" id="challenge-${n}"><b>Challenge:</b> ${lv.ch[0]}<br><button class="sv">Show solution</button><div class="sol">${lv.ch[1]}</div></div></section>`});
+$("#levels").innerHTML=h;
+$("#road").innerHTML=L.map((lv,i)=>{const n=String(i+1).padStart(2,"0");return `<a class="card" href="#level-${n}"><b>Level ${n}: ${lv.n}</b><small>${lv.d} · ${lv.t}</small><div class="bar"><i id="rb${i}"></i></div><small class="m" id="rt${i}"></small></a>`}).join("");
+$("#plist").innerHTML=P.map((p,i)=>{const id="project-"+String(i+1).padStart(2,"0");idx.push([p[0],"Project",p[1],id]);return `<div class="lesson" id="${id}"><button class="h" aria-expanded="false"><span>${p[0]} <small class="dim">(${p[1]})</small></span></button><div class="body"><p>Reuses skills from earlier levels. Write: purpose, requirements, files, script, tests, expected result, failure modes, security notes, documentation and portfolio value. Build it in a lab VM.</p></div></div>`}).join("");
+$("#slist").innerHTML=S.map((s,i)=>{const id="scenario-"+String(i+1).padStart(2,"0");idx.push([s[0],"Scenario",s[1].slice(0,90),id]);return `<div class="lesson" id="${id}"><button class="h" aria-expanded="false"><span>${s[0]}</span></button><div class="body"><p>${s[1]}</p></div></div>`}).join("");
+$("#cs").innerHTML=C.map(r=>{idx.push([r[0],"Cheat sheet",r[1],"cheatsheet"]);return `<tr><th>${r[0]}</th><td class="m">${esc(r[1])}</td></tr>`}).join("");
+$("#chk").innerHTML=K.map((k,i)=>`<label><input type="checkbox" data-k="${i}"> ${k}</label>`).join("");
+function paint(){let d=0;const per=L.map(()=>[0,0]);
+ document.querySelectorAll("[data-l]").forEach(e=>{const l=+e.dataset.l,f=!!st["d"+e.id];per[l][1]++;if(f){per[l][0]++;d++}e.classList.toggle("done",f);e.querySelector(".dn").textContent=f?"Mark not done":"Mark done"});
+ per.forEach((p,i)=>{const pc=Math.round(100*p[0]/p[1]);$("#rb"+i).style.width=pc+"%";$("#rt"+i).textContent=`Level ${String(i+1).padStart(2,"0")} — ${pc}%`});
+ $("#gbar").style.width=100*d/total+"%";$("#gtxt").textContent=`${d} / ${total} concepts`;
+ document.querySelectorAll("[data-k]").forEach(c=>c.checked=!!st["k"+c.dataset.k])}
+const toast=t=>{const e=$("#toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1200)};
+document.addEventListener("click",e=>{const b=e.target.closest("button"),les=e.target.closest(".lesson");if(!b)return;
+ if(b.classList.contains("h")){const o=les.classList.toggle("open");b.setAttribute("aria-expanded",o)}
+ else if(b.classList.contains("dn")){st["d"+les.id]=!st["d"+les.id];save();paint()}
+ else if(b.classList.contains("sv")){const s=b.nextElementSibling;s.classList.toggle("show");b.textContent=s.classList.contains("show")?"Hide solution":"Show solution"}
+ else if(b.classList.contains("cp")){const t=b.previousElementSibling.textContent;const ok=()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1200)};
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,()=>fb(t,ok));else fb(t,ok)}
+ else if(b.id==="sb")openS()});
+function fb(t,ok){const a=document.createElement("textarea");a.value=t;document.body.append(a);a.select();try{document.execCommand("copy");ok()}catch(e){toast("Copy failed")}a.remove()}
+document.addEventListener("change",e=>{if(e.target.dataset.k!=null){st["k"+e.target.dataset.k]=e.target.checked;save()}});
+const nv=$("#nav");nv.innerHTML=["course","roadmap",...L.map((_,i)=>"level-"+String(i+1).padStart(2,"0")),"projects","scen","cheatsheet","resources"].map(id=>`<a href="#${id}">${id.startsWith("level")?"L"+id.slice(6):id==="scen"?"scenarios":id}</a>`).join("")+'<button id="sb">Search /</button>';
+const secs=[...document.querySelectorAll("section")];
+addEventListener("scroll",()=>{let cur=secs[0].id;secs.forEach(s=>{if(s.getBoundingClientRect().top<90)cur=s.id});nv.querySelectorAll("a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+cur))},{passive:true});
+function openS(){$("#ov").classList.add("on");$("#q").value="";$("#res").innerHTML="";$("#q").focus()}
+function closeS(){$("#ov").classList.remove("on")}
+$("#q").addEventListener("input",e=>{const q=e.target.value.toLowerCase().trim();if(!q){$("#res").innerHTML="";return}
+ $("#res").innerHTML=idx.filter(r=>(r[0]+r[1]+r[2]+(r[4]||"")).toLowerCase().includes(q)).slice(0,12).map(r=>`<a href="#${r[3]}" data-id="${r[3]}">${esc(r[0])}<small>${r[1]} — ${esc(r[2])}</small></a>`).join("")||"<p class='dim'>No matches.</p>"});
+$("#res").addEventListener("click",e=>{const a=e.target.closest("a");if(!a)return;closeS();const t=document.getElementById(a.dataset.id);if(t&&t.classList.contains("lesson")){t.classList.add("open");t.querySelector(".h").setAttribute("aria-expanded","true")}});
+$("#ov").addEventListener("click",e=>{if(e.target.id==="ov")closeS()});
+addEventListener("keydown",e=>{if(e.key==="Escape")closeS();else if(e.key==="/"&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();openS()}});
+paint();
+</script></body></html>
