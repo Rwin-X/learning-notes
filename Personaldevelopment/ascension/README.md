@@ -155,6 +155,4 @@ Designed around a printable "Ascension 2026" daily planner page, then rebuilt as
 
 ---
 
-## License
-
-Choose a license before publishing (for example MIT) and add a `LICENSE` file.
+BY Rwin-X
