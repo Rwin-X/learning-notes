@@ -1,1 +1,1 @@
-
+all projecet dekete
