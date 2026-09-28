@@ -1,0 +1,51 @@
+10 KEY CYBERSECURITY CONCEPTS
+==========================================================
+
+1. The CIA Triad (Confidentiality, Integrity, Availability)
+----------------------------------------------------------
+The foundation of every security decision. Confidentiality means only authorized people can access the data (e.g., encryption). Integrity means data cannot be altered without detection (e.g., hashing and digital signatures). Availability means the system is accessible when needed (e.g., redundancy and DDoS mitigation). Every attack targets at least one of these three.
+
+
+2. Risk Management: Risk = Threat x Vulnerability x Impact
+----------------------------------------------------------
+Risk is the likelihood that a vulnerability will be exploited, combined with the impact of that exploitation. Removing the vulnerability or the threat reduces risk. There are four standard responses to risk: mitigate, transfer, accept, and avoid.
+
+
+3. Attack Surface & Threat Modeling
+----------------------------------------------------------
+The attack surface is the sum of all points an attacker can interact with (ports, APIs, user inputs, people). Threat modeling examines these points before a system is built. A common framework is STRIDE: Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege.
+
+
+4. Defense in Depth
+----------------------------------------------------------
+No single control is enough. The layers include network (segmentation, firewalls), host (hardening, EDR), application (input validation), and data (encryption). If one layer fails, the next must stop or reveal the attack.
+
+
+5. Least Privilege & Zero Trust
+----------------------------------------------------------
+Least Privilege means every user or service has only the access needed to do its job. Zero Trust extends this logic: "never trust, always verify." Network location alone does not create trust, and every request is evaluated based on identity, device posture, and context.
+
+
+6. Identity and Access Management (IAM)
+----------------------------------------------------------
+Covers Authentication (who are you?), Authorization (what are you allowed to do?), and Accounting (what did you do?). MFA combines "something you know, something you have, and something you are." Many real-world breaches begin with credential stuffing, phishing, and privilege escalation rather than sophisticated exploits.
+
+
+7. Cryptography Fundamentals
+----------------------------------------------------------
+Symmetric encryption (AES) is fast but has a key distribution problem. Asymmetric encryption (RSA, ECC) solves key distribution but is slower. Hash functions (SHA-256, and bcrypt/Argon2 for passwords) are one-way. TLS combines all three. In practice, most failures come from weak key management and incorrect implementation, not from the algorithms themselves.
+
+
+8. Vulnerability Lifecycle (CVE / CVSS / Exploit)
+----------------------------------------------------------
+A CVE is the public identifier of a vulnerability, and CVSS rates its severity from 0 to 10. The gap between disclosure, exploit release, and patching (the patch window) must be managed. Prioritizing by CVSS alone is not enough; real-world exploitability and asset criticality must also be considered (e.g., using EPSS or CISA's KEV catalog).
+
+
+9. Cyber Kill Chain & MITRE ATT&CK
+----------------------------------------------------------
+Lockheed Martin's Kill Chain models an attack in 7 stages: Reconnaissance, Weaponization, Delivery, Exploitation, Installation, Command and Control (C2), and Actions on Objectives. MITRE ATT&CK offers a more granular view, cataloging real-world attacker tactics and techniques. It is useful for both red teams (attack simulation) and blue teams (detection coverage).
+
+
+10. Detection & Incident Response
+----------------------------------------------------------
+100% prevention is impossible, so you must assume breach. This concept includes centralized logging, SIEM, threat hunting, and metrics such as MTTD (mean time to detect) and MTTR (mean time to respond/recover). The NIST incident response lifecycle: Preparation -> Detection & Analysis -> Containment/Eradication/Recovery -> Post-Incident Activity.
