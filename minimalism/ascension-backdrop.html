@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ASCENSION — Backdrop</title>
+<style>
+:root{--bg:#f6f6f4;--fg:#0c0c0c;--mut:#8a8a86;--line:#d9d9d5;--card:#fff;--soft:#ecece8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}}
+:root[data-theme="dark"]{--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font:400 14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;cursor:default}
+#bg.hoverable{cursor:pointer}
+
+/* ---- note modal: an identity-card sheet for a single day ---- */
+#scrim{
+  position:fixed;inset:0;z-index:5;
+  background:color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  padding:22px;
+  opacity:0;pointer-events:none;
+  transition:opacity .18s ease;
+}
+#scrim.open{opacity:1;pointer-events:auto}
+#note{
+  width:100%;max-width:440px;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:22px 22px 18px;
+  transform:translateY(8px) scale(.985);
+  transition:transform .18s ease;
+}
+#scrim.open #note{transform:translateY(0) scale(1)}
+.note-head{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  border-bottom:1px solid var(--fg);
+  padding-bottom:14px;margin-bottom:16px;
+}
+.note-id{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut)}
+.note-date{font-size:11px;letter-spacing:.05em;color:var(--mut);margin-top:6px}
+#noteClose{
+  font:inherit;color:var(--mut);background:none;border:1px solid var(--line);
+  border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;
+  display:flex;align-items:center;justify-content:center;flex:none;
+}
+#noteClose:hover{border-color:var(--fg);color:var(--fg)}
+.note-title-lab, .note-body-lab{
+  font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--mut);
+  margin-bottom:7px;display:block;
+}
+#noteTitle{
+  width:100%;font:700 20px/1.25 Inter,system-ui,sans-serif;letter-spacing:-.02em;
+  color:var(--fg);background:none;border:none;outline:none;padding:0 0 12px;
+  border-bottom:1px solid var(--line);margin-bottom:14px;
+}
+#noteTitle::placeholder{color:var(--mut);font-weight:400}
+#noteBody{
+  width:100%;min-height:140px;resize:vertical;
+  font:400 13.5px/1.6 Inter,system-ui,sans-serif;color:var(--fg);
+  background:none;border:none;outline:none;padding:0;
+}
+#noteBody::placeholder{color:var(--mut)}
+
+.note-level-lab{
+  font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--mut);
+  margin:14px 0 8px;display:block;
+}
+.level-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.level-btn{
+  font:500 10.5px/1 Inter,system-ui,sans-serif;letter-spacing:.06em;
+  color:var(--mut);background:none;border:1px solid var(--line);border-radius:8px;
+  padding:9px 4px 8px;cursor:pointer;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  transition:border-color .12s ease, color .12s ease;
+}
+.level-btn .dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--line);
+  transition:background .12s ease, transform .12s ease;
+}
+.level-btn:hover{border-color:var(--mut)}
+.level-btn.active{border-color:var(--fg);color:var(--fg)}
+.level-btn.active .dot{background:var(--fg);transform:scale(1.15)}
+/* each level's dot is progressively larger, so strength reads at a glance even unselected */
+.level-btn[data-lv="1"] .dot{width:5px;height:5px}
+.level-btn[data-lv="2"] .dot{width:6.5px;height:6.5px}
+.level-btn[data-lv="3"] .dot{width:8px;height:8px}
+.level-btn[data-lv="4"] .dot{width:9.5px;height:9.5px}
+
+.note-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+}
+.note-status{font-size:11px;color:var(--mut)}
+.note-badge{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);
+  border:1px solid var(--line);border-radius:6px;padding:3px 8px;
+}
+
+#noteDate{
+  font-size:11px;letter-spacing:.03em;color:var(--fg);
+  background:none;border:none;outline:none;padding:0;
+  font-family:inherit;margin-top:6px;cursor:pointer;
+}
+#noteDate::-webkit-calendar-picker-indicator{
+  filter:var(--datepicker-filter,none);opacity:.55;cursor:pointer;
+}
+:root[data-theme="dark"] #noteDate::-webkit-calendar-picker-indicator{ filter:invert(1); }
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #noteDate::-webkit-calendar-picker-indicator{ filter:invert(1); }}
+
+#addEntry{
+  position:fixed;z-index:4;
+  right:22px;bottom:calc(22px + env(safe-area-inset-bottom,0px));
+  width:48px;height:48px;border-radius:50%;
+  background:var(--card);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:20px;font-weight:300;color:var(--fg);
+  line-height:1;
+}
+#addEntry:hover{border-color:var(--fg)}
+#addEntry svg{width:18px;height:18px;stroke:var(--fg);fill:none;stroke-width:1.6}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div id="scrim">
+  <div id="note" role="dialog" aria-modal="true" aria-labelledby="noteId">
+    <div class="note-head">
+      <div>
+        <div class="note-id" id="noteId">DAY —</div>
+        <input class="note-date" id="noteDate" type="date">
+      </div>
+      <button id="noteClose" aria-label="Close">✕</button>
+    </div>
+    <span class="note-title-lab">Title</span>
+    <input id="noteTitle" type="text" placeholder="Untitled" maxlength="80">
+    <span class="note-body-lab">Entry</span>
+    <textarea id="noteBody" placeholder="Write something for this day…"></textarea>
+    <span class="note-level-lab">Intensity</span>
+    <div class="level-row" id="levelRow">
+      <button class="level-btn" data-lv="1"><span class="dot"></span>Low</button>
+      <button class="level-btn" data-lv="2"><span class="dot"></span>Medium</button>
+      <button class="level-btn" data-lv="3"><span class="dot"></span>High</button>
+      <button class="level-btn" data-lv="4"><span class="dot"></span>Peak</button>
+    </div>
+    <div class="note-foot">
+      <span class="note-status" id="noteStatus">Saved</span>
+      <span class="note-badge" id="noteBadge">Empty</span>
+    </div>
+  </div>
+</div>
+
+<button id="addEntry" aria-label="Add entry" title="Add entry">
+  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<script>
+const $=s=>document.querySelector(s);
+
+/* ---- entries: the user's own days. Each entry is one node on the helix; order is insertion order for now. ---- */
+const SLOTS=240;           // helix always shows this many positions, so the structure stays intact while empty
+const entries=[];          // [{date:'YYYY-MM-DD', title, body, lv}]
+const todayISO=(()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");})();
+const year=new Date().getFullYear();
+const n=SLOTS;
+const dayOfYear=-1;        // no "today" marker tied to a calendar position anymore
+const store={};            // slot index -> {f,lv} view of entries, consumed by scan()
+
+/* ---- 3D backdrop: the year as an ascending helix. Lightweight — no filter blur, no per-node shadows. ---- */
+const cv=$("#bg"),cx=cv.getContext("2d"),RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let W=0,H=0,mx=0,my=0,tx=0,ty=0,fg=[12,12,12],bgc=[246,246,244],fr=0,nodes=[],yaw=0,pit=.3,zoom=1,sx=.5,spin=1,pulses=[],breathM=0,lastT=0;
+let glowSoft=null,glowSharp=null,vignette=null;
+const R=250,HH=1500,STEP=0.34;
+let SPAN=2600; // vertical extent of the helix itself; set from viewport height in fit()
+const CUBE=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+const EDG=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+const dust=Array.from({length:52},()=>[(Math.random()-.5)*1600,(Math.random()-.5)*1900,(Math.random()-.5)*1600,Math.random(),Math.random()*.6+.4]);
+
+// screen-space hit targets for each day node, rebuilt every frame from actual projected positions
+let hitTargets=[]; // {i, x, y, r}
+
+
+function fit(){
+  const d=Math.min(devicePixelRatio||1,1.5);
+  W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+  sx=W>820?.7:.5;
+  zoom=Math.max(.4,Math.min(1.05,Math.min(W,H)/1000+.22));
+  vignette=null;
+  SPAN=Math.max(1400,Math.min(2600,H*3.1));
+}
+function fgc(){
+  const cs=getComputedStyle(document.documentElement),h=cs.getPropertyValue("--fg").trim(),b=cs.getPropertyValue("--bg").trim();
+  if(/^#[0-9a-f]{6}$/i.test(h))fg=[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+  if(/^#[0-9a-f]{6}$/i.test(b))bgc=[1,3,5].map(i=>parseInt(b.substr(i,2),16));
+  glowSoft=null;glowSharp=null;vignette=null;
+}
+function scan(){
+  nodes=[];
+  for(let i=0;i<SLOTS;i++){
+    const e=entries[i];
+    nodes.push({f:e?1:0,s:0,t:0,m:e?Math.min(10,Math.round((e.body||"").length/40)):0,lv:e?e.lv:1});
+  }
+  pulses=[];spin=.8;breathM=0;
+}
+function P(x,y,z){
+  const c=Math.cos(yaw),s=Math.sin(yaw);
+  let X=x*c+z*s,Z=-x*s+z*c;
+  const cp=Math.cos(pit),sp=Math.sin(pit),Y=y*cp-Z*sp;Z=y*sp+Z*cp;
+  const f=zoom*900/(1400+Z);
+  return[W*sx+X*f,H*.5+Y*f,f,Z];
+}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rgba=a=>"rgba("+fg[0]+","+fg[1]+","+fg[2]+","+clamp(a,0,1).toFixed(3)+")";
+function line(a,b,al,w){cx.lineWidth=w||1;cx.strokeStyle=rgba(al);cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.stroke()}
+
+// two pre-rendered radial sprites: a wide soft ambient halo and a tight bright core — layering both
+// reads as a much richer glow than one sprite alone, at a fixed, cheap cost.
+function buildGlows(){
+  if(glowSoft&&glowSharp)return;
+  function sprite(stops,size){
+    const g=document.createElement("canvas");g.width=g.height=size;const gc=g.getContext("2d");
+    const rg=gc.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+    stops.forEach(([pos,a])=>rg.addColorStop(pos,"rgba("+fg[0]+","+fg[1]+","+fg[2]+","+a+")"));
+    gc.fillStyle=rg;gc.fillRect(0,0,size,size);return g;
+  }
+  glowSoft=sprite([[0,.5],[.4,.16],[1,0]],80);
+  glowSharp=sprite([[0,.95],[.3,.4],[1,0]],48);
+}
+function glowDot(p,r,al){
+  buildGlows();
+  const s1=r*7,s2=r*4.2;
+  cx.globalAlpha=clamp(al*.8,0,1);cx.drawImage(glowSoft,p[0]-s1/2,p[1]-s1/2,s1,s1);
+  cx.globalAlpha=clamp(al,0,1);cx.drawImage(glowSharp,p[0]-s2/2,p[1]-s2/2,s2,s2);
+  cx.globalAlpha=1;
+  cx.fillStyle=rgba(al);cx.beginPath();cx.arc(p[0],p[1],r*.4,0,7);cx.fill();
+}
+
+// a single cached vignette gradient (built once per resize/theme, never per-frame) —
+// deepens the corners subtly so the scene reads as it has real depth beyond the helix.
+function buildVignette(){
+  if(vignette)return vignette;
+  const g=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.72);
+  g.addColorStop(0,"rgba("+bgc[0]+","+bgc[1]+","+bgc[2]+",0)");
+  g.addColorStop(1,"rgba("+bgc[0]*0.5+","+bgc[1]*0.5+","+bgc[2]*0.5+",0.22)");
+  vignette=g;return g;
+}
+
+function frame(ts){
+  if(!RM)requestAnimationFrame(frame);
+  if(ts-lastT<33)return;
+  lastT=ts;
+  const t=RM?0:ts/1000;fr++;
+  if(fr%20===1){fgc();scan()}
+
+  // easing toward pointer target is slightly slower than before — reads as more physical, less jittery
+  tx+=(mx-tx)*.05;ty+=(my-ty)*.05;
+  const breath=.5+.5*Math.sin(t*.6)*(.4+breathM*.06);
+  const sc=scrollY;
+  yaw=t*.075*spin+sc*.0016+tx*.55;
+  pit=clamp(.28+ty*.2,-.35,.85);
+  const off=-sc*.34+SPAN*.42,nn=nodes.length||SLOTS;
+
+  cx.fillStyle="rgb("+bgc.join(",")+")";cx.fillRect(0,0,W,H);
+
+  // receding floor grid — slightly finer fade at the edges than before
+  const y0=HH/2+40+off;
+  for(let j=-6;j<=6;j+=2){
+    const al=.085-Math.abs(j)*.009;
+    line(P(j*190,y0,-1140),P(j*190,y0,1140),al);
+    line(P(-1140,y0,j*190),P(1140,y0,j*190),al);
+  }
+  // central axis, very slightly brighter near the "today" marker's height
+  line(P(0,-HH/2+off,0),P(0,HH/2+off,0),.12);
+
+  // sparse dust — depth-varying size in addition to alpha, for a touch more richness at near cost
+  dust.forEach(d=>{
+    const y=((d[1]+t*16*(.4+d[3])+950)%1900)-950+off*.5,p=P(d[0],y,d[2]);
+    const near=1-clamp((p[3]+R*3)/(R*6),0,1);
+    cx.fillStyle=rgba(.06+.24*near);
+    const sz=(0.8+near*1.1)*d[4];
+    cx.fillRect(p[0],p[1],sz,sz);
+  });
+
+  // pulses: lead point plus one faint trailing point (two draws, not a redraw loop) for a sense of motion
+  pulses.forEach(pl=>{
+    pl.p+=pl.spd;if(pl.p>1)pl.p-=1;
+    const i=pl.a+(pl.b-pl.a)*pl.p,a=i*STEP,y=(i/nn-.5)*SPAN+off,p=P(Math.cos(a)*R,y,Math.sin(a)*R);
+    const trailP=Math.max(0,pl.p-.03),ti=pl.a+(pl.b-pl.a)*trailP,ta=ti*STEP,ty2=(ti/nn-.5)*SPAN+off,tp=P(Math.cos(ta)*R,ty2,Math.sin(ta)*R);
+    if(tp[1]>-20&&tp[1]<H+20)glowDot(tp,1.1*tp[2],.18);
+    if(p[1]>-20&&p[1]<H+20)glowDot(p,1.9*p[2],.55);
+  });
+
+  // helix: chain of days — filled days get a radial bar whose height reads the day's Mode score
+  hitTargets=[];
+  // smooth spine: sample the spiral finely (6 samples per slot) so it reads as a continuous helix
+  {
+    const SUB=6,total=nn*SUB;let sp=null,spNear=0;
+    for(let k=0;k<=total;k++){
+      const f=k/SUB,a=f*STEP,y=(f/nn-.5)*SPAN+off,p=P(Math.cos(a)*R,y,Math.sin(a)*R);
+      const near=1-clamp((p[3]+R)/(2*R),0,1);
+      if(sp&&p[1]>-40&&p[1]<H+40)line(sp,p,.05+.24*Math.min(near,spNear),1);
+      sp=p;spNear=near;
+    }
+  }
+  let prev=null,prevNear=0;
+  for(let i=0;i<nodes.length;i++){
+    const a=i*STEP,y=(i/nn-.5)*SPAN+off,cA=Math.cos(a),sA=Math.sin(a),p=P(cA*R,y,sA*R);
+    const dep=clamp((p[3]+R)/(2*R),0,1),near=1-dep,nd=nodes[i];
+    prev=p;prevNear=near;
+    if(p[1]<-40||p[1]>H+40)continue;
+    // register a click target for every visible day node — generous radius, biased toward near/front nodes
+    if(near>0.06 && p[0]>8 && p[0]<W-8 && p[1]>8 && p[1]<H-8){
+      const lvPad = nd.f ? (nd.lv||1)*2.4 : 0;
+      hitTargets.push({i, x:p[0], y:p[1], r:Math.max(9, 6*p[2])+near*6+lvPad});
+    }
+
+    if(nd.s){
+      // sealed day: spinning wireframe cube — size and glow scale with level (1-4), so a stronger
+      // day reads as a visibly larger, brighter marker even before opening its note
+      const lvScale=0.7+nd.lv*0.33;
+      const sz=(8+near*2)*lvScale,r=t*.85+i*.6,cr=Math.cos(r),sr=Math.sin(r);
+      const pts=CUBE.map(v=>P(cA*R+(v[0]*cr+v[2]*sr)*sz,y+v[1]*sz,sA*R+(-v[0]*sr+v[2]*cr)*sz));
+      EDG.forEach(e=>line(pts[e[0]],pts[e[1]],(.28+.5*near)*Math.min(1,0.75+nd.lv*0.08)));
+      if(near>.4)glowDot(pts[6],1.1*p[2]*lvScale,(.16+nd.lv*0.06)*near);
+    }else if(nd.f){
+      // filled day: radial bar rising outward — height and brightness scale with level, not just Mode.
+      // level 1 (Low) stays modest; level 4 (Peak) reaches noticeably further and glows harder.
+      const lvScale=0.55+nd.lv*0.5;
+      const bh=(6+nd.m*3.4)*lvScale,tip=P(cA*(R+bh),y,sA*(R+bh));
+      line(p,tip,(.2+.5*near*(.4+.06*nd.m))*Math.min(1.3,0.7+nd.lv*0.18),(1.5+nd.lv*0.4)*p[2]);
+      glowDot(tip,(1.5+nd.lv*0.55)*p[2],(.28+.42*near*(.5+.05*nd.m))*Math.min(1.4,0.65+nd.lv*0.22));
+      cx.fillStyle=rgba(.55+.4*near);
+      cx.beginPath();cx.arc(p[0],p[1],(2.2+nd.lv*.4)*p[2]*1.2,0,7);cx.fill();
+    }else{
+      // empty day: node tip made clearer/larger than before so every branch reads distinctly,
+      // not just filled/sealed ones
+      cx.strokeStyle=rgba(.22+.38*near);cx.lineWidth=1;
+      cx.beginPath();cx.arc(p[0],p[1],(3.6+near*1.6)*p[2]*1.2,0,7);cx.stroke();
+      cx.fillStyle=rgba(.3+.45*near);
+      cx.beginPath();cx.arc(p[0],p[1],1.5*p[2]*1.2,0,7);cx.fill();
+    }
+    if(nd.t){
+      const pr=8+3*Math.sin(t*3)*(1+.15*breath);
+      glowDot(p,pr*p[2]*.6,.42+.26*breath);
+      cx.strokeStyle=rgba(.9);cx.lineWidth=1.1;
+      cx.beginPath();cx.arc(p[0],p[1],pr*p[2]*1.2,0,7);cx.stroke();
+      // a second, larger, fainter ring for a bit more presence on "today" without another glow sprite pass
+      cx.strokeStyle=rgba(.22+.12*breath);cx.lineWidth=.8;
+      cx.beginPath();cx.arc(p[0],p[1],pr*p[2]*1.9,0,7);cx.stroke();
+    }
+  }
+
+  // cached vignette, drawn last, once per frame as a single fillRect with a pre-built gradient
+  cx.fillStyle=buildVignette();cx.fillRect(0,0,W,H);
+}
+fit();fgc();scan();
+addEventListener("resize",()=>{fit();if(RM)requestAnimationFrame(frame)});
+addEventListener("pointermove",e=>{
+  mx=(e.clientX/W-.5)*2;my=(e.clientY/H-.5)*2;
+  if(!noteOpen){
+    const hit=findHit(e.clientX,e.clientY);
+    cv.classList.toggle("hoverable", !!hit);
+  }
+},{passive:true});
+addEventListener("pointerleave",()=>{mx=0;my=0},{passive:true});
+if(RM){addEventListener("scroll",()=>requestAnimationFrame(frame),{passive:true});}
+requestAnimationFrame(frame);
+
+/* ---- notes: each node is one of the user's own entries — date (editable) + title, then the entry body ---- */
+let noteOpen=false, activeSlot=null, activeLevel=1;
+const scrimEl=$("#scrim"), noteIdEl=$("#noteId"), noteDateEl=$("#noteDate"),
+      titleEl=$("#noteTitle"), bodyEl=$("#noteBody"), statusEl=$("#noteStatus"), badgeEl=$("#noteBadge"),
+      levelRowEl=$("#levelRow"), levelBtns=[...document.querySelectorAll(".level-btn")];
+
+function setLevel(lv){
+  activeLevel=lv;
+  levelBtns.forEach(b=>b.classList.toggle("active", Number(b.dataset.lv)===lv));
+}
+levelBtns.forEach(b=>b.addEventListener("click",()=>{ setLevel(Number(b.dataset.lv)); scheduleSave(); }));
+
+function findHit(clientX,clientY){
+  let best=null,bestD=Infinity;
+  for(const h of hitTargets){
+    const dx=clientX-h.x, dy=clientY-h.y, d=Math.hypot(dx,dy);
+    if(d<=h.r+6 && d<bestD){bestD=d;best=h;}
+  }
+  return best;
+}
+function firstFreeSlot(){
+  for(let i=0;i<SLOTS;i++) if(!entries[i]) return i;
+  return null;
+}
+function openNote(i){
+  if(i===null||i===undefined) return;
+  activeSlot=i;
+  const e=entries[i]||{date:todayISO,title:"",body:"",lv:1};
+  noteIdEl.textContent="ENTRY "+String(i+1).padStart(2,"0");
+  noteDateEl.value=e.date;
+  titleEl.value=e.title;
+  bodyEl.value=e.body;
+  setLevel(e.lv||1);
+  updateBadge();
+  statusEl.textContent=entries[i]?"Saved":"New";
+  scrimEl.classList.add("open");
+  noteOpen=true;
+  cv.classList.remove("hoverable");
+  setTimeout(()=>titleEl.focus(),180);
+}
+function closeNote(){
+  scrimEl.classList.remove("open");
+  noteOpen=false;
+}
+function updateBadge(){
+  const has=titleEl.value.trim()||bodyEl.value.trim();
+  badgeEl.textContent = has ? "Filled" : "Empty";
+}
+function persist(){
+  if(activeSlot===null)return;
+  const title=titleEl.value, body=bodyEl.value, date=noteDateEl.value||todayISO, lv=activeLevel;
+  if(title.trim()||body.trim()){
+    entries[activeSlot]={date,title,body,lv};
+    statusEl.textContent="Saved";
+  }else{
+    delete entries[activeSlot];   // empty entries don't exist — the node returns to its empty state
+    statusEl.textContent="Empty";
+  }
+  scan();
+  updateBadge();
+}
+let saveTimer=null;
+function scheduleSave(){
+  statusEl.textContent="Saving…";
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(persist,350);
+}
+titleEl.addEventListener("input",scheduleSave);
+bodyEl.addEventListener("input",scheduleSave);
+noteDateEl.addEventListener("change",scheduleSave);
+function closeAndSave(){ clearTimeout(saveTimer); persist(); closeNote(); }
+$("#noteClose").addEventListener("click",closeAndSave);
+scrimEl.addEventListener("click",e=>{ if(e.target===scrimEl) closeAndSave(); });
+addEventListener("keydown",e=>{ if(e.key==="Escape"&&noteOpen) closeAndSave(); });
+
+cv.addEventListener("click",e=>{
+  if(noteOpen)return;
+  const hit=findHit(e.clientX,e.clientY);
+  if(hit)openNote(hit.i);
+});
+cv.addEventListener("touchend",e=>{
+  if(noteOpen||!e.changedTouches||!e.changedTouches[0])return;
+  const t=e.changedTouches[0], hit=findHit(t.clientX,t.clientY);
+  if(hit){e.preventDefault();openNote(hit.i);}
+},{passive:false});
+
+// "+" opens a fresh entry in the lowest free slot
+$("#addEntry").addEventListener("click",()=>{ if(!noteOpen) openNote(firstFreeSlot()); });
+</script>
+</body>
+</html>
