@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RWIN / devforge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f6f4;--fg:#0c0c0c;--mut:#8a8a86;--line:#d9d9d5;--card:#fff;--soft:#ecece8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}}
+:root[data-theme="dark"]{--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--fg);font:400 13px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 22px 60px}
+.lab{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut)}
+header{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:1px solid var(--fg)}
+button{font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+button:hover,button[aria-pressed="true"]{border-color:var(--fg)}
+h1{font-weight:800;font-size:clamp(56px,16vw,200px);letter-spacing:-.045em;line-height:.9;margin:56px 0 24px}
+.intro{max-width:520px;color:var(--mut);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin:56px 0;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.stat{padding:20px 24px}.stat+.stat{border-left:1px solid var(--line)}
+.stat b{display:block;font-size:clamp(22px,4vw,34px);font-weight:300;letter-spacing:-.03em;margin-top:6px}
+.bars{display:grid;gap:10px;margin-bottom:56px}
+.bar{display:grid;grid-template-columns:110px 1fr 24px;align-items:center;gap:14px}
+.track{height:6px;background:var(--soft);border-radius:3px;overflow:hidden}
+.fill{height:100%;background:var(--fg);width:0;transition:width .6s ease}
+.bar span:last-child{text-align:right;color:var(--mut)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+.list{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:200px 1fr 220px;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.row b{font-weight:500;letter-spacing:-.01em}
+.row .d{color:var(--mut)}
+.row .s{color:var(--mut);text-align:right;font-size:11px;letter-spacing:.08em}
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center}
+@media (max-width:640px){.stats{grid-template-columns:1fr}.stat+.stat{border-left:0;border-top:1px solid var(--line)}.row{grid-template-columns:1fr;gap:2px}.row .s{text-align:left}.bar{grid-template-columns:90px 1fr 24px}}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="lab">black8arch / devforge</span>
+    <button id="theme" type="button">Theme</button>
+  </header>
+
+  <h1>RWIN</h1>
+  <p class="intro">Cybersecurity student and Python developer. Builds security tooling, network utilities and procedural simulations. Each project is small, self-contained and documented.</p>
+
+  <div class="stats">
+    <div class="stat"><span class="lab">Projects</span><b id="s-total">0</b></div>
+    <div class="stat"><span class="lab">Domains</span><b id="s-dom">0</b></div>
+    <div class="stat"><span class="lab">Largest</span><b id="s-top">-</b></div>
+  </div>
+
+  <div class="lab" style="margin-bottom:16px">Distribution</div>
+  <div class="bars" id="bars"></div>
+
+  <div class="lab">Index</div>
+  <div class="filters" id="filters"></div>
+  <div class="list" id="list"></div>
+
+  <footer class="lab"><span>Learn</span><span>&middot;</span><span>Build</span><span>&middot;</span><span>Document</span><span>&middot;</span><span>Publish</span><span>&middot;</span><span>Improve</span></footer>
+</div>
+
+<script>
+var P=[
+["HoneyShield","Security","Multi-service honeypot with live dashboard and SQLite logging","Python / PyQt6"],
+["METAINSPECT","Security","Metadata extraction CLI with ANSI and JSON output","Python"],
+["STG_CRY","Security","AES-256-GCM encryption with LSB PNG steganography","Python"],
+["CipherVault","Security","File encryption from the command line","AES-256-GCM"],
+["SecureShred","Security","Secure deletion with DoD, Gutmann and NIST passes","Python"],
+["PassVault","Security","Password manager in Bash","AES-256-CBC"],
+["inOs","Security","Asynchronous OSINT username checker","Python / asyncio"],
+["secNT","Security","Encrypted notepad for Windows","PyQt6 / Argon2id"],
+["VaultKeep","Security","Desktop password manager","PyQt6 / Argon2id"],
+["NetViz","Network","Network monitoring GUI","Scapy / Matplotlib"],
+["PacketForge","Network","Packet builder","Scapy / PyQt6"],
+["EYECENSOR","Vision","Client-side face and eye redaction in the browser","face-api.js"],
+["CARSCAN","Vision","Vehicle detection in a single HTML file","TensorFlow.js"],
+["SIGNAL","Simulation","Symbolic radar and electronic-warfare simulator","HTML / Canvas"],
+["ARACHNID","Simulation","Procedural spider with inverse kinematics and firefly ecosystem","HTML / Canvas"],
+["nova-player","Desktop","Minimal dark media player","PyQt6 / libVLC"]
+];
+var active="All";
+var root=document.documentElement;
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function counts(){var m={};P.forEach(function(p){m[p[1]]=(m[p[1]]||0)+1});return m}
+function stats(){
+  var m=counts(),k=Object.keys(m).sort(function(a,b){return m[b]-m[a]});
+  document.getElementById("s-total").textContent=P.length;
+  document.getElementById("s-dom").textContent=k.length;
+  document.getElementById("s-top").textContent=k[0];
+  var b=document.getElementById("bars");
+  k.forEach(function(n){
+    var r=el("div","bar"),t=el("div","track"),f=el("div","fill");
+    t.appendChild(f);r.appendChild(el("span","lab",n));r.appendChild(t);r.appendChild(el("span","",m[n]));
+    b.appendChild(r);
+    requestAnimationFrame(function(){f.style.width=(m[n]/P.length*100)+"%"});
+  });
+  var fl=document.getElementById("filters");
+  ["All"].concat(k).forEach(function(n){
+    var x=el("button","",n);x.type="button";x.setAttribute("aria-pressed",n===active);
+    x.onclick=function(){active=n;Array.prototype.forEach.call(fl.children,function(c){c.setAttribute("aria-pressed",c.textContent===n)});render()};
+    fl.appendChild(x);
+  });
+}
+function render(){
+  var l=document.getElementById("list");l.textContent="";
+  P.filter(function(p){return active==="All"||p[1]===active}).forEach(function(p){
+    var r=el("div","row");
+    r.appendChild(el("b","",p[0]));r.appendChild(el("span","d",p[2]));r.appendChild(el("span","s",p[3].toUpperCase()));
+    l.appendChild(r);
+  });
+}
+document.getElementById("theme").onclick=function(){
+  var dark=root.getAttribute("data-theme")==="dark"||(!root.hasAttribute("data-theme")&&matchMedia("(prefers-color-scheme:dark)").matches);
+  root.setAttribute("data-theme",dark?"light":"dark");
+};
+stats();render();
+</script>
+</body>
+</html>
