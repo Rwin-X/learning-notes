@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIGIL / black8arch</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}
+:root[data-theme="light"]{--bg:#f6f6f4;--fg:#0c0c0c;--mut:#8a8a86;--line:#d9d9d5;--card:#fff;--soft:#ecece8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font:400 13px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 22px 60px}
+.lab{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut)}
+header{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:1px solid var(--fg)}
+button{font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+button:hover{border-color:var(--fg)}
+h1{font-weight:800;font-size:clamp(48px,12vw,120px);letter-spacing:-.045em;line-height:.9;margin:48px 0 20px}
+.intro{max-width:480px;color:var(--mut);font-size:14px}
+main{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:32px;margin-top:48px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+input{width:100%;font:300 clamp(22px,4vw,34px)/1.2 Inter,system-ui,sans-serif;letter-spacing:-.03em;color:var(--fg);background:none;border:0;border-bottom:1px solid var(--line);padding:8px 0;outline:0;margin-top:8px}
+input:focus{border-bottom-color:var(--fg)}
+.hex{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 10px;margin:28px 0;font:400 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut);letter-spacing:.05em}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+svg{display:block;width:100%;height:auto;color:var(--fg)}
+.note{margin-top:20px;color:var(--mut)}
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);text-align:center}
+@media (max-width:760px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="lab">black8arch / sigil</span>
+    <button id="theme" type="button">Theme</button>
+  </header>
+
+  <h1>SIGIL</h1>
+  <p class="intro">Any text becomes a unique mark. The SHA-256 digest of the input, 256 bits, is drawn as sixteen concentric rings, mirrored left to right. Same input, same mark. One changed character, a different mark.</p>
+
+  <main>
+    <section>
+      <div class="lab">Input</div>
+      <input id="in" type="text" value="black8arch" spellcheck="false" autocomplete="off" maxlength="200" aria-label="Input text">
+      <div class="hex" id="hex"></div>
+      <div class="btns">
+        <button id="dl-svg" type="button">Download SVG</button>
+        <button id="dl-png" type="button">Download PNG</button>
+      </div>
+      <p class="note" id="status"></p>
+    </section>
+    <section class="card"><div id="mark"></div></section>
+  </main>
+
+  <footer class="lab">Deterministic &middot; Local &middot; No network</footer>
+</div>
+
+<script>
+var N = 16, SEG = 16, STEP = 360 / 32, C = 200;
+var root = document.documentElement;
+var current = { svg: "", name: "sigil" };
+
+function pol(r, deg) {
+  var a = (deg - 90) * Math.PI / 180;
+  return [C + r * Math.cos(a), C + r * Math.sin(a)];
+}
+function arc(r, a0, a1) {
+  var p = pol(r, a0), q = pol(r, a1);
+  return "M" + p[0].toFixed(2) + " " + p[1].toFixed(2) + "A" + r + " " + r + " 0 0 1 " + q[0].toFixed(2) + " " + q[1].toFixed(2);
+}
+function buildSvg(bytes) {
+  var paths = "";
+  for (var ring = 0; ring < N; ring++) {
+    var r = 40 + ring * 9.5, d = "";
+    for (var i = 0; i < SEG; i++) {
+      var k = ring * SEG + i;
+      if ((bytes[k >> 3] >> (7 - (k & 7))) & 1) {
+        var a0 = i * STEP + 0.6, a1 = (i + 1) * STEP - 0.6;
+        d += arc(r, a0, a1) + arc(r, 360 - a1, 360 - a0);
+      }
+    }
+    if (d) paths += '<path d="' + d + '"/>';
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Sigil">' +
+    '<circle cx="200" cy="200" r="194" fill="none" stroke="currentColor" stroke-width=".5" opacity=".5"/>' +
+    '<path d="M200 2V14" stroke="currentColor" stroke-width="1"/>' +
+    '<g fill="none" stroke="currentColor" stroke-width="5">' + paths + '</g>' +
+    '<circle cx="200" cy="200" r="3" fill="currentColor"/></svg>';
+}
+function toHex(bytes) {
+  return Array.prototype.map.call(bytes, function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+}
+async function update() {
+  var text = document.getElementById("in").value;
+  var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  var bytes = new Uint8Array(buf), hex = toHex(bytes);
+  current.svg = buildSvg(bytes);
+  current.name = "sigil-" + hex.slice(0, 8);
+  document.getElementById("mark").innerHTML = current.svg;
+  var h = document.getElementById("hex");
+  h.textContent = "";
+  for (var i = 0; i < 8; i++) {
+    var s = document.createElement("span");
+    s.textContent = hex.slice(i * 8, i * 8 + 8);
+    h.appendChild(s);
+  }
+}
+function palette() {
+  var cs = getComputedStyle(root);
+  return { fg: cs.getPropertyValue("--fg").trim(), bg: cs.getPropertyValue("--bg").trim() };
+}
+function exportSvg() {
+  var p = palette();
+  var s = current.svg.replace(/currentColor/g, p.fg)
+    .replace(/(<svg[^>]*>)/, '$1<rect width="400" height="400" fill="' + p.bg + '"/>');
+  return s;
+}
+function save(blob, name) {
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+}
+function status(t) { document.getElementById("status").textContent = t; }
+
+document.getElementById("dl-svg").onclick = function () {
+  save(new Blob([exportSvg()], { type: "image/svg+xml" }), current.name + ".svg");
+  status("Saved " + current.name + ".svg");
+};
+document.getElementById("dl-png").onclick = function () {
+  var img = new Image();
+  var url = URL.createObjectURL(new Blob([exportSvg()], { type: "image/svg+xml" }));
+  img.onload = function () {
+    var cv = document.createElement("canvas");
+    cv.width = cv.height = 1600;
+    cv.getContext("2d").drawImage(img, 0, 0, 1600, 1600);
+    URL.revokeObjectURL(url);
+    cv.toBlob(function (b) { save(b, current.name + ".png"); status("Saved " + current.name + ".png"); }, "image/png");
+  };
+  img.onerror = function () { status("PNG export failed. Use SVG."); };
+  img.src = url;
+};
+document.getElementById("theme").onclick = function () {
+  root.setAttribute("data-theme", root.getAttribute("data-theme") === "light" ? "dark" : "light");
+};
+document.getElementById("in").addEventListener("input", update);
+update();
+</script>
+</body>
+</html>
