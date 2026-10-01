@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIGIL 3D / black8arch</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}
+:root[data-theme="light"]{--bg:#f6f6f4;--fg:#0c0c0c;--mut:#8a8a86;--line:#d9d9d5;--card:#fff;--soft:#ecece8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font:400 13px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 22px 60px}
+.lab{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut)}
+header{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:1px solid var(--fg)}
+button{font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+button:hover{border-color:var(--fg)}
+h1{font-weight:800;font-size:clamp(48px,12vw,120px);letter-spacing:-.045em;line-height:.9;margin:48px 0 20px}
+.intro{max-width:520px;color:var(--mut);font-size:14px}
+main{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:32px;margin-top:48px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+canvas{display:block;width:100%;aspect-ratio:1/1;touch-action:none;cursor:grab}
+canvas:active{cursor:grabbing}
+input{width:100%;font:300 clamp(22px,4vw,34px)/1.2 Inter,system-ui,sans-serif;letter-spacing:-.03em;color:var(--fg);background:none;border:0;border-bottom:1px solid var(--line);padding:8px 0;outline:0;margin-top:8px}
+input:focus{border-bottom-color:var(--fg)}
+.hex{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 10px;margin:28px 0;font:400 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut);letter-spacing:.05em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:24px}
+.stats div{padding:14px 16px}.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font-size:26px;font-weight:300;letter-spacing:-.03em;margin-top:4px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.note{margin-top:20px;color:var(--mut)}
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);text-align:center}
+@media (max-width:760px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="lab">black8arch / sigil 3d</span>
+    <button id="theme" type="button">Theme</button>
+  </header>
+
+  <h1>SIGIL</h1>
+  <p class="intro">The 256-bit SHA-256 digest of your input, mapped onto a sphere. Sixteen latitude rings, sixteen bits each, mirrored. Each ring turns at a speed and direction taken from its own digest byte. Drag to rotate.</p>
+
+  <main>
+    <section>
+      <div class="lab">Input</div>
+      <input id="in" type="text" value="black8arch" spellcheck="false" autocomplete="off" maxlength="200" aria-label="Input text">
+      <div class="hex" id="hex"></div>
+      <div class="stats">
+        <div><span class="lab">Bits set</span><b id="s-bits">0</b></div>
+        <div><span class="lab">Rings</span><b>16</b></div>
+        <div><span class="lab">Fastest</span><b id="s-fast">0</b></div>
+      </div>
+      <div class="btns">
+        <button id="pause" type="button">Pause</button>
+        <button id="dl" type="button">Download PNG</button>
+      </div>
+      <p class="note" id="status"></p>
+    </section>
+    <section class="card"><canvas id="cv" aria-label="Rotating 3D sigil"></canvas></section>
+  </main>
+
+  <footer class="lab">Deterministic &middot; Local &middot; No network</footer>
+</div>
+
+<script>
+var cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+var root = document.documentElement;
+var RINGS = 16, SEG = 16, STEP = Math.PI / 16, GAP = 0.012, R = 170;
+var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+var W = 0, bytes = new Uint8Array(32), hexStr = "";
+var omega = new Array(RINGS).fill(0), phase = new Array(RINGS).fill(0);
+var yaw = 0.6, pitBase = 0.35, pitOff = 0, mx = 0, my = 0;
+var build = 0, paused = false, dragging = false, lx = 0, ly = 0;
+var fg = [242, 242, 240], bg = "#0a0a0a", glow = null, lastT = 0, frameN = 0, running = false;
+
+function fit() {
+  var d = Math.min(window.devicePixelRatio || 1, 1.5);
+  W = cv.clientWidth;
+  cv.width = Math.round(W * d); cv.height = Math.round(W * d);
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+  redraw();
+}
+function readTheme() {
+  var cs = getComputedStyle(root), h = cs.getPropertyValue("--fg").trim();
+  var n = [1, 3, 5].map(function (i) { return parseInt(h.substr(i, 2), 16); });
+  if (n.join() !== fg.join()) { fg = n; glow = null; }
+  bg = cs.getPropertyValue("--bg").trim();
+}
+function glowSprite() {
+  if (glow) return glow;
+  var s = 64, g = document.createElement("canvas"); g.width = g.height = s;
+  var gc = g.getContext("2d"), rg = gc.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2), c = fg.join(",");
+  rg.addColorStop(0, "rgba(" + c + ",.9)"); rg.addColorStop(.4, "rgba(" + c + ",.25)"); rg.addColorStop(1, "rgba(" + c + ",0)");
+  gc.fillStyle = rg; gc.fillRect(0, 0, s, s); glow = g; return g;
+}
+function ease(t) { t = Math.max(0, Math.min(1, t)); return 1 - Math.pow(1 - t, 3); }
+
+function render() {
+  var U = W / 290, cy = Math.cos(yaw), sy = Math.sin(yaw), pit = pitBase + pitOff, cp = Math.cos(pit), sp = Math.sin(pit);
+  ctx.clearRect(0, 0, W, W);
+  function P(x, y, z) {
+    var X = x * cy + z * sy, Z = -x * sy + z * cy, Y = y * cp - Z * sp; Z = y * sp + Z * cp;
+    var f = U * 900 / (1400 + Z);
+    return [W / 2 + X * f, W / 2 + Y * f, Z];
+  }
+  var paths = [new Path2D(), new Path2D(), new Path2D(), new Path2D()], heads = [];
+  var top = P(0, -R * 1.08, 0), bot = P(0, R * 1.08, 0);
+  for (var k = 0; k < RINGS; k++) {
+    var th = Math.PI * (k + .5) / RINGS, e = ease(build * 1.7 - k * 0.07);
+    var y = -R * Math.cos(th) * e, rr = R * Math.sin(th) * e;
+    if (e <= 0) continue;
+    var ph = phase[k], h = P(rr * Math.cos(ph), y, rr * Math.sin(ph));
+    heads.push(h);
+    for (var i = 0; i < SEG; i++) {
+      var b = k * SEG + i;
+      if (!((bytes[b >> 3] >> (7 - (b & 7))) & 1)) continue;
+      var a0 = i * STEP + GAP, a1 = (i + 1) * STEP - GAP, am = (a0 + a1) / 2;
+      for (var m = 0; m < 2; m++) {
+        var sg = m ? -1 : 1, A = ph + sg * a0, B = ph + sg * am, C = ph + sg * a1;
+        var p0 = P(rr * Math.cos(A), y, rr * Math.sin(A)), p1 = P(rr * Math.cos(B), y, rr * Math.sin(B)), p2 = P(rr * Math.cos(C), y, rr * Math.sin(C));
+        var near = 1 - Math.max(0, Math.min(1, (p1[2] + R) / (2 * R))), bk = Math.min(3, Math.floor(near * 4));
+        paths[bk].moveTo(p0[0], p0[1]); paths[bk].lineTo(p1[0], p1[1]); paths[bk].lineTo(p2[0], p2[1]);
+      }
+    }
+  }
+  var col = "rgb(" + fg.join(",") + ")", w = W / 440;
+  ctx.strokeStyle = col; ctx.lineCap = "butt";
+  ctx.globalAlpha = .22; ctx.lineWidth = Math.max(.5, w * .6);
+  ctx.beginPath(); ctx.moveTo(top[0], top[1]); ctx.lineTo(bot[0], bot[1]); ctx.stroke();
+  var al = [.16, .36, .64, .95];
+  for (var q = 0; q < 4; q++) { ctx.globalAlpha = al[q]; ctx.lineWidth = w * (1.6 + q * .9); ctx.stroke(paths[q]); }
+  var g = glowSprite(), s = W / 22, i2;
+  for (i2 = 0; i2 < heads.length; i2++) {
+    var hn = 1 - Math.max(0, Math.min(1, (heads[i2][2] + R) / (2 * R)));
+    ctx.globalAlpha = .25 + .6 * hn; ctx.drawImage(g, heads[i2][0] - s / 2, heads[i2][1] - s / 2, s, s);
+  }
+  ctx.globalAlpha = .8; ctx.drawImage(g, top[0] - s / 2, top[1] - s / 2, s, s); ctx.drawImage(g, bot[0] - s / 2, bot[1] - s / 2, s, s);
+  ctx.globalAlpha = 1;
+}
+function step(dt) {
+  if (build < 1) build = Math.min(1, build + dt / 1.1);
+  if (!paused) { yaw += dt * 0.14; for (var k = 0; k < RINGS; k++) phase[k] += omega[k] * dt; }
+  pitOff += (my * 0.18 - pitOff) * 0.06;
+}
+function frame(ts) {
+  if (!running) return;
+  requestAnimationFrame(frame);
+  if (ts - lastT < 33) return;
+  var dt = Math.min(0.1, (ts - lastT) / 1000); lastT = ts;
+  if (++frameN % 24 === 0) readTheme();
+  step(dt); render();
+}
+function redraw() { readTheme(); if (reduced || !running) { build = 1; render(); } }
+
+function start() {
+  if (reduced) { build = 1; render(); return; }
+  running = true; requestAnimationFrame(function (t) { lastT = t; requestAnimationFrame(frame); });
+}
+async function update() {
+  var text = document.getElementById("in").value;
+  bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
+  hexStr = Array.prototype.map.call(bytes, function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+  var bits = 0, fast = 0;
+  for (var k = 0; k < RINGS; k++) {
+    var sp = (bytes[k * 2] % 7 + 1) * 0.045, dir = (bytes[k * 2 + 1] & 1) ? 1 : -1;
+    omega[k] = sp * dir; fast = Math.max(fast, sp);
+  }
+  for (var i = 0; i < 32; i++) for (var j = 0; j < 8; j++) bits += (bytes[i] >> j) & 1;
+  document.getElementById("s-bits").textContent = bits;
+  document.getElementById("s-fast").textContent = fast.toFixed(2);
+  var hx = document.getElementById("hex"); hx.textContent = "";
+  for (var n = 0; n < 8; n++) { var sp2 = document.createElement("span"); sp2.textContent = hexStr.slice(n * 8, n * 8 + 8); hx.appendChild(sp2); }
+  build = reduced ? 1 : 0;
+  if (reduced || !running) { build = 1; render(); }
+}
+
+cv.addEventListener("pointerdown", function (e) { dragging = true; lx = e.clientX; ly = e.clientY; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", function (e) {
+  var r = cv.getBoundingClientRect();
+  mx = ((e.clientX - r.left) / r.width) * 2 - 1; my = ((e.clientY - r.top) / r.height) * 2 - 1;
+  if (dragging) {
+    yaw += (e.clientX - lx) * 0.008; pitBase = Math.max(-1.2, Math.min(1.2, pitBase + (e.clientY - ly) * 0.006));
+    lx = e.clientX; ly = e.clientY; if (reduced || !running) render();
+  }
+});
+cv.addEventListener("pointerup", function () { dragging = false; });
+cv.addEventListener("pointerleave", function () { mx = 0; my = 0; });
+
+document.getElementById("in").addEventListener("input", update);
+document.getElementById("theme").onclick = function () {
+  root.setAttribute("data-theme", root.getAttribute("data-theme") === "light" ? "dark" : "light");
+  readTheme(); glow = null; if (reduced || !running) render();
+};
+document.getElementById("pause").onclick = function () { paused = !paused; this.textContent = paused ? "Play" : "Pause"; };
+document.getElementById("dl").onclick = function () {
+  var t = document.createElement("canvas"); t.width = cv.width; t.height = cv.height;
+  var c = t.getContext("2d"); c.fillStyle = bg; c.fillRect(0, 0, t.width, t.height); c.drawImage(cv, 0, 0);
+  t.toBlob(function (b) {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "sigil3d-" + hexStr.slice(0, 8) + ".png";
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    document.getElementById("status").textContent = "Saved sigil3d-" + hexStr.slice(0, 8) + ".png";
+  }, "image/png");
+};
+addEventListener("resize", fit);
+readTheme(); fit(); update().then(start);
+</script>
+</body>
+</html>
