@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIGIL 3D v2 / black8arch</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}
+:root[data-theme="light"]{--bg:#f6f6f4;--fg:#0c0c0c;--mut:#8a8a86;--line:#d9d9d5;--card:#fff;--soft:#ecece8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font:400 13px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 22px 60px}
+.lab{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut)}
+header{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:1px solid var(--fg)}
+button{font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+button:hover{border-color:var(--fg)}
+h1{font-weight:800;font-size:clamp(48px,12vw,120px);letter-spacing:-.045em;line-height:.9;margin:48px 0 20px}
+.intro{max-width:560px;color:var(--mut);font-size:14px}
+main{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:32px;margin-top:48px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+canvas{display:block;width:100%;aspect-ratio:1/1;touch-action:none;cursor:grab}
+canvas:active{cursor:grabbing}
+input[type=text]{width:100%;font:300 clamp(22px,4vw,34px)/1.2 Inter,system-ui,sans-serif;letter-spacing:-.03em;color:var(--fg);background:none;border:0;border-bottom:1px solid var(--line);padding:8px 0;outline:0;margin-top:8px}
+input[type=text]:focus{border-bottom-color:var(--fg)}
+.hex{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 10px;margin:8px 0 18px;font:400 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut);letter-spacing:.04em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:12px;background:var(--card);margin:22px 0}
+.stats div{padding:14px 16px}.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font-size:26px;font-weight:300;letter-spacing:-.03em;margin-top:4px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;margin-bottom:18px}
+.ctl label{display:flex;align-items:center;gap:8px;cursor:pointer}
+input[type=checkbox],input[type=range]{accent-color:var(--fg)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.note{margin-top:18px;color:var(--mut)}
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);text-align:center}
+@media (max-width:760px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="lab">black8arch / sigil 3d v2</span>
+    <button id="theme" type="button">Theme</button>
+  </header>
+
+  <h1>SIGIL</h1>
+  <p class="intro">Three nested shells carry 768 bits: SHA-256 on the outside, the two halves of SHA-512 inside, each tilted by its own digest bytes. Thirty-two orbiting nodes follow the SHA-256 bytes and link when they pass close. The core is an icosahedron that pulses with the bit density.</p>
+
+  <main>
+    <section>
+      <div class="lab">Input</div>
+      <input id="in" type="text" value="black8arch" spellcheck="false" autocomplete="off" maxlength="200" aria-label="Input text">
+      <div class="stats">
+        <div><span class="lab">Bits set</span><b id="s-bits">0</b></div>
+        <div><span class="lab">Shells</span><b>3</b></div>
+        <div><span class="lab">Live links</span><b id="s-links">0</b></div>
+      </div>
+      <div class="lab">SHA-256</div><div class="hex" id="hex2"></div>
+      <div class="lab">SHA-512</div><div class="hex" id="hex5"></div>
+      <div class="ctl">
+        <label><input type="checkbox" id="l-shells" checked>Shells</label>
+        <label><input type="checkbox" id="l-orbits" checked>Orbits</label>
+        <label><input type="checkbox" id="l-core" checked>Core</label>
+        <label>Speed <input type="range" id="speed" min="0" max="2.5" step="0.1" value="1"></label>
+      </div>
+      <div class="btns">
+        <button id="pause" type="button">Pause</button>
+        <button id="reset" type="button">Reset view</button>
+        <button id="dl" type="button">Download PNG</button>
+      </div>
+      <p class="note" id="status">Drag to rotate. Wheel to zoom. Double-click to reset.</p>
+    </section>
+    <section class="card"><canvas id="cv" aria-label="Rotating 3D sigil"></canvas></section>
+  </main>
+
+  <footer class="lab">Deterministic &middot; Local &middot; No network</footer>
+</div>
+
+<script>
+var cv = document.getElementById("cv"), ctx = cv.getContext("2d"), root = document.documentElement;
+var RINGS = 16, SEG = 16, STEP = Math.PI / 16, GAP = 0.012, LINK = 70;
+var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+var W = 0, hexStr = "", yaw = 0.6, pitBase = 0.35, pitOff = 0, my = 0, zoom = 1, speed = 1;
+var build = 0, tAcc = 0, paused = false, dragging = false, lx = 0, ly = 0, running = false;
+var fg = [242, 242, 240], bg = "#0a0a0a", glow = null, lastT = 0, frameN = 0, links = 0;
+var coreA = .3, coreB = .25, pulse = .08;
+var shells = [170, 116, 68].map(function (R) {
+  return { R: R, bytes: new Uint8Array(32), omega: new Array(RINGS).fill(0), phase: new Array(RINGS).fill(0), tilt: 0 };
+});
+var nodes = [], ICO = [], EDGES = [];
+(function () {
+  var f = (1 + Math.sqrt(5)) / 2, v = [];
+  [-1, 1].forEach(function (a) { [-1, 1].forEach(function (b) { v.push([0, a, b * f], [a, b * f, 0], [b * f, 0, a]); }); });
+  ICO = v;
+  for (var i = 0; i < v.length; i++) for (var j = i + 1; j < v.length; j++) {
+    var d = Math.pow(v[i][0] - v[j][0], 2) + Math.pow(v[i][1] - v[j][1], 2) + Math.pow(v[i][2] - v[j][2], 2);
+    if (Math.abs(d - 4) < 0.01) EDGES.push([i, j]);
+  }
+})();
+
+function static_() { return reduced || !running; }
+function fit() {
+  var d = Math.min(window.devicePixelRatio || 1, 1.5);
+  W = cv.clientWidth; cv.width = Math.round(W * d); cv.height = Math.round(W * d);
+  ctx.setTransform(d, 0, 0, d, 0, 0); readTheme(); if (static_()) { build = 1; render(); }
+}
+function readTheme() {
+  var cs = getComputedStyle(root), h = cs.getPropertyValue("--fg").trim();
+  var n = [1, 3, 5].map(function (i) { return parseInt(h.substr(i, 2), 16); });
+  if (n.join() !== fg.join()) { fg = n; glow = null; }
+  bg = cs.getPropertyValue("--bg").trim();
+}
+function glowSprite() {
+  if (glow) return glow;
+  var s = 64, g = document.createElement("canvas"); g.width = g.height = s;
+  var gc = g.getContext("2d"), rg = gc.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2), c = fg.join(",");
+  rg.addColorStop(0, "rgba(" + c + ",.9)"); rg.addColorStop(.4, "rgba(" + c + ",.25)"); rg.addColorStop(1, "rgba(" + c + ",0)");
+  gc.fillStyle = rg; gc.fillRect(0, 0, s, s); glow = g; return g;
+}
+function ease(t) { t = Math.max(0, Math.min(1, t)); return 1 - Math.pow(1 - t, 3); }
+function nearOf(z) { return 1 - Math.max(0, Math.min(1, (z + 170) / 340)); }
+
+function render() {
+  var U = W / 290 * zoom, cy = Math.cos(yaw), sy = Math.sin(yaw), pit = pitBase + pitOff, cp = Math.cos(pit), sp = Math.sin(pit);
+  var w = W / 440, g = glowSprite();
+  ctx.clearRect(0, 0, W, W);
+  function P(x, y, z) {
+    var X = x * cy + z * sy, Z = -x * sy + z * cy, Y = y * cp - Z * sp; Z = y * sp + Z * cp;
+    var f = U * 900 / (1400 + Z);
+    return [W / 2 + X * f, W / 2 + Y * f, Z];
+  }
+  var col = "rgb(" + fg.join(",") + ")", paths = [new Path2D(), new Path2D(), new Path2D(), new Path2D()], heads = [], k, i, m, q;
+  ctx.strokeStyle = col; ctx.lineCap = "butt";
+
+  if (document.getElementById("l-core").checked) {
+    var sc = 30 * (1 + pulse * Math.sin(tAcc * 1.6)) * ease(build * 3), ca = Math.cos(tAcc * coreA), sa = Math.sin(tAcc * coreA), cb = Math.cos(tAcc * coreB), sb = Math.sin(tAcc * coreB);
+    var pv = ICO.map(function (v) {
+      var x = v[0] * ca + v[2] * sa, z = -v[0] * sa + v[2] * ca, y = v[1] * cb - z * sb; z = v[1] * sb + z * cb;
+      return P(x * sc, y * sc, z * sc);
+    });
+    var cp2 = new Path2D();
+    EDGES.forEach(function (e) { cp2.moveTo(pv[e[0]][0], pv[e[0]][1]); cp2.lineTo(pv[e[1]][0], pv[e[1]][1]); });
+    ctx.globalAlpha = .75; ctx.lineWidth = w * 1.1; ctx.stroke(cp2);
+    pv.forEach(function (p) { ctx.globalAlpha = .5; ctx.drawImage(g, p[0] - w * 7, p[1] - w * 7, w * 14, w * 14); });
+  }
+
+  if (document.getElementById("l-shells").checked) {
+    shells.forEach(function (s, si) {
+      var ct = Math.cos(s.tilt), st = Math.sin(s.tilt);
+      function Q(x, y, z) { return P(x, y * ct - z * st, y * st + z * ct); }
+      for (k = 0; k < RINGS; k++) {
+        var e = ease(build * 3.2 - k * 0.07 - si * 0.5);
+        if (e <= 0) continue;
+        var th = Math.PI * (k + .5) / RINGS, y = -s.R * Math.cos(th) * e, rr = s.R * Math.sin(th) * e, ph = s.phase[k];
+        heads.push([Q(rr * Math.cos(ph), y, rr * Math.sin(ph)), 1 - si * .22]);
+        for (i = 0; i < SEG; i++) {
+          var b = k * SEG + i;
+          if (!((s.bytes[b >> 3] >> (7 - (b & 7))) & 1)) continue;
+          var a0 = i * STEP + GAP, a1 = (i + 1) * STEP - GAP, am = (a0 + a1) / 2;
+          for (m = 0; m < 2; m++) {
+            var sg = m ? -1 : 1, A = ph + sg * a0, B = ph + sg * am, C = ph + sg * a1;
+            var p0 = Q(rr * Math.cos(A), y, rr * Math.sin(A)), p1 = Q(rr * Math.cos(B), y, rr * Math.sin(B)), p2 = Q(rr * Math.cos(C), y, rr * Math.sin(C));
+            var bk = Math.min(3, Math.floor(nearOf(p1[2]) * 4));
+            paths[bk].moveTo(p0[0], p0[1]); paths[bk].lineTo(p1[0], p1[1]); paths[bk].lineTo(p2[0], p2[1]);
+          }
+        }
+      }
+    });
+    var al = [.16, .36, .64, .95];
+    for (q = 0; q < 4; q++) { ctx.globalAlpha = al[q]; ctx.lineWidth = w * (1.4 + q * .8); ctx.stroke(paths[q]); }
+    var s2 = W / 24;
+    heads.forEach(function (h) {
+      ctx.globalAlpha = (.2 + .6 * nearOf(h[0][2])) * h[1]; ctx.drawImage(g, h[0][0] - s2 / 2, h[0][1] - s2 / 2, s2, s2);
+    });
+  }
+
+  links = 0;
+  if (document.getElementById("l-orbits").checked) {
+    var e2 = ease(build * 2.5), wp = [], pp = [], j;
+    nodes.forEach(function (n) {
+      var a = n.a0 + n.w * tAcc, x0 = n.rho * e2 * Math.cos(a), z0 = n.rho * e2 * Math.sin(a);
+      var y1 = -z0 * Math.sin(n.inc), z1 = z0 * Math.cos(n.inc);
+      var x = x0 * Math.cos(n.lon) + z1 * Math.sin(n.lon), z = -x0 * Math.sin(n.lon) + z1 * Math.cos(n.lon);
+      wp.push([x, y1, z]); pp.push(P(x, y1, z));
+    });
+    var near = new Path2D(), far = new Path2D();
+    for (i = 0; i < wp.length; i++) for (j = i + 1; j < wp.length; j++) {
+      var dx = wp[i][0] - wp[j][0], dy = wp[i][1] - wp[j][1], dz = wp[i][2] - wp[j][2], d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (d < LINK) { links++; var pth = d < LINK * .55 ? near : far; pth.moveTo(pp[i][0], pp[i][1]); pth.lineTo(pp[j][0], pp[j][1]); }
+    }
+    ctx.lineWidth = w * .7; ctx.globalAlpha = .3; ctx.stroke(far); ctx.globalAlpha = .65; ctx.stroke(near);
+    var s3 = W / 30;
+    pp.forEach(function (p) { ctx.globalAlpha = .35 + .65 * nearOf(p[2]); ctx.drawImage(g, p[0] - s3 / 2, p[1] - s3 / 2, s3, s3); });
+  }
+  ctx.globalAlpha = 1;
+  if (static_() || frameN % 12 === 0) document.getElementById("s-links").textContent = links;
+}
+
+function step(dt) {
+  dt *= speed;
+  if (build < 1) build = Math.min(1, build + dt / 2.4);
+  if (!paused) { tAcc += dt; yaw += dt * 0.14; shells.forEach(function (s) { for (var k = 0; k < RINGS; k++) s.phase[k] += s.omega[k] * dt; }); }
+  pitOff += (my * 0.18 - pitOff) * 0.06;
+}
+function frame(ts) {
+  if (!running) return;
+  requestAnimationFrame(frame);
+  if (ts - lastT < 33) return;
+  var dt = Math.min(0.1, (ts - lastT) / 1000); lastT = ts; frameN++;
+  if (frameN % 24 === 0) readTheme();
+  step(dt); render();
+}
+function start() {
+  if (reduced) { build = 1; render(); return; }
+  running = true; requestAnimationFrame(function (t) { lastT = t; requestAnimationFrame(frame); });
+}
+function pop(a) { var c = 0; for (var i = 0; i < a.length; i++) for (var j = 0; j < 8; j++) c += (a[i] >> j) & 1; return c; }
+function fill(id, hex) {
+  var el = document.getElementById(id); el.textContent = "";
+  for (var i = 0; i < hex.length; i += 8) { var s = document.createElement("span"); s.textContent = hex.slice(i, i + 8); el.appendChild(s); }
+}
+function toHex(b) { return Array.prototype.map.call(b, function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); }
+
+async function update() {
+  var enc = new TextEncoder().encode(document.getElementById("in").value);
+  var h2 = new Uint8Array(await crypto.subtle.digest("SHA-256", enc)), h5 = new Uint8Array(await crypto.subtle.digest("SHA-512", enc));
+  hexStr = toHex(h2);
+  shells[0].bytes = h2; shells[1].bytes = h5.slice(0, 32); shells[2].bytes = h5.slice(32);
+  shells.forEach(function (s, si) {
+    for (var k = 0; k < RINGS; k++) s.omega[k] = ((s.bytes[k * 2] % 7) + 1) * 0.045 * ((s.bytes[k * 2 + 1] & 1) ? 1 : -1);
+    s.tilt = si ? (s.bytes[si] / 255 - .5) * 1.1 : 0;
+  });
+  nodes = [];
+  for (var j = 0; j < 32; j++) nodes.push({
+    rho: 55 + h2[j] / 255 * 110, inc: h2[(j + 7) % 32] / 255 * Math.PI, lon: h2[(j + 21) % 32] / 255 * 2 * Math.PI,
+    a0: h2[(j + 13) % 32] / 255 * 2 * Math.PI, w: ((h2[(j + 3) % 32] % 9) + 2) * 0.03 * ((h2[(j + 5) % 32] & 1) ? 1 : -1)
+  });
+  coreA = .2 + h2[0] / 255 * .4; coreB = .15 + h2[1] / 255 * .4; pulse = .03 + .1 * pop(h2) / 256;
+  document.getElementById("s-bits").textContent = pop(h2) + pop(h5);
+  fill("hex2", hexStr); fill("hex5", toHex(h5));
+  build = reduced ? 1 : 0; if (static_()) { build = 1; render(); }
+}
+function resetView() { yaw = .6; pitBase = .35; zoom = 1; if (static_()) render(); }
+
+cv.addEventListener("pointerdown", function (e) { dragging = true; lx = e.clientX; ly = e.clientY; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", function (e) {
+  var r = cv.getBoundingClientRect(); my = ((e.clientY - r.top) / r.height) * 2 - 1;
+  if (dragging) {
+    yaw += (e.clientX - lx) * 0.008; pitBase = Math.max(-1.2, Math.min(1.2, pitBase + (e.clientY - ly) * 0.006));
+    lx = e.clientX; ly = e.clientY; if (static_()) render();
+  }
+});
+cv.addEventListener("pointerup", function () { dragging = false; });
+cv.addEventListener("pointerleave", function () { my = 0; });
+cv.addEventListener("wheel", function (e) { e.preventDefault(); zoom = Math.max(.6, Math.min(1.8, zoom * (e.deltaY < 0 ? 1.06 : .94))); if (static_()) render(); }, { passive: false });
+cv.addEventListener("dblclick", resetView);
+
+document.getElementById("in").addEventListener("input", update);
+["l-shells", "l-orbits", "l-core"].forEach(function (id) { document.getElementById(id).onchange = function () { if (static_()) render(); }; });
+document.getElementById("speed").oninput = function () { speed = parseFloat(this.value); };
+document.getElementById("reset").onclick = resetView;
+document.getElementById("theme").onclick = function () {
+  root.setAttribute("data-theme", root.getAttribute("data-theme") === "light" ? "dark" : "light");
+  readTheme(); glow = null; if (static_()) render();
+};
+document.getElementById("pause").onclick = function () { paused = !paused; this.textContent = paused ? "Play" : "Pause"; };
+document.getElementById("dl").onclick = function () {
+  var t = document.createElement("canvas"); t.width = cv.width; t.height = cv.height;
+  var c = t.getContext("2d"); c.fillStyle = bg; c.fillRect(0, 0, t.width, t.height); c.drawImage(cv, 0, 0);
+  t.toBlob(function (b) {
+    var a = document.createElement("a"), n = "sigil3d-v2-" + hexStr.slice(0, 8) + ".png";
+    a.href = URL.createObjectURL(b); a.download = n; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    document.getElementById("status").textContent = "Saved " + n;
+  }, "image/png");
+};
+addEventListener("resize", fit);
+readTheme(); fit(); update().then(start);
+</script>
+</body>
+</html>
