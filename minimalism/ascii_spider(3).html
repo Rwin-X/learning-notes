@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ASCII Spider</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05070a;
+    --phosphor:#34ff8a;
+    --phosphor-bright:#d6fff0;
+    color-scheme: dark;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html,body{
+    height:100%;
+    margin:0;
+    background:var(--bg);
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  canvas{
+    display:block;
+    width:100vw;
+    height:100vh;
+    background:var(--bg);
+    cursor:none;
+    touch-action:none;
+  }
+  #feedBtn{
+    position:fixed;
+    top:calc(env(safe-area-inset-top,0px) + 16px);
+    right:16px;
+    z-index:5;
+    background:transparent;
+    color:var(--phosphor);
+    border:1px solid rgba(52,255,138,0.5);
+    font-family:'JetBrains Mono','Fira Code',Consolas,monospace;
+    font-size:11px;
+    letter-spacing:0.05em;
+    padding:6px 12px;
+    cursor:pointer;
+    user-select:none;
+    transition:background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  #feedBtn:hover{ border-color:var(--phosphor); }
+  #feedBtn.armed{
+    background:var(--phosphor);
+    color:#05070a;
+    border-color:var(--phosphor);
+  }
+  #modelPicker{
+    position:fixed;
+    top:calc(env(safe-area-inset-top,0px) + 16px);
+    left:16px;
+    z-index:5;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    max-width:62vw;
+  }
+  .modelBtn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.25);
+    font-family:'JetBrains Mono','Fira Code',Consolas,monospace;
+    font-size:10px;
+    letter-spacing:0.05em;
+    padding:5px 9px;
+    cursor:pointer;
+    user-select:none;
+    transition:background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<button id="feedBtn" type="button">FEED</button>
+<div id="modelPicker"></div>
+<script>
+(function(){
+  "use strict";
+
+  var canvas = document.getElementById('c');
+  var ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'alphabetic';
+
+  var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var TRAIL_ALPHA = reducedMotion ? 1 : 0.22;
+
+  // Five species: each owns its color, silhouette (bodyPoints/eyePoints,
+  // in body-local +x-forward/+y-right space), leg proportions and hair.
+  var MODELS = [
+    {
+      id: 'phosphor', label: 'HUNTER',
+      color: '#34ff8a', bright: '#d6fff0', rgb: '52,255,138',
+      legScale: 1.0, legFontScale: 1.0, glowRadius: 46, hairDensity: 1,
+      bodyPoints: [
+        { x: -26, y: 0,   ch: '.', font: 11, alpha: 0.5 },
+        { x: -21, y: -8,  ch: '*', font: 12, alpha: 0.65 },
+        { x: -21, y: 8,   ch: '*', font: 12, alpha: 0.65 },
+        { x: -15, y: -10, ch: '%', font: 14, alpha: 0.8 },
+        { x: -15, y: 10,  ch: '%', font: 14, alpha: 0.8 },
+        { x: -16, y: 0,   ch: '@', font: 24, alpha: 1 },
+        { x: -8,  y: -11, ch: '.', font: 10, alpha: 0.45 },
+        { x: -8,  y: 11,  ch: '.', font: 10, alpha: 0.45 },
+        { x: 5,   y: 0,   ch: '#', font: 17, alpha: 0.95 },
+        { x: 11,  y: -6,  ch: '*', font: 11, alpha: 0.7 },
+        { x: 11,  y: 6,   ch: '*', font: 11, alpha: 0.7 },
+        { x: 19,  y: -3,  ch: 'v', font: 10, alpha: 0.55 },
+        { x: 19,  y: 3,   ch: 'v', font: 10, alpha: 0.55 }
+      ],
+      eyePoints: [
+        { x: 15, y: -4, size: 12, bright: 1 },
+        { x: 15, y: 4,  size: 12, bright: 1 },
+        { x: 12, y: -7, size: 8,  bright: 0.6 },
+        { x: 12, y: 7,  size: 8,  bright: 0.6 },
+        { x: 9,  y: -8, size: 6,  bright: 0.4 },
+        { x: 9,  y: 8,  size: 6,  bright: 0.4 }
+      ]
+    },
+    {
+      id: 'amber', label: 'TARANTULA',
+      color: '#ffb000', bright: '#fff4d6', rgb: '255,176,0',
+      legScale: 1.15, legFontScale: 1.1, glowRadius: 54, hairDensity: 2,
+      bodyPoints: [
+        { x: -30, y: 0,   ch: '%', font: 14, alpha: 0.55 },
+        { x: -24, y: -10, ch: '#', font: 15, alpha: 0.7 },
+        { x: -24, y: 10,  ch: '#', font: 15, alpha: 0.7 },
+        { x: -18, y: -13, ch: '%', font: 16, alpha: 0.85 },
+        { x: -18, y: 13,  ch: '%', font: 16, alpha: 0.85 },
+        { x: -18, y: 0,   ch: '@', font: 28, alpha: 1 },
+        { x: -9,  y: -12, ch: '*', font: 11, alpha: 0.5 },
+        { x: -9,  y: 12,  ch: '*', font: 11, alpha: 0.5 },
+        { x: 4,   y: 0,   ch: '#', font: 19, alpha: 0.95 },
+        { x: 11,  y: -7,  ch: '%', font: 13, alpha: 0.75 },
+        { x: 11,  y: 7,   ch: '%', font: 13, alpha: 0.75 },
+        { x: 20,  y: -3,  ch: 'v', font: 12, alpha: 0.6 },
+        { x: 20,  y: 3,   ch: 'v', font: 12, alpha: 0.6 }
+      ],
+      eyePoints: [
+        { x: 14, y: -4, size: 7, bright: 0.7 },
+        { x: 14, y: 4,  size: 7, bright: 0.7 },
+        { x: 11, y: -7, size: 5, bright: 0.4 },
+        { x: 11, y: 7,  size: 5, bright: 0.4 }
+      ]
+    },
+    {
+      id: 'crimson', label: 'WIDOW',
+      color: '#ff3b54', bright: '#ffd9df', rgb: '255,59,84',
+      legScale: 0.95, legFontScale: 0.85, glowRadius: 40, hairDensity: 0,
+      bodyPoints: [
+        { x: -22, y: 0,  ch: '@', font: 22, alpha: 1 },
+        { x: -26, y: -7, ch: '.', font: 9,  alpha: 0.4 },
+        { x: -26, y: 7,  ch: '.', font: 9,  alpha: 0.4 },
+        { x: -18, y: -9, ch: '%', font: 12, alpha: 0.6 },
+        { x: -18, y: 9,  ch: '%', font: 12, alpha: 0.6 },
+        { x: -22, y: -4, ch: 'v', font: 11, alpha: 1, mark: true },
+        { x: -22, y: 4,  ch: '^', font: 11, alpha: 1, mark: true },
+        { x: 3,   y: 0,  ch: '#', font: 15, alpha: 0.9 },
+        { x: 9,   y: -5, ch: '*', font: 10, alpha: 0.6 },
+        { x: 9,   y: 5,  ch: '*', font: 10, alpha: 0.6 },
+        { x: 16,  y: -2, ch: 'v', font: 9,  alpha: 0.5 },
+        { x: 16,  y: 2,  ch: 'v', font: 9,  alpha: 0.5 }
+      ],
+      eyePoints: [
+        { x: 12, y: -3, size: 6, bright: 0.8 },
+        { x: 12, y: 3,  size: 6, bright: 0.8 },
+        { x: 9,  y: -5, size: 5, bright: 0.5 },
+        { x: 9,  y: 5,  size: 5, bright: 0.5 },
+        { x: 9,  y: -1, size: 4, bright: 0.4 },
+        { x: 9,  y: 1,  size: 4, bright: 0.4 }
+      ]
+    },
+    {
+      id: 'cyan', label: 'GHOST',
+      color: '#38e8ff', bright: '#eafeff', rgb: '56,232,255',
+      legScale: 1.55, legFontScale: 0.8, glowRadius: 28, hairDensity: 0,
+      bodyPoints: [
+        { x: -8, y: 0,  ch: 'o', font: 14, alpha: 0.85 },
+        { x: 2,  y: 0,  ch: '.', font: 9,  alpha: 0.5 },
+        { x: 6,  y: -3, ch: '.', font: 8,  alpha: 0.35 },
+        { x: 6,  y: 3,  ch: '.', font: 8,  alpha: 0.35 }
+      ],
+      eyePoints: [
+        { x: 5, y: -3, size: 8, bright: 1 },
+        { x: 5, y: 3,  size: 8, bright: 1 }
+      ]
+    },
+    {
+      id: 'mono', label: 'SPECTER',
+      color: '#e8e8ec', bright: '#ffffff', rgb: '232,232,236',
+      legScale: 1.05, legFontScale: 1.0, glowRadius: 42, hairDensity: 0,
+      bodyPoints: [
+        { x: -20, y: 0,  ch: '@', font: 22, alpha: 0.9 },
+        { x: -14, y: -8, ch: '.', font: 9,  alpha: 0.4 },
+        { x: -14, y: 8,  ch: '.', font: 9,  alpha: 0.4 },
+        { x: 4,   y: 0,  ch: '#', font: 16, alpha: 0.85 },
+        { x: 10,  y: -5, ch: '.', font: 9,  alpha: 0.4 },
+        { x: 10,  y: 5,  ch: '.', font: 9,  alpha: 0.4 },
+        { x: 17,  y: 0,  ch: 'v', font: 9,  alpha: 0.45 }
+      ],
+      eyePoints: [
+        { x: 13, y: -3, size: 9, bright: 1 },
+        { x: 13, y: 3,  size: 9, bright: 1 }
+      ]
+    }
+  ];
+
+  var currentModel = MODELS[0];
+  function HUD_COLOR() { return 'rgba(' + currentModel.rgb + ',0.55)'; }
+  function THREAD_COLOR() { return 'rgba(' + currentModel.rgb + ',0.12)'; }
+  var STEP_THRESHOLD = 22;
+  var EMERGENCY_THRESHOLD = 55; // beyond this, a leg snaps back even if its gait group is busy
+  var STEP_DURATION = 110; // ms, normal step
+  var STEP_DURATION_FAST = 65; // ms, emergency catch-up step
+  var FOLLOW_LAMBDA = 6;
+  var FOLLOW_LAMBDA_MIN = 2.2; // sluggish "groping" response far from the web
+  var ANGLE_LAMBDA = 10;
+  var ANGLE_LAMBDA_MIN = 4;
+  var PLUCK_RADIUS = 14;       // touching an actual strand counts as a pluck
+  var WEB_SENSE_RANGE = 260;   // signal fades out to baseline over this distance
+  var BASELINE_SIGNAL = 0.22;  // ambient ground-sense floor, far from the web
+  var RIPPLE_DURATION = 650;   // ms, visual feedback for a pluck
+
+  // Shallow behaviour state machine: BUILD_HOME (spin a home web first) ->
+  // HUNT (chase cursor, or rest at home once idle) -> APPROACH food ->
+  // WRAP it in silk -> EAT it -> back to HUNT. RETURN carries it home to
+  // eat stored prey once hungry.
+  var STATE_BUILD_HOME = 'BUILD_HOME', STATE_HUNT = 'HUNT', STATE_APPROACH = 'APPROACH', STATE_WRAP = 'WRAP', STATE_RETURN = 'RETURN', STATE_EAT = 'EAT';
+  var spiderState = STATE_BUILD_HOME;
+  var activeFood = null;   // food currently being approached / wrapped
+  var eatingTarget = null; // stored cocoon currently being returned to / eaten
+  var storedFood = [];     // wrapped cocoons left sitting in the world
+  var foodQueue = [];
+  var REACH_THRESHOLD = 20;
+  var WRAP_DURATION = 1400;
+  var EAT_DURATION = 2200;
+  var HUNGER_INTERVAL = 10000; // ms it keeps chasing the cursor before it gets hungry
+  var nextHungerCheck = null;
+  var wrapStartTime = 0, wrapProgress = 0;
+  var eatStartTime = 0, eatProgress = 0;
+  var armed = false;
+
+  // Home: built once at start; the spider's ordinary/idle behaviour is to
+  // rest there between hunts instead of drifting forever.
+  var homePos = null;
+  var homeBuilt = false;
+  var buildStartTime = null;
+  var buildProgress = 0;
+  var BUILD_DURATION = 2200;
+  var lastMoveTime = 0;
+  var IDLE_RETURN_DELAY = 4000; // ms of cursor stillness before it heads home
+  var nextGroomTime = null;
+
+  var ripples = [];          // active pluck ripples: { x, y, start }
+  var lastPluckTime = -Infinity;
+  var webFlashStart = -Infinity;
+  var lastSenseSignal = 1;   // most recent sense signal, read by the HUD
+
+  var w = 0, h = 0, dpr = 1;
+  var idleCenterX = 0, idleCenterY = 0;
+
+  var mouse = { x: 0, y: 0 };
+  var hasInput = false;
+
+  var body = { x: 0, y: 0, angle: 0, prevX: 0, prevY: 0 };
+
+  var lastTime = 0;
+  var hintAlpha = 0.85;
+  var hintFadeStart = 2500;
+  var hintFadeDur = 1200;
+  var startTime = null;
+
+  var legs = [];
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function damp(current, target, lambda, dt) {
+    return target + (current - target) * Math.exp(-lambda * dt);
+  }
+
+  function angleDamp(current, target, lambda, dt) {
+    var diff = target - current;
+    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+    return current + diff * (1 - Math.exp(-lambda * dt));
+  }
+
+  function worldTransform(local) {
+    var c = Math.cos(body.angle), s = Math.sin(body.angle);
+    return {
+      x: body.x + local.x * c - local.y * s,
+      y: body.y + local.x * s + local.y * c
+    };
+  }
+
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  function isSpiderIdle(now) {
+    return !hasInput || (now - lastMoveTime) > IDLE_RETURN_DELAY;
+  }
+
+  function distPointToSegment(px, py, x1, y1, x2, y2) {
+    var dx = x2 - x1, dy = y2 - y1;
+    var lenSq = dx * dx + dy * dy;
+    var t = lenSq > 0 ? ((px - x1) * dx + (py - y1) * dy) / lenSq : 0;
+    t = clamp(t, 0, 1);
+    var cx = x1 + dx * t, cy = y1 + dy * t;
+    return Math.hypot(px - cx, py - cy);
+  }
+
+  // Shortest distance from (px,py) to any strand of the home web — the exact
+  // spokes/rings drawHomeWeb draws, i.e. the web's actual sensory surface.
+  function distanceToWeb(px, py) {
+    if (!homeBuilt || !homePos) return Infinity;
+    var R = 42;
+    var best = Infinity;
+    for (var i = 0; i < 8; i++) {
+      var ang = (i / 8) * Math.PI * 2;
+      var ex = homePos.x + Math.cos(ang) * R, ey = homePos.y + Math.sin(ang) * R;
+      best = Math.min(best, distPointToSegment(px, py, homePos.x, homePos.y, ex, ey));
+    }
+    var distFromHome = Math.hypot(px - homePos.x, py - homePos.y);
+    var radii = [R * 0.4, R * 0.7, R];
+    for (var r = 0; r < radii.length; r++) {
+      best = Math.min(best, Math.abs(distFromHome - radii[r]));
+    }
+    return best;
+  }
+
+  // 1 = touching a strand (precise lock-on), fading to a weak ambient
+  // baseline far from the web (it still senses the cursor, just sluggishly).
+  function computeSenseSignal(d) {
+    if (d < PLUCK_RADIUS) return 1;
+    var falloff = clamp(1 - (d - PLUCK_RADIUS) / WEB_SENSE_RANGE, 0, 1);
+    return BASELINE_SIGNAL + falloff * (1 - BASELINE_SIGNAL);
+  }
+
+  function solveIK(hip, foot, l1, l2, bendSign) {
+    var dx = foot.x - hip.x, dy = foot.y - hip.y;
+    var dist = Math.hypot(dx, dy);
+    dist = clamp(dist, Math.abs(l1 - l2) + 0.01, l1 + l2 - 0.01);
+    var a = Math.atan2(dy, dx);
+    var cosAngleA = (l1 * l1 + dist * dist - l2 * l2) / (2 * l1 * dist);
+    var angleA = Math.acos(clamp(cosAngleA, -1, 1));
+    var kneeAngle = a + bendSign * angleA;
+    return {
+      x: hip.x + Math.cos(kneeAngle) * l1,
+      y: hip.y + Math.sin(kneeAngle) * l1
+    };
+  }
+
+  // Pick an ASCII character whose slant approximates a line's direction.
+  function lineChar(dx, dy) {
+    var deg = Math.atan2(dy, dx) * 180 / Math.PI;
+    deg = ((deg % 180) + 180) % 180;
+    if (deg < 22.5 || deg >= 157.5) return '-';
+    if (deg < 67.5) return '\\';
+    if (deg < 112.5) return '|';
+    return '/';
+  }
+
+  function drawSegmentASCII(x1, y1, x2, y2, color, alpha, fontPx, spacing) {
+    spacing = spacing || 8;
+    var dx = x2 - x1, dy = y2 - y1;
+    var len = Math.hypot(dx, dy);
+    var steps = Math.max(1, Math.round(len / spacing));
+    var ch = lineChar(dx, dy);
+    ctx.font = fontPx + "px 'JetBrains Mono', 'Fira Code', Consolas, monospace";
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    for (var i = 0; i <= steps; i++) {
+      var t = i / steps;
+      var x = x1 + dx * t;
+      var y = y1 + dy * t;
+      ctx.fillText(ch, x - fontPx * 0.3, y + fontPx * 0.35);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawDottedLine(x1, y1, x2, y2, color, spacing) {
+    var dx = x2 - x1, dy = y2 - y1;
+    var len = Math.hypot(dx, dy);
+    var steps = Math.max(1, Math.round(len / spacing));
+    ctx.font = "10px 'JetBrains Mono', monospace";
+    ctx.fillStyle = color;
+    for (var i = 1; i < steps; i++) {
+      var t = i / steps;
+      ctx.fillText('.', x1 + dx * t, y1 + dy * t);
+    }
+  }
+
+  function buildLegs() {
+    legs = [];
+    var scale = currentModel.legScale;
+    var femur = 34 * scale;
+    var tibia = 40 * scale;
+    for (var i = 0; i < 4; i++) {
+      var t = i / 3;
+      var hipX = lerp(20, -20, t) * scale;
+      var hipY = 10 * scale;
+      var footX = lerp(65, -60, t) * scale;
+      var footY = lerp(48, 62, t) * scale;
+      [1, -1].forEach(function (s) {
+        var group = (i % 2 === 0) ? (s > 0 ? 0 : 1) : (s > 0 ? 1 : 0);
+        var leg = {
+          hipLocal: { x: hipX, y: s * hipY },
+          restLocal: { x: footX, y: s * footY },
+          femur: femur,
+          tibia: tibia,
+          side: s,
+          group: group,
+          foot: { x: 0, y: 0 },
+          stepping: false,
+          stepStart: { x: 0, y: 0 },
+          stepTarget: { x: 0, y: 0 },
+          stepStartTime: 0,
+          stepDuration: STEP_DURATION,
+          liftPhase: 0
+        };
+        var w0 = worldTransform(leg.restLocal);
+        leg.foot.x = w0.x;
+        leg.foot.y = w0.y;
+        legs.push(leg);
+      });
+    }
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    idleCenterX = w / 2;
+    idleCenterY = h / 2;
+    if (!hasInput) { mouse.x = w / 2; mouse.y = h / 2; }
+  }
+
+  function onMove(x, y) {
+    hasInput = true;
+    mouse.x = x;
+    mouse.y = y;
+    lastMoveTime = performance.now();
+  }
+
+  canvas.addEventListener('mousemove', function (e) { onMove(e.clientX, e.clientY); });
+  canvas.addEventListener('touchstart', function (e) {
+    if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  canvas.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+    if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: false });
+  window.addEventListener('resize', resize);
+
+  var feedBtn = document.getElementById('feedBtn');
+  feedBtn.addEventListener('click', function () {
+    armed = !armed;
+    feedBtn.textContent = armed ? 'CLICK TO DROP' : 'FEED';
+    feedBtn.classList.toggle('armed', armed);
+  });
+
+  function dropFood(x, y) {
+    var f = { x: x, y: y };
+    if (spiderState === STATE_HUNT && !activeFood) {
+      activeFood = f;
+      spiderState = STATE_APPROACH;
+    } else {
+      foodQueue.push(f);
+    }
+  }
+
+  canvas.addEventListener('click', function (e) {
+    if (!armed) return;
+    dropFood(e.clientX, e.clientY);
+    armed = false;
+    feedBtn.textContent = 'FEED';
+    feedBtn.classList.remove('armed');
+  });
+
+  var modelPicker = document.getElementById('modelPicker');
+  MODELS.forEach(function (m) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'modelBtn';
+    btn.textContent = m.label;
+    btn.style.color = m.color;
+    btn.style.borderColor = 'rgba(' + m.rgb + ',0.45)';
+    if (m === currentModel) {
+      btn.style.background = 'rgba(' + m.rgb + ',0.18)';
+      btn.style.borderColor = m.color;
+    }
+    btn.addEventListener('click', function () {
+      currentModel = m;
+      var kids = modelPicker.children;
+      for (var k = 0; k < kids.length; k++) {
+        kids[k].style.background = 'transparent';
+        kids[k].style.borderColor = 'rgba(' + MODELS[k].rgb + ',0.45)';
+      }
+      btn.style.background = 'rgba(' + m.rgb + ',0.18)';
+      btn.style.borderColor = m.color;
+      buildLegs();
+    });
+    modelPicker.appendChild(btn);
+  });
+
+  function drawBody(now, chewing) {
+    var m = currentModel;
+    var grad = ctx.createRadialGradient(body.x, body.y, 4, body.x, body.y, m.glowRadius);
+    grad.addColorStop(0, 'rgba(' + m.rgb + ',0.16)');
+    grad.addColorStop(1, 'rgba(' + m.rgb + ',0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(body.x, body.y, m.glowRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    for (var i = 0; i < m.bodyPoints.length; i++) {
+      var bp = m.bodyPoints[i];
+      var wp = worldTransform(bp);
+      if (chewing && bp.ch === 'v' && !bp.mark) { wp.y += Math.sin(now * 0.02) * 1.5; }
+      ctx.font = bp.font + "px 'JetBrains Mono', monospace";
+      ctx.fillStyle = bp.mark ? m.bright : m.color;
+      ctx.globalAlpha = bp.alpha;
+      ctx.fillText(bp.ch, wp.x - bp.font * 0.3, wp.y + bp.font * 0.35);
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.shadowColor = m.bright;
+    ctx.shadowBlur = 8;
+    for (var j = 0; j < m.eyePoints.length; j++) {
+      var ep = m.eyePoints[j];
+      var we = worldTransform(ep);
+      ctx.font = ep.size + "px 'JetBrains Mono', monospace";
+      ctx.fillStyle = m.bright;
+      ctx.globalAlpha = ep.bright;
+      ctx.fillText('o', we.x - ep.size * 0.3, we.y + ep.size * 0.35);
+    }
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  }
+
+  function drawReticle(now, isArmed) {
+    var x = mouse.x, y = mouse.y;
+    var dist = Math.hypot(mouse.x - body.x, mouse.y - body.y);
+    var closeness = clamp(1 - dist / 300, 0, 1);
+    var pulse = reducedMotion ? 0 : Math.sin(now / 300) * 0.12;
+    var size = 16 - closeness * 5;
+    var alpha = 0.45 + closeness * 0.4 + pulse * 0.1;
+    ctx.globalAlpha = clamp(alpha, 0, 1);
+    ctx.fillStyle = currentModel.bright;
+    ctx.font = "12px 'JetBrains Mono', monospace";
+    var corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+    for (var i = 0; i < corners.length; i++) {
+      var dx = corners[i][0], dy = corners[i][1];
+      var cx = x + dx * size, cy = y + dy * size;
+      ctx.fillText('-', cx - dx * 4 - 3, cy + 4);
+      ctx.fillText('|', cx - 3, cy - dy * 6 + 4);
+    }
+    if (isArmed) {
+      ctx.globalAlpha = 0.7 + pulse;
+      ctx.font = "10px 'JetBrains Mono', monospace";
+      ctx.fillText('+', x - 3, y + 3);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawFoodItem(f, state, progress, now, attached) {
+    var m = currentModel;
+    if (state === 'waiting') {
+      ctx.font = "10px 'JetBrains Mono', monospace";
+      ctx.fillStyle = m.color;
+      ctx.globalAlpha = 0.35;
+      ctx.fillText('*', f.x - 3, f.y + 3);
+      ctx.globalAlpha = 1;
+    } else if (state === 'approach') {
+      var pulse = 0.5 + 0.4 * Math.sin(now * 0.006);
+      ctx.font = "12px 'JetBrains Mono', monospace";
+      ctx.fillStyle = m.bright;
+      ctx.globalAlpha = pulse;
+      ctx.fillText('*', f.x - 4, f.y + 4);
+      ctx.globalAlpha = 1;
+    } else if (state === 'wrap') {
+      var count = Math.floor(lerp(3, 14, progress));
+      var radius = lerp(18, 6, progress);
+      for (var i = 0; i < count; i++) {
+        var ang = (i / count) * Math.PI * 2 + now * 0.001;
+        var px = f.x + Math.cos(ang) * radius;
+        var py = f.y + Math.sin(ang) * radius;
+        var ch = (i % 2 === 0) ? '/' : '\\';
+        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.fillStyle = m.color;
+        ctx.globalAlpha = 0.5 + 0.35 * progress;
+        ctx.fillText(ch, px - 3, py + 3);
+      }
+      ctx.globalAlpha = 1;
+      if (attached) {
+        var abd = worldTransform({ x: -16, y: 0 });
+        drawDottedLine(abd.x, abd.y, f.x, f.y, 'rgba(' + m.rgb + ',0.25)', 10);
+      }
+    } else if (state === 'eat') {
+      var size = lerp(10, 2, progress);
+      var alpha = lerp(0.9, 0, progress);
+      ctx.font = size + "px 'JetBrains Mono', monospace";
+      ctx.fillStyle = m.color;
+      ctx.globalAlpha = alpha;
+      ctx.fillText('%', f.x - size * 0.3, f.y + size * 0.35);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // A small orb web: spokes finish first, then rings weave in. Once fully
+  // built it is drawn every frame at progress 1, as permanent scenery.
+  function drawHomeWeb(home, progress, now, flashBoost) {
+    var m = currentModel;
+    var boost = flashBoost || 0;
+    var R = 42;
+    var spokeCount = 8;
+    var spokeLen = R * clamp(progress / 0.5, 0, 1);
+    for (var i = 0; i < spokeCount; i++) {
+      var ang = (i / spokeCount) * Math.PI * 2;
+      var ex = home.x + Math.cos(ang) * spokeLen;
+      var ey = home.y + Math.sin(ang) * spokeLen;
+      drawSegmentASCII(home.x, home.y, ex, ey, m.color, 0.3 + boost, 10, 9);
+    }
+    var ringP = clamp((progress - 0.4) / 0.6, 0, 1);
+    var radii = [R * 0.4, R * 0.7, R];
+    ctx.font = "8px 'JetBrains Mono', monospace";
+    ctx.fillStyle = m.color;
+    for (var r = 0; r < radii.length; r++) {
+      var dotsTotal = 10;
+      var dotsShown = Math.floor(dotsTotal * ringP);
+      for (var d = 0; d < dotsShown; d++) {
+        var a2 = (d / dotsTotal) * Math.PI * 2 + r * 0.3;
+        var px = home.x + Math.cos(a2) * radii[r];
+        var py = home.y + Math.sin(a2) * radii[r];
+        ctx.globalAlpha = 0.28 + boost;
+        ctx.fillText('.', px - 2, py + 2);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawRipples(now) {
+    var m = currentModel;
+    for (var i = ripples.length - 1; i >= 0; i--) {
+      var rp = ripples[i];
+      var age = now - rp.start;
+      if (age > RIPPLE_DURATION) { ripples.splice(i, 1); continue; }
+      var p = age / RIPPLE_DURATION;
+      var radius = lerp(2, 26, p);
+      var alpha = lerp(0.85, 0, p);
+      var dots = 10;
+      ctx.font = "9px 'JetBrains Mono', monospace";
+      ctx.fillStyle = m.bright;
+      for (var d = 0; d < dots; d++) {
+        var ang = (d / dots) * Math.PI * 2;
+        var px = rp.x + Math.cos(ang) * radius;
+        var py = rp.y + Math.sin(ang) * radius;
+        ctx.globalAlpha = alpha;
+        ctx.fillText('.', px - 2, py + 2);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawHUD(now) {
+    var pad = 16;
+    var idle = isSpiderIdle(now);
+    var targetPoint = mouse;
+    if (spiderState === STATE_BUILD_HOME) targetPoint = homePos;
+    else if (spiderState === STATE_APPROACH || spiderState === STATE_WRAP) targetPoint = activeFood;
+    else if (spiderState === STATE_RETURN || spiderState === STATE_EAT) targetPoint = eatingTarget;
+    else if (spiderState === STATE_HUNT && idle) targetPoint = homePos;
+    var dist = targetPoint ? Math.hypot(targetPoint.x - body.x, targetPoint.y - body.y) : 0;
+    var state;
+    if (spiderState === STATE_BUILD_HOME) {
+      state = 'BUILDING HOME ' + Math.round(buildProgress * 100) + '%';
+    } else if (spiderState === STATE_HUNT) {
+      if (idle) {
+        state = dist < 25 ? 'RESTING' : 'RETURNING HOME';
+      } else {
+        state = hasInput ? (dist < 40 ? 'ENGAGED' : 'TRACKING') : 'IDLE-SCAN';
+      }
+    } else if (spiderState === STATE_APPROACH) {
+      state = 'APPROACHING';
+    } else if (spiderState === STATE_WRAP) {
+      state = 'WRAPPING ' + Math.round(wrapProgress * 100) + '%';
+    } else if (spiderState === STATE_RETURN) {
+      state = 'RETURNING';
+    } else {
+      state = 'EATING ' + Math.round(eatProgress * 100) + '%';
+    }
+    var lines = [
+      'ASCII_SPIDER.SYS',
+      'TARGET  ' + Math.round(mouse.x) + ',' + Math.round(mouse.y),
+      'DIST    ' + Math.round(dist) + 'px',
+      'STATE   ' + state
+    ];
+    if (spiderState === STATE_HUNT && hasInput && !idle) {
+      lines.push('SENSE   ' + (lastSenseSignal >= 1 ? 'PLUCK!' : Math.round(lastSenseSignal * 100) + '%'));
+    }
+    if (foodQueue.length > 0) { lines.push('QUEUE   ' + foodQueue.length); }
+    if (storedFood.length > 0) { lines.push('STORED  ' + storedFood.length); }
+    if (spiderState === STATE_HUNT && storedFood.length > 0) {
+      var secsLeft = Math.max(0, Math.ceil((nextHungerCheck - now) / 1000));
+      lines.push('HUNGER  ' + secsLeft + 's');
+    }
+    ctx.font = "11px 'JetBrains Mono', monospace";
+    ctx.fillStyle = HUD_COLOR();
+    ctx.globalAlpha = 1;
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], pad, h - pad - (lines.length - 1 - i) * 15);
+    }
+  }
+
+  function drawHint(elapsed) {
+    if (hintAlpha <= 0) return;
+    if (elapsed > hintFadeStart) {
+      hintAlpha = clamp(0.85 - (elapsed - hintFadeStart) / hintFadeDur * 0.85, 0, 0.85);
+    }
+    if (hintAlpha <= 0) return;
+    ctx.globalAlpha = hintAlpha;
+    ctx.fillStyle = HUD_COLOR();
+    ctx.font = "13px 'JetBrains Mono', monospace";
+    ctx.textAlign = 'center';
+    ctx.fillText('it hunts your cursor', w / 2, 40);
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = 1;
+  }
+
+  function render(now) {
+    if (reducedMotion) {
+      ctx.fillStyle = '#05070a';
+      ctx.fillRect(0, 0, w, h);
+    } else {
+      ctx.fillStyle = 'rgba(5,7,10,' + TRAIL_ALPHA + ')';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    if (homePos) {
+      var flashAge = now - webFlashStart;
+      var flashBoost = flashAge < 300 ? 0.35 * (1 - flashAge / 300) : 0;
+      drawHomeWeb(homePos, homeBuilt ? 1 : buildProgress, now, flashBoost);
+    }
+    drawRipples(now);
+
+    if (hasInput) {
+      drawDottedLine(body.x, body.y, mouse.x, mouse.y, THREAD_COLOR(), 16);
+    }
+
+    var lfs = currentModel.legFontScale;
+    for (var i = 0; i < legs.length; i++) {
+      var leg = legs[i];
+      var hipWorld = worldTransform(leg.hipLocal);
+      var knee = solveIK(hipWorld, leg.foot, leg.femur, leg.tibia, leg.side);
+      drawSegmentASCII(hipWorld.x, hipWorld.y, knee.x, knee.y, currentModel.color, 0.55, 15 * lfs);
+      drawSegmentASCII(knee.x, knee.y, leg.foot.x, leg.foot.y, currentModel.color, 0.9, 14 * lfs);
+
+      for (var hb = 0; hb < currentModel.hairDensity; hb++) {
+        var ht = 0.4 + hb * 0.3;
+        var hx = knee.x + (leg.foot.x - knee.x) * ht;
+        var hy = knee.y + (leg.foot.y - knee.y) * ht;
+        ctx.font = (9 * lfs) + "px 'JetBrains Mono', monospace";
+        ctx.fillStyle = currentModel.color;
+        ctx.globalAlpha = 0.35;
+        ctx.fillText('`', hx - 2, hy - 3 - hb * 2);
+        ctx.globalAlpha = 1;
+      }
+
+      ctx.font = (12 * lfs) + "px 'JetBrains Mono', monospace";
+      ctx.fillStyle = currentModel.color;
+      ctx.globalAlpha = 0.7;
+      ctx.fillText('o', knee.x - 3.5, knee.y + 4);
+
+      var footChar = leg.stepping ? "'" : '.';
+      if (leg.stepping) { ctx.shadowColor = currentModel.bright; ctx.shadowBlur = 6; }
+      ctx.font = (13 * lfs) + "px 'JetBrains Mono', monospace";
+      ctx.fillStyle = leg.stepping ? currentModel.bright : currentModel.color;
+      ctx.globalAlpha = leg.stepping ? 1 : 0.6;
+      ctx.fillText(footChar, leg.foot.x - 3, leg.foot.y + 4);
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+
+    drawBody(now, spiderState === STATE_EAT);
+    drawReticle(now, armed);
+
+    for (var fq = 0; fq < foodQueue.length; fq++) {
+      drawFoodItem(foodQueue[fq], 'waiting', 0, now, false);
+    }
+    for (var sf = 0; sf < storedFood.length; sf++) {
+      var cocoon = storedFood[sf];
+      if (cocoon === eatingTarget && spiderState === STATE_EAT) continue;
+      drawFoodItem(cocoon, 'wrap', 1, now, false);
+    }
+    if (activeFood) {
+      if (spiderState === STATE_APPROACH) drawFoodItem(activeFood, 'approach', 0, now, false);
+      else if (spiderState === STATE_WRAP) drawFoodItem(activeFood, 'wrap', wrapProgress, now, true);
+    }
+    if (eatingTarget && spiderState === STATE_EAT) {
+      drawFoodItem(eatingTarget, 'eat', eatProgress, now, false);
+    }
+
+    drawHUD(now);
+    drawHint(now - startTime);
+  }
+
+  function step(now) {
+    if (startTime === null) startTime = now;
+    if (nextHungerCheck === null) nextHungerCheck = now + HUNGER_INTERVAL;
+    if (buildStartTime === null) buildStartTime = now;
+    if (!lastTime) lastTime = now;
+    var dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+
+    if (spiderState === STATE_HUNT && storedFood.length > 0 && now >= nextHungerCheck) {
+      eatingTarget = storedFood[0];
+      spiderState = STATE_RETURN;
+    }
+
+    var targetX, targetY;
+    if (spiderState === STATE_BUILD_HOME) {
+      targetX = homePos.x;
+      targetY = homePos.y;
+    } else if (spiderState === STATE_HUNT) {
+      if (isSpiderIdle(now)) {
+        targetX = homePos.x;
+        targetY = homePos.y;
+      } else {
+        targetX = mouse.x;
+        targetY = mouse.y;
+      }
+    } else if (spiderState === STATE_APPROACH || spiderState === STATE_WRAP) {
+      targetX = activeFood.x;
+      targetY = activeFood.y;
+    } else {
+      targetX = eatingTarget.x;
+      targetY = eatingTarget.y;
+    }
+
+    var followLambda = FOLLOW_LAMBDA;
+    var angleLambda = ANGLE_LAMBDA;
+    if (spiderState === STATE_HUNT && hasInput && !isSpiderIdle(now)) {
+      var distToStrand = distanceToWeb(mouse.x, mouse.y);
+      var signal = computeSenseSignal(distToStrand);
+      lastSenseSignal = signal;
+      followLambda = lerp(FOLLOW_LAMBDA_MIN, FOLLOW_LAMBDA, signal);
+      angleLambda = lerp(ANGLE_LAMBDA_MIN, ANGLE_LAMBDA, signal);
+      if (signal < 1) {
+        var jitterAmt = (1 - signal) * 22;
+        targetX += Math.cos(now * 0.004) * jitterAmt;
+        targetY += Math.sin(now * 0.0037) * jitterAmt;
+      }
+      if (distToStrand < PLUCK_RADIUS && now - lastPluckTime > 400) {
+        ripples.push({ x: mouse.x, y: mouse.y, start: now });
+        webFlashStart = now;
+        lastPluckTime = now;
+      }
+    } else {
+      lastSenseSignal = 1;
+    }
+
+    body.prevX = body.x;
+    body.prevY = body.y;
+    body.x = damp(body.x, targetX, followLambda, dt);
+    body.y = damp(body.y, targetY, followLambda, dt);
+
+    if (spiderState === STATE_BUILD_HOME) {
+      buildProgress = clamp((now - buildStartTime) / BUILD_DURATION, 0, 1);
+      if (buildProgress >= 1) {
+        homeBuilt = true;
+        if (foodQueue.length) { activeFood = foodQueue.shift(); spiderState = STATE_APPROACH; }
+        else { spiderState = STATE_HUNT; }
+      }
+    } else if (spiderState === STATE_APPROACH) {
+      var distToFood = Math.hypot(activeFood.x - body.x, activeFood.y - body.y);
+      if (distToFood < REACH_THRESHOLD) {
+        spiderState = STATE_WRAP;
+        wrapStartTime = now;
+        wrapProgress = 0;
+      }
+    } else if (spiderState === STATE_WRAP) {
+      wrapProgress = clamp((now - wrapStartTime) / WRAP_DURATION, 0, 1);
+      if (wrapProgress >= 1) {
+        storedFood.push({ x: activeFood.x, y: activeFood.y });
+        activeFood = null;
+        if (foodQueue.length) { activeFood = foodQueue.shift(); spiderState = STATE_APPROACH; }
+        else { spiderState = STATE_HUNT; }
+      }
+    } else if (spiderState === STATE_RETURN) {
+      var distToCocoon = Math.hypot(eatingTarget.x - body.x, eatingTarget.y - body.y);
+      if (distToCocoon < REACH_THRESHOLD) {
+        spiderState = STATE_EAT;
+        eatStartTime = now;
+        eatProgress = 0;
+      }
+    } else if (spiderState === STATE_EAT) {
+      eatProgress = clamp((now - eatStartTime) / EAT_DURATION, 0, 1);
+      if (eatProgress >= 1) {
+        var idx = storedFood.indexOf(eatingTarget);
+        if (idx > -1) storedFood.splice(idx, 1);
+        eatingTarget = null;
+        nextHungerCheck = now + HUNGER_INTERVAL;
+        if (foodQueue.length) { activeFood = foodQueue.shift(); spiderState = STATE_APPROACH; }
+        else { spiderState = STATE_HUNT; }
+      }
+    }
+
+    var vx = body.x - body.prevX, vy = body.y - body.prevY;
+    var speed = Math.hypot(vx, vy);
+    if (speed > 0.05) {
+      var desiredAngle = Math.atan2(vy, vx);
+      body.angle = angleDamp(body.angle, desiredAngle, angleLambda, dt);
+    }
+
+    var groupStepping = [false, false];
+    for (var i = 0; i < legs.length; i++) if (legs[i].stepping) groupStepping[legs[i].group] = true;
+
+    var stepThresh = STEP_THRESHOLD * currentModel.legScale;
+    var emergencyThresh = EMERGENCY_THRESHOLD * currentModel.legScale;
+    var overshootCap = 18 * currentModel.legScale;
+
+    for (var j = 0; j < legs.length; j++) {
+      var leg = legs[j];
+      var idealWorld = worldTransform(leg.restLocal);
+      if (!leg.stepping) {
+        var d = Math.hypot(leg.foot.x - idealWorld.x, leg.foot.y - idealWorld.y);
+        var emergency = d > emergencyThresh;
+        if (d > stepThresh && (!groupStepping[leg.group] || emergency)) {
+          leg.stepping = true;
+          leg.stepStart.x = leg.foot.x;
+          leg.stepStart.y = leg.foot.y;
+          leg.stepDuration = emergency ? STEP_DURATION_FAST : STEP_DURATION;
+          var overshoot = Math.min(speed * 4, overshootCap);
+          var dirx = speed > 0.05 ? vx / speed : 0;
+          var diry = speed > 0.05 ? vy / speed : 0;
+          leg.stepTarget.x = idealWorld.x + dirx * overshoot;
+          leg.stepTarget.y = idealWorld.y + diry * overshoot;
+          leg.stepStartTime = now;
+          groupStepping[leg.group] = true;
+        }
+      } else {
+        var p = Math.min(1, (now - leg.stepStartTime) / leg.stepDuration);
+        var ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        leg.foot.x = leg.stepStart.x + (leg.stepTarget.x - leg.stepStart.x) * ease;
+        leg.foot.y = leg.stepStart.y + (leg.stepTarget.y - leg.stepStart.y) * ease;
+        leg.liftPhase = Math.sin(p * Math.PI);
+        if (p >= 1) { leg.stepping = false; leg.liftPhase = 0; }
+      }
+    }
+
+    if (spiderState === STATE_HUNT && homeBuilt && isSpiderIdle(now) &&
+        Math.hypot(body.x - homePos.x, body.y - homePos.y) < 30) {
+      if (nextGroomTime === null) nextGroomTime = now + 2000 + Math.random() * 2000;
+      if (now >= nextGroomTime) {
+        var idleLegs = legs.filter(function (l) { return !l.stepping; });
+        if (idleLegs.length) {
+          var pick = idleLegs[Math.floor(Math.random() * idleLegs.length)];
+          var jitter = 6 * currentModel.legScale;
+          pick.stepping = true;
+          pick.stepStart.x = pick.foot.x;
+          pick.stepStart.y = pick.foot.y;
+          pick.stepTarget.x = pick.foot.x + (Math.random() - 0.5) * jitter;
+          pick.stepTarget.y = pick.foot.y + (Math.random() - 0.5) * jitter;
+          pick.stepDuration = STEP_DURATION;
+          pick.stepStartTime = now;
+        }
+        nextGroomTime = now + 2500 + Math.random() * 3000;
+      }
+    } else {
+      nextGroomTime = null;
+    }
+
+    render(now);
+    requestAnimationFrame(step);
+  }
+
+  resize();
+  body.x = w / 2;
+  body.y = h / 2;
+  homePos = { x: body.x, y: body.y };
+  buildLegs();
+  requestAnimationFrame(step);
+})();
+</script>
+</body>
+</html>
