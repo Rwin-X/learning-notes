@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AVALANCHE / black8arch</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525}
+:root[data-theme="light"]{--bg:#f6f6f4;--fg:#0c0c0c;--mut:#8a8a86;--line:#d9d9d5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font:400 13px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.lab{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut)}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;z-index:0}
+#cv:active{cursor:grabbing}
+header{position:fixed;top:0;left:0;right:0;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:calc(16px + env(safe-area-inset-top,0px)) 22px 14px;border-bottom:1px solid var(--fg);pointer-events:none}
+header .r{display:flex;gap:8px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end}
+button{font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+button:hover,button[aria-pressed="true"]{border-color:var(--fg)}
+button[aria-pressed="false"]{color:var(--mut)}
+.meta{position:fixed;z-index:3;top:calc(70px + env(safe-area-inset-top,0px));left:22px;right:22px;display:flex;flex-wrap:wrap;gap:4px 22px;pointer-events:none}
+.meta b{font-weight:400;color:var(--fg);letter-spacing:.1em;margin-left:8px}
+.bottom{position:fixed;z-index:3;left:22px;right:22px;bottom:calc(20px + env(safe-area-inset-bottom,0px));pointer-events:none}
+h1{font-weight:800;font-size:clamp(44px,10vw,140px);letter-spacing:-.045em;line-height:.9;margin-bottom:14px}
+.field{max-width:430px;pointer-events:auto}
+.mono{font:400 11px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut);letter-spacing:.03em;white-space:pre-line;overflow:hidden;text-overflow:ellipsis}
+textarea{width:100%;font:400 12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--fg);background:color-mix(in srgb,var(--bg) 70%,transparent);border:1px solid var(--line);border-radius:10px;padding:10px;resize:vertical;outline:0;margin-bottom:8px}
+textarea:focus{border-color:var(--fg)}
+select{font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+select option{background:var(--bg);text-transform:none}
+input[type=text]{width:100%;font:300 18px/1.3 Inter,system-ui,sans-serif;letter-spacing:-.02em;color:var(--fg);background:none;border:0;border-bottom:1px solid var(--line);padding:5px 0;outline:0;margin-bottom:8px}
+input[type=text]:focus{border-bottom-color:var(--fg)}
+.rg{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rg:hover,.rg.on{color:var(--fg)}
+#tip{position:fixed;z-index:5;display:none;pointer-events:none;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--bg) 88%,transparent);font:400 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--fg);white-space:pre}
+</style>
+</head>
+<body>
+<canvas id="cv" aria-label="Rotating 3D comparison of two hash outputs"></canvas>
+<header>
+  <span class="lab">black8arch / avalanche</span>
+  <div class="r"><select id="alg" aria-label="Algorithm"></select><button id="exp" type="button">Experiment</button><button id="flip" type="button">Flip bit</button><button id="dl" type="button">PNG</button><button id="theme" type="button">Theme</button></div>
+</header>
+<div class="meta lab" id="meta"></div>
+<div class="bottom"><h1>AVALANCHE</h1><div class="field"><div class="lab" style="margin-bottom:2px">A</div><input type="text" id="ia" spellcheck="false" autocomplete="off" aria-label="Input A"><div class="lab" style="margin-bottom:2px">B</div><input type="text" id="ib" spellcheck="false" autocomplete="off" aria-label="Input B"><div class="mono" id="info"></div></div></div>
+<div id="tip"></div>
+<input type="file" id="fin" hidden>
+<script>
+
+var cv=document.getElementById("cv"),ctx=cv.getContext("2d"),root=document.documentElement;
+function el(i){return document.getElementById(i)}
+var MONO="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+var D=1,Wc=0,Hc=0,CXc=0,CYc=0,SD=1,fg=[242,242,240],bg="#0a0a0a";
+var yaw=.6,pit=.35,zoom=1,UU=1,PX=0,PY=0,PZ=0,PF=1,cyw=1,syw=0,cpt=1,spt=0;
+var T=0,paused=false,running=false,lastT=0,dragging=false,lx=0,ly=0,moved=0,ptrs={},pinchD=0,glow=null,scene={};
+var reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function rgba(a){return "rgba("+fg[0]+","+fg[1]+","+fg[2]+","+a+")"}
+function ease(t){t=Math.max(0,Math.min(1,t));return 1-Math.pow(1-t,3)}
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function readTheme(){var cs=getComputedStyle(root),h=cs.getPropertyValue("--fg").trim();var n=[1,3,5].map(function(i){return parseInt(h.substr(i,2),16)});if(n.join()!==fg.join()){fg=n;glow=null}bg=cs.getPropertyValue("--bg").trim()}
+function glowSprite(){if(glow)return glow;var s=64,g=document.createElement("canvas");g.width=g.height=s;var gc=g.getContext("2d"),rg=gc.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2),c=fg.join(",");rg.addColorStop(0,"rgba("+c+",.9)");rg.addColorStop(.4,"rgba("+c+",.25)");rg.addColorStop(1,"rgba("+c+",0)");gc.fillStyle=rg;gc.fillRect(0,0,s,s);glow=g;return g}
+function fit(){D=Math.min(window.devicePixelRatio||1,1.5);Wc=cv.clientWidth;Hc=cv.clientHeight;cv.width=Math.round(Wc*D);cv.height=Math.round(Hc*D);CXc=Wc/2;CYc=Hc*.46;SD=Math.min(Wc,Hc);readTheme();redraw()}
+function cam(){UU=SD/380*zoom;cyw=Math.cos(yaw);syw=Math.sin(yaw);cpt=Math.cos(pit);spt=Math.sin(pit)}
+function proj(x,y,z){var X=x*cyw+z*syw,Z=-x*syw+z*cyw,Y=y*cpt-Z*spt;Z=y*spt+Z*cpt;var f=UU*900/(1400+Z);PX=CXc+X*f;PY=CYc+Y*f;PZ=Z;PF=f}
+function redraw(){ctx.setTransform(D,0,0,D,0,0);ctx.clearRect(0,0,Wc,Hc);cam();if(scene.draw)scene.draw()}
+function frame(ts){requestAnimationFrame(frame);if(ts-lastT<33)return;var dt=Math.min(.1,(ts-lastT)/1000);lastT=ts;if(!paused){T+=dt;if(scene.step)scene.step(dt)}redraw()}
+function startLoop(){if(reduced){redraw();return}running=true;requestAnimationFrame(function(t){lastT=t;requestAnimationFrame(frame)})}
+function clampView(){if(scene.yawLim)yaw=clamp(yaw,-scene.yawLim,scene.yawLim);pit=clamp(pit,-.2,1.3);zoom=clamp(zoom,.4,2.6)}
+var tipEl=el("tip");
+function tip(t,x,y){if(t===null){tipEl.style.display="none";return}tipEl.textContent=t;tipEl.style.display="block";tipEl.style.left=Math.max(8,Math.min(x+14,Wc-tipEl.offsetWidth-8))+"px";tipEl.style.top=(y+16)+"px"}
+cv.addEventListener("pointerdown",function(e){ptrs[e.pointerId]=[e.clientX,e.clientY];dragging=true;lx=e.clientX;ly=e.clientY;moved=0;pinchD=0;tip(null);cv.setPointerCapture(e.pointerId)});
+cv.addEventListener("pointermove",function(e){
+  if(ptrs[e.pointerId])ptrs[e.pointerId]=[e.clientX,e.clientY];
+  var ids=Object.keys(ptrs);
+  if(ids.length===2){var a=ptrs[ids[0]],b=ptrs[ids[1]],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pinchD)zoom*=d/pinchD;pinchD=d;clampView();if(!running)redraw();return}
+  if(dragging&&ids.length===1){var dx=e.clientX-lx,dy=e.clientY-ly;moved+=Math.abs(dx)+Math.abs(dy);yaw+=dx*.008;pit+=dy*.006;lx=e.clientX;ly=e.clientY;clampView();if(!running)redraw()}
+  else if(scene.hover)scene.hover(e.clientX,e.clientY)});
+function pend(e){var wasClick=moved<5&&Object.keys(ptrs).length===1;delete ptrs[e.pointerId];pinchD=0;var k=Object.keys(ptrs)[0];dragging=!!k;if(k){lx=ptrs[k][0];ly=ptrs[k][1]}if(wasClick&&e.type==="pointerup"&&scene.click)scene.click(e.clientX,e.clientY)}
+cv.addEventListener("pointerup",pend);cv.addEventListener("pointercancel",pend);
+cv.addEventListener("pointerleave",function(){if(scene.hover)scene.hover(-999,-999)});
+cv.addEventListener("wheel",function(e){e.preventDefault();zoom*=e.deltaY<0?1.06:.94;clampView();if(!running)redraw()},{passive:false});
+cv.addEventListener("dblclick",function(){yaw=.6;pit=.35;zoom=1;if(!running)redraw()});
+el("theme").onclick=function(){root.setAttribute("data-theme",root.getAttribute("data-theme")==="light"?"dark":"light");readTheme();if(!running)redraw()};
+addEventListener("keydown",function(e){if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")return;if(e.code==="Space"){e.preventDefault();paused=!paused}});
+addEventListener("resize",fit);
+function wireFile(cb){var fin=el("fin");if(el("file"))el("file").onclick=function(){fin.click()};fin.onchange=function(){if(fin.files[0])cb(fin.files[0])};addEventListener("dragover",function(e){e.preventDefault()});addEventListener("drop",function(e){e.preventDefault();if(e.dataTransfer.files[0])cb(e.dataTransfer.files[0])})}
+function savePNG(name){var t=document.createElement("canvas");t.width=cv.width;t.height=cv.height;var c=t.getContext("2d");c.fillStyle=bg;c.fillRect(0,0,t.width,t.height);c.drawImage(cv,0,0);t.toBlob(function(b){var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},1000)})}
+if(el("dl"))el("dl").onclick=function(){savePNG("avalanche.png")};
+function toHex(b){return Array.prototype.map.call(b,function(x){return("0"+x.toString(16)).slice(-2)}).join("")}
+async function sha256(bytes){return new Uint8Array(await crypto.subtle.digest("SHA-256",bytes))}
+function human(n){if(n<1024)return n+" B";var u=["KB","MB","GB"],i=-1;do{n/=1024;i++}while(n>=1024&&i<2);return n.toFixed(n<10?2:1)+" "+u[i]}
+function xr(seed){var s=seed|0||1;return function(){s^=s<<13;s^=s>>>17;s^=s<<5;return(s>>>0)/4294967296}}
+function setMeta(pairs){var m=el("meta");m.textContent="";pairs.forEach(function(p){var s=document.createElement("span");s.textContent=p[0];var b=document.createElement("b");b.textContent=p[1];s.appendChild(b);m.appendChild(s)})}
+
+
+var ALG="SHA-256",bitsA=null,bitsB=null,prob=null,expo=null,diffOut=0,inDiff=-1,tk=0,hov=-1,XYS=null,crcTab=null,expHist=null;
+function crc32(b){
+  if(!crcTab){crcTab=new Uint32Array(256);for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);crcTab[n]=c>>>0}}
+  var c2=0xffffffff;for(var i=0;i<b.length;i++)c2=crcTab[(c2^b[i])&255]^(c2>>>8);c2=(c2^0xffffffff)>>>0;
+  return new Uint8Array([c2>>>24,(c2>>>16)&255,(c2>>>8)&255,c2&255])}
+function bsum(b){var a=new Uint8Array(8);for(var i=0;i<b.length;i++)a[i&7]=(a[i&7]+b[i]*31+i)&255;return a}
+function sub(alg){return function(b){return crypto.subtle.digest(alg,b).then(function(x){return new Uint8Array(x)})}}
+var ALGS={"SHA-256":{n:256,f:sub("SHA-256")},"SHA-512":{n:512,f:sub("SHA-512")},"SHA-1":{n:160,f:sub("SHA-1")},"CRC-32":{n:32,f:function(b){return Promise.resolve(crc32(b))}},"Byte-sum":{n:64,f:function(b){return Promise.resolve(bsum(b))}}};
+function bitsOf(h,n){var o=new Uint8Array(n);for(var j=0;j<n;j++)o[j]=(h[j>>3]>>(7-(j&7)))&1;return o}
+function pc(x){var c=0;while(x){c+=x&1;x>>=1}return c}
+async function compute(){
+  var my=++tk,enc=new TextEncoder(),a=enc.encode(el("ia").value),b=enc.encode(el("ib").value),al=ALGS[ALG];
+  var ha=await al.f(a),hb=await al.f(b);if(my!==tk)return;
+  bitsA=bitsOf(ha,al.n);bitsB=bitsOf(hb,al.n);diffOut=0;for(var j=0;j<al.n;j++)diffOut+=bitsA[j]^bitsB[j];
+  inDiff=-1;if(a.length===b.length){inDiff=0;for(var i=0;i<a.length;i++)inDiff+=pc(a[i]^b[i])}
+  prob=null;expo=null;XYS=null;report();if(!running)redraw()}
+function report(){
+  var n=ALGS[ALG].n,pct=(diffOut/n*100).toFixed(1),sdp=(50/Math.sqrt(n)).toFixed(1);
+  setMeta([["Algorithm",ALG],["Input diff",inDiff<0?"lengths differ":inDiff+(inDiff===1?" bit":" bits")],["Output diff",diffOut+" / "+n+"  ("+pct+"%)"],["Ideal","50% +/- "+sdp+"%"]]);
+  var t="A and B differ in "+(inDiff<0?"length":inDiff+" input bit(s)")+"; "+ALG+" outputs differ in "+diffOut+" of "+n+" bits.";
+  if(expo)t+="\n"+expo.text;else t+="\nPress Experiment to flip every bit of A in turn and test the avalanche statistically.";
+  el("info").textContent=t}
+async function affine(al){
+  var ok=0,T2=24;
+  for(var t=0;t<T2;t++){
+    var x=crypto.getRandomValues(new Uint8Array(16)),y=crypto.getRandomValues(new Uint8Array(16)),z=crypto.getRandomValues(new Uint8Array(16)),w=new Uint8Array(16);
+    for(var i=0;i<16;i++)w[i]=x[i]^y[i]^z[i];
+    var r=await Promise.all([al.f(x),al.f(y),al.f(z),al.f(w)]),same=true;
+    for(var k=0;k<r[0].length;k++)if((r[0][k]^r[1][k]^r[2][k])!==r[3][k]){same=false;break}
+    if(same)ok++}
+  return ok/T2}
+async function experiment(){
+  var my=++tk,al=ALGS[ALG],enc=new TextEncoder(),a=enc.encode(el("ia").value);if(!a.length)a=enc.encode("a");
+  var nn=al.n,N=Math.min(a.length,32)*8,base=bitsOf(await al.f(a),nn),cnt=new Float64Array(nn),hist=new Float64Array(nn+1),jobs=[],i,j;
+  for(i=0;i<N;i++){var c=new Uint8Array(a);c[i>>3]^=1<<(i&7);jobs.push(al.f(c))}
+  var res=await Promise.all(jobs),sum=0,sum2=0;
+  res.forEach(function(h){var bb=bitsOf(h,nn),d=0;for(j=0;j<nn;j++)if(bb[j]!==base[j]){cnt[j]++;d++}hist[d]++;sum+=d;sum2+=d*d});
+  var mean=sum/N,sd=Math.sqrt(Math.max(0,sum2/N-mean*mean)),isd=Math.sqrt(nn)/2,zMean=(mean-nn/2)/(isd/Math.sqrt(N)),z3=0,zmax=0,p=new Float32Array(nn);
+  for(j=0;j<nn;j++){p[j]=cnt[j]/N;var z=(cnt[j]-N/2)/Math.sqrt(N/4);if(Math.abs(z)>zmax)zmax=Math.abs(z);if(Math.abs(z)>3)z3++}
+  var aff=await affine(al);if(my!==tk)return;
+  var okM=Math.abs(zMean)<3.5,okS=sd>isd*.7&&sd<isd*1.3,okB=z3<=Math.max(2,nn*.02),verdict=(okM&&okS&&okB)?"consistent with ideal avalanche":"deviates from ideal avalanche";
+  if(aff>=.99)verdict+="; affine over XOR, so forgeable and not cryptographic";
+  var small=N<32?" (small sample: use a longer A)":"";
+  expo={mean:mean,sd:sd,isd:isd,N:N,hist:hist,zmax:zmax,z3:z3,aff:aff,verdict:verdict,
+    text:"Experiment: "+N+" single-bit flips of A. Bits changed: mean "+mean.toFixed(1)+" (ideal "+(nn/2)+"), sd "+sd.toFixed(1)+" (ideal "+isd.toFixed(1)+"). Worst per-bit |z| "+zmax.toFixed(1)+"; "+z3+" bit(s) beyond 3 sigma (expect about "+(nn*.0027).toFixed(1)+"). Affine over XOR: "+(aff>=.99?"yes":"no")+".\nVerdict: "+verdict+small+"."};
+  prob=p;report();if(!running)redraw()}
+function geo(){var n=ALGS[ALG].n,rows=n/16;return{n:n,rows:rows,cs:Math.min(18,300/Math.max(16,rows))}}
+scene.step=function(dt){if(!dragging)yaw+=dt*.1};
+scene.draw=function(){
+  if(!bitsA)return;
+  var G=geo(),n=G.n,w=SD/600,g=glowSprite(),e=ease(T/1.3),j;
+  if(!XYS||XYS.length!==n*6)XYS=new Float32Array(n*6);
+  var ys=[-110,0,110],lines=new Path2D(),ov=new Path2D();
+  for(var s=0;s<3;s++)for(j=0;j<n;j++){proj(((j%16)-7.5)*G.cs,ys[s]*e,(((j/16)|0)-(G.rows-1)/2)*G.cs);XYS[(s*n+j)*2]=PX;XYS[(s*n+j)*2+1]=PY}
+  for(var sl=0;sl<3;sl++){
+    var sx0=(-8)*G.cs,sx1=8*G.cs,sz0=(-G.rows/2)*G.cs,sz1=(G.rows/2)*G.cs,pts=[[sx0,sz0],[sx1,sz0],[sx1,sz1],[sx0,sz1]];
+    for(var q=0;q<4;q++){var a=pts[q],b=pts[(q+1)%4];proj(a[0],ys[sl]*e,a[1]);ov.moveTo(PX,PY);proj(b[0],ys[sl]*e,b[1]);ov.lineTo(PX,PY)}}
+  ctx.strokeStyle=rgba(.14);ctx.lineWidth=w*.8;ctx.stroke(ov);
+  for(j=0;j<n;j++)if(bitsA[j]!==bitsB[j]){lines.moveTo(XYS[j*2],XYS[j*2+1]);lines.lineTo(XYS[(2*n+j)*2],XYS[(2*n+j)*2+1])}
+  ctx.strokeStyle=rgba(.2);ctx.stroke(lines);
+  var s1=w*9,dot=w*1.6;
+  for(var sl2=0;sl2<3;sl2++)for(j=0;j<n;j++){
+    var x=XYS[(sl2*n+j)*2],y=XYS[(sl2*n+j)*2+1],on,al;
+    if(sl2===0){on=bitsA[j];al=on?.95:.14}else if(sl2===2){on=bitsB[j];al=on?.95:.14}
+    else if(prob){on=1;al=.08+.92*Math.min(1,prob[j]*1.6)}else{on=bitsA[j]!==bitsB[j];al=on?1:.1}
+    ctx.globalAlpha=al*e;if(on)ctx.drawImage(g,x-s1/2,y-s1/2,s1,s1);else{ctx.fillStyle=rgba(1);ctx.fillRect(x-dot/2,y-dot/2,dot,dot)}}
+  ctx.globalAlpha=1;ctx.fillStyle=rgba(.6);ctx.font="10px "+MONO;ctx.textAlign="left";
+  var lab=["A: "+ALG,prob?"flip probability (experiment)":"XOR of A and B","B: "+ALG];
+  for(var t=0;t<3;t++){proj(-8.8*G.cs,ys[t]*e,(-G.rows/2)*G.cs);ctx.fillText(lab[t],PX-4,PY-6)}
+  if(expo&&Wc>900){
+    var x0=Wc-22-280,y0=Hc-48,bw=280,bh=80,bins=Math.min(n+1,64),bwid=Math.ceil((n+1)/bins),mx=1,hb=[],b2,d;
+    for(b2=0;b2<bins;b2++){var sum=0;for(d=b2*bwid;d<Math.min(n+1,(b2+1)*bwid);d++)sum+=expo.hist[d];hb.push(sum);if(sum>mx)mx=sum}
+    var cur=[];for(b2=0;b2<bins;b2++){var dm=(b2+.5)*bwid,pdf=Math.exp(-.5*Math.pow((dm-n/2)/expo.isd,2))/(expo.isd*2.5066)*expo.N*bwid;cur.push(pdf);if(pdf>mx)mx=pdf}
+    ctx.fillStyle=rgba(.55);for(b2=0;b2<bins;b2++){var h=hb[b2]/mx*bh;ctx.fillRect(x0+b2*bw/bins,y0-h,Math.max(1,bw/bins-1),h)}
+    ctx.beginPath();for(b2=0;b2<bins;b2++){var cx=x0+(b2+.5)*bw/bins,cy=y0-cur[b2]/mx*bh;if(b2)ctx.lineTo(cx,cy);else ctx.moveTo(cx,cy)}ctx.strokeStyle=rgba(.9);ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle=rgba(.5);ctx.textAlign="left";ctx.fillText("0",x0,y0+13);ctx.textAlign="right";ctx.fillText(n+" bits changed",x0+bw,y0+13);ctx.textAlign="center";ctx.fillText("bars: measured | line: ideal binomial",x0+bw/2,y0-bh-8);ctx.textAlign="left"}
+};
+scene.hover=function(x,y){
+  if(!XYS||x<0){hov=-1;tip(null);return}
+  var n=ALGS[ALG].n,best=-1,bd=14*14;
+  for(var i=0;i<n*3;i++){var dx=XYS[i*2]-x,dy=XYS[i*2+1]-y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=i}}
+  if(best<0){tip(null);return}
+  var s=(best/n)|0,j=best%n;
+  tip("bit "+j+"\nA="+bitsA[j]+"  B="+bitsB[j]+(prob?"\nflip rate "+(prob[j]*100).toFixed(0)+"%":""),x,y)};
+Object.keys(ALGS).forEach(function(k){var o=document.createElement("option");o.value=k;o.textContent=k;el("alg").appendChild(o)});
+el("alg").onchange=function(){ALG=this.value;compute()};
+el("ia").addEventListener("input",compute);el("ib").addEventListener("input",compute);
+el("exp").onclick=experiment;
+el("flip").onclick=function(){
+  var s=el("ia").value;if(!s)return;var k=(Math.random()*s.length)|0,c=s.charCodeAt(k),bit=1<<((Math.random()*5)|0);
+  el("ib").value=s.slice(0,k)+String.fromCharCode(c^bit)+s.slice(k+1);compute()};
+el("ia").value="black8arch";el("ib").value="black8arci";
+fit();compute().then(startLoop);
+
+</script>
+</body>
+</html>
