@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CIPHER / black8arch</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525}
+:root[data-theme="light"]{--bg:#f6f6f4;--fg:#0c0c0c;--mut:#8a8a86;--line:#d9d9d5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font:400 13px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.lab{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut)}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;z-index:0}
+#cv:active{cursor:grabbing}
+.top{position:fixed;top:0;left:0;right:0;z-index:3;pointer-events:none}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:calc(16px + env(safe-area-inset-top,0px)) 22px 14px;border-bottom:1px solid var(--fg)}
+header .r{display:flex;gap:8px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end}
+button{font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+button:hover,button[aria-pressed="true"]{border-color:var(--fg)}
+button[aria-pressed="false"]{color:var(--mut)}
+.meta{padding:0 22px;display:flex;flex-wrap:wrap;gap:4px 22px}
+.meta b{font-weight:400;color:var(--fg);letter-spacing:.1em;margin-left:8px}
+.bottom{position:fixed;z-index:3;left:22px;right:22px;bottom:calc(20px + env(safe-area-inset-bottom,0px));pointer-events:none}
+h1{font-weight:800;font-size:clamp(24px,3.4vw,38px);letter-spacing:-.04em;line-height:1;padding:14px 22px 6px}
+.field{max-width:430px;pointer-events:auto}
+.mono{font:400 11px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut);letter-spacing:.03em;white-space:pre-line;overflow:hidden;text-overflow:ellipsis}
+textarea{width:100%;font:400 12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--fg);background:color-mix(in srgb,var(--bg) 70%,transparent);border:1px solid var(--line);border-radius:10px;padding:10px;resize:vertical;outline:0;margin-bottom:8px}
+textarea:focus{border-color:var(--fg)}
+select{font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+select option{background:var(--bg);text-transform:none}
+input[type=text]{width:100%;font:300 18px/1.3 Inter,system-ui,sans-serif;letter-spacing:-.02em;color:var(--fg);background:none;border:0;border-bottom:1px solid var(--line);padding:5px 0;outline:0;margin-bottom:8px}
+input[type=text]:focus{border-bottom-color:var(--fg)}
+.rg{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rg:hover,.rg.on{color:var(--fg)}
+#tip{position:fixed;z-index:5;display:none;pointer-events:none;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--bg) 88%,transparent);font:400 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--fg);white-space:pre}
+</style>
+</head>
+<body>
+<canvas id="cv" aria-label="Rotating 3D letter frequency bars for cipher analysis"></canvas>
+<div class="top">
+<header>
+  <span class="lab">black8arch / cipher</span>
+  <div class="r"><button id="sample" type="button">Sample</button><button id="dl" type="button">PNG</button><button id="theme" type="button">Theme</button></div>
+</header>
+<h1>CIPHER</h1>
+<div class="meta lab" id="meta"></div>
+</div>
+<div class="bottom"><div class="field"><div class="lab" style="margin-bottom:6px">Ciphertext</div><textarea id="ct" rows="5" spellcheck="false" aria-label="Ciphertext"></textarea><div class="mono" id="info"></div></div></div>
+<div id="tip"></div>
+<input type="file" id="fin" hidden>
+<script>
+
+var cv=document.getElementById("cv"),ctx=cv.getContext("2d"),root=document.documentElement;
+function el(i){return document.getElementById(i)}
+var MONO="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+var D=1,Wc=0,Hc=0,CXc=0,CYc=0,SD=1,fg=[242,242,240],bg="#0a0a0a";
+var yaw=.6,pit=.35,zoom=1,UU=1,PX=0,PY=0,PZ=0,PF=1,cyw=1,syw=0,cpt=1,spt=0;
+var T=0,paused=false,running=false,lastT=0,dragging=false,lx=0,ly=0,moved=0,ptrs={},pinchD=0,glow=null,scene={};
+var reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function rgba(a){return "rgba("+fg[0]+","+fg[1]+","+fg[2]+","+a+")"}
+function ease(t){t=Math.max(0,Math.min(1,t));return 1-Math.pow(1-t,3)}
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function readTheme(){var cs=getComputedStyle(root),h=cs.getPropertyValue("--fg").trim();var n=[1,3,5].map(function(i){return parseInt(h.substr(i,2),16)});if(n.join()!==fg.join()){fg=n;glow=null}bg=cs.getPropertyValue("--bg").trim()}
+function glowSprite(){if(glow)return glow;var s=64,g=document.createElement("canvas");g.width=g.height=s;var gc=g.getContext("2d"),rg=gc.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2),c=fg.join(",");rg.addColorStop(0,"rgba("+c+",.9)");rg.addColorStop(.4,"rgba("+c+",.25)");rg.addColorStop(1,"rgba("+c+",0)");gc.fillStyle=rg;gc.fillRect(0,0,s,s);glow=g;return g}
+function fit(){D=Math.min(window.devicePixelRatio||1,1.5);Wc=cv.clientWidth;Hc=cv.clientHeight;cv.width=Math.round(Wc*D);cv.height=Math.round(Hc*D);CXc=Wc/2;CYc=Hc*.46;SD=Math.min(Wc,Hc);readTheme();redraw()}
+function cam(){UU=SD/380*zoom;cyw=Math.cos(yaw);syw=Math.sin(yaw);cpt=Math.cos(pit);spt=Math.sin(pit)}
+function proj(x,y,z){var X=x*cyw+z*syw,Z=-x*syw+z*cyw,Y=y*cpt-Z*spt;Z=y*spt+Z*cpt;var f=UU*900/(1400+Z);PX=CXc+X*f;PY=CYc+Y*f;PZ=Z;PF=f}
+function redraw(){ctx.setTransform(D,0,0,D,0,0);ctx.clearRect(0,0,Wc,Hc);cam();if(scene.draw)scene.draw()}
+function frame(ts){requestAnimationFrame(frame);if(ts-lastT<33)return;var dt=Math.min(.1,(ts-lastT)/1000);lastT=ts;if(!paused){T+=dt;if(scene.step)scene.step(dt)}redraw()}
+function startLoop(){if(reduced){redraw();return}running=true;requestAnimationFrame(function(t){lastT=t;requestAnimationFrame(frame)})}
+function clampView(){if(scene.yawLim)yaw=clamp(yaw,-scene.yawLim,scene.yawLim);pit=clamp(pit,-.2,1.3);zoom=clamp(zoom,.4,2.6)}
+var tipEl=el("tip");
+function tip(t,x,y){if(t===null){tipEl.style.display="none";return}tipEl.textContent=t;tipEl.style.display="block";tipEl.style.left=Math.max(8,Math.min(x+14,Wc-tipEl.offsetWidth-8))+"px";tipEl.style.top=(y+16)+"px"}
+cv.addEventListener("pointerdown",function(e){ptrs[e.pointerId]=[e.clientX,e.clientY];dragging=true;lx=e.clientX;ly=e.clientY;moved=0;pinchD=0;tip(null);cv.setPointerCapture(e.pointerId)});
+cv.addEventListener("pointermove",function(e){
+  if(ptrs[e.pointerId])ptrs[e.pointerId]=[e.clientX,e.clientY];
+  var ids=Object.keys(ptrs);
+  if(ids.length===2){var a=ptrs[ids[0]],b=ptrs[ids[1]],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pinchD)zoom*=d/pinchD;pinchD=d;clampView();if(!running)redraw();return}
+  if(dragging&&ids.length===1){var dx=e.clientX-lx,dy=e.clientY-ly;moved+=Math.abs(dx)+Math.abs(dy);yaw+=dx*.008;pit+=dy*.006;lx=e.clientX;ly=e.clientY;clampView();if(!running)redraw()}
+  else if(scene.hover)scene.hover(e.clientX,e.clientY)});
+function pend(e){var wasClick=moved<5&&Object.keys(ptrs).length===1;delete ptrs[e.pointerId];pinchD=0;var k=Object.keys(ptrs)[0];dragging=!!k;if(k){lx=ptrs[k][0];ly=ptrs[k][1]}if(wasClick&&e.type==="pointerup"&&scene.click)scene.click(e.clientX,e.clientY)}
+cv.addEventListener("pointerup",pend);cv.addEventListener("pointercancel",pend);
+cv.addEventListener("pointerleave",function(){if(scene.hover)scene.hover(-999,-999)});
+cv.addEventListener("wheel",function(e){e.preventDefault();zoom*=e.deltaY<0?1.06:.94;clampView();if(!running)redraw()},{passive:false});
+cv.addEventListener("dblclick",function(){yaw=.6;pit=.35;zoom=1;if(!running)redraw()});
+el("theme").onclick=function(){root.setAttribute("data-theme",root.getAttribute("data-theme")==="light"?"dark":"light");readTheme();if(!running)redraw()};
+addEventListener("keydown",function(e){if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")return;if(e.code==="Space"){e.preventDefault();paused=!paused}});
+addEventListener("resize",fit);
+function wireFile(cb){var fin=el("fin");if(el("file"))el("file").onclick=function(){fin.click()};fin.onchange=function(){if(fin.files[0])cb(fin.files[0])};addEventListener("dragover",function(e){e.preventDefault()});addEventListener("drop",function(e){e.preventDefault();if(e.dataTransfer.files[0])cb(e.dataTransfer.files[0])})}
+function savePNG(name){var t=document.createElement("canvas");t.width=cv.width;t.height=cv.height;var c=t.getContext("2d");c.fillStyle=bg;c.fillRect(0,0,t.width,t.height);c.drawImage(cv,0,0);t.toBlob(function(b){var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},1000)})}
+if(el("dl"))el("dl").onclick=function(){savePNG("cipher.png")};
+function toHex(b){return Array.prototype.map.call(b,function(x){return("0"+x.toString(16)).slice(-2)}).join("")}
+async function sha256(bytes){return new Uint8Array(await crypto.subtle.digest("SHA-256",bytes))}
+function human(n){if(n<1024)return n+" B";var u=["KB","MB","GB"],i=-1;do{n/=1024;i++}while(n>=1024&&i<2);return n.toFixed(n<10?2:1)+" "+u[i]}
+function xr(seed){var s=seed|0||1;return function(){s^=s<<13;s^=s>>>17;s^=s<<5;return(s>>>0)/4294967296}}
+function setMeta(pairs){var m=el("meta");m.textContent="";pairs.forEach(function(p){var s=document.createElement("span");s.textContent=p[0];var b=document.createElement("b");b.textContent=p[1];s.appendChild(b);m.appendChild(s)})}
+
+
+var EN=[8.167,1.492,2.782,4.253,12.702,2.228,2.015,6.094,6.966,0.153,0.772,4.025,2.406,6.749,7.507,1.929,0.095,5.987,6.327,9.056,2.758,0.978,2.360,0.150,1.974,0.074].map(function(x){return x/100});
+var PLAIN="The security of a hash function depends on how little structure leaks from its output. When a single bit of the input changes, roughly half of the output bits should flip, and an observer should find no pattern that links the two digests. Engineers test this property by flipping every input bit in turn and measuring the distance between the outputs. A good function behaves like a random oracle, while a weak checksum betrays its arithmetic. The cryptanalysis of older ciphers follows the same spirit: the structure of the language survives encryption, and statistics reveal it. Letter frequencies, the index of coincidence and patient counting break ciphers that once protected diplomatic messages.";
+var SAMPLES=[["Vigenere","SIGNAL"],["Caesar",11],["Atbash",0]],si=0;
+var L=[],cnt=new Array(26).fill(0),N=0,ioc=0,res=null,iocByLen=[],decCnt=null,ct="";
+function letters(s){var a=[];for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c>=65&&c<=90)a.push(c-65);else if(c>=97&&c<=122)a.push(c-97)}return a}
+function counts(a){var c=new Array(26).fill(0);a.forEach(function(x){c[x]++});return c}
+function iocOf(c){var n=0,s=0;c.forEach(function(x){n+=x;s+=x*(x-1)});return n>1?s/(n*(n-1)):0}
+function chi(c){var n=0;c.forEach(function(x){n+=x});var s=0;for(var i=0;i<26;i++){var e=n*EN[i];s+=(c[i]-e)*(c[i]-e)/e}return s}
+function shiftCounts(c,s){var o=new Array(26);for(var i=0;i<26;i++)o[(i-s+26)%26]=c[i];return o}
+function bestShift(c){var b=0,bc=Infinity;for(var s=0;s<26;s++){var x=chi(shiftCounts(c,s));if(x<bc){bc=x;b=s}}return{s:b,chi:bc}}
+function applyShifts(text,ks,dir){var out="",k=0;for(var i=0;i<text.length;i++){var c=text.charCodeAt(i),b=c>=65&&c<=90?65:c>=97&&c<=122?97:0;if(!b){out+=text[i];continue}var s=ks[k%ks.length];k++;out+=String.fromCharCode(b+(((c-b+dir*s)%26)+26)%26)}return out}
+function atbash(t){var o="";for(var i=0;i<t.length;i++){var c=t.charCodeAt(i);o+=c>=65&&c<=90?String.fromCharCode(155-c):c>=97&&c<=122?String.fromCharCode(219-c):t[i]}return o}
+function keyStr(ks){return ks.map(function(s){return String.fromCharCode(65+s)}).join("")}
+function analyse(){
+  ct=el("ct").value;L=letters(ct);N=L.length;cnt=counts(L);ioc=iocOf(cnt);res=null;iocByLen=[];decCnt=null;
+  if(N>=40){
+    var c=[],Lk,j;
+    c.push({type:"plaintext (no cipher)",key:"-",cx:0,dec:ct,chi:chi(cnt)});
+    var bs=bestShift(cnt);c.push({type:"Caesar",key:"shift "+bs.s+" ("+String.fromCharCode(65+bs.s)+")",cx:1,dec:applyShifts(ct,[bs.s],-1),chi:bs.chi});
+    var at=atbash(ct);c.push({type:"Atbash",key:"-",cx:1,dec:at,chi:chi(counts(letters(at)))});
+    var maxI=0;
+    for(Lk=1;Lk<=20&&Lk<=N/8;Lk++){var cols=[];for(j=0;j<Lk;j++)cols.push([]);L.forEach(function(x,i){cols[i%Lk].push(x)});var sum=0,m=0;cols.forEach(function(cc){if(cc.length>=2){sum+=iocOf(counts(cc));m++}});iocByLen[Lk]=m?sum/m:0;if(iocByLen[Lk]>maxI)maxI=iocByLen[Lk]}
+    var pick=0;for(Lk=2;Lk<iocByLen.length;Lk++)if(iocByLen[Lk]>=.9*maxI){pick=Lk;break}
+    if(pick){var ks=[];for(j=0;j<pick;j++){var col=[];L.forEach(function(x,i){if(i%pick===j)col.push(x)});ks.push(bestShift(counts(col)).s)}
+      var dv=applyShifts(ct,ks,-1);c.push({type:"Vigenere",key:keyStr(ks)+" (length "+pick+")",ks:ks,cx:pick,dec:dv,chi:chi(counts(letters(dv)))})}
+    c.forEach(function(x){x.score=x.chi/N*(1+.03*x.cx)});c.sort(function(a,b){return a.score-b.score});
+    res=c[0];res.fit=res.chi/N;res.ok=res.fit<.35;res.cands=c;decCnt=counts(letters(res.dec))}
+  ui();if(!running)redraw()}
+function ui(){
+  setMeta([["Letters",N],["IoC",N>1?ioc.toFixed(4):"-"],["Detected",res?(res.ok?res.type:"unrecognised"):"-"],["Key",res&&res.ok?res.key:"-"],["Fit",res?res.fit.toFixed(3)+" chi2/letter":"-"]]);
+  var t="";
+  if(N<40)t="Paste at least 40 letters of ciphertext. Supported: Caesar, Atbash, Vigenere.";
+  else{t="Index of coincidence "+ioc.toFixed(4)+" (English about 0.0667, random about 0.0385).\n";
+    if(res.ok)t+=res.type+(res.key!=="-"?", key "+res.key:"")+".\n"+res.dec.slice(0,360)+(res.dec.length>360?"...":"");
+    else t+="No simple cipher fits (best: "+res.type+", "+res.fit.toFixed(2)+" chi2 per letter). It may be a substitution, transposition or modern cipher.";
+    t+="\nHeuristic: needs a few hundred letters for long Vigenere keys."}
+  el("info").textContent=t}
+scene.yawLim=1;
+scene.step=function(dt){if(!dragging)yaw+=Math.cos(T*.25)*.0875*dt};
+scene.draw=function(){
+  var w=SD/600,e=ease(T/1.2),i,r,rows=[];
+  if(N<1)return;
+  var cf=cnt.map(function(x){return x/N}),df=decCnt?decCnt.map(function(x){return x/N}):cf;
+  rows=[{f:EN,a:.35,z:-70,lab:"English"},{f:cf,a:.65,z:0,lab:"ciphertext"},{f:df,a:1,z:70,lab:res&&res.ok?"decrypted":"-"}];
+  ctx.font="10px "+MONO;ctx.textAlign="left";var Y0=80,g=glowSprite();
+  rows.forEach(function(rw){
+    for(i=0;i<26;i++){var x=(i-12.5)*15,h=rw.f[i]*1000*e;proj(x,Y0,rw.z);var bx=PX,by=PY;proj(x,Y0-h,rw.z);
+      ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(PX,PY);ctx.strokeStyle=rgba(rw.a);ctx.lineWidth=w*6;ctx.stroke();
+      if(h>2){var s=w*9;ctx.globalAlpha=rw.a;ctx.drawImage(g,PX-s/2,PY-s/2,s,s);ctx.globalAlpha=1}}
+    proj(-12.5*15-14,Y0,rw.z);ctx.fillStyle=rgba(.6);ctx.textAlign="right";ctx.fillText(rw.lab,PX,PY);ctx.textAlign="left"});
+  ctx.textAlign="center";ctx.fillStyle=rgba(.7);
+  for(i=0;i<26;i++){proj((i-12.5)*15,Y0+12,70);ctx.fillText(String.fromCharCode(65+i),PX,PY)}
+  ctx.textAlign="left";
+  if(Wc>900&&iocByLen.length>1){
+    var x0=Wc-22-280,yb=Hc-34,bw2=280,bh=70,n=iocByLen.length-1,mx=.0750;
+    for(i=1;i<=n;i++){var hh=Math.min(1,iocByLen[i]/mx)*bh;ctx.fillStyle=rgba(res&&res.cx===i?.95:.35);ctx.fillRect(x0+(i-1)*bw2/n,yb-hh,Math.max(1,bw2/n-2),hh)}
+    [[.0667,"English"],[.0385,"random"]].forEach(function(l){var yy=yb-l[0]/mx*bh;ctx.strokeStyle=rgba(.5);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x0,yy);ctx.lineTo(x0+bw2,yy);ctx.stroke();ctx.fillStyle=rgba(.5);ctx.fillText(l[1],x0+bw2+4,yy+3)});
+    ctx.fillStyle=rgba(.5);ctx.fillText("1",x0,yb+13);ctx.textAlign="right";ctx.fillText(String(n),x0+bw2,yb+13);ctx.textAlign="center";ctx.fillText("mean IoC by assumed key length",x0+bw2/2,yb-bh-8);ctx.textAlign="left"}
+};
+function sample(k){
+  var s=SAMPLES[k%SAMPLES.length],t;
+  if(s[0]==="Vigenere")t=applyShifts(PLAIN,s[1].split("").map(function(c){return c.charCodeAt(0)-65}),1);
+  else if(s[0]==="Caesar")t=applyShifts(PLAIN,[s[1]],1);else t=atbash(PLAIN);
+  return t}
+el("sample").onclick=function(){el("ct").value=sample(si++);analyse()};
+var deb=0;el("ct").addEventListener("input",function(){clearTimeout(deb);deb=setTimeout(analyse,150)});
+el("ct").value=sample(si++);fit();analyse();startLoop();
+
+</script>
+</body>
+</html>
