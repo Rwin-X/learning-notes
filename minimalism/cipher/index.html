@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Minimal client-side cryptography: AES-256-GCM encryption, SHA hashing and secure random generation. Runs entirely in your browser.">
+<title>Cipher</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 26 16 6l12 20z' fill='none' stroke='%23888' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="looks.css">
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="bar">
+      <span class="lab">Cipher / 1.1</span>
+      <div class="ctl">
+        <div class="looks" role="group" aria-label="Look">
+          <button class="look" type="button" data-look="mono" aria-pressed="true">Mono</button>
+          <button class="look" type="button" data-look="paper" aria-pressed="false">Paper</button>
+          <button class="look" type="button" data-look="swiss" aria-pressed="false">Swiss</button>
+          <button class="look" type="button" data-look="terminal" aria-pressed="false">Terminal</button>
+          <button class="look" type="button" data-look="soft" aria-pressed="false">Soft</button>
+          <button class="look" type="button" data-look="void" aria-pressed="false">Void</button>
+        </div>
+        <button class="btn ghost" id="theme" type="button" aria-label="Toggle light or dark">Theme</button>
+      </div>
+    </div>
+    <h1>Cipher.</h1>
+    <p class="lede">Client-side cryptography. Nothing is uploaded, stored or logged. Every operation runs in your browser through the Web Crypto API.</p>
+    <nav role="tablist" aria-label="Tools">
+      <button role="tab" id="tab-encrypt" data-tab="encrypt" aria-selected="true" aria-controls="panel-encrypt" type="button">Encrypt</button>
+      <button role="tab" id="tab-hash" data-tab="hash" aria-selected="false" aria-controls="panel-hash" tabindex="-1" type="button">Hash</button>
+      <button role="tab" id="tab-generate" data-tab="generate" aria-selected="false" aria-controls="panel-generate" tabindex="-1" type="button">Generate</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ENCRYPT -->
+    <section role="tabpanel" id="panel-encrypt" aria-labelledby="tab-encrypt">
+      <div class="grid">
+        <div class="col">
+          <div class="field">
+            <label class="lab" for="in">Input</label>
+            <textarea id="in" spellcheck="false" autocomplete="off" placeholder="Plaintext to encrypt, or a Cipher token to decrypt"></textarea>
+          </div>
+          <div class="field">
+            <label class="lab" for="pw">Password</label>
+            <input id="pw" type="password" autocomplete="off" spellcheck="false" placeholder="Passphrase">
+            <div class="meter" aria-hidden="true"><i id="pw-fill"></i></div>
+            <div class="row end">
+              <span class="status" id="pw-info"></span>
+              <button class="btn ghost" id="pw-toggle" type="button">Show</button>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn solid" id="btn-enc" type="button">Encrypt</button>
+            <button class="btn" id="btn-dec" type="button">Decrypt</button>
+            <button class="btn ghost" id="btn-clear" type="button">Clear</button>
+          </div>
+        </div>
+        <div class="col">
+          <div class="field">
+            <label class="lab" for="out">Output</label>
+            <textarea id="out" readonly spellcheck="false" placeholder="Result"></textarea>
+          </div>
+          <div class="row end">
+            <span class="status" id="enc-status" role="status" aria-live="polite"></span>
+            <button class="btn" id="btn-copy" type="button">Copy</button>
+          </div>
+          <p class="status">AES-256-GCM &middot; PBKDF2-SHA256 &middot; 600,000 iterations &middot; random salt and IV per message &middot; header authenticated.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HASH -->
+    <section role="tabpanel" id="panel-hash" aria-labelledby="tab-hash" hidden>
+      <div class="grid">
+        <div class="col">
+          <div class="field">
+            <label class="lab" for="h-in">Text</label>
+            <textarea id="h-in" spellcheck="false" autocomplete="off" placeholder="Type or paste text to hash"></textarea>
+          </div>
+          <div class="field">
+            <label class="lab" for="h-file">Or a file</label>
+            <input id="h-file" type="file">
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <div class="hrow"><span class="lab">SHA-256</span><code id="h-256" class="empty">&mdash;</code></div>
+            <div class="hrow"><span class="lab">SHA-384</span><code id="h-384" class="empty">&mdash;</code></div>
+            <div class="hrow"><span class="lab">SHA-512</span><code id="h-512" class="empty">&mdash;</code></div>
+          </div>
+          <div class="field">
+            <label class="lab" for="h-verify">Verify against expected hash</label>
+            <input id="h-verify" type="text" spellcheck="false" autocomplete="off" placeholder="Paste a hash to compare">
+            <span class="status" id="h-match" role="status" aria-live="polite"></span>
+          </div>
+          <div class="row end">
+            <span class="status" id="h-info"></span>
+            <button class="btn" id="h-copy" type="button">Copy SHA-256</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GENERATE -->
+    <section role="tabpanel" id="panel-generate" aria-labelledby="tab-generate" hidden>
+      <div class="grid">
+        <div class="col">
+          <span class="lab">Password</span>
+          <input id="g-out" type="text" readonly spellcheck="false" aria-label="Generated password">
+          <div class="meter" aria-hidden="true"><i id="g-fill"></i></div>
+          <div class="row end">
+            <span class="status stat"><b id="g-bits">0</b> bits</span>
+            <div class="row">
+              <button class="btn solid" id="g-regen" type="button">Regenerate</button>
+              <button class="btn" id="g-copy" type="button">Copy</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="lab" for="g-len">Length &middot; <span id="g-len-val">24</span></label>
+            <input id="g-len" type="range" min="8" max="96" value="24">
+          </div>
+          <div class="row">
+            <label class="check"><input type="checkbox" id="g-lower" checked> a-z</label>
+            <label class="check"><input type="checkbox" id="g-upper" checked> A-Z</label>
+            <label class="check"><input type="checkbox" id="g-digits" checked> 0-9</label>
+            <label class="check"><input type="checkbox" id="g-symbols" checked> Symbols</label>
+          </div>
+          <span class="status" id="g-status" role="status" aria-live="polite"></span>
+        </div>
+        <div class="col">
+          <span class="lab">256-bit random key (hex)</span>
+          <textarea id="k-out" class="short" readonly spellcheck="false" aria-label="Generated key"></textarea>
+          <div class="row">
+            <button class="btn solid" id="k-regen" type="button">Regenerate</button>
+            <button class="btn" id="k-copy" type="button">Copy</button>
+          </div>
+          <p class="status">Generated with crypto.getRandomValues. Unbiased character selection via rejection sampling.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span class="lab">Local &middot; Open source &middot; No network</span>
+    <span class="lab">Web Crypto API &middot; MIT</span>
+  </footer>
+
+</div>
+<script src="cipher.js"></script>
+<script src="backdrop.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
