@@ -1,0 +1,12 @@
+{
+  "name": "cipher",
+  "version": "1.0.0",
+  "description": "Minimal client-side cryptography in the browser: AES-256-GCM, SHA hashing, secure random generation.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test",
+    "serve": "python3 -m http.server 8080"
+  },
+  "engines": { "node": ">=20" }
+}
