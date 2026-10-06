@@ -47,17 +47,6 @@ To add a look: add its light and dark palette blocks and tokens to `looks.css` (
 base64url( "CPH1" | iterations (uint32 BE) | salt (16 B) | iv (12 B) | ciphertext + tag )
 ```
 
-## Run locally
-
-```bash
-git clone <your-repo-url> cipher
-cd cipher
-npm run serve        # python3 -m http.server 8080
-# open http://localhost:8080
-```
-
-Web Crypto requires a secure context: `https://` or `localhost`.
-
 ## Test
 
 ```bash
@@ -65,12 +54,6 @@ npm test             # Node >= 20, no dependencies
 ```
 
 Covers round trips (including Unicode), random salt/IV, wrong passwords, tampering with header, salt and ciphertext, malformed tokens, SHA known-answer vectors, generator constraints, contrast for every look, look-list consistency and the CSP.
-
-## Deploy on GitHub Pages
-
-1. Create a repository and push this folder to `main`.
-2. In **Settings, Pages**, set **Source** to **GitHub Actions**.
-3. The workflow in `.github/workflows/pages.yml` runs the tests, then publishes the site.
 
 ## Limitations
 
@@ -91,7 +74,3 @@ backdrop.js    ambient canvas for the Void look
 app.js         UI wiring
 test/          node:test suite (crypto, contrast, consistency)
 ```
-
-## License
-
-MIT
