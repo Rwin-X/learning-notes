@@ -1,0 +1,278 @@
+/* Cipher looks. Six minimalist looks in one file.
+ * Select with <html data-look="mono|paper|swiss|terminal|soft|void"> and, optionally,
+ * data-theme="light|dark" (otherwise the OS preference applies).
+ * Each look = palette pair (light/dark) + design tokens. Structure lives in style.css.
+ * `npm test` verifies WCAG contrast for every look in both modes.
+ */
+
+/* ===== MONO :: Editorial monochrome. Hairlines, one huge headline. ===== */
+/* look:mono mode:light */
+:root, :root[data-look="mono"] {
+  --font-body: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-display: var(--font-body);
+  --h1-weight: 800;
+  --h1-track: -.055em;
+  --h1-case: none;
+  --h1-lh: .86;
+  --h1-size: clamp(54px, 13vw, 156px);
+  --r-lg: 10px;
+  --r-sm: 8px;
+  --lab-track: .28em;
+  --btn-track: .22em;
+  --rule: var(--fg);
+  --rule-w: 1px;
+  --bg-img: linear-gradient(to right, color-mix(in srgb, var(--fg) 4%, transparent) 1px, transparent 1px);
+  --bg-size: 96px 100%;
+  --field-bg: var(--card);
+  --bg: #f6f6f4;
+  --fg: #0c0c0c;
+  --mut: #6b6b67;
+  --line: #d9d9d5;
+  --card: #ffffff;
+  --soft: #ecece8;
+}
+/* look:mono mode:dark */
+@media (prefers-color-scheme: dark) {
+  :root[data-look="mono"]:not([data-theme="light"]),
+    :root:not([data-look]):not([data-theme="light"]) {
+    --bg: #0a0a0a;
+    --fg: #f2f2f0;
+    --mut: #8a8a82;
+    --line: #252525;
+    --card: #111111;
+    --soft: #161616;
+  }
+}
+:root[data-look="mono"][data-theme="dark"] {
+  --bg: #0a0a0a;
+  --fg: #f2f2f0;
+  --mut: #8a8a82;
+  --line: #252525;
+  --card: #111111;
+  --soft: #161616;
+}
+
+/* ===== PAPER :: Warm stock, serif headline, ruled lines. ===== */
+/* look:paper mode:light */
+:root[data-look="paper"] {
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  --h1-weight: 600;
+  --h1-track: -.035em;
+  --h1-lh: .95;
+  --r-lg: 6px;
+  --r-sm: 4px;
+  --lab-track: .2em;
+  --btn-track: .16em;
+  --bg-img: repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in srgb, var(--fg) 6%, transparent) 31px 32px);
+  --bg-size: auto;
+  --bg: #efe9dd;
+  --fg: #1c1915;
+  --mut: #6a6354;
+  --line: #d3cab6;
+  --card: #f7f3ea;
+  --soft: #e5dece;
+}
+/* look:paper mode:dark */
+@media (prefers-color-scheme: dark) {
+  :root[data-look="paper"]:not([data-theme="light"]) {
+    --bg: #16130f;
+    --fg: #ece6d8;
+    --mut: #9a917f;
+    --line: #2c2720;
+    --card: #1c1814;
+    --soft: #221e18;
+  }
+}
+:root[data-look="paper"][data-theme="dark"] {
+  --bg: #16130f;
+  --fg: #ece6d8;
+  --mut: #9a917f;
+  --line: #2c2720;
+  --card: #1c1814;
+  --soft: #221e18;
+}
+
+/* ===== SWISS :: Square corners, heavy rule, uppercase grid. ===== */
+/* look:swiss mode:light */
+:root[data-look="swiss"] {
+  --font-body: "Helvetica Neue", Helvetica, Arial, "Liberation Sans", sans-serif;
+  --h1-weight: 800;
+  --h1-track: -.07em;
+  --h1-case: uppercase;
+  --h1-lh: .82;
+  --h1-size: clamp(48px, 12vw, 150px);
+  --r-lg: 0;
+  --r-sm: 0;
+  --lab-track: .12em;
+  --btn-track: .12em;
+  --rule-w: 6px;
+  --bg-img: none;
+  --bg-size: auto;
+  --bg: #ffffff;
+  --fg: #000000;
+  --mut: #595959;
+  --line: #000000;
+  --card: #ffffff;
+  --soft: #f0f0f0;
+}
+/* look:swiss mode:dark */
+@media (prefers-color-scheme: dark) {
+  :root[data-look="swiss"]:not([data-theme="light"]) {
+    --bg: #000000;
+    --fg: #ffffff;
+    --mut: #a3a3a3;
+    --line: #ffffff;
+    --card: #000000;
+    --soft: #141414;
+  }
+}
+:root[data-look="swiss"][data-theme="dark"] {
+  --bg: #000000;
+  --fg: #ffffff;
+  --mut: #a3a3a3;
+  --line: #ffffff;
+  --card: #000000;
+  --soft: #141414;
+}
+:root[data-look="swiss"] .meter,
+:root[data-look="swiss"] .meter i { border-radius: 0; }
+:root[data-look="swiss"] .meter { height: 4px; }
+
+/* ===== TERMINAL :: Monospace everything, phosphor tint, blinking cursor. ===== */
+/* look:terminal mode:light */
+:root[data-look="terminal"] {
+  --font-body: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-display: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --h1-weight: 500;
+  --h1-track: -.03em;
+  --h1-lh: .95;
+  --h1-size: clamp(40px, 9.5vw, 116px);
+  --r-lg: 0;
+  --r-sm: 0;
+  --lab-track: .08em;
+  --btn-track: .08em;
+  --bg-img: repeating-linear-gradient(to bottom, transparent 0 2px, color-mix(in srgb, var(--fg) 4%, transparent) 2px 3px);
+  --bg-size: auto;
+  --bg: #e6eadf;
+  --fg: #14210f;
+  --mut: #4b5a43;
+  --line: #b4bfa8;
+  --card: #eef2e8;
+  --soft: #d8dfcd;
+}
+/* look:terminal mode:dark */
+@media (prefers-color-scheme: dark) {
+  :root[data-look="terminal"]:not([data-theme="light"]) {
+    --bg: #070a07;
+    --fg: #b8f2b0;
+    --mut: #76ab6f;
+    --line: #1f2e1d;
+    --card: #0b110b;
+    --soft: #101a0f;
+  }
+}
+:root[data-look="terminal"][data-theme="dark"] {
+  --bg: #070a07;
+  --fg: #b8f2b0;
+  --mut: #76ab6f;
+  --line: #1f2e1d;
+  --card: #0b110b;
+  --soft: #101a0f;
+}
+:root[data-look="terminal"] .lab::before { content: "// "; }
+:root[data-look="terminal"] h1::after {
+  content: "_";
+  animation: cipher-blink 1.1s steps(1) infinite;
+}
+@keyframes cipher-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-look="terminal"] h1::after { animation: none; }
+}
+
+/* ===== SOFT :: Low contrast, generous radii, pill controls. ===== */
+/* look:soft mode:light */
+:root[data-look="soft"] {
+  --h1-weight: 600;
+  --h1-track: -.045em;
+  --h1-lh: .92;
+  --r-lg: 18px;
+  --r-sm: 999px;
+  --lab-track: .16em;
+  --btn-track: .14em;
+  --rule: var(--line);
+  --bg-img: none;
+  --bg-size: auto;
+  --bg: #e8e8ec;
+  --fg: #26262b;
+  --mut: #5c5c66;
+  --line: #cfcfd6;
+  --card: #f3f3f6;
+  --soft: #dcdce2;
+}
+/* look:soft mode:dark */
+@media (prefers-color-scheme: dark) {
+  :root[data-look="soft"]:not([data-theme="light"]) {
+    --bg: #18181b;
+    --fg: #e8e8ec;
+    --mut: #9a9aa6;
+    --line: #2e2e34;
+    --card: #202024;
+    --soft: #26262b;
+  }
+}
+:root[data-look="soft"][data-theme="dark"] {
+  --bg: #18181b;
+  --fg: #e8e8ec;
+  --mut: #9a9aa6;
+  --line: #2e2e34;
+  --card: #202024;
+  --soft: #26262b;
+}
+
+/* ===== VOID :: OLED black, ultra-light headline, ambient 3D helix. ===== */
+/* look:void mode:light */
+:root[data-look="void"] {
+  --h1-weight: 200;
+  --h1-track: -.07em;
+  --h1-lh: .92;
+  --h1-size: clamp(64px, 16vw, 220px);
+  --r-lg: 14px;
+  --r-sm: 999px;
+  --lab-track: .4em;
+  --btn-track: .3em;
+  --rule: var(--line);
+  --bg-img: none;
+  --bg-size: auto;
+  --field-bg: color-mix(in srgb, var(--card) 78%, transparent);
+  --bg: #f1f1f1;
+  --fg: #050505;
+  --mut: #5f5f5f;
+  --line: #d4d4d4;
+  --card: #f8f8f8;
+  --soft: #e6e6e6;
+}
+/* look:void mode:dark */
+@media (prefers-color-scheme: dark) {
+  :root[data-look="void"]:not([data-theme="light"]) {
+    --bg: #030303;
+    --fg: #f5f5f5;
+    --mut: #8f8f8f;
+    --line: #1d1d1d;
+    --card: #080808;
+    --soft: #101010;
+  }
+}
+:root[data-look="void"][data-theme="dark"] {
+  --bg: #030303;
+  --fg: #f5f5f5;
+  --mut: #8f8f8f;
+  --line: #1d1d1d;
+  --card: #080808;
+  --soft: #101010;
+}
+
+/* ===== Ambient backdrop canvas (Void look only; see backdrop.js) ===== */
+#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+#bg[hidden] { display: none; }
+.wrap { position: relative; z-index: 1; }
