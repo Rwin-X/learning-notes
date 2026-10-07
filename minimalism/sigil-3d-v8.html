@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIGIL v8 / black8arch</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--fg:#f2f2f0;--mut:#77776f;--line:#252525;--card:#111;--soft:#161616}
+:root[data-theme="light"]{--bg:#f6f6f4;--fg:#0c0c0c;--mut:#8a8a86;--line:#d9d9d5;--card:#fff;--soft:#ecece8}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font:400 13px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.lab{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mut)}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;z-index:0}
+#cv:active{cursor:grabbing}
+header{position:fixed;top:0;left:0;right:0;z-index:3;display:flex;justify-content:space-between;align-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) 22px 14px;border-bottom:1px solid var(--fg);pointer-events:none}
+header .r{display:flex;gap:8px;pointer-events:auto}
+button{font:inherit;color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+button:hover,button[aria-expanded="true"]{border-color:var(--fg)}
+.meta{position:fixed;z-index:3;top:calc(66px + env(safe-area-inset-top,0px));left:22px;display:flex;flex-wrap:wrap;gap:4px 22px;pointer-events:none}
+.meta b{font-weight:400;color:var(--fg);letter-spacing:.1em;margin-left:8px}
+.bottom{position:fixed;z-index:3;left:22px;right:22px;bottom:calc(20px + env(safe-area-inset-bottom,0px));pointer-events:none}
+h1{font-weight:800;font-size:clamp(44px,10vw,140px);letter-spacing:-.045em;line-height:.9;margin-bottom:14px}
+.field{max-width:460px;pointer-events:auto}
+input[type=text]{width:100%;font:300 clamp(20px,3vw,30px)/1.2 Inter,system-ui,sans-serif;letter-spacing:-.03em;color:var(--fg);background:none;border:0;border-bottom:1px solid var(--line);padding:6px 0;outline:0;margin-top:4px}
+input[type=text]:focus{border-bottom-color:var(--fg)}
+.dig{margin-top:8px;font:400 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stream{position:fixed;z-index:1;top:112px;bottom:130px;width:92px;overflow:hidden;pointer-events:none;font:400 10px/1.8 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut);opacity:.6;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent)}
+.stream.l{left:22px}.stream.r{right:22px;text-align:right}
+.stream div{white-space:pre;animation:sc 90s linear infinite}
+.stream.r div{animation-duration:140s;animation-direction:reverse}
+@keyframes sc{to{transform:translateY(-50%)}}
+#panel{position:fixed;z-index:4;top:calc(66px + env(safe-area-inset-top,0px));right:22px;width:min(290px,calc(100vw - 44px));padding:18px;border:1px solid var(--line);border-radius:14px;max-height:calc(100vh - 90px);overflow:auto;background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:none}
+#panel.open{display:block}
+#panel .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:12px 0 16px}
+#panel label{display:flex;align-items:center;gap:8px;cursor:pointer}
+#panel .sp{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+#panel .sp input{flex:1}
+#panel .btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+#panel .hx{font:400 10px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut);word-break:break-all;margin:6px 0 12px}
+input[type=checkbox],input[type=range]{accent-color:var(--fg)}
+#term{position:fixed;z-index:2;right:22px;bottom:calc(20px + env(safe-area-inset-bottom,0px));width:330px;white-space:pre;overflow:hidden;font:400 11px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut);pointer-events:none;-webkit-mask-image:linear-gradient(transparent,#000 45%);mask-image:linear-gradient(transparent,#000 45%)}
+.stream.r{bottom:210px}
+.he{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.he:hover{color:var(--fg)}
+@media (max-width:900px){.stream,#term{display:none}}
+@media (prefers-reduced-motion:reduce){.stream div{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="cv" aria-label="Rotating 3D sigil made of rings of words"></canvas>
+<div class="stream l" aria-hidden="true"><div id="st-l"></div></div>
+<div class="stream r" aria-hidden="true"><div id="st-r"></div></div>
+<div id="term" aria-hidden="true"></div>
+
+<header>
+  <span class="lab">black8arch / sigil</span>
+  <div class="r">
+    <button id="ctl" type="button" aria-expanded="false" aria-controls="panel">Controls</button>
+    <button id="theme" type="button">Theme</button>
+  </div>
+</header>
+
+<div class="meta lab">
+  <span>Bits<b id="s-bits">0</b></span><span>Words<b id="s-words">0</b></span><span>Links<b id="s-links">0</b></span><span>Delta<b id="s-delta">-</b></span><span>Shells<b>8</b></span>
+</div>
+
+<div class="meta lab" id="hud" style="top:calc(90px + env(safe-area-inset-top,0px))"></div>
+
+<aside id="panel">
+  <div class="lab">Layers</div>
+  <div class="grid">
+    <label><input type="checkbox" id="l-words" checked>Words</label>
+    <label><input type="checkbox" id="l-orbits" checked>Orbits</label>
+    <label><input type="checkbox" id="l-core" checked>Core</label>
+    <label><input type="checkbox" id="l-floor" checked>Floor</label>
+    <label><input type="checkbox" id="l-dust" checked>Dust</label>
+    <label><input type="checkbox" id="l-term" checked>Log</label>
+    <label><input type="checkbox" id="l-drift">Drift</label>
+    <label><input type="checkbox" id="l-sound">Sound</label>
+  </div>
+  <div class="lab">Shells</div>
+  <div class="grid" style="grid-template-columns:repeat(6,1fr)">
+    <label><input type="checkbox" class="sh" data-i="0" checked>1</label>
+    <label><input type="checkbox" class="sh" data-i="1" checked>2</label>
+    <label><input type="checkbox" class="sh" data-i="2" checked>3</label>
+    <label><input type="checkbox" class="sh" data-i="3" checked>4</label>
+    <label><input type="checkbox" class="sh" data-i="4" checked>B</label>
+    <label><input type="checkbox" class="sh" data-i="5" checked>W</label>
+  </div>
+  <div class="sp"><span class="lab">Speed</span><input type="range" id="speed" min="0" max="2.5" step="0.1" value="1" aria-label="Speed"></div>
+  <div class="btns">
+    <button id="pause" type="button">Pause</button>
+    <button id="reset" type="button">Reset view</button>
+    <button id="dl" type="button">PNG</button>
+    <button id="mut" type="button">Mutate</button>
+    <button id="file" type="button">File</button>
+    <button id="fs" type="button">Full</button>
+    <input type="file" id="fin" hidden>
+  </div>
+  <div class="lab">History</div><div class="hx" id="hist"></div>
+  <div class="lab">Chain</div><div class="hx" id="hx3"></div>
+  <div class="lab">SHA-256</div><div class="hx" id="hx2"></div>
+  <div class="lab">SHA-512</div><div class="hx" id="hx5"></div>
+  <p class="lab" id="status" style="letter-spacing:.12em;text-transform:none;font-size:12px">Drag to rotate. Wheel to zoom. Drop a file to hash it. Keys: Space, D, F.</p>
+</aside>
+
+<div class="bottom">
+  <h1>SIGIL</h1>
+  <div class="field">
+    <div class="lab">Input</div>
+    <input id="in" type="text" value="black8arch" spellcheck="false" autocomplete="off" maxlength="200" aria-label="Input text">
+    <div class="dig" id="dig"></div>
+  </div>
+</div>
+
+<script>
+var CHAIN = ["SHA256(SHA256(x))", "BLOCK 0x7F3A", "NONCE FOUND", "MERKLE ROOT OK", "GENESIS", "PREV HASH LINKED", "DIFFICULTY 22", "CHAIN VERIFIED", "TX 0x91C4 CONFIRMED", "ORPHAN DROPPED", "ENTROPY 256 BIT", "XOR 0xFF", "ROTL 13", "PAD 0x80", "ROUND 64/64", "DIGEST READY", "KEY SCHEDULE", "SALT 16 BYTES", "ARGON2ID", "AES-256-GCM", "IV UNIQUE", "TAG OK", "0xDEADBEEF", "NULL", "BIT 1", "BIT 0"];
+var CMD = ["root@black8arch:~#", "sudo su -", "nmap -sV -p-", "ssh -i key.pem", "chmod +x run.sh", "tcpdump -i eth0", "tail -f auth.log", "grep -r token .", "whoami", "ls -la /root", "ping -c 4 gw", "traceroute 10.0.0.1", "nc -lvnp 4444", "hashcat -m 0", "openssl enc -aes256", "git push origin", "kill -9 1337", "iptables -L", "uname -a", "curl -I https://", "python3 -m http.server", "cd /var/log", "cat /etc/hosts", "history -c", "id", "ps aux", "top", "pwd"];
+var STATUS = ["HANDSHAKE OK", "PORT 443 OPEN", "PACKET LOSS 0%", "KEY EXCHANGE...", "TUNNEL ESTABLISHED", "CIPHER: AES-256", "SCANNING 10.0.0.0/24", "TRACE: 3 HOPS", "PROXY CHAIN ACTIVE", "TOKEN VALID", "HASH MATCH", "CHECKSUM OK", "NODE 07 ONLINE", "UPLINK STABLE", "LATENCY 12 MS", "SESSION OPENED", "SIGNAL LOCKED", "BUFFER CLEARED", "LOGS ROTATED", "ENTROPY HIGH", "SALT APPLIED", "DAEMON STARTED", "FIREWALL: UP", "PACKETS: 4096", "OK", "ONLINE", "LOCKED", "SYNC"];
+var TALK = ["I'M IN.", "ACCESS GRANTED", "ACCESS DENIED", "TRACE COMPLETE", "THEY'RE WATCHING", "60 SECONDS LEFT", "DECRYPTING...", "DON'T PANIC", "GHOST IN THE WIRE", "STAY LOW", "KILL THE LIGHTS", "NO TRACE LEFT", "BREACH DETECTED", "LOCK ON TARGET", "COUNTDOWN: 10", "SEND IT", "ONE LAST HOP", "SILENCE ON THE LINE", "CONNECTION LOST", "REBOOTING...", "TRUST NO ONE", "WELCOME BACK, BLACK8ARCH", "STAY ON THE LINE", "SYSTEM IS CLEAN", "GO", "NOW", "DARK", "WAIT"];
+var VOC = [CHAIN, CMD, STATUS, TALK, null, null, null, null], STEPS = [1, 1, 1, 2, 0, 0, 0, 0], SIZE = [16, 12, 9, 7, 8, 8, 8, 7], ALPHA = [1, 1, .85, .7, .8, .7, .6, .5], RADII = [235, 170, 116, 68, 300, 318, 336, 560], BELT_TILT = [0, .95, -.95, 0];
+var MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace", SPFS = 40, CULL = [.12, .25, .42];
+var RMAX = 336, FLOOR = 380, RINGS = 16, LINK = 70;
+
+var cv = document.getElementById("cv"), ctx = cv.getContext("2d"), root = document.documentElement;
+var D = 1, DCAP = 1.25, lod = 0, ema = 0;
+var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+var Wc = 0, Hc = 0, CXc = 0, CYc = 0, SD = 1;
+var hexStr = "", yaw = 0.6, pitBase = 0.35, pitOff = 0, my = 0, zoom = 1, speed = 1, ticket = 0;
+var build = 0, tAcc = 0, paused = false, dragging = false, lx = 0, ly = 0, running = false;
+var fg = [242, 242, 240], bg = "#0a0a0a", glow = null, lastT = 0, frameN = 0, links = 0, dirty = true;
+var coreA = .3, coreB = .25, pulse = .08;
+var on = { words: true, orbits: true, core: true, floor: true, dust: true, term: true };
+var shOn = [true, true, true, true, true, true], fpsE = 30, hist = [], histN = 0, drift = false, fileBytes = null, fileName = "", prevH2 = null, logSrc = [], logN = 0, nextLog = 0, logLines = [], AC = null, snd = null;
+var shells = RADII.map(function (R) {
+  return { R: R, bytes: new Uint8Array(32), omega: new Array(RINGS).fill(0), phase: new Array(RINGS).fill(0), tilt: 0 };
+});
+var nodes = [], ICO = [], EDGES = [], RING = [], WS = [], dust = [];
+var ox0, oy0, oux, ouy, osx, osy, ofr, bIdx = [], bN = [0, 0, 0, 0, 0];
+var cyw = 1, syw = 0, cpt = 1, spt = 0, UU = 1, PX = 0, PY = 0, PZ = 0, PF = 1;
+var mctx = document.createElement("canvas").getContext("2d"), sprites = {};
+mctx.font = "500 " + SPFS + "px " + MONO;
+var C48 = [], S48 = [], C24 = [], S24 = [];
+(function () {
+  var i, f = (1 + Math.sqrt(5)) / 2, v = [];
+  for (i = 0; i <= 48; i++) { C48.push(Math.cos(i / 48 * 2 * Math.PI)); S48.push(Math.sin(i / 48 * 2 * Math.PI)); }
+  for (i = 0; i < 24; i++) { C24.push(Math.cos(i / 24 * 2 * Math.PI)); S24.push(Math.sin(i / 24 * 2 * Math.PI)); }
+  [-1, 1].forEach(function (a) { [-1, 1].forEach(function (b) { v.push([0, a, b * f], [a, b * f, 0], [b * f, 0, a]); }); });
+  ICO = v;
+  for (i = 0; i < v.length; i++) for (var j = i + 1; j < v.length; j++) {
+    var d = Math.pow(v[i][0] - v[j][0], 2) + Math.pow(v[i][1] - v[j][1], 2) + Math.pow(v[i][2] - v[j][2], 2);
+    if (Math.abs(d - 4) < 0.01) EDGES.push([i, j]);
+  }
+})();
+
+function static_() { return reduced || !running; }
+function fit() {
+  D = Math.min(window.devicePixelRatio || 1, DCAP);
+  Wc = cv.clientWidth; Hc = cv.clientHeight;
+  cv.width = Math.round(Wc * D); cv.height = Math.round(Hc * D);
+  CXc = Wc / 2; CYc = Hc * .46; SD = Math.min(Wc, Hc);
+  ctx.setTransform(D, 0, 0, D, 0, 0); readTheme(); if (static_()) { build = 1; render(); }
+}
+function readTheme() {
+  var cs = getComputedStyle(root), h = cs.getPropertyValue("--fg").trim();
+  var n = [1, 3, 5].map(function (i) { return parseInt(h.substr(i, 2), 16); });
+  if (n.join() !== fg.join()) { fg = n; glow = null; dirty = true; }
+  bg = cs.getPropertyValue("--bg").trim();
+}
+function glowSprite() {
+  if (glow) return glow;
+  var s = 64, g = document.createElement("canvas"); g.width = g.height = s;
+  var gc = g.getContext("2d"), rg = gc.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2), c = fg.join(",");
+  rg.addColorStop(0, "rgba(" + c + ",.9)"); rg.addColorStop(.4, "rgba(" + c + ",.25)"); rg.addColorStop(1, "rgba(" + c + ",0)");
+  gc.fillStyle = rg; gc.fillRect(0, 0, s, s); glow = g; return g;
+}
+function spriteFor(t) {
+  var s = sprites[t];
+  if (s) return s;
+  var tw = Math.ceil(mctx.measureText(t).width), c = document.createElement("canvas");
+  c.width = tw + 4; c.height = SPFS + 8;
+  var x = c.getContext("2d");
+  x.font = "500 " + SPFS + "px " + MONO; x.textBaseline = "middle"; x.fillStyle = "rgb(" + fg.join(",") + ")";
+  x.fillText(t, 2, c.height / 2 + 1);
+  return (sprites[t] = { c: c, tw: tw, h: c.height });
+}
+function rebuildSprites() { sprites = {}; var i; for (i = 0; i < WS.length; i++) WS[i].sp = spriteFor(WS[i].text); for (i = 0; i < nodes.length; i++) nodes[i].sp = spriteFor(nodes[i].lab); dirty = false; }
+function ease(t) { t = Math.max(0, Math.min(1, t)); return 1 - Math.pow(1 - t, 3); }
+function proj(x, y, z, ct, st) {
+  var y2 = y * ct - z * st, z2 = y * st + z * ct;
+  var X = x * cyw + z2 * syw, Z = -x * syw + z2 * cyw, Y = y2 * cpt - Z * spt;
+  Z = y2 * spt + Z * cpt;
+  var f = UU * 900 / (1400 + Z);
+  PX = CXc + X * f; PY = CYc + Y * f; PZ = Z; PF = f;
+}
+function P(x, y, z) { proj(x, y, z, 1, 0); return [PX, PY, PZ, PF]; }
+
+function render() {
+  if (dirty) rebuildSprites();
+  UU = SD / 380 * zoom * (drift ? 1 + .04 * Math.sin(tAcc * .17) : 1); cyw = Math.cos(yaw); syw = Math.sin(yaw);
+  var pit = pitBase + pitOff + (drift ? .12 * Math.sin(tAcc * .23) : 0); cpt = Math.cos(pit); spt = Math.sin(pit);
+  var w = SD / 560, g = glowSprite(), i, j, n, b, a;
+  ctx.setTransform(D, 0, 0, D, 0, 0); ctx.clearRect(0, 0, Wc, Hc);
+  var col = "rgb(" + fg.join(",") + ")";
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineCap = "butt";
+
+  var e2 = ease(build * 2.5), wp = [], pp = [], sw0 = tAcc * .7;
+  nodes.forEach(function (nd) {
+    var an = nd.a0 + nd.w * tAcc, x0 = nd.rho * e2 * Math.cos(an), z0 = nd.rho * e2 * Math.sin(an);
+    var y1 = -z0 * Math.sin(nd.inc), z1 = z0 * Math.cos(nd.inc);
+    var x = x0 * Math.cos(nd.lon) + z1 * Math.sin(nd.lon), z = -x0 * Math.sin(nd.lon) + z1 * Math.cos(nd.lon);
+    wp.push([x, y1, z]); pp.push(P(x, y1, z));
+  });
+
+  if (on.dust) {
+    for (i = 0; i < dust.length; i++) {
+      var d0 = dust[i]; proj(d0.x, d0.y, d0.z, 1, 0);
+      var nz = 1 - (PZ + 1000) / 2000; nz = nz < 0 ? 0 : nz > 1 ? 1 : nz;
+      ctx.globalAlpha = .08 + .5 * nz * nz;
+      var sz = d0.s * (PF * .4 + .4); ctx.fillRect(PX - sz / 2, PY - sz / 2, sz, sz);
+    }
+  }
+
+  if (on.floor) {
+    var rp = new Path2D(), r;
+    for (r = 1; r <= 6; r++) for (a = 0; a <= 48; a++) { proj(r * 120 * C48[a], FLOOR, r * 120 * S48[a], 1, 0); if (a) rp.lineTo(PX, PY); else rp.moveTo(PX, PY); }
+    ctx.lineWidth = w * .6; ctx.globalAlpha = .12; ctx.stroke(rp);
+    var spk = new Path2D();
+    for (a = 0; a < 24; a++) { proj(60 * C24[a], FLOOR, 60 * S24[a], 1, 0); spk.moveTo(PX, PY); proj(720 * C24[a], FLOOR, 720 * S24[a], 1, 0); spk.lineTo(PX, PY); }
+    ctx.globalAlpha = .07; ctx.stroke(spk);
+    for (i = 0; i < 6; i++) {
+      var ang = sw0 - i * .05, ca3 = Math.cos(ang), sa3 = Math.sin(ang), q = 1 - i / 6;
+      ctx.beginPath(); proj(40 * ca3, FLOOR, 40 * sa3, 1, 0); ctx.moveTo(PX, PY); proj(720 * ca3, FLOOR, 720 * sa3, 1, 0); ctx.lineTo(PX, PY);
+      ctx.globalAlpha = .34 * q * q; ctx.lineWidth = w * (1.3 - i * .15); ctx.stroke();
+    }
+    var dl = new Path2D(), TAU = 2 * Math.PI;
+    for (i = 0; i < wp.length; i++) {
+      proj(wp[i][0], FLOOR, wp[i][2], 1, 0);
+      var fx = PX, fy = PY; dl.moveTo(pp[i][0], pp[i][1]); dl.lineTo(fx, fy);
+      var dd = (sw0 - Math.atan2(wp[i][2], wp[i][0])) % TAU; if (dd < 0) dd += TAU;
+      ctx.globalAlpha = .15 + .85 * Math.exp(-dd * 1.8); ctx.drawImage(g, fx - w * 6, fy - w * 6, w * 12, w * 12);
+    }
+    ctx.lineWidth = w * .5; ctx.globalAlpha = .1; ctx.stroke(dl);
+  }
+
+  if (on.core) {
+    var sc = 30 * (1 + pulse * Math.sin(tAcc * 1.6)) * ease(build * 3), ca = Math.cos(tAcc * coreA), sa = Math.sin(tAcc * coreA), cb = Math.cos(tAcc * coreB), sb = Math.sin(tAcc * coreB);
+    var pv = ICO.map(function (v) {
+      var x = v[0] * ca + v[2] * sa, z = -v[0] * sa + v[2] * ca, y = v[1] * cb - z * sb; z = v[1] * sb + z * cb;
+      return P(x * sc, y * sc, z * sc);
+    });
+    var cp2 = new Path2D();
+    EDGES.forEach(function (e) { cp2.moveTo(pv[e[0]][0], pv[e[0]][1]); cp2.lineTo(pv[e[1]][0], pv[e[1]][1]); });
+    ctx.globalAlpha = .75; ctx.lineWidth = w * 1.1; ctx.stroke(cp2);
+    ctx.globalAlpha = .5;
+    pv.forEach(function (p) { ctx.drawImage(g, p[0] - w * 7, p[1] - w * 7, w * 14, w * 14); });
+  }
+
+  links = 0;
+  if (on.orbits) {
+    var nearP = new Path2D(), farP = new Path2D();
+    for (i = 0; i < wp.length; i++) for (j = i + 1; j < wp.length; j++) {
+      var dx = wp[i][0] - wp[j][0], dy = wp[i][1] - wp[j][1], dz = wp[i][2] - wp[j][2], dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (dist < LINK) { links++; var pth = dist < LINK * .55 ? nearP : farP; pth.moveTo(pp[i][0], pp[i][1]); pth.lineTo(pp[j][0], pp[j][1]); }
+    }
+    ctx.lineWidth = w * .7; ctx.globalAlpha = .3; ctx.stroke(farP); ctx.globalAlpha = .65; ctx.stroke(nearP);
+    var s3 = w * 17;
+    for (i = 0; i < pp.length; i++) {
+      var nn = 1 - Math.max(0, Math.min(1, (pp[i][2] + 170) / 340));
+      ctx.globalAlpha = .35 + .65 * nn; ctx.drawImage(g, pp[i][0] - s3 / 2, pp[i][1] - s3 / 2, s3, s3);
+      if (nn > .3 && nodes[i].sp) { var sp0 = nodes[i].sp, lh = w * 7.5; ctx.globalAlpha = .12 + .7 * nn; ctx.drawImage(sp0.c, pp[i][0] + w * 6, pp[i][1] - lh / 2, sp0.c.width / sp0.c.height * lh, lh); }
+    }
+  }
+
+  if (on.words && WS.length) {
+    var rg, wd, ca2, sa2, x0, y0, x1, y1, z0, z1, f0, f1, tmp, ddx, ddy, ch, nr, al, cull = CULL[lod];
+    for (n = 0; n < RING.length; n++) {
+      rg = RING[n];
+      rg.e = shOn[rg.si > 6 ? 5 : rg.si > 3 ? 4 : rg.si] ? ease(build * 4 - rg.k * 0.07 - Math.min(rg.si, 5) * 0.45) : 0;
+      if (rg.e <= 0) continue;
+      var sh = shells[rg.si], ph = sh.phase[rg.k];
+      if (rg.fr) { rg.y = rg.fy * rg.e; rg.rr = rg.fr * rg.e; } else { rg.y = -sh.R * rg.cth * rg.e; rg.rr = sh.R * rg.sth * rg.e; } rg.c = Math.cos(ph); rg.s = Math.sin(ph);
+    }
+    for (b = 0; b < 5; b++) bN[b] = 0;
+    for (n = 0; n < WS.length; n++) {
+      wd = WS[n]; rg = RING[wd.ri];
+      if (rg.e <= 0) continue;
+      ca2 = rg.c * wd.c0 - rg.s * wd.s0; sa2 = rg.s * wd.c0 + rg.c * wd.s0;
+      proj(rg.rr * ca2, rg.y, rg.rr * sa2, rg.ct, rg.st); x0 = PX; y0 = PY; z0 = PZ; f0 = PF;
+      ca2 = rg.c * wd.c1 - rg.s * wd.s1; sa2 = rg.s * wd.c1 + rg.c * wd.s1;
+      proj(rg.rr * ca2, rg.y, rg.rr * sa2, rg.ct, rg.st); x1 = PX; y1 = PY; z1 = PZ; f1 = PF;
+      if (x1 < x0) { tmp = x0; x0 = x1; x1 = tmp; tmp = y0; y0 = y1; y1 = tmp; }
+      ddx = x1 - x0; ddy = y1 - y0; ch = Math.sqrt(ddx * ddx + ddy * ddy);
+      if (ch < 4 || (rg.fr && z0 + z1 < 80)) continue;
+      nr = rg.fr ? 1 - Math.max(0, Math.min(1, (z0 + z1) * .5 / rg.R)) : 1 - Math.max(0, Math.min(1, ((z0 + z1) * .5 + rg.R) / (2 * rg.R)));
+      al = (.08 + .92 * nr * nr) * ALPHA[rg.si];
+      if (al < cull) continue;
+      ox0[n] = x0; oy0[n] = y0; oux[n] = ddx / ch; ouy[n] = ddy / ch;
+      osx[n] = ch / wd.sp.tw; osy[n] = wd.size * (f0 + f1) * .5 / SPFS; ofr[n] = rg.e;
+      b = (al * 5) | 0; if (b > 4) b = 4;
+      bIdx[b][bN[b]++] = n;
+    }
+    for (b = 0; b < 5; b++) {
+      if (!bN[b]) continue;
+      ctx.globalAlpha = Math.min(1, (b + .6) / 5);
+      var lst = bIdx[b], cnt = bN[b];
+      for (i = 0; i < cnt; i++) {
+        n = lst[i]; wd = WS[n];
+        var ux = oux[n], uy = ouy[n], tx = ox0[n], ty = oy0[n], sp = wd.sp, fr = ofr[n];
+        if (wd.g > tAcc) { var gx = (wd.gi & 1) ? 3 : -3; tx += ux * gx; ty += uy * gx; }
+        ctx.setTransform(ux * osx[n] * D, uy * osx[n] * D, -uy * osy[n] * D, ux * osy[n] * D, tx * D, ty * D);
+        if (fr >= .995) ctx.drawImage(sp.c, -2, -sp.h / 2);
+        else if (fr > .02) { var sw = sp.c.width * fr; ctx.drawImage(sp.c, 0, 0, sw, sp.h, -2, -sp.h / 2, sw, sp.h); }
+      }
+    }
+    ctx.setTransform(D, 0, 0, D, 0, 0);
+  }
+  ctx.globalAlpha = 1;
+  if (static_() || frameN % 12 === 0) document.getElementById("s-links").textContent = links;
+}
+
+function step(dt) {
+  dt *= speed;
+  if (build < 1) build = Math.min(1, build + dt / 2.6);
+  if (!paused) {
+    tAcc += dt; yaw += dt * 0.14;
+    if (on.term && tAcc > nextLog) { addLog(); nextLog = tAcc + 1.3; }
+    for (var si = 0; si < shells.length; si++) { var s = shells[si]; for (var k = 0; k < RINGS; k++) s.phase[k] += s.omega[k] * dt; }
+    if (WS.length && Math.random() < dt * 3) { var wd = WS[(Math.random() * WS.length) | 0]; wd.g = tAcc + .15; wd.gi = (Math.random() * 2) | 0; }
+  }
+  pitOff += (my * 0.18 - pitOff) * 0.06;
+}
+function frame(ts) {
+  if (!running) return;
+  requestAnimationFrame(frame);
+  if (ts - lastT < 33) return;
+  var dt = Math.min(0.1, (ts - lastT) / 1000); lastT = ts; frameN++;
+  if (frameN % 24 === 0) readTheme();
+  var t0 = performance.now();
+  step(dt); render();
+  ema = ema * .9 + (performance.now() - t0) * .1;
+  fpsE = fpsE * .9 + .1 / dt;
+  if (frameN % 15 === 0) document.getElementById("hud").textContent = "FPS " + (fpsE | 0) + "   LOD " + lod + "   YAW " + ((((yaw * 57.3) % 360) + 360) % 360 | 0) + "   PITCH " + (((pitBase + pitOff) * 57.3) | 0) + "   ZOOM " + zoom.toFixed(2);
+  if (frameN % 45 === 0 && ema > 11 && lod < 2) { lod++; if (lod === 2 && DCAP > 1) { DCAP = 1; fit(); } }
+}
+function start() {
+  if (reduced) { build = 1; render(); return; }
+  running = true; requestAnimationFrame(function (t) { lastT = t; requestAnimationFrame(frame); });
+}
+function pop(a) { var c = 0; for (var i = 0; i < a.length; i++) for (var j = 0; j < 8; j++) c += (a[i] >> j) & 1; return c; }
+function toHex(b) { return Array.prototype.map.call(b, function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); }
+async function chainBytes(alg, seed, n) {
+  var out = [], cur = seed;
+  while (out.length < n) { for (var i = 0; i < cur.length; i++) out.push(cur[i]); cur = new Uint8Array(await crypto.subtle.digest(alg, cur)); }
+  return out;
+}
+function streamText(bytes) {
+  var lines = [];
+  for (var i = 0; i + 3 < bytes.length && lines.length < 64; i += 4) lines.push(toHex(bytes.slice(i, i + 4)).replace(/(..)(?=.)/g, "$1 "));
+  var t = lines.join("\n"); return t + "\n" + t;
+}
+
+function layoutBelt(s, si) {
+  var S = SIZE[si], cap = Math.floor(2 * Math.PI * s.R / (.6 * S)), src = toHex(s.bytes).match(/.{8}/g), groups = [], used = 0, n = 0;
+  while (n < 200 && used + 9 <= cap) { groups.push(src[(n + si * 3) % src.length]); used += 9; n++; }
+  if (!groups.length) return;
+  var ri = RING.length;
+  RING.push({ si: si, k: 0, R: s.R, cth: 0, sth: 1, ct: Math.cos(s.tilt), st: Math.sin(s.tilt), e: 0, y: 0, rr: 0, c: 1, s: 0 });
+  var unit = 2 * Math.PI / used, cum = 0;
+  groups.forEach(function (txt) {
+    var a0 = cum * unit, a1 = (cum + 8) * unit;
+    WS.push({ ri: ri, text: txt, size: S, c0: Math.cos(a0), s0: Math.sin(a0), c1: Math.cos(a1), s1: Math.sin(a1), g: 0, gi: 0, sp: null });
+    cum += 9;
+  });
+}
+function layoutWall(s, si) {
+  var S = SIZE[si], cap = Math.floor(2 * Math.PI * s.R / (.6 * S)), hx = toHex(s.bytes), src = [], i, k;
+  for (i = 0; i + 40 <= hx.length; i += 8) src.push(hx.slice(i, i + 40));
+  for (k = 0; k < 15; k++) {
+    var used = 0, n = 0, list = [];
+    while (used + 41 <= cap && n < 60) { list.push(src[(k * 7 + n * 3) % src.length]); used += 41; n++; }
+    if (!list.length) continue;
+    var ri = RING.length;
+    RING.push({ si: si, k: k, R: s.R, fy: -350 + k * 50, fr: s.R, cth: 0, sth: 1, ct: 1, st: 0, e: 0, y: 0, rr: 0, c: 1, s: 0 });
+    var unit = 2 * Math.PI / used, cum = 0;
+    list.forEach(function (txt) {
+      var a0 = cum * unit, a1 = (cum + 40) * unit;
+      WS.push({ ri: ri, text: txt, size: S, c0: Math.cos(a0), s0: Math.sin(a0), c1: Math.cos(a1), s1: Math.sin(a1), g: 0, gi: 0, sp: null });
+      cum += 41;
+    });
+  }
+}
+function layout(s, si) {
+  if (si === 7) { layoutWall(s, si); return; }
+  if (si >= 4) { layoutBelt(s, si); return; }
+  var voc = VOC[si];
+  for (var k = 0; k < RINGS; k += STEPS[si]) {
+    var th = Math.PI * (k + .5) / RINGS, sn = Math.sin(th), C = 2 * Math.PI * s.R * sn;
+    var S = Math.min(SIZE[si], .8 * (Math.PI / RINGS) * s.R * sn * STEPS[si]);
+    var cap = Math.floor(C / (.6 * S)), list = [], used = 0, n = 0;
+    while (n < 90) {
+      var rem = cap - used, b = s.bytes[(k * 2 + n * 3 + si) & 31], start = (b + n * 5 + k * 11) % voc.length, pick = null;
+      for (var t = 0; t < voc.length; t++) { var cand = voc[(start + t) % voc.length]; if (cand.length + 1 <= rem) { pick = cand; break; } }
+      if (!pick) break;
+      list.push(pick); used += pick.length + 1; n++;
+    }
+    if (!list.length) continue;
+    var ri = RING.length;
+    RING.push({ si: si, k: k, R: s.R, cth: Math.cos(th), sth: sn, ct: Math.cos(s.tilt), st: Math.sin(s.tilt), e: 0, y: 0, rr: 0, c: 1, s: 0 });
+    var unit = 2 * Math.PI / used, cum = 0;
+    list.forEach(function (txt) {
+      var a0 = cum * unit, a1 = (cum + txt.length) * unit;
+      WS.push({ ri: ri, text: txt, size: S, c0: Math.cos(a0), s0: Math.sin(a0), c1: Math.cos(a1), s1: Math.sin(a1), g: 0, gi: 0, sp: null });
+      cum += txt.length + 1;
+    });
+  }
+}
+async function update() {
+  var my_ = ++ticket, enc = fileBytes || new TextEncoder().encode(document.getElementById("in").value);
+  var h2 = new Uint8Array(await crypto.subtle.digest("SHA-256", enc)), h5 = new Uint8Array(await crypto.subtle.digest("SHA-512", enc));
+  var h3 = new Uint8Array(await crypto.subtle.digest("SHA-256", h2));
+  var cl = await chainBytes("SHA-256", h2, 256), cr = await chainBytes("SHA-512", h5, 256);
+  if (my_ !== ticket) return;
+  hexStr = toHex(h2);
+  var dl2 = null;
+  if (prevH2) { dl2 = 0; for (var q2 = 0; q2 < 32; q2++) dl2 += pop([h2[q2] ^ prevH2[q2]]); document.getElementById("s-delta").textContent = dl2 + "/256"; }
+  addHist(fileName || document.getElementById("in").value, dl2);
+  prevH2 = h2; logSrc = cl; logLines = []; logN = 0; nextLog = tAcc;
+  shells[0].bytes = h3; shells[1].bytes = h2; shells[2].bytes = h5.slice(0, 32); shells[3].bytes = h5.slice(32);
+  shells[4].bytes = h3; shells[5].bytes = h2; shells[6].bytes = h5; shells[7].bytes = Uint8Array.from(cl);
+  RING = []; WS = [];
+  shells.forEach(function (s, si) {
+    for (var k = 0; k < RINGS; k++) s.omega[k] = ((s.bytes[k * 2] % 7) + 1) * 0.03 * ((s.bytes[k * 2 + 1] & 1) ? 1 : -1);
+    s.tilt = si >= 4 ? BELT_TILT[si - 4] : si ? (s.bytes[si] / 255 - .5) * 1.1 : 0;
+    if (si >= 4 && si < 7) s.omega[0] *= .5;
+    if (si === 7) for (var kk = 0; kk < RINGS; kk++) s.omega[kk] *= .25;
+    layout(s, si);
+  });
+  var N = WS.length;
+  ox0 = new Float32Array(N); oy0 = new Float32Array(N); oux = new Float32Array(N); ouy = new Float32Array(N);
+  osx = new Float32Array(N); osy = new Float32Array(N); ofr = new Float32Array(N);
+  bIdx = [0, 1, 2, 3, 4].map(function () { return new Int32Array(N); });
+  rebuildSprites();
+  nodes = [];
+  for (var j = 0; j < 32; j++) nodes.push({
+    rho: 55 + h2[j] / 255 * 110, inc: h2[(j + 7) % 32] / 255 * Math.PI, lon: h2[(j + 21) % 32] / 255 * 2 * Math.PI,
+    a0: h2[(j + 13) % 32] / 255 * 2 * Math.PI, w: ((h2[(j + 3) % 32] % 9) + 2) * 0.03 * ((h2[(j + 5) % 32] & 1) ? 1 : -1),
+    lab: "10." + h2[(j + 9) % 32] + "." + h2[(j + 17) % 32] + "." + (h2[(j + 25) % 32] % 254 + 1), sp: null
+  });
+  for (var jj = 0; jj < nodes.length; jj++) nodes[jj].sp = spriteFor(nodes[jj].lab);
+  var seed = ((h5[0] << 24) | (h5[1] << 16) | (h5[2] << 8) | h5[3]) | 1;
+  function rnd() { seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; return ((seed >>> 0) % 100000) / 100000; }
+  dust = [];
+  for (var d = 0; d < 140; d++) {
+    var u = rnd() * 2 - 1, t = rnd() * 2 * Math.PI, rad = 420 + rnd() * 580, q = Math.sqrt(1 - u * u);
+    dust.push({ x: rad * q * Math.cos(t), y: rad * u, z: rad * q * Math.sin(t), s: 1 + rnd() * 1.4 });
+  }
+  coreA = .2 + h2[0] / 255 * .4; coreB = .15 + h2[1] / 255 * .4; pulse = .03 + .1 * pop(h2) / 256;
+  document.getElementById("s-bits").textContent = pop(h3) + pop(h2) + pop(h5);
+  document.getElementById("s-words").textContent = N;
+  document.getElementById("hx3").textContent = toHex(h3);
+  document.getElementById("hx2").textContent = hexStr;
+  document.getElementById("hx5").textContent = toHex(h5);
+  document.getElementById("dig").textContent = (fileName ? fileName + "  " : "") + "sha-256  " + hexStr;
+  document.getElementById("st-l").textContent = streamText(cl);
+  document.getElementById("st-r").textContent = streamText(cr);
+  if (snd) tuneSound();
+  if (reduced && on.term) { for (var z = 0; z < 8; z++) { tAcc += 1.3; addLog(); } }
+  build = reduced ? 1 : 0; if (static_()) { build = 1; render(); }
+}
+function addHist(txt, d) {
+  hist.unshift({ t: txt, hex: hexStr.slice(0, 10), d: d, n: ++histN, file: !!fileName });
+  if (hist.length > 8) hist.pop();
+  var el = document.getElementById("hist"); el.textContent = "";
+  hist.forEach(function (h) {
+    var r = document.createElement("div"); r.className = "he";
+    r.textContent = "#" + h.n + "  " + h.hex + "  " + (h.d === null ? "--" : h.d) + "  " + h.t.slice(0, 16);
+    r.onclick = function () { if (h.file) return; document.getElementById("in").value = h.t; fileBytes = null; fileName = ""; update(); };
+    el.appendChild(r);
+  });
+}
+function addLog() {
+  var b = logSrc[(logN * 3) % logSrc.length], k = b & 3, v = VOC[k], m = v[logSrc[(logN * 3 + 1) % logSrc.length] % v.length];
+  var t = tAcc.toFixed(1); while (t.length < 6) t = "0" + t;
+  logLines.push("[" + t + "] " + (k === 1 ? "$ " : k === 3 ? "> " : "  ") + m);
+  if (logLines.length > 9) logLines.shift();
+  logN++; document.getElementById("term").textContent = logLines.join("\n");
+}
+function soundOn() {
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  AC.resume();
+  if (!snd) {
+    var master = AC.createGain(), flt = AC.createBiquadFilter(), lfo = AC.createOscillator(), lg = AC.createGain(), o = [];
+    master.gain.value = 0; flt.type = "lowpass"; flt.Q.value = 6;
+    lfo.frequency.value = .07; lg.gain.value = 180; lfo.connect(lg); lg.connect(flt.frequency);
+    for (var i = 0; i < 3; i++) { var os = AC.createOscillator(); os.type = i === 1 ? "sawtooth" : "sine"; os.connect(flt); os.start(); o.push(os); }
+    flt.connect(master); master.connect(AC.destination); lfo.start();
+    snd = { master: master, flt: flt, o: o };
+  }
+  tuneSound(); snd.master.gain.setTargetAtTime(.05, AC.currentTime, .8);
+}
+function tuneSound() {
+  if (!snd) return;
+  var b = shells[1].bytes, base = 36.71 * Math.pow(2, (b[0] % 12) / 12), t = AC.currentTime;
+  snd.o[0].frequency.setTargetAtTime(base, t, .5);
+  snd.o[1].frequency.setTargetAtTime(base * 1.5 * (1 + b[1] / 8000), t, .5);
+  snd.o[2].frequency.setTargetAtTime(base * 2.01, t, .5);
+  snd.flt.frequency.setTargetAtTime(260 + b[2] * 2.5, t, .5);
+}
+function soundOff() { if (snd) snd.master.gain.setTargetAtTime(0, AC.currentTime, .4); }
+async function loadFile(f) {
+  var st = document.getElementById("status");
+  if (f.size > 64 * 1048576) { st.textContent = "File too large (64 MB max)."; return; }
+  fileBytes = new Uint8Array(await f.arrayBuffer()); fileName = f.name + " (" + f.size + " bytes)";
+  st.textContent = "Hashed " + f.name; update();
+}
+function resetView() { yaw = .6; pitBase = .35; zoom = 1; if (static_()) render(); }
+
+cv.addEventListener("pointerdown", function (e) { dragging = true; lx = e.clientX; ly = e.clientY; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", function (e) {
+  my = (e.clientY / Math.max(1, Hc)) * 2 - 1;
+  if (dragging) {
+    yaw += (e.clientX - lx) * 0.008; pitBase = Math.max(-1.2, Math.min(1.2, pitBase + (e.clientY - ly) * 0.006));
+    lx = e.clientX; ly = e.clientY; if (static_()) render();
+  }
+});
+cv.addEventListener("pointerup", function () { dragging = false; });
+cv.addEventListener("pointerleave", function () { my = 0; });
+cv.addEventListener("wheel", function (e) { e.preventDefault(); zoom = Math.max(.4, Math.min(2.6, zoom * (e.deltaY < 0 ? 1.06 : .94))); if (static_()) render(); }, { passive: false });
+cv.addEventListener("dblclick", resetView);
+
+document.getElementById("in").addEventListener("input", function () { fileBytes = null; fileName = ""; update(); });
+["words", "orbits", "core", "floor", "dust", "term"].forEach(function (k) {
+  document.getElementById("l-" + k).onchange = function () { on[k] = this.checked; if (k === "term") document.getElementById("term").style.display = this.checked ? "" : "none"; if (static_()) render(); };
+});
+document.getElementById("speed").oninput = function () { speed = parseFloat(this.value); };
+document.getElementById("reset").onclick = resetView;
+document.getElementById("ctl").onclick = function () {
+  var p = document.getElementById("panel"), o = p.classList.toggle("open"); this.setAttribute("aria-expanded", o);
+};
+document.getElementById("theme").onclick = function () {
+  root.setAttribute("data-theme", root.getAttribute("data-theme") === "light" ? "dark" : "light");
+  readTheme(); glow = null; if (static_()) render();
+};
+document.getElementById("pause").onclick = function () { paused = !paused; this.textContent = paused ? "Play" : "Pause"; };
+document.getElementById("dl").onclick = function () {
+  var t = document.createElement("canvas"); t.width = cv.width; t.height = cv.height;
+  var c = t.getContext("2d"); c.fillStyle = bg; c.fillRect(0, 0, t.width, t.height); c.drawImage(cv, 0, 0);
+  t.toBlob(function (b) {
+    var a = document.createElement("a"), n = "sigil-" + hexStr.slice(0, 8) + ".png";
+    a.href = URL.createObjectURL(b); a.download = n; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    document.getElementById("status").textContent = "Saved " + n;
+  }, "image/png");
+};
+Array.prototype.forEach.call(document.querySelectorAll(".sh"), function (c) {
+  c.onchange = function () { shOn[+c.dataset.i] = c.checked; if (static_()) render(); };
+});
+document.getElementById("l-drift").onchange = function () { drift = this.checked; if (static_()) render(); };
+document.getElementById("l-sound").onchange = function () { if (this.checked) soundOn(); else soundOff(); };
+document.getElementById("mut").onclick = function () {
+  var inp = document.getElementById("in"), v = inp.value || "x", c = v.charCodeAt(v.length - 1);
+  fileBytes = null; fileName = ""; inp.value = v.slice(0, -1) + String.fromCharCode(c < 126 ? c + 1 : 33); update();
+};
+var fin = document.getElementById("fin");
+document.getElementById("file").onclick = function () { fin.click(); };
+fin.onchange = function () { if (fin.files[0]) loadFile(fin.files[0]); };
+addEventListener("dragover", function (e) { e.preventDefault(); });
+addEventListener("drop", function (e) { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+document.getElementById("fs").onclick = function () { if (document.fullscreenElement) document.exitFullscreen(); else if (root.requestFullscreen) root.requestFullscreen(); };
+addEventListener("keydown", function (e) {
+  if (e.target.tagName === "INPUT") return;
+  if (e.code === "Space") { e.preventDefault(); document.getElementById("pause").click(); }
+  else if (e.key === "d") document.getElementById("l-drift").click();
+  else if (e.key === "f") document.getElementById("fs").click();
+});
+addEventListener("resize", fit);
+readTheme(); fit(); update().then(start);
+</script>
+</body>
+</html>
