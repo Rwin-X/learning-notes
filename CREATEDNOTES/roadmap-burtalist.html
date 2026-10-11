@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cybersecurity Roadmap // Brutalist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;900&display=swap">
+<style>
+:root { --paper:#ffffff; --ink:#000000; --mut:#5a5a5a; --line:#000000; --accent:#ff2e00; --on-accent:#000000; color-scheme:light; }
+:root[data-theme="dark"] { --paper:#000000; --ink:#ffffff; --mut:#9a9a9a; --line:#ffffff; --accent:#ffe600; color-scheme:dark; }
+*, *::before, *::after { box-sizing:border-box; border-radius:0 !important; }
+html { background:var(--paper); }
+body { margin:0; background:var(--paper); color:var(--ink); font:400 16px/1.35 Archivo, -apple-system, Helvetica, Arial, sans-serif; }
+.page { padding-inline:20px; padding-block:24px 0; overflow-x:clip; }
+a { color:var(--ink); text-decoration:underline; text-decoration-thickness:3px; text-underline-offset:3px; }
+a:hover { background:var(--ink); color:var(--paper); }
+:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+.tag { display:inline-block; font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; border:2px solid var(--ink); padding:2px 8px; background:var(--paper); white-space:nowrap; }
+.tag.fill { background:var(--ink); color:var(--paper); }
+.tag.hot { background:var(--accent); color:var(--on-accent); border-color:var(--ink); }
+.mut { color:var(--mut); }
+h1 { margin:0; font-weight:900; font-size:clamp(48px,12vw,160px); letter-spacing:-.02em; line-height:.85; text-transform:uppercase; overflow-wrap:anywhere; }
+h2 { margin:0; font-weight:900; font-size:clamp(26px,5vw,48px); line-height:.9; text-transform:uppercase; letter-spacing:-.01em; }
+button { font:inherit; font-weight:700; text-transform:uppercase; letter-spacing:.02em; background:var(--paper); color:var(--ink); border:3px solid var(--ink); padding:10px 20px; cursor:pointer; transition:background .08s linear, color .08s linear; }
+button:hover { background:var(--ink); color:var(--paper); }
+button.armed { background:var(--accent); color:var(--on-accent); border-color:var(--ink); }
+
+.top { display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:flex-start; padding-bottom:20px; }
+.top .tags { display:flex; flex-wrap:wrap; gap:8px; }
+.top button { padding:6px 14px; font-size:13px; }
+header { border-bottom:4px solid var(--ink); }
+.hero { display:grid; grid-template-columns:5fr 2fr; gap:0; border-top:4px solid var(--ink); margin-top:28px; }
+.hero > * { padding:20px; min-width:0; }
+.hero > :first-child { border-right:4px solid var(--ink); padding-left:0; display:grid; gap:16px; align-content:start; }
+.big { font-weight:900; font-size:clamp(64px,14vw,200px); line-height:.8; letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+.hero .lbl { font-weight:700; text-transform:uppercase; font-size:12px; letter-spacing:.04em; }
+.bar { --v:0; position:relative; display:block; height:30px; border:3px solid var(--ink); background:var(--paper); }
+.bar::before { content:""; position:absolute; left:0; top:0; bottom:0; width:calc(var(--v)*1%); background:var(--ink); }
+.bar::after { content:""; position:absolute; inset:0; background:repeating-linear-gradient(90deg, transparent 0 calc(10% - 3px), var(--paper) calc(10% - 3px) 10%); mix-blend-mode:normal; }
+.bar.thin { height:18px; border-width:2px; }
+
+.next { background:var(--accent); color:var(--on-accent); border:4px solid var(--ink); box-shadow:8px 8px 0 var(--ink); padding:18px; margin:32px 8px 8px 0; display:grid; gap:6px; }
+.next .lbl { font-weight:900; text-transform:uppercase; font-size:13px; letter-spacing:.04em; }
+.next .t { font-weight:900; font-size:clamp(20px,3.2vw,34px); line-height:1; text-transform:uppercase; overflow-wrap:anywhere; }
+.next button { justify-self:start; background:var(--paper); color:#000; border-color:#000; margin-top:6px; }
+.next button:hover { background:#000; color:#fff; }
+
+section.blk { border-top:4px solid var(--ink); margin-top:48px; padding-top:18px; display:grid; gap:18px; }
+section.blk > .hd { display:flex; flex-wrap:wrap; gap:8px 16px; align-items:baseline; justify-content:space-between; }
+
+.map { border-top:3px solid var(--ink); }
+.mrow { display:grid; grid-template-columns:7ch minmax(0,2fr) minmax(0,3fr) 7ch 11ch; align-items:center; gap:0; border-bottom:3px solid var(--ink); text-decoration:none; color:var(--ink); }
+.mrow > * { padding:10px 12px; min-width:0; }
+.mrow .n { font-weight:900; font-size:28px; border-right:3px solid var(--ink); text-align:center; }
+.mrow .nm { font-weight:900; text-transform:uppercase; border-right:3px solid var(--ink); }
+.mrow .bw { border-right:3px solid var(--ink); }
+.mrow .c { font-weight:900; text-align:center; border-right:3px solid var(--ink); font-variant-numeric:tabular-nums; }
+.mrow .s { text-align:center; }
+.mrow:hover { background:var(--ink); color:var(--paper); }
+.mrow:hover .bar { border-color:var(--paper); background:var(--ink); }
+.mrow:hover .bar::before { background:var(--paper); }
+.mrow:hover .bar::after { background:repeating-linear-gradient(90deg, transparent 0 calc(10% - 3px), var(--ink) calc(10% - 3px) 10%); }
+.mrow:hover .tag { border-color:var(--paper); }
+.mrow:hover > * { border-color:var(--paper); }
+
+.tl { display:flex; border:4px solid var(--ink); }
+.tl > div { padding:12px; border-right:4px solid var(--ink); min-width:0; font-weight:900; text-transform:uppercase; line-height:1; overflow:hidden; }
+.tl > div:last-child { border-right:0; }
+.tl small { display:block; font-weight:700; font-size:12px; margin-top:6px; letter-spacing:.02em; }
+.tl > div:nth-child(odd) { background:var(--ink); color:var(--paper); }
+.note { font-size:14px; max-width:70ch; }
+
+.dec { display:grid; grid-template-columns:2fr 5fr; border:4px solid var(--ink); }
+.dec > div { padding:16px; min-width:0; }
+.dec > div:nth-child(odd) { border-right:4px solid var(--ink); font-weight:900; text-transform:uppercase; }
+.dec > div:not(:nth-last-child(-n+2)) { border-bottom:4px solid var(--ink); }
+.dec > div:nth-child(even) { border-bottom-width:0; }
+.dec > div:nth-child(1), .dec > div:nth-child(2), .dec > div:nth-child(3), .dec > div:nth-child(4) { border-bottom:4px solid var(--ink); }
+
+.ph { display:grid; grid-template-columns:2fr 5fr; border:4px solid var(--ink); margin-top:-4px; scroll-margin-top:12px; }
+.ph:first-of-type { margin-top:0; }
+.ph .l { border-right:4px solid var(--ink); padding:16px; display:flex; flex-direction:column; gap:10px; min-width:0; }
+.ph .r { padding:16px 20px; display:grid; gap:14px; align-content:start; min-width:0; }
+.ph .num { font-weight:900; font-size:clamp(72px,10vw,140px); line-height:.8; letter-spacing:-.04em; }
+.ph .ttl { font-weight:900; text-transform:uppercase; font-size:22px; line-height:.95; }
+.ph .l .tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; }
+.ph.active .num { background:var(--accent); color:var(--on-accent); align-self:flex-start; padding:0 8px 8px 0; margin-right:-4px; border:4px solid var(--ink); padding-left:8px; }
+.ph.done .l { background:var(--ink); color:var(--paper); }
+.ph.done .tag { border-color:var(--paper); background:var(--ink); color:var(--paper); }
+.goal { font-weight:900; font-size:clamp(20px,2.6vw,30px); line-height:1; text-transform:uppercase; }
+.items { list-style:none; margin:0; padding:0; border-top:3px solid var(--ink); }
+.items li { border-bottom:3px solid var(--ink); }
+.item { display:flex; gap:14px; align-items:flex-start; padding:10px 0; cursor:pointer; }
+.item input { appearance:none; -webkit-appearance:none; flex:none; width:28px; height:28px; margin:0; border:3px solid var(--ink); background:var(--paper); cursor:pointer; display:grid; place-items:center; }
+.item input:checked { background:var(--ink); }
+.item input:checked::after { content:"X"; color:var(--paper); font-weight:900; font-size:18px; line-height:1; }
+.item input:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+.item span { min-width:0; overflow-wrap:anywhere; font-weight:500; }
+.item input:checked + span { color:var(--mut); text-decoration:line-through; text-decoration-thickness:3px; }
+.exit { border:3px solid var(--ink); padding:12px; box-shadow:6px 6px 0 var(--ink); background:var(--paper); }
+.exit b { display:block; text-transform:uppercase; font-size:12px; letter-spacing:.04em; margin-bottom:4px; }
+.links { display:flex; flex-wrap:wrap; gap:6px 14px; font-weight:700; text-transform:uppercase; font-size:13px; }
+
+.scroll { overflow-x:auto; border:4px solid var(--ink); }
+.tbl { width:100%; min-width:760px; border-collapse:collapse; }
+.tbl th { text-align:left; text-transform:uppercase; font-size:12px; letter-spacing:.04em; background:var(--ink); color:var(--paper); padding:10px 12px; border-right:3px solid var(--paper); }
+.tbl td { padding:12px; border-top:3px solid var(--ink); border-right:3px solid var(--ink); vertical-align:top; }
+.tbl td:first-child { font-weight:900; text-transform:uppercase; }
+.tbl tr:first-child td { background:var(--accent); color:var(--on-accent); }
+.tbl tr:first-child a { color:var(--on-accent); }
+.tbl tr:first-child a:hover { background:#000; color:#fff; }
+.tbl th:last-child, .tbl td:last-child { border-right:0; }
+.rules { list-style:none; margin:0; padding:0; border-top:3px solid var(--ink); }
+.rules li { padding:12px 0; border-bottom:3px solid var(--ink); font-weight:700; display:flex; gap:14px; }
+.rules li::before { content:"/"; font-weight:900; }
+.reset { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+
+footer { margin:64px -20px 0; background:var(--ink); color:var(--paper); padding:18px 20px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; display:flex; flex-wrap:wrap; gap:6px 24px; justify-content:space-between; }
+
+@media (max-width:700px) {
+  .page { padding-inline:16px; }
+  footer { margin-inline:-16px; padding-inline:16px; }
+  h1 { font-size:clamp(40px,17vw,160px); }
+  .hero { grid-template-columns:1fr; } .hero > :first-child { border-right:0; padding-right:0; } .hero > :last-child { border-top:4px solid var(--ink); padding-inline:0; }
+  .next { margin-right:6px; box-shadow:5px 5px 0 var(--ink); }
+  .mrow { grid-template-columns:5ch minmax(0,1fr) 6ch; } .mrow .bw, .mrow .s { display:none; } .mrow .c { border-right:0; }
+  .dec { grid-template-columns:1fr; } .dec > div:nth-child(odd) { border-right:0; border-bottom:0 !important; padding-bottom:0; } .dec > div:nth-child(even) { border-bottom:4px solid var(--ink) !important; } .dec > div:last-child { border-bottom:0 !important; }
+  .ph { grid-template-columns:1fr; } .ph .l { border-right:0; border-bottom:4px solid var(--ink); flex-direction:row; flex-wrap:wrap; align-items:flex-end; } .ph .l .tags { margin-top:0; margin-left:auto; }
+  .ph .num { font-size:72px; } .exit { box-shadow:4px 4px 0 var(--ink); }
+  .tl > div { padding:8px; border-right-width:3px; font-size:13px; } .tl { border-width:3px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition:none !important; scroll-behavior:auto !important; } }
+@media print { .top button, .reset { display:none; } }
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+ <div class="top"><div class="tags"><span class="tag fill">Cybersecurity</span><span class="tag">Learning path</span><span class="tag">~10 h / week</span><span class="tag">28 items</span></div><button id="theme" type="button">Invert</button></div>
+ <h1>Cyber<br>security<br>roadmap</h1>
+ <div class="hero">
+  <div><div class="lbl">Total progress</div><div class="big" id="bigpct">0%</div><span id="totbar" class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Overall progress"></span></div>
+  <div><div class="lbl">Rule</div><p style="margin:8px 0 0;font-weight:700;text-transform:uppercase">Only test what you own or have written permission to test.</p></div>
+ </div>
+</header>
+
+<div class="next" aria-live="polite"><span class="lbl" id="nlbl">Next action</span><span class="t" id="ntxt"></span><span id="nsub" style="font-weight:700;text-transform:uppercase;font-size:13px"></span><button id="ngo" type="button">Go to phase</button></div>
+
+<section class="blk" aria-labelledby="h-map"><div class="hd"><h2 id="h-map">Map</h2><span class="tag">Click a row to jump</span></div><div class="map" id="map"></div></section>
+
+<section class="blk" aria-labelledby="h-tl"><div class="hd"><h2 id="h-tl">Timeline</h2><span class="tag">Scaled by weeks / ~30 total</span></div>
+ <div class="tl" id="tl" role="img" aria-label="Timeline: phase 0 six weeks, phase 1 eight weeks, phase 2 twelve weeks, phase 5 four weeks"></div>
+ <p class="note">Phase 3 runs in parallel from week 7. Phase 4 is optional and starts after phase 2. All durations are estimates.</p></section>
+
+<section class="blk" aria-labelledby="h-dec"><div class="hd"><h2 id="h-dec">Decision</h2><span class="tag hot">Opinion</span></div>
+ <div class="dec"><div>Pick</div><div>Web / AppSec as the first track.</div><div>Why</div><div>Legal targets are free, feedback is immediate, and the skills (HTTP, auth, injection, crypto misuse) carry into every other track. Bug bounty also gives a real first result.</div><div>Label</div><div>Opinion, based on how fast each track gives verifiable wins. If you already know you want malware analysis or cryptography engineering, jump to that row in the track table after phase 1.</div><div>Fact</div><div>Time estimates are rough.</div></div></section>
+
+<section class="blk" aria-labelledby="h-ph"><div class="hd"><h2 id="h-ph">Phases</h2><span class="tag">Tick items as you finish them</span></div><div id="phases"></div></section>
+
+<section class="blk" aria-labelledby="h-tr"><div class="hd"><h2 id="h-tr">Tracks</h2><span class="tag">Choose one in phase 2</span></div>
+ <div class="scroll" tabindex="0" role="region" aria-label="Specialization tracks"><table class="tbl"><thead><tr><th>Track</th><th>What you do</th><th>Core stack</th><th>First lab path</th></tr></thead><tbody id="tracks"></tbody></table></div></section>
+
+<section class="blk" aria-labelledby="h-ru"><div class="hd"><h2 id="h-ru">Rules</h2></div><ul class="rules" id="rules"></ul>
+ <div class="reset"><button id="reset" type="button">Reset progress</button><span id="rmsg" class="tag" role="status" hidden></span></div></section>
+
+<footer><span>Roadmap / Cybersecurity</span><span id="fpct">0% done</span></footer>
+</div>
+<script>
+(function () {
+var PHASES = [
+    { short: 'foundations', tag: 'phase 0 // foundations', goal: 'Understand the machine and the wire.', dur: '~6 weeks', w: 6, items: [
+      'Linux CLI daily: files, permissions, processes, systemd, grep / awk / sed, pipes',
+      'Networking: TCP/IP, DNS, HTTP, TLS handshake, ARP, NAT. Read real packets in Wireshark',
+      'Python for automation: sockets, requests, subprocess, log parsing',
+      'Bash scripting plus C basics: pointers, stack and heap layout',
+      'Windows and Active Directory concepts: users, groups, Kerberos at overview level',
+      'Build a home lab: Kali plus one deliberately vulnerable VM, snapshots enabled'
+    ], exit: 'Capture a login over HTTP and over HTTPS, then explain every difference you see in the packets.', links: [] },
+    { short: 'core security', tag: 'phase 1 // core security', goal: 'Learn how things break, and why.', dur: '~8 weeks', w: 8, items: [
+      'CIA triad, attack surface, threat modeling with STRIDE',
+      'Applied crypto: hashes, MACs, AEAD, key exchange, PKI. Finish Cryptopals sets 1 and 2',
+      'Authentication: sessions, JWT, OAuth2 / OIDC, password storage with argon2 or bcrypt',
+      'OWASP Top 10: injection, XSS, CSRF, IDOR, SSRF, broken access control',
+      'Tooling: Burp Suite, nmap, ffuf. Use sqlmap only after exploiting SQLi by hand',
+      'Read CVEs and CVSS scores. Map one real attack to MITRE ATT&CK'
+    ], exit: 'Exploit, then patch, a SQL injection and a stored XSS in an app you host yourself.', links: [['OWASP Top 10','https://owasp.org/www-project-top-ten/'],['MITRE ATT&CK','https://attack.mitre.org'],['Cryptopals','https://cryptopals.com']] },
+    { short: 'specialize', tag: 'phase 2 // specialize', goal: 'Pick one track and go deep for 12 weeks.', dur: '~12+ weeks', w: 12, items: [
+      'Choose one track from the table and write the choice down',
+      'Finish the full first lab path for that track',
+      'Publish at least 5 walk-throughs of what you solved',
+      "Learn the track's main tool until you can explain its internals, not just its flags"
+    ], exit: 'Solve a medium-difficulty target in your track without a guide, then write it up.', links: [] },
+    { short: 'practice', tag: 'phase 3 // practice', goal: 'Build speed through repetition.', dur: 'continuous, from week 7', w: 0, items: [
+      '3 lab or challenge solves per week on your platform',
+      'Play one CTF per month. Start with picoCTF, then events listed on CTFtime',
+      'Work through OverTheWire Bandit, then Natas',
+      'Read one public incident report or CVE write-up per week and summarize it in 5 lines'
+    ], exit: 'Place in the top half of a public CTF, alone or with a team.', links: [['picoCTF','https://picoctf.org'],['CTFtime','https://ctftime.org'],['OverTheWire','https://overthewire.org/wargames/']] },
+    { short: 'credentials', tag: 'phase 4 // credentials (optional)', goal: 'Add certificates only where they unlock interviews.', dur: '4-8 weeks each', w: 0, items: [
+      'Security+ if HR filters in your target market ask for it',
+      'Offensive ladder: eJPT, then PNPT, then OSCP',
+      'Defensive ladder: BTL1 or CySA+, later GCIH',
+      'Defer CISSP until you have the required work experience'
+    ], exit: 'One credential matching your track, passed after you already solve its topics in labs.', links: [] },
+    { short: 'portfolio', tag: 'phase 5 // portfolio', goal: 'Make the work visible.', dur: '~4 weeks, then ongoing', w: 4, items: [
+      'Ship 2 or 3 tools on GitHub with README, architecture notes and a demo. Ideas: file integrity monitor, log analyzer, port scanner',
+      'Keep a blog or repo of lab write-ups, one per solved target',
+      'Submit a first report to a bug bounty or disclosure program',
+      'Join one local community or Discord and answer questions weekly'
+    ], exit: 'A stranger can read your profile and see what you can do in under five minutes.', links: [['HackerOne','https://www.hackerone.com'],['Bugcrowd','https://www.bugcrowd.com'],['Intigriti','https://www.intigriti.com']] }
+  ];
+var TRACKS = [
+ ['Web / AppSec','Find and fix flaws in applications','Burp Suite, Python, JavaScript',[['PortSwigger Academy','https://portswigger.net/web-security']]],
+ ['Pentest / Red team','Emulate attackers against networks and AD','nmap, Metasploit, BloodHound, C2',[['TryHackMe','https://tryhackme.com'],['Hack The Box','https://www.hackthebox.com']]],
+ ['SOC / Blue team','Triage alerts, hunt, write detections','Splunk or Elastic, Sigma, EDR',[['Blue Team Labs','https://blueteamlabs.online'],['LetsDefend','https://letsdefend.io']]],
+ ['DFIR / Malware RE','Reconstruct incidents, dissect binaries','Volatility, Ghidra, x64dbg',[['Malware Unicorn','https://malwareunicorn.org']]],
+ ['Cloud security','Audit IAM and misconfigurations','AWS or Azure, Terraform, Prowler',[['flaws.cloud','http://flaws.cloud']]],
+ ['Cryptography eng.','Break and implement protocols','Python, C or Rust, SageMath',[['Cryptopals','https://cryptopals.com'],['CryptoHack','https://cryptohack.org']]]
+];
+var RULES = [
+ 'Only test systems you own or have written permission to test. Labs and CTFs exist for this reason.',
+ "Understand a tool's output before you automate it. Run nmap flags by hand before you script them.",
+ 'Write up every solved lab in your own words. The write-up proves you understood it.',
+ 'Fact: time estimates are rough. Opinion: Web/AppSec as first track. The rest is a standard, widely used path.'
+];
+var KEY = 'cyber-roadmap-v1';
+var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+var store = {};
+try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { store = {}; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+function el(tag, props, kids) {
+  var n = document.createElement(tag);
+  if (props) Object.keys(props).forEach(function (k) { if (k === 'class') n.className = props[k]; else if (k === 'text') n.textContent = props[k]; else n.setAttribute(k, props[k]); });
+  (kids || []).forEach(function (c) { n.appendChild(c); });
+  return n;
+}
+function $(id) { return document.getElementById(id); }
+function setBar(b, pct) { b.style.setProperty('--v', pct); b.setAttribute('aria-valuenow', Math.round(pct)); }
+function pad(n) { return ('0' + n).slice(-2); }
+
+/* theme */
+var root = document.documentElement;
+try { if (localStorage.getItem('cyber-roadmap-brutal-theme') === 'dark') root.setAttribute('data-theme', 'dark'); } catch (e) {}
+$('theme').addEventListener('click', function () {
+  var d = root.getAttribute('data-theme') === 'dark';
+  if (d) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', 'dark');
+  try { localStorage.setItem('cyber-roadmap-brutal-theme', d ? 'light' : 'dark'); } catch (e) {}
+});
+
+var phHost = $('phases'), mapEl = $('map'), P = [];
+PHASES.forEach(function (p, i) {
+  var boxes = [], list = el('ul', { class: 'items' });
+  p.items.forEach(function (t, j) {
+    var id = 'p' + i + '-' + j, cb = el('input', { type: 'checkbox', id: id });
+    cb.checked = !!store[id];
+    cb.addEventListener('change', function () { if (cb.checked) store[id] = true; else delete store[id]; save(); update(); });
+    boxes.push(cb);
+    list.appendChild(el('li', null, [el('label', { class: 'item', for: id }, [cb, el('span', { text: t })])]));
+  });
+  var bar = el('span', { class: 'bar thin', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': '0', 'aria-label': 'Phase ' + i + ' progress' });
+  var cnt = el('span', { class: 'tag', text: '0/' + p.items.length });
+  var state = el('span', { class: 'tag', text: 'TODO' });
+  var right = el('div', { class: 'r' }, [
+    el('div', { class: 'goal', text: p.goal }),
+    el('div', { style: 'display:flex;align-items:center;gap:12px' }, [el('div', { style: 'flex:1;min-width:0' }, [bar]), cnt]),
+    list,
+    el('div', { class: 'exit' }, [el('b', { text: 'Exit criteria' }), el('span', { text: p.exit, style: 'font-weight:700' })])
+  ]);
+  if (p.links.length) {
+    var lk = el('div', { class: 'links' }, [el('span', { class: 'mut', text: 'Refs' })]);
+    p.links.forEach(function (l) { lk.appendChild(el('a', { href: l[1], target: '_blank', rel: 'noopener', text: l[0] })); });
+    right.appendChild(lk);
+  }
+  var left = el('div', { class: 'l' }, [el('div', { class: 'num', text: pad(i) }), el('div', { class: 'ttl', text: p.short }), el('div', { class: 'tags' }, [el('span', { class: 'tag', text: p.dur }), state])]);
+  var art = el('article', { class: 'ph', id: 'ph-' + i }, [left, right]);
+  phHost.appendChild(art);
+
+  var mb = el('span', { class: 'bar thin', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': '0', 'aria-label': 'Phase ' + i + ' map progress' });
+  var mc = el('div', { class: 'c', text: '0/' + p.items.length }), ms = el('span', { class: 'tag', text: 'TODO' });
+  var row = el('a', { class: 'mrow', href: '#ph-' + i }, [el('div', { class: 'n', text: pad(i) }), el('div', { class: 'nm', text: p.short }), el('div', { class: 'bw' }, [mb]), mc, el('div', { class: 's' }, [ms])]);
+  mapEl.appendChild(row);
+  P.push({ art: art, boxes: boxes, bar: bar, cnt: cnt, state: state, mb: mb, mc: mc, ms: ms });
+});
+
+var tl = $('tl');
+[0, 1, 2, 5].forEach(function (i) {
+  var d = el('div', null, [document.createTextNode(pad(i) + ' ' + PHASES[i].short), el('small', { text: PHASES[i].w + ' weeks' })]);
+  d.style.flex = PHASES[i].w + ' 1 0'; tl.appendChild(d);
+});
+
+function update() {
+  var done = 0, total = 0, current = -1, nx = null;
+  P.forEach(function (o, i) {
+    var d = o.boxes.filter(function (c) { return c.checked; }).length, n = o.boxes.length, pct = d / n * 100;
+    done += d; total += n;
+    var st = d === n ? 'DONE' : (d > 0 ? 'ACTIVE' : 'TODO');
+    setBar(o.bar, pct); setBar(o.mb, pct);
+    o.cnt.textContent = d + '/' + n; o.mc.textContent = d + '/' + n;
+    o.state.textContent = st; o.ms.textContent = st;
+    o.art.classList.toggle('done', d === n);
+    if (current < 0 && d < n) { current = i; for (var k = 0; k < n; k++) if (!o.boxes[k].checked) { nx = PHASES[i].items[k]; break; } }
+  });
+  P.forEach(function (o, i) { o.art.classList.toggle('active', i === current); });
+  var pct = Math.round(done / total * 100);
+  setBar($('totbar'), pct); $('bigpct').textContent = pct + '%'; $('fpct').textContent = pct + '% done / ' + done + ' of ' + total;
+  if (current < 0) { $('nlbl').textContent = 'Status'; $('ntxt').textContent = 'All phases complete.'; $('nsub').textContent = 'Keep shipping write-ups and tools.'; $('ngo').hidden = true; }
+  else { $('nlbl').textContent = 'Next action'; $('ntxt').textContent = nx; $('nsub').textContent = PHASES[current].tag + ' / ' + done + ' of ' + total + ' done'; $('ngo').hidden = false; $('ngo').dataset.i = current; }
+}
+$('ngo').addEventListener('click', function () { var i = +this.dataset.i; P[i].art.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); });
+
+TRACKS.forEach(function (r) {
+  var last = el('td');
+  r[3].forEach(function (l, n) { if (n) last.appendChild(document.createTextNode(', ')); last.appendChild(el('a', { href: l[1], target: '_blank', rel: 'noopener', text: l[0] })); });
+  $('tracks').appendChild(el('tr', null, [el('td', { text: r[0] }), el('td', { text: r[1] }), el('td', { text: r[2] }), last]));
+});
+RULES.forEach(function (r) { $('rules').appendChild(el('li', { text: r })); });
+
+/* two-step reset */
+var armed = 0, rb = $('reset'), rm = $('rmsg');
+rb.addEventListener('click', function () {
+  if (!armed) {
+    rb.textContent = 'Confirm: clear all ticks?'; rb.classList.add('armed');
+    armed = setTimeout(function () { armed = 0; rb.textContent = 'Reset progress'; rb.classList.remove('armed'); }, 5000); return;
+  }
+  clearTimeout(armed); armed = 0; rb.textContent = 'Reset progress'; rb.classList.remove('armed');
+  store = {}; save(); P.forEach(function (o) { o.boxes.forEach(function (c) { c.checked = false; }); });
+  update(); rm.hidden = false; rm.textContent = '[CLEARED]';
+});
+update();
+})();
+</script>
+</body>
+</html>
