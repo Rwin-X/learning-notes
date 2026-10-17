@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ASCENSION — Year Journal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#e8ebf0;--fg:#2a2e38;--mut:#848a9a;--line:#ffffff;
+  --card:rgba(255,255,255,.55);--soft:rgba(255,255,255,.35);
+  --lightS:rgba(255,255,255,.9);--darkS:rgba(163,170,190,.55);
+  --accent:#6c7bff;--accentSoft:rgba(108,123,255,.18);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1b1d24;--fg:#e9eaf0;--mut:#8a8fa3;--line:rgba(255,255,255,.06);
+  --card:rgba(255,255,255,.04);--soft:rgba(255,255,255,.025);
+  --lightS:rgba(255,255,255,.06);--darkS:rgba(0,0,0,.6);
+  --accent:#8a95ff;--accentSoft:rgba(138,149,255,.15)
+}}
+:root[data-theme="dark"]{
+  --bg:#1b1d24;--fg:#e9eaf0;--mut:#8a8fa3;--line:rgba(255,255,255,.06);
+  --card:rgba(255,255,255,.04);--soft:rgba(255,255,255,.025);
+  --lightS:rgba(255,255,255,.06);--darkS:rgba(0,0,0,.6);
+  --accent:#8a95ff;--accentSoft:rgba(138,149,255,.15)
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.page{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:36px 22px 60px}
+
+/* ---- core glass surface: soft dual shadow (light upper-left, dark lower-right) + thin translucent edge ---- */
+.glass{
+  background:var(--card);border:1px solid var(--line);border-radius:22px;
+  box-shadow:-8px -8px 20px var(--lightS),10px 10px 24px var(--darkS);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+}
+.inset{
+  background:var(--soft);border-radius:16px;
+  box-shadow:inset -4px -4px 10px var(--lightS),inset 5px 5px 12px var(--darkS);
+}
+
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:22px 26px;margin-bottom:28px}
+h1{margin:0;font-weight:800;font-size:clamp(34px,7vw,72px);letter-spacing:-.04em;line-height:.95;
+  background:linear-gradient(135deg,var(--fg),var(--accent) 140%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.yr{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.3em;color:var(--mut);margin-top:12px}
+.yr b{color:var(--fg);font-weight:600}
+.tag{color:var(--mut);margin-top:6px}
+button{font:inherit;color:var(--fg);background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 14px;cursor:pointer;
+  box-shadow:-3px -3px 8px var(--lightS),4px 4px 10px var(--darkS);transition:transform .12s,box-shadow .12s}
+button:hover{transform:translateY(-1px);box-shadow:-4px -4px 10px var(--lightS),6px 6px 14px var(--darkS)}
+button:active{transform:translateY(0);box-shadow:inset -3px -3px 7px var(--lightS),inset 4px 4px 9px var(--darkS)}
+.ico{padding:4px 11px;border-radius:10px}
+.tools{display:flex;flex-direction:column;align-items:flex-end;gap:8px}.tb{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.msg{font-size:11px;color:var(--mut);min-height:16px;text-align:right}
+button.warn{background:var(--accentSoft);border-color:var(--accent);color:var(--accent)}
+.c.s{box-shadow:0 0 0 1.5px var(--accent),-3px -3px 8px var(--lightS),4px 4px 10px var(--darkS)}
+
+.sig{margin-top:30px;padding:26px}.sr{display:grid;grid-template-columns:80px 1fr 170px;gap:12px;align-items:center;font-size:12px}
+.sb{height:8px;border-radius:5px;position:relative;background:var(--soft);box-shadow:inset -2px -2px 5px var(--lightS),inset 3px 3px 6px var(--darkS)}
+.sb i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--fg)));font-style:normal}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;height:100px}.wk div{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:10px;color:var(--mut);gap:4px}
+.wk i{width:100%;border-radius:6px 6px 3px 3px;display:block;min-height:3px;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 50%,var(--fg)));font-style:normal}
+.seal{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--mut);word-break:break-all}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 24px}
+.stat{padding:16px 18px;border-radius:18px}
+.stat b{display:block;font-size:clamp(22px,4vw,32px);font-weight:300;letter-spacing:-.03em}
+.stat span{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+
+.bar{height:10px;border-radius:6px;margin:0 0 30px;background:var(--soft);box-shadow:inset -2px -2px 5px var(--lightS),inset 3px 3px 6px var(--darkS)}
+.bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 55%,var(--fg)))}
+
+.wrap{overflow-x:auto;padding:4px 4px 10px}
+.grid{display:grid;grid-template-columns:44px repeat(31,minmax(20px,1fr));gap:5px;min-width:800px}
+.mo{font-size:10px;letter-spacing:.2em;color:var(--mut);align-self:center;text-transform:uppercase}
+.hd{font-size:9px;color:var(--mut);text-align:center}
+.c{aspect-ratio:1;border-radius:7px;border:0;background:var(--soft);padding:0;position:relative;min-height:20px;
+  box-shadow:-2px -2px 5px var(--lightS),3px 3px 6px var(--darkS);transition:transform .1s,box-shadow .1s}
+.c.f{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) var(--p,15%),var(--soft)),var(--soft))}
+.c.t{box-shadow:0 0 0 2px var(--accent),-2px -2px 5px var(--lightS),3px 3px 6px var(--darkS)}
+.c.x{visibility:hidden;box-shadow:none}
+.c.f::after{content:"";position:absolute;inset:auto 4px 4px auto;width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:.85}
+.c:hover{transform:translateY(-1px);box-shadow:-3px -3px 7px var(--lightS),4px 4px 9px var(--darkS)}
+.lg{display:flex;gap:6px;align-items:center;margin-top:16px;font-size:10px;letter-spacing:.15em;color:var(--mut);text-transform:uppercase}
+.lg i{width:12px;height:12px;border-radius:4px;display:inline-block;background:color-mix(in srgb,var(--accent) var(--p),var(--soft));font-style:normal}
+footer{margin-top:56px;text-align:center;font-size:10px;letter-spacing:.4em;color:var(--mut)}
+
+#md{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 60%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow-y:auto;padding:max(16px,env(safe-area-inset-top,0px)) 14px max(16px,env(safe-area-inset-bottom,0px));z-index:9}
+#md[hidden]{display:none}
+.sheet{max-width:920px;margin:0 auto;padding:28px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.top h2{margin:0;font-size:clamp(24px,5vw,38px);font-weight:700;letter-spacing:-.03em;line-height:1}
+.top small{color:var(--mut);letter-spacing:.2em;font-size:11px;text-transform:uppercase}
+.nav{display:flex;gap:8px}
+.lab{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin:0 0 8px;display:block}
+input[type=text],textarea{width:100%;font:inherit;color:var(--fg);background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 13px;outline:none;resize:vertical;
+  box-shadow:inset -2px -2px 5px var(--lightS),inset 3px 3px 7px var(--darkS)}
+input[type=text]:focus,textarea:focus{box-shadow:inset -2px -2px 5px var(--lightS),inset 3px 3px 7px var(--darkS),0 0 0 2px var(--accentSoft)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.box{border-radius:16px;padding:14px}
+.row{display:flex;gap:8px;align-items:center}
+.row input[type=checkbox]{accent-color:var(--accent);width:17px;height:17px;flex:none}
+.sec{margin-top:22px}
+.stack{display:grid;gap:8px}
+.q{background:var(--soft);border-radius:16px;padding:16px;box-shadow:inset -2px -2px 5px var(--lightS),inset 3px 3px 7px var(--darkS)}
+.mv{font-size:26px;font-weight:300;letter-spacing:-.03em;color:var(--accent)}
+.st{font-size:11px;color:var(--mut);margin-top:16px;text-align:right}
+@media(max-width:640px){.g2{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.sheet{padding:18px}header{padding:18px}}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="page">
+<header class="glass">
+  <div>
+    <h1>ASCENSION</h1>
+    <div class="yr"><button class="ico" id="py" aria-label="Previous year">←</button><b id="yl">2026</b><button class="ico" id="ny" aria-label="Next year">→</button></div>
+    <div class="tag">Small steps. Every day. Big results.</div>
+  </div>
+  <div class="tools"><div class="tb"><button id="ex">Export</button><button id="im">Import</button><button id="vf">Verify chain</button><button id="rs">Reset</button><button id="tt">Theme</button></div><div class="msg" id="msg"></div><input type="file" id="fi" accept=".json,application/json" hidden></div>
+</header>
+<div class="stats">
+  <div class="stat glass"><b id="s1">0</b><span>Day of year</span></div>
+  <div class="stat glass"><b id="s2">0</b><span>Days logged</span></div>
+  <div class="stat glass"><b id="s3">0</b><span>Current streak</span></div>
+  <div class="stat glass"><b id="s4">–</b><span>Avg mode / 10</span></div>
+</div>
+<div class="bar"><i id="pb" style="width:0"></i></div>
+<div class="wrap"><div class="grid" id="grid"></div></div>
+<div class="lg">Mode <i style="--p:12%"></i><i style="--p:30%"></i><i style="--p:55%"></i><i style="--p:85%"></i> low → high · click any day to open it</div>
+<div class="sig glass"><span class="lab">Signal — what actually moves your Mode</span><div class="stack" id="sg"></div>
+<span class="lab" style="margin-top:26px;display:block">Mode by weekday</span><div class="wk" id="wk"></div></div>
+<footer>CREATE · LEARN · ASCEND · REPEAT</footer>
+</div>
+
+<div id="md" hidden>
+<div class="sheet glass">
+  <div class="top">
+    <div><small id="dw"></small><h2 id="dt"></h2></div>
+    <div class="nav"><button id="dp">←</button><button id="dn">→</button><button id="dc">Close</button></div>
+  </div>
+  <label class="lab">Today is</label>
+  <input type="text" data-f="t" placeholder="One line that defines today">
+  <div class="g2" style="margin-top:14px">
+    <div class="box inset"><label class="lab">Mode / 10</label><div class="row"><input type="range" min="0" max="10" step="1" data-f="m"><span class="mv" id="mv">0</span></div></div>
+    <div class="box inset"><label class="lab">The path</label><input type="text" data-f="path" placeholder="Direction for today / this season"></div>
+  </div>
+  <div class="g2">
+    <div class="box inset"><label class="lab">Body · training</label><div class="row"><input type="checkbox" data-f="bd"><input type="text" data-f="b" placeholder="Workout, sleep, steps…"></div></div>
+    <div class="box inset"><label class="lab">Focus · target</label><div class="row"><input type="checkbox" data-f="fd"><input type="text" data-f="f" placeholder="The one thing that matters"></div></div>
+    <div class="box inset"><label class="lab">Health · nutrition</label><div class="row"><input type="checkbox" data-f="hd"><input type="text" data-f="h" placeholder="Food, water, recovery…"></div></div>
+    <div class="box inset"><label class="lab">Learning · reading</label><div class="row"><input type="checkbox" data-f="ld"><input type="text" data-f="l" placeholder="Book, course, topic…"></div></div>
+  </div>
+  <div class="g2 sec">
+    <div><label class="lab">Today's plan</label><div class="stack" id="plan"></div><button id="pa" style="margin-top:8px">+ Add task</button></div>
+    <div><label class="lab">Data / intelligence</label><div class="stack" id="intel"></div></div>
+  </div>
+  <div class="g2 sec">
+    <div><label class="lab">Lessons learned</label><div class="stack" id="les"></div></div>
+    <div><label class="lab">Quote</label><div class="q stack"><textarea rows="3" data-f="q" placeholder="“…”"></textarea><input type="text" data-f="qa" placeholder="— Author"></div></div>
+  </div>
+  <div class="sec"><label class="lab">Notes</label><textarea rows="6" data-f="n" placeholder="Free-form notes, thoughts, observations…"></textarea></div>
+  <div class="box inset seal sec"><span id="sh"></span><button id="sb">Seal day</button></div><div class="st" id="st"></div>
+</div>
+</div>
+
+<div id="pmd" hidden>
+<div class="sheet glass" style="max-width:420px">
+  <div class="top"><div><small id="plab">ENCRYPTION</small><h2 style="font-size:26px">Passphrase</h2></div></div>
+  <p id="ptext" style="color:var(--mut);font-size:13px;line-height:1.6;margin:0 0 14px"></p>
+  <input type="password" id="pin" autocomplete="off" placeholder="Passphrase" style="margin-bottom:10px">
+  <input type="password" id="pin2" autocomplete="off" placeholder="Confirm passphrase" hidden style="margin-bottom:10px">
+  <div class="row" style="justify-content:flex-end;gap:8px;margin-top:4px;flex-wrap:wrap">
+    <button id="pskip" hidden>Seal without encrypting</button>
+    <button id="pcancel">Cancel</button><button id="pok">Continue</button>
+  </div>
+  <p id="perr" style="color:var(--mut);font-size:12px;margin-top:10px;min-height:14px"></p>
+</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const WD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const LS="ascension-journal-v1";
+let busy=false, store={}, year=new Date().getFullYear(), cur=null, db=null, uid=null, col=null, timers={};
+const pad=n=>String(n).padStart(2,"0"), key=(y,m,d)=>y+"-"+pad(m+1)+"-"+pad(d);
+const todayKey=()=>{const n=new Date();return key(n.getFullYear(),n.getMonth(),n.getDate())};
+const blank=()=>({t:"",m:0,path:"",b:"",bd:0,f:"",fd:0,h:"",hd:0,l:"",ld:0,plan:[],intel:["","","","","",""],les:["","",""],q:"",qa:"",n:""});
+const filled=d=>!!d&&(d.m>0||["t","path","b","f","h","l","q","n"].some(k=>d[k])||d.bd||d.fd||d.hd||d.ld||(d.plan||[]).some(p=>p.x)||(d.intel||[]).some(Boolean)||(d.les||[]).some(Boolean));
+try{store=JSON.parse(localStorage.getItem(LS)||"{}")}catch(e){store={}}
+const cache=()=>{try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}};
+const dget=(o,p)=>p.split(".").reduce((a,k)=>a==null?a:a[k],o);
+function dset(o,p,v){const ks=p.split(".");let a=o;ks.slice(0,-1).forEach(k=>{a=a[k]});a[ks[ks.length-1]]=v}
+
+function render(){
+  $("#yl").textContent=year;
+  const g=$("#grid");g.textContent="";
+  const add=(c,t)=>{const e=document.createElement("div");e.className=c;if(t!=null)e.textContent=t;g.appendChild(e);return e};
+  add("hd","");for(let d=1;d<=31;d++)add("hd",d);
+  const tk=todayKey();
+  for(let m=0;m<12;m++){
+    add("mo",MN[m]);
+    const dim=new Date(year,m+1,0).getDate();
+    for(let d=1;d<=31;d++){
+      const b=document.createElement("button");b.className="c";
+      if(d>dim){b.className="c x";b.disabled=true}
+      else{
+        const k=key(year,m,d),v=store[k];
+        if(filled(v)){b.classList.add("f");b.style.setProperty("--p",(v.m>0?10+v.m*7.5:12)+"%")}
+        if(v&&v.s)b.classList.add("s");if(k===tk)b.classList.add("t");
+        b.title=MN[m]+" "+d;b.onclick=()=>openDay(k);
+      }
+      g.appendChild(b);
+    }
+  }
+  stats();
+}
+function stats(){
+  const now=new Date(),ty=now.getFullYear(),len=(new Date(year,1,29).getMonth()===1)?366:365;
+  let doy=year<ty?len:year>ty?0:Math.floor((now-new Date(ty,0,0))/864e5);
+  $("#s1").textContent=doy+" / "+len;$("#pb").style.width=(doy/len*100)+"%";
+  let n=0,sum=0,cnt=0;
+  Object.keys(store).forEach(k=>{if(k.startsWith(year+"-")&&filled(store[k])){n++;if(store[k].m>0){sum+=store[k].m;cnt++}}});
+  $("#s2").textContent=n;$("#s4").textContent=cnt?(sum/cnt).toFixed(1):"–";
+  let s=0,d=new Date();if(!filled(store[todayKey()]))d.setDate(d.getDate()-1);
+  while(filled(store[key(d.getFullYear(),d.getMonth(),d.getDate())])){s++;d.setDate(d.getDate()-1)}
+  $("#s3").textContent=s;sig();
+}
+
+function fields(id,name,n,ph){
+  const c=$(id);c.textContent="";
+  for(let i=0;i<n;i++){const t=document.createElement("input");t.type="text";t.dataset.f=name+"."+i;t.placeholder=ph+" "+(i+1);c.appendChild(t)}
+}
+function planRows(d){
+  const c=$("#plan");c.textContent="";
+  d.plan.forEach((p,i)=>{
+    const r=document.createElement("div");r.className="row";
+    const cb=document.createElement("input");cb.type="checkbox";cb.checked=!!p.d;
+    const t=document.createElement("input");t.type="text";t.value=p.x;t.placeholder="Task";
+    const x=document.createElement("button");x.textContent="×";x.className="ico";
+    cb.onchange=()=>{p.d=cb.checked?1:0;changed()};
+    t.oninput=()=>{p.x=t.value;changed()};
+    x.onclick=()=>{d.plan.splice(i,1);planRows(d);changed()};
+    r.append(cb,t,x);c.appendChild(r);
+  });
+}
+async function openDay(k){
+  cur=k;const stored=store[k]||blank();
+  ["plan","intel","les","q","qa","n","path"].forEach(f=>{if(stored[f]==null)stored[f]=blank()[f]});
+  // If this day is sealed+encrypted, decrypt into a transient working copy for display only.
+  // store[k] keeps the ciphertext (d.c) as the source of truth — we never write decrypted
+  // plaintext back into store/localStorage, or the encryption would be pointless.
+  let d=stored;
+  if(stored.c){
+    const copy=Object.assign({},stored);
+    const ok=await unlockDay(copy); // mutates `copy`'s plaintext fields in place, not `stored`
+    if(cur!==k)return; // user navigated away while the passphrase prompt was open
+    if(!ok){cur=null;return} // wrong passphrase or cancelled — don't open the day at all
+    copy._view=true; // marks this as a read-only decrypted display copy — see changed()'s guard
+    d=copy;
+  }
+  document.querySelectorAll("#md [data-f]").forEach(e=>{
+    const v=dget(d,e.dataset.f);
+    if(e.type==="checkbox")e.checked=!!v;else e.value=v==null?"":v;
+  });
+  planRows(d);lockUI(d);
+  const dt=new Date(k+"T00:00:00");
+  $("#dw").textContent=WD[dt.getDay()]+" · Day "+(Math.floor((dt-new Date(dt.getFullYear(),0,0))/864e5));
+  $("#dt").textContent=MN[dt.getMonth()]+" "+dt.getDate()+", "+dt.getFullYear();
+  $("#mv").textContent=d.m;$("#st").textContent="";
+  $("#md").hidden=false;$("#md").scrollTop=0;
+  window._d=d;
+}
+function shift(n){flush();const dt=new Date(cur+"T00:00:00");dt.setDate(dt.getDate()+n);year=dt.getFullYear();render();openDay(key(dt.getFullYear(),dt.getMonth(),dt.getDate()))}
+function changed(){
+  const d=window._d;
+  // Guard: a sealed+encrypted day's inputs are always disabled, so this path shouldn't be
+  // reachable while one is open — but if it ever were, writing the decrypted display copy
+  // over the stored ciphertext would silently destroy the encryption. Refuse rather than
+  // risk that. (The Seal/Unseal button is the one sanctioned way to change a sealed day; it
+  // operates on window._d directly, which is never marked _view, so it's unaffected here.)
+  if(d._view){say("This day is locked for viewing only. Unseal it to make changes.");return}
+  store[cur]=d;
+  $("#mv").textContent=d.m;
+  clearTimeout(timers[cur]);const k=cur;timers[k]=setTimeout(()=>save(k),600);
+  $("#st").textContent="Saving…";cache();render_cell();
+}
+function render_cell(){clearTimeout(render_cell.t);render_cell.t=setTimeout(render,250)}
+document.addEventListener("input",e=>{
+  const f=e.target.dataset&&e.target.dataset.f;if(!f||$("#md").hidden)return;
+  const v=e.target.type==="checkbox"?(e.target.checked?1:0):e.target.type==="range"?+e.target.value:e.target.value;
+  dset(window._d,f,v);changed();
+});
+async function save(k){
+  delete timers[k];const d=store[k];
+  if(!db||!uid){$("#st").textContent="Saved · this device";return}
+  try{
+    const ref=col.doc("d"+k);
+    if(filled(d))await ref.set(d);else await ref.delete();
+    $("#st").textContent="Saved · synced";
+  }catch(e){$("#st").textContent="Saved · this device (sync unavailable)"}
+}
+function flush(){Object.keys(timers).forEach(k=>{clearTimeout(timers[k]);save(k)})}
+function closeDay(){flush();$("#md").hidden=true;cur=null;render()}
+
+$("#dc").onclick=closeDay;$("#dp").onclick=()=>shift(-1);$("#dn").onclick=()=>shift(1);
+$("#pa").onclick=()=>{window._d.plan.push({x:"",d:0});planRows(window._d);changed()};
+$("#py").onclick=()=>{year--;render()};$("#ny").onclick=()=>{year++;render()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#md").hidden)closeDay()});
+$("#tt").onclick=()=>{const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue("--bg").trim()==="#1b1d24";r.dataset.theme=dark?"light":"dark"};
+
+const say=t=>{$("#msg").textContent=t};
+const validKey=k=>/^\d{4}-\d{2}-\d{2}$/.test(k);
+$("#ex").onclick=async()=>{
+  flush();
+  const out=JSON.stringify({app:"ascension",version:1,exported:new Date().toISOString(),data:store},null,2);
+  const name="ascension-backup-"+todayKey()+".json";
+  try{
+    const dl=await claude.use("downloads");
+    if(dl){await dl.save({filename:name,data:out});say("Export ready.");return}
+  }catch(e){if(e&&e.code==="declined"){say("Export cancelled.");return}}
+  try{
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([out],{type:"application/json"}));
+    a.download=name;document.body.appendChild(a);a.click();a.remove();say("Export ready.");
+  }catch(e){say("Export unavailable in this view.")}
+};
+$("#im").onclick=()=>{$("#fi").value="";$("#fi").click()};
+$("#fi").onchange=async e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  let inc;
+  try{const j=JSON.parse(await f.text());inc=j&&j.data&&typeof j.data==="object"?j.data:j}catch(x){say("Import failed: not valid JSON.");return}
+  const keys=Object.keys(inc||{}).filter(k=>validKey(k)&&inc[k]&&typeof inc[k]==="object");
+  if(!keys.length){say("Import failed: no journal days found.");return}
+  if(cur){flush();$("#md").hidden=true;cur=null}
+  busy=true;say("Importing "+keys.length+" days…");let bad=0;
+  for(const k of keys){
+    store[k]=Object.assign(blank(),inc[k]);
+    if(db&&uid){try{await col.doc("d"+k).set(store[k])}catch(x){bad++}}
+  }
+  cache();busy=false;render();
+  say("Imported "+keys.length+" days"+(bad?" ("+bad+" not synced, kept on this device).":"."));
+};
+
+const st=v=>Array.isArray(v)?"["+v.map(st).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).sort().map(k=>JSON.stringify(k)+":"+st(v[k])).join(",")+"}":JSON.stringify(v);
+const PLAIN_FIELDS=["t","m","path","b","bd","f","fd","h","hd","l","ld","plan","intel","les","q","qa","n"];
+const body=d=>{const c={};PLAIN_FIELDS.forEach(k=>c[k]=d[k]);return st(c)};
+async function sha(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const sealed=()=>Object.keys(store).filter(k=>store[k]&&store[k].s).sort();
+
+/* ---- AES-GCM encryption for sealed days ---- *
+ * Sealing locks a day (as before) AND, if the user sets a passphrase, replaces its
+ * plaintext fields with a single encrypted blob. The hash chain is computed over the
+ * ciphertext (not the plaintext), so Verify chain still works without ever asking for
+ * the passphrase — it proves "nothing changed", not "here is what it says". Reading a
+ * sealed day's content back always requires the passphrase. There is no password
+ * recovery: losing the passphrase means that content is unrecoverable by design. */
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+// The passphrase itself is never stored anywhere — not in a variable that outlives the
+// operation, not in localStorage. Each encrypt/decrypt call takes it fresh from the prompt.
+async function deriveKey(pass,salt){
+  const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:210000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function encBody(plainObj,pass){
+  const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pass,salt);
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(JSON.stringify(plainObj)));
+  return{salt:b64(salt),iv:b64(iv),ct:b64(ct)};
+}
+async function decBody(enc,pass){
+  const key=await deriveKey(pass,unb64(enc.salt));
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(enc.iv)},key,unb64(enc.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+// askPass modes: "set" (choosing a new passphrase, offers a skip-encryption escape hatch),
+// "enter" (unlocking existing content). Resolves a passphrase string, "skip", or null (cancel).
+function askPass(mode){
+  return new Promise(res=>{
+    const m=$("#pmd"),p1=$("#pin"),p2=$("#pin2"),err=$("#perr"),ok=$("#pok"),cancel=$("#pcancel"),skip=$("#pskip");
+    p1.value="";p2.value="";err.textContent="";p2.hidden=mode!=="set";skip.hidden=mode!=="set";
+    $("#ptext").textContent=mode==="set"
+      ?"Set a passphrase to encrypt this day's content. There is no recovery — if it's lost, the content is gone for good."
+      :"Enter the passphrase to decrypt this entry.";
+    m.hidden=false;p1.focus();
+    const close=v=>{m.hidden=true;ok.onclick=null;cancel.onclick=null;skip.onclick=null;p1.onkeydown=null;res(v)};
+    cancel.onclick=()=>close(null);
+    skip.onclick=()=>close("skip");
+    ok.onclick=()=>{
+      if(!p1.value){err.textContent="Passphrase can't be empty.";return}
+      if(mode==="set"&&p1.value!==p2.value){err.textContent="Passphrases don't match.";return}
+      close(p1.value);
+    };
+    p1.onkeydown=e=>{if(e.key==="Enter"&&mode!=="set")ok.onclick()};
+  });
+}
+
+function lockUI(d){
+  const locked=d.s&&d.c; // sealed AND encrypted (content hidden, needs passphrase to view)
+  document.querySelectorAll("#md [data-f], #plan input, #plan button, #pa").forEach(e=>e.disabled=!!d.s);
+  $("#sb").textContent=d.s?"Unseal":"Seal day";
+  if(!d.s){$("#sh").textContent="Seal this day into the hash chain. Sealed days are locked and tamper-evident.";return}
+  const chain="sha256 "+d.s.h.slice(0,20)+"… ← "+(d.s.p==="GENESIS"?"genesis":d.s.p.slice(0,10)+"…");
+  $("#sh").textContent=(locked?"🔒 SEALED + ENCRYPTED · ":"SEALED · ")+chain;
+}
+async function unlockDay(d){
+  if(!d.c)return true; // sealed but not encrypted — nothing to unlock
+  const pass=await askPass("enter");
+  if(pass==null)return false;
+  try{
+    const plain=await decBody(d.c,pass);
+    PLAIN_FIELDS.forEach(k=>{if(plain[k]!==undefined)d[k]=plain[k]});
+    return true;
+  }catch(e){say("Wrong passphrase, or this entry is corrupted.");return false}
+}
+$("#sb").onclick=async()=>{
+  // Always operate on the real stored object, never on window._d directly — when viewing a
+  // sealed+encrypted day, window._d is a transient decrypted display copy (see openDay),
+  // and changes made to it are intentionally never saved back (see changed()'s guard).
+  const d=store[cur]||window._d,sh=$("#sh");
+  if(!window.crypto||!crypto.subtle){sh.textContent="Encryption is unavailable in this browser context.";return}
+  const ks=sealed().filter(k=>k!==cur);
+  if(d.s){
+    if(sealed().pop()!==cur){sh.textContent="Ledger is append-only: only the latest seal can be removed.";return}
+    if(d.c){
+      // window._d already holds the decrypted plaintext from opening this day — reuse it
+      // instead of prompting for the passphrase a second time in the same session.
+      if(window._d&&window._d._view)PLAIN_FIELDS.forEach(k=>{d[k]=window._d[k]});
+      else{const ok=await unlockDay(d);if(!ok)return}
+      delete d.c;
+    }
+    delete d.s;
+  }else{
+    if(ks.length&&ks[ks.length-1]>cur){sh.textContent="Ledger is append-only: seal days in chronological order.";return}
+    const choice=await askPass("set"); // a passphrase string, "skip", or null (cancel)
+    if(choice===null)return;
+    let enc=null;
+    if(choice!=="skip")enc=await encBody(Object.fromEntries(PLAIN_FIELDS.map(k=>[k,d[k]])),choice);
+    const p=ks.length?store[ks[ks.length-1]].s.h:"GENESIS";
+    const hashSrc=enc?p+"|"+cur+"|"+enc.salt+enc.iv+enc.ct:p+"|"+cur+"|"+body(d);
+    d.s={h:await sha(hashSrc),p,at:new Date().toISOString()};
+    if(enc){
+      d.c=enc;
+      PLAIN_FIELDS.forEach(k=>{
+        if(k==="plan")d[k]=[];
+        else if(k==="intel")d[k]=["","","","","",""];
+        else if(k==="les")d[k]=["","",""];
+        else if(k==="m"||k==="bd"||k==="fd"||k==="hd"||k==="ld")d[k]=0;
+        else d[k]="";
+      });
+    }
+  }
+  delete d._view; // d is now the authoritative object going forward, editable or re-locked
+  window._d=d;
+  changed();lockUI(d);
+  document.querySelectorAll("#md [data-f]").forEach(e=>{const v=dget(d,e.dataset.f);if(e.type==="checkbox")e.checked=!!v;else e.value=v==null?"":v});
+  planRows(d);
+};
+$("#vf").onclick=async()=>{
+  if(!window.crypto||!crypto.subtle){say("Hashing unavailable here.");return}
+  const ks=sealed();if(!ks.length){say("No sealed days yet.");return}
+  let prev="GENESIS";
+  for(const k of ks){const d=store[k];
+    const hashSrc=d.c?prev+"|"+k+"|"+d.c.salt+d.c.iv+d.c.ct:prev+"|"+k+"|"+body(d);
+    if(d.s.p!==prev||await sha(hashSrc)!==d.s.h){say("CHAIN BROKEN at "+k+" — entry was altered or reordered.");return}
+    prev=d.s.h}
+  say("Chain intact · "+ks.length+" sealed day"+(ks.length>1?"s":"")+" · head "+prev.slice(0,12)+"…");
+};
+function sig(){
+  const ks=Object.keys(store).filter(k=>k.startsWith(year+"-")&&store[k].m>0),av=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  const sg=$("#sg");sg.textContent="";
+  [["bd","Body"],["fd","Focus"],["hd","Health"],["ld","Learning"]].forEach(([f,n])=>{
+    const w=ks.filter(k=>store[k][f]).map(k=>store[k].m),o=ks.filter(k=>!store[k][f]).map(k=>store[k].m);
+    const r=document.createElement("div");r.className="sr";
+    const a=document.createElement("span");a.textContent=n;
+    const b=document.createElement("div");b.className="sb";const i=document.createElement("i");b.appendChild(i);
+    const c=document.createElement("span");c.style.color="var(--mut)";
+    if(w.length<3||o.length<3){c.textContent="needs 3+ days each way"}
+    else{const x=av(w),y=av(o);i.style.width=x*10+"%";c.textContent=x.toFixed(1)+" done · "+y.toFixed(1)+" skipped · Δ "+(x-y>=0?"+":"")+(x-y).toFixed(1)}
+    r.append(a,b,c);sg.appendChild(r);
+  });
+  const wk=$("#wk");wk.textContent="";
+  [1,2,3,4,5,6,0].forEach(w=>{
+    const v=ks.filter(k=>new Date(k+"T00:00:00").getDay()===w).map(k=>store[k].m);
+    const c=document.createElement("div"),i=document.createElement("i");
+    i.style.height=(v.length?av(v)*10:0)+"%";
+    const l=document.createElement("span");l.textContent=WD[w].slice(0,3)+(v.length?" "+av(v).toFixed(1):"");
+    c.append(i,l);wk.appendChild(c);
+  });
+}
+let rc=0;
+$("#rs").onclick=async()=>{
+  const b=$("#rs");
+  if(!rc){b.textContent="Confirm reset?";b.classList.add("warn");say("This erases every day. Click again within 5 s.");
+    rc=setTimeout(()=>{rc=0;b.textContent="Reset";b.classList.remove("warn");say("")},5000);return}
+  clearTimeout(rc);rc=0;b.textContent="Reset";b.classList.remove("warn");
+  busy=true;Object.keys(timers).forEach(k=>clearTimeout(timers[k]));timers={};
+  if(!$("#md").hidden){$("#md").hidden=true;cur=null}
+  const ks=Object.keys(store);store={};cache();render();say("Resetting…");let bad=0;
+  if(db&&uid){for(const k of ks){try{await col.doc("d"+k).delete()}catch(x){bad++}}}
+  busy=false;say(bad?"Reset locally; "+bad+" cloud entries could not be deleted.":"All data erased.");
+};
+fields("#intel","intel",6,"Insight");fields("#les","les",3,"Lesson");
+render();
+
+/* ---- Glass backdrop: soft drifting light orbs instead of the sharp helix. ----
+ * Performance discipline carried over from the minimal-webdesign build: no per-frame
+ * ctx.filter blur, no per-element shadowBlur. Each orb is a single pre-rendered radial-
+ * gradient sprite (the one expensive blur-like softness in this design happens once, at
+ * sprite-build time, not per frame) reused via drawImage, exactly like the helix's glow
+ * dots. 30fps cap, capped DPR, modest orb count — the "blur" of this aesthetic lives in
+ * CSS backdrop-filter on a few fixed UI surfaces (cheap, GPU-composited, not animated
+ * canvas blur), never in the per-frame canvas loop itself. */
+const cv=$("#bg"),cx=cv.getContext("2d"),RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let W=0,H=0,mx=0,my=0,tx=0,ty=0,accentRGB=[108,123,255],bgRGB=[232,235,240],fr=0,lastT=0,sprite=null,spriteCol="";
+const ORB_N=7;
+const orbs=Array.from({length:ORB_N},(_,i)=>({
+  bx:Math.random(),by:Math.random(),r:140+Math.random()*180,
+  sp:.02+Math.random()*.03,ph:Math.random()*Math.PI*2,amp:60+Math.random()*90,
+  m:i%3===0?1.3:1 // today-ish / mode-weighted orbs drawn slightly bigger — purely decorative here
+}));
+function fit(){const d=Math.min(devicePixelRatio||1,1.5);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)}
+function fgc(){
+  const cs=getComputedStyle(document.documentElement),a=cs.getPropertyValue("--accent").trim(),b=cs.getPropertyValue("--bg").trim();
+  if(/^#[0-9a-f]{6}$/i.test(a))accentRGB=[1,3,5].map(i=>parseInt(a.substr(i,2),16));
+  if(/^#[0-9a-f]{6}$/i.test(b))bgRGB=[1,3,5].map(i=>parseInt(b.substr(i,2),16));
+  sprite=null;
+}
+// one pre-rendered soft radial sprite reused for every orb — the only "blur" computed,
+// and it is computed once, not per frame, exactly like the minimal skin's glowSprite().
+function orbSprite(){
+  const key=accentRGB.join(",");
+  if(sprite&&spriteCol===key)return sprite;
+  const s=512,g=document.createElement("canvas");g.width=g.height=s;const gc=g.getContext("2d");
+  const rg=gc.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  rg.addColorStop(0,"rgba("+key+",.5)");rg.addColorStop(.5,"rgba("+key+",.16)");rg.addColorStop(1,"rgba("+key+",0)");
+  gc.fillStyle=rg;gc.fillRect(0,0,s,s);sprite=g;spriteCol=key;return g;
+}
+function frame(ts){
+  if(!RM)requestAnimationFrame(frame);
+  if(ts-lastT<33)return; // ~30fps cap
+  lastT=ts;
+  const t=RM?0:ts/1000;fr++;
+  if(fr%30===1)fgc();
+  tx+=(mx-tx)*.04;ty+=(my-ty)*.04;
+  cx.fillStyle="rgb("+bgRGB.join(",")+")";cx.fillRect(0,0,W,H);
+  const spr=orbSprite();
+  orbs.forEach(o=>{
+    const ang=t*o.sp+o.ph;
+    const x=o.bx*W+Math.cos(ang)*o.amp+tx*40,y=o.by*H+Math.sin(ang*.8)*o.amp+ty*30;
+    const r=o.r*o.m,s=r*2;
+    cx.drawImage(spr,x-s/2,y-s/2,s,s);
+  });
+}
+fit();fgc();
+addEventListener("resize",()=>{fit();if(RM)requestAnimationFrame(frame)});
+addEventListener("pointermove",e=>{mx=(e.clientX/W-.5)*2;my=(e.clientY/H-.5)*2},{passive:true});
+addEventListener("pointerleave",()=>{mx=0;my=0},{passive:true});
+if(RM){$("#tt").addEventListener("click",()=>setTimeout(()=>{fgc();frame(0)},50))}
+requestAnimationFrame(frame);
+
+(async()=>{
+  try{
+    const user=await claude.use("user"),d=await claude.use("db");
+    if(!user||!d)return;
+    const id=await user.id();if(!id)return;
+    db=d;uid=id;col=db.collection("data/users/"+uid);
+    col.onSnapshot(snap=>{
+      if(busy)return;
+      snap.docs.forEach(s=>{const k=s.id.slice(1);if(s.id[0]!=="d"||k===cur||timers[k])return;s.exists?store[k]=s.data():delete store[k]});
+      cache();render();
+    },()=>{db=null});
+  }catch(e){db=null}
+})();
+</script>
+</body>
+</html>
