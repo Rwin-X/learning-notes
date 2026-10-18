@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ASCENSION — Year Journal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#09060f;--fg:#eaf0ff;--mut:#7a7aa6;--line:#2a1f45;--card:#120d22;--soft:#171029;
+  --c1:#f4ff2b;--c1g:rgba(244,255,43,.55);--c2:#2bf6ff;--c2g:rgba(43,246,255,.5);--warn:#ffb020;--err:#ff3b5c;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+:root[data-theme="light"]{--bg:#f1f0ea;--fg:#1a1600;--mut:#726a40;--line:#e0d9a8;--card:#fff;--soft:#f3efd6;--c1:#9a8a00;--c1g:rgba(154,138,0,.3);--c2:#008a94;--c2g:rgba(0,138,148,.3)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:500 14px/1.5 Rajdhani,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#rain{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:.5}
+body::after{content:"";position:fixed;inset:0;z-index:9997;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0 2px,rgba(244,255,43,.022) 2px 3px)}
+/* glitch layer: three stacked full-page text copies with clip-path slices + RGB channel offset.
+   Driven entirely by toggling a body class for a few frames — see #glitchkeys in JS comment below.
+   Costs nothing while idle (display:none), and while active it is a handful of composited
+   transforms on a tiny fixed element, never a page-wide filter. */
+.glitch-flash{position:fixed;inset:0;z-index:9996;pointer-events:none;opacity:0;mix-blend-mode:screen}
+body.glitching .glitch-flash{opacity:1;background:
+    linear-gradient(90deg,transparent 0 30%,rgba(244,255,43,.08) 30% 31%,transparent 31%),
+    linear-gradient(90deg,transparent 0 62%,rgba(43,246,255,.08) 62% 63%,transparent 63%)}
+body.glitching .page{animation:gshift .22s steps(2) 1}
+body.glitching h1{text-shadow:4px 0 var(--c1),-4px 0 var(--c2) !important}
+@keyframes gshift{0%{transform:translate(0,0)}25%{transform:translate(-3px,1px)}50%{transform:translate(2px,-2px)}75%{transform:translate(-2px,0)}100%{transform:translate(0,0)}}
+.page{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:30px 20px 60px}
+.mono{font-family:"JetBrains Mono",monospace}
+
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;border-bottom:2px solid var(--c1);padding-bottom:16px;box-shadow:0 1px 0 var(--c1g)}
+h1{margin:0;font-weight:700;font-size:clamp(36px,7.5vw,78px);letter-spacing:-.02em;line-height:.92;text-transform:uppercase;
+  color:var(--fg);text-shadow:2px 0 var(--c1),-2px 0 var(--c2);position:relative;transition:text-shadow .15s}
+@keyframes flicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:.4}94%{opacity:1}96%{opacity:.7}97%{opacity:1}}
+h1.boot{animation:flicker 1.1s steps(1) 1}
+.yr{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.25em;color:var(--mut);margin-top:10px;font-family:"JetBrains Mono",monospace;text-transform:uppercase}
+.yr b{color:var(--c2);font-weight:600;text-shadow:0 0 8px var(--c2g)}
+.tag{color:var(--mut);margin-top:5px;font-size:12px}
+button{font:600 11px/1 "JetBrains Mono",monospace;color:var(--fg);background:var(--soft);border:1px solid var(--line);
+  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);
+  padding:8px 13px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .12s;position:relative}
+button:hover{border-color:var(--c2);color:var(--c2);box-shadow:0 0 12px var(--c2g)}
+button:active{transform:translateY(1px) scale(.98);box-shadow:0 0 4px var(--c2g)}
+.ico{padding:5px 10px}
+.tools{display:flex;flex-direction:column;align-items:flex-end;gap:7px}.tb{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.msg{font-size:11px;color:var(--c2);min-height:15px;text-align:right;font-family:"JetBrains Mono",monospace}
+button.warn{border-color:var(--err);color:var(--err);box-shadow:0 0 12px rgba(255,59,92,.4)}
+.c.s{box-shadow:inset 0 0 0 1.5px var(--c2),0 0 6px var(--c2g)}
+.c.t{animation:tpulse 2.4s ease-in-out infinite}
+@keyframes tpulse{0%,100%{box-shadow:inset 0 0 0 1.5px var(--c2),0 0 6px var(--c2g)}50%{box-shadow:inset 0 0 0 1.5px var(--c2),0 0 14px var(--c2g)}}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin:22px 0 1px;background:var(--line)}
+.stat{padding:14px 16px;background:var(--card);position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--c1)}
+.stat b{display:block;font-size:clamp(22px,4vw,32px);font-weight:600;letter-spacing:-.01em;font-family:"JetBrains Mono",monospace;color:var(--fg)}
+.stat span{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+
+.bar{height:3px;background:var(--line);margin:0 0 30px;position:relative;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--c1),var(--c2));box-shadow:0 0 10px var(--c1g);position:relative}
+.bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);width:40px;animation:sweep 2.6s linear infinite}
+@keyframes sweep{0%{transform:translateX(-40px)}100%{transform:translateX(calc(100% + 40px))}}
+
+.wrap{overflow-x:auto;padding-bottom:6px}
+.grid{display:grid;grid-template-columns:44px repeat(31,minmax(20px,1fr));gap:3px;min-width:770px}
+.mo{font-size:10px;letter-spacing:.18em;color:var(--mut);align-self:center;text-transform:uppercase;font-family:"JetBrains Mono",monospace}
+.hd{font-size:9px;color:var(--mut);text-align:center;font-family:"JetBrains Mono",monospace}
+.c{aspect-ratio:1;border:1px solid var(--line);background:var(--soft);padding:0;position:relative;min-height:20px;transition:box-shadow .15s}
+.c.f{border-color:var(--c1);background:color-mix(in srgb,var(--c1) var(--p,16%),var(--soft))}
+.c.x{visibility:hidden}
+.c.f::after{content:"";position:absolute;inset:auto 3px 3px auto;width:3px;height:3px;background:var(--c1);box-shadow:0 0 4px var(--c1)}
+.c:hover{border-color:var(--c2);box-shadow:0 0 8px var(--c2g)}
+.lg{display:flex;gap:6px;align-items:center;margin-top:16px;font-size:10px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;font-family:"JetBrains Mono",monospace}
+.lg i{width:12px;height:12px;display:inline-block;background:color-mix(in srgb,var(--c1) var(--p),var(--soft))}
+
+.sig{margin-top:38px;border:1px solid var(--line);padding:18px;background:var(--card);position:relative}
+.sig::before{content:"//  SIGNAL";position:absolute;top:-10px;left:14px;background:var(--bg);padding:0 8px;font:600 10px "JetBrains Mono",monospace;letter-spacing:.2em;color:var(--c2)}
+.sr{display:grid;grid-template-columns:80px 1fr 170px;gap:12px;align-items:center;font-size:12px;font-family:"JetBrains Mono",monospace}
+.sb{height:6px;background:var(--line);position:relative}.sb i{position:absolute;left:0;top:0;bottom:0;background:var(--c2);box-shadow:0 0 6px var(--c2g)}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:100px}.wk div{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:10px;color:var(--mut);gap:4px;font-family:"JetBrains Mono",monospace}
+.wk i{width:100%;background:linear-gradient(180deg,var(--c2),var(--c1));display:block;min-height:2px}
+.seal{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--mut);word-break:break-all;font-family:"JetBrains Mono",monospace}
+footer{margin-top:60px;text-align:center;font-size:10px;letter-spacing:.5em;color:var(--mut);font-family:"JetBrains Mono",monospace;text-transform:uppercase}
+footer::before{content:"[ ";color:var(--c1)}footer::after{content:" ]";color:var(--c2)}
+
+#md{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(5px);overflow-y:auto;padding:max(16px,env(safe-area-inset-top,0px)) 14px max(16px,env(safe-area-inset-bottom,0px));z-index:10}
+#md[hidden]{display:none}
+.sheet{max-width:940px;margin:0 auto;background:var(--card);border:1px solid var(--c1);box-shadow:0 0 0 1px var(--line),0 0 40px var(--c1g);padding:24px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.top h2{margin:0;font-size:clamp(22px,5vw,36px);font-weight:700;letter-spacing:-.01em;line-height:1;text-transform:uppercase}
+.top small{color:var(--c2);letter-spacing:.2em;font-size:11px;text-transform:uppercase;font-family:"JetBrains Mono",monospace}
+.nav{display:flex;gap:6px}
+.lab{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin:0 0 7px;display:block;font-family:"JetBrains Mono",monospace}
+input[type=text],textarea{width:100%;font:500 13px Rajdhani,sans-serif;color:var(--fg);background:var(--bg);border:1px solid var(--line);padding:9px 12px;outline:none;resize:vertical}
+input[type=text]:focus,textarea:focus{border-color:var(--c2);box-shadow:0 0 0 1px var(--c2g)}
+input[type=range]{width:100%;accent-color:var(--c1)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.box{border:1px solid var(--line);padding:12px;position:relative}
+.row{display:flex;gap:8px;align-items:center}
+.row input[type=checkbox]{accent-color:var(--c1);width:16px;height:16px;flex:none}
+.sec{margin-top:22px}
+.stack{display:grid;gap:6px}
+.q{background:var(--soft);border-left:2px solid var(--c1);padding:14px}
+.mv{font-size:28px;font-weight:600;letter-spacing:-.02em;color:var(--c2);text-shadow:0 0 10px var(--c2g);font-family:"JetBrains Mono",monospace}
+.st{font-size:11px;color:var(--mut);margin-top:16px;text-align:right;font-family:"JetBrains Mono",monospace}
+@media(max-width:640px){.g2{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr);row-gap:14px}.sheet{padding:16px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}body.glitching .page{animation:none !important}}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="glitch-flash" aria-hidden="true"></div>
+<div class="page">
+<header>
+  <div>
+    <h1 id="h1">ASCENSION</h1>
+    <div class="yr"><button class="ico" id="py" aria-label="Previous year">&lt;</button><b id="yl">2026</b><button class="ico" id="ny" aria-label="Next year">&gt;</button></div>
+    <div class="tag">Small steps. Every day. Big results.</div>
+  </div>
+  <div class="tools"><div class="tb"><button id="ex">Export</button><button id="im">Import</button><button id="vf">Verify chain</button><button id="rs">Reset</button><button id="tt">Theme</button></div><div class="msg" id="msg"></div><input type="file" id="fi" accept=".json,application/json" hidden></div>
+</header>
+<div class="stats">
+  <div class="stat"><b id="s1">0</b><span>Day of year</span></div>
+  <div class="stat"><b id="s2">0</b><span>Days logged</span></div>
+  <div class="stat"><b id="s3">0</b><span>Current streak</span></div>
+  <div class="stat"><b id="s4">–</b><span>Avg mode / 10</span></div>
+</div>
+<div class="bar"><i id="pb" style="width:0"></i></div>
+<div class="wrap"><div class="grid" id="grid"></div></div>
+<div class="lg">Mode <i style="--p:12%"></i><i style="--p:30%"></i><i style="--p:55%"></i><i style="--p:85%"></i> low → high · click any day to open it</div>
+<div class="sig"><span class="lab">Signal — what actually moves your Mode</span><div class="stack" id="sg"></div>
+<span class="lab" style="margin-top:26px;display:block">Mode by weekday</span><div class="wk" id="wk"></div></div>
+<footer>CREATE · LEARN · ASCEND · REPEAT</footer>
+</div>
+
+<div id="md" hidden>
+<div class="sheet">
+  <div class="top">
+    <div><small id="dw"></small><h2 id="dt"></h2></div>
+    <div class="nav"><button id="dp">&lt;</button><button id="dn">&gt;</button><button id="dc">Close</button></div>
+  </div>
+  <label class="lab">Today is</label>
+  <input type="text" data-f="t" placeholder="One line that defines today">
+  <div class="g2" style="margin-top:12px">
+    <div class="box"><label class="lab">Mode / 10</label><div class="row"><input type="range" min="0" max="10" step="1" data-f="m"><span class="mv" id="mv">0</span></div></div>
+    <div class="box"><label class="lab">The path</label><input type="text" data-f="path" placeholder="Direction for today / this season"></div>
+  </div>
+  <div class="g2">
+    <div class="box"><label class="lab">Body · training</label><div class="row"><input type="checkbox" data-f="bd"><input type="text" data-f="b" placeholder="Workout, sleep, steps…"></div></div>
+    <div class="box"><label class="lab">Focus · target</label><div class="row"><input type="checkbox" data-f="fd"><input type="text" data-f="f" placeholder="The one thing that matters"></div></div>
+    <div class="box"><label class="lab">Health · nutrition</label><div class="row"><input type="checkbox" data-f="hd"><input type="text" data-f="h" placeholder="Food, water, recovery…"></div></div>
+    <div class="box"><label class="lab">Learning · reading</label><div class="row"><input type="checkbox" data-f="ld"><input type="text" data-f="l" placeholder="Book, course, topic…"></div></div>
+  </div>
+  <div class="g2 sec">
+    <div><label class="lab">Today's plan</label><div class="stack" id="plan"></div><button id="pa" style="margin-top:8px">+ Add task</button></div>
+    <div><label class="lab">Data / intelligence</label><div class="stack" id="intel"></div></div>
+  </div>
+  <div class="g2 sec">
+    <div><label class="lab">Lessons learned</label><div class="stack" id="les"></div></div>
+    <div><label class="lab">Quote</label><div class="q stack"><textarea rows="3" data-f="q" placeholder="“…”"></textarea><input type="text" data-f="qa" placeholder="— Author"></div></div>
+  </div>
+  <div class="sec"><label class="lab">Notes</label><textarea rows="6" data-f="n" placeholder="Free-form notes, thoughts, observations…"></textarea></div>
+  <div class="box seal sec"><span id="sh"></span><button id="sb">Seal day</button></div><div class="st" id="st"></div>
+</div>
+</div>
+
+<div id="pmd" hidden>
+<div class="sheet" style="max-width:420px">
+  <div class="top"><div><small id="plab">ENCRYPTION</small><h2 style="font-size:26px">Passphrase</h2></div></div>
+  <p id="ptext" style="color:var(--mut);font-size:13px;line-height:1.6;margin:0 0 14px"></p>
+  <input type="password" id="pin" autocomplete="off" placeholder="Passphrase" style="margin-bottom:10px">
+  <input type="password" id="pin2" autocomplete="off" placeholder="Confirm passphrase" hidden style="margin-bottom:10px">
+  <div class="row" style="justify-content:flex-end;gap:8px;margin-top:4px;flex-wrap:wrap">
+    <button id="pskip" hidden>Seal without encrypting</button>
+    <button id="pcancel">Cancel</button><button id="pok">Continue</button>
+  </div>
+  <p id="perr" style="color:var(--err);font-size:12px;margin-top:10px;min-height:14px;font-family:'JetBrains Mono',monospace"></p>
+</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const WD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const LS="ascension-journal-v1";
+let busy=false, store={}, year=new Date().getFullYear(), cur=null, db=null, uid=null, col=null, timers={};
+const pad=n=>String(n).padStart(2,"0"), key=(y,m,d)=>y+"-"+pad(m+1)+"-"+pad(d);
+const todayKey=()=>{const n=new Date();return key(n.getFullYear(),n.getMonth(),n.getDate())};
+const blank=()=>({t:"",m:0,path:"",b:"",bd:0,f:"",fd:0,h:"",hd:0,l:"",ld:0,plan:[],intel:["","","","","",""],les:["","",""],q:"",qa:"",n:""});
+const filled=d=>!!d&&(d.m>0||["t","path","b","f","h","l","q","n"].some(k=>d[k])||d.bd||d.fd||d.hd||d.ld||(d.plan||[]).some(p=>p.x)||(d.intel||[]).some(Boolean)||(d.les||[]).some(Boolean));
+try{store=JSON.parse(localStorage.getItem(LS)||"{}")}catch(e){store={}}
+const cache=()=>{try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}};
+const dget=(o,p)=>p.split(".").reduce((a,k)=>a==null?a:a[k],o);
+function dset(o,p,v){const ks=p.split(".");let a=o;ks.slice(0,-1).forEach(k=>{a=a[k]});a[ks[ks.length-1]]=v}
+
+function render(){
+  $("#yl").textContent=year;
+  const g=$("#grid");g.textContent="";
+  const add=(c,t)=>{const e=document.createElement("div");e.className=c;if(t!=null)e.textContent=t;g.appendChild(e);return e};
+  add("hd","");for(let d=1;d<=31;d++)add("hd",d);
+  const tk=todayKey();
+  for(let m=0;m<12;m++){
+    add("mo",MN[m]);
+    const dim=new Date(year,m+1,0).getDate();
+    for(let d=1;d<=31;d++){
+      const b=document.createElement("button");b.className="c";
+      if(d>dim){b.className="c x";b.disabled=true}
+      else{
+        const k=key(year,m,d),v=store[k];
+        if(filled(v)){b.classList.add("f");b.style.setProperty("--p",(v.m>0?10+v.m*7.5:12)+"%")}
+        if(v&&v.s)b.classList.add("s");if(k===tk)b.classList.add("t");
+        b.title=MN[m]+" "+d;b.onclick=()=>openDay(k);
+      }
+      g.appendChild(b);
+    }
+  }
+  stats();
+}
+function stats(){
+  const now=new Date(),ty=now.getFullYear(),len=(new Date(year,1,29).getMonth()===1)?366:365;
+  let doy=year<ty?len:year>ty?0:Math.floor((now-new Date(ty,0,0))/864e5);
+  $("#s1").textContent=doy+" / "+len;$("#pb").style.width=(doy/len*100)+"%";
+  let n=0,sum=0,cnt=0;
+  Object.keys(store).forEach(k=>{if(k.startsWith(year+"-")&&filled(store[k])){n++;if(store[k].m>0){sum+=store[k].m;cnt++}}});
+  $("#s2").textContent=n;$("#s4").textContent=cnt?(sum/cnt).toFixed(1):"–";
+  let s=0,d=new Date();if(!filled(store[todayKey()]))d.setDate(d.getDate()-1);
+  while(filled(store[key(d.getFullYear(),d.getMonth(),d.getDate())])){s++;d.setDate(d.getDate()-1)}
+  $("#s3").textContent=s;sig();
+}
+
+function fields(id,name,n,ph){
+  const c=$(id);c.textContent="";
+  for(let i=0;i<n;i++){const t=document.createElement("input");t.type="text";t.dataset.f=name+"."+i;t.placeholder=ph+" "+(i+1);c.appendChild(t)}
+}
+function planRows(d){
+  const c=$("#plan");c.textContent="";
+  d.plan.forEach((p,i)=>{
+    const r=document.createElement("div");r.className="row";
+    const cb=document.createElement("input");cb.type="checkbox";cb.checked=!!p.d;
+    const t=document.createElement("input");t.type="text";t.value=p.x;t.placeholder="Task";
+    const x=document.createElement("button");x.textContent="×";x.className="ico";
+    cb.onchange=()=>{p.d=cb.checked?1:0;changed()};
+    t.oninput=()=>{p.x=t.value;changed()};
+    x.onclick=()=>{d.plan.splice(i,1);planRows(d);changed()};
+    r.append(cb,t,x);c.appendChild(r);
+  });
+}
+async function openDay(k){
+  cur=k;const stored=store[k]||blank();
+  ["plan","intel","les","q","qa","n","path"].forEach(f=>{if(stored[f]==null)stored[f]=blank()[f]});
+  // If this day is sealed+encrypted, decrypt into a transient working copy for display only.
+  // store[k] keeps the ciphertext (d.c) as the source of truth — we never write decrypted
+  // plaintext back into store/localStorage, or the encryption would be pointless.
+  let d=stored;
+  if(stored.c){
+    const copy=Object.assign({},stored);
+    const ok=await unlockDay(copy); // mutates `copy`'s plaintext fields in place, not `stored`
+    if(cur!==k)return; // user navigated away while the passphrase prompt was open
+    if(!ok){cur=null;return} // wrong passphrase or cancelled — don't open the day at all
+    copy._view=true; // marks this as a read-only decrypted display copy — see changed()'s guard
+    d=copy;
+  }
+  document.querySelectorAll("#md [data-f]").forEach(e=>{
+    const v=dget(d,e.dataset.f);
+    if(e.type==="checkbox")e.checked=!!v;else e.value=v==null?"":v;
+  });
+  planRows(d);lockUI(d);
+  const dt=new Date(k+"T00:00:00");
+  $("#dw").textContent=WD[dt.getDay()]+" · Day "+(Math.floor((dt-new Date(dt.getFullYear(),0,0))/864e5));
+  $("#dt").textContent=MN[dt.getMonth()]+" "+dt.getDate()+", "+dt.getFullYear();
+  $("#mv").textContent=d.m;$("#st").textContent="";
+  $("#md").hidden=false;$("#md").scrollTop=0;
+  window._d=d;
+}
+function shift(n){flush();const dt=new Date(cur+"T00:00:00");dt.setDate(dt.getDate()+n);year=dt.getFullYear();render();openDay(key(dt.getFullYear(),dt.getMonth(),dt.getDate()))}
+function changed(){
+  const d=window._d;
+  // Guard: a sealed+encrypted day's inputs are always disabled, so this path shouldn't be
+  // reachable while one is open — but if it ever were, writing the decrypted display copy
+  // over the stored ciphertext would silently destroy the encryption. Refuse rather than
+  // risk that. (The Seal/Unseal button is the one sanctioned way to change a sealed day; it
+  // operates on window._d directly, which is never marked _view, so it's unaffected here.)
+  if(d._view){say("This day is locked for viewing only. Unseal it to make changes.");return}
+  store[cur]=d;
+  $("#mv").textContent=d.m;
+  clearTimeout(timers[cur]);const k=cur;timers[k]=setTimeout(()=>save(k),600);
+  $("#st").textContent="Saving…";cache();render_cell();
+}
+function render_cell(){clearTimeout(render_cell.t);render_cell.t=setTimeout(render,250)}
+document.addEventListener("input",e=>{
+  const f=e.target.dataset&&e.target.dataset.f;if(!f||$("#md").hidden)return;
+  const v=e.target.type==="checkbox"?(e.target.checked?1:0):e.target.type==="range"?+e.target.value:e.target.value;
+  dset(window._d,f,v);changed();
+});
+async function save(k){
+  delete timers[k];const d=store[k];
+  if(!db||!uid){$("#st").textContent="Saved · this device";return}
+  try{
+    const ref=col.doc("d"+k);
+    if(filled(d))await ref.set(d);else await ref.delete();
+    $("#st").textContent="Saved · synced";
+  }catch(e){$("#st").textContent="Saved · this device (sync unavailable)"}
+}
+function flush(){Object.keys(timers).forEach(k=>{clearTimeout(timers[k]);save(k)})}
+function closeDay(){flush();$("#md").hidden=true;cur=null;render()}
+
+$("#dc").onclick=closeDay;$("#dp").onclick=()=>shift(-1);$("#dn").onclick=()=>shift(1);
+$("#pa").onclick=()=>{window._d.plan.push({x:"",d:0});planRows(window._d);changed()};
+$("#py").onclick=()=>{year--;render()};$("#ny").onclick=()=>{year++;render()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#md").hidden)closeDay()});
+$("#tt").onclick=()=>{const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue("--bg").trim()==="#09060f";r.dataset.theme=dark?"light":"dark"};
+
+const say=t=>{$("#msg").textContent=t};
+const validKey=k=>/^\d{4}-\d{2}-\d{2}$/.test(k);
+$("#ex").onclick=async()=>{
+  flush();
+  const out=JSON.stringify({app:"ascension",version:1,exported:new Date().toISOString(),data:store},null,2);
+  const name="ascension-backup-"+todayKey()+".json";
+  try{
+    const dl=await claude.use("downloads");
+    if(dl){await dl.save({filename:name,data:out});say("Export ready.");return}
+  }catch(e){if(e&&e.code==="declined"){say("Export cancelled.");return}}
+  try{
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([out],{type:"application/json"}));
+    a.download=name;document.body.appendChild(a);a.click();a.remove();say("Export ready.");
+  }catch(e){say("Export unavailable in this view.")}
+};
+$("#im").onclick=()=>{$("#fi").value="";$("#fi").click()};
+$("#fi").onchange=async e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  let inc;
+  try{const j=JSON.parse(await f.text());inc=j&&j.data&&typeof j.data==="object"?j.data:j}catch(x){say("Import failed: not valid JSON.");return}
+  const keys=Object.keys(inc||{}).filter(k=>validKey(k)&&inc[k]&&typeof inc[k]==="object");
+  if(!keys.length){say("Import failed: no journal days found.");return}
+  if(cur){flush();$("#md").hidden=true;cur=null}
+  busy=true;say("Importing "+keys.length+" days…");let bad=0;
+  for(const k of keys){
+    store[k]=Object.assign(blank(),inc[k]);
+    if(db&&uid){try{await col.doc("d"+k).set(store[k])}catch(x){bad++}}
+  }
+  cache();busy=false;render();
+  say("Imported "+keys.length+" days"+(bad?" ("+bad+" not synced, kept on this device).":"."));
+};
+
+const st=v=>Array.isArray(v)?"["+v.map(st).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).sort().map(k=>JSON.stringify(k)+":"+st(v[k])).join(",")+"}":JSON.stringify(v);
+const PLAIN_FIELDS=["t","m","path","b","bd","f","fd","h","hd","l","ld","plan","intel","les","q","qa","n"];
+const body=d=>{const c={};PLAIN_FIELDS.forEach(k=>c[k]=d[k]);return st(c)};
+async function sha(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const sealed=()=>Object.keys(store).filter(k=>store[k]&&store[k].s).sort();
+
+/* ---- AES-GCM encryption for sealed days ---- *
+ * Sealing locks a day (as before) AND, if the user sets a passphrase, replaces its
+ * plaintext fields with a single encrypted blob. The hash chain is computed over the
+ * ciphertext (not the plaintext), so Verify chain still works without ever asking for
+ * the passphrase — it proves "nothing changed", not "here is what it says". Reading a
+ * sealed day's content back always requires the passphrase. There is no password
+ * recovery: losing the passphrase means that content is unrecoverable by design. */
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+// The passphrase itself is never stored anywhere — not in a variable that outlives the
+// operation, not in localStorage. Each encrypt/decrypt call takes it fresh from the prompt.
+async function deriveKey(pass,salt){
+  const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:210000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function encBody(plainObj,pass){
+  const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pass,salt);
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(JSON.stringify(plainObj)));
+  return{salt:b64(salt),iv:b64(iv),ct:b64(ct)};
+}
+async function decBody(enc,pass){
+  const key=await deriveKey(pass,unb64(enc.salt));
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(enc.iv)},key,unb64(enc.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+// askPass modes: "set" (choosing a new passphrase, offers a skip-encryption escape hatch),
+// "enter" (unlocking existing content). Resolves a passphrase string, "skip", or null (cancel).
+function askPass(mode){
+  return new Promise(res=>{
+    const m=$("#pmd"),p1=$("#pin"),p2=$("#pin2"),err=$("#perr"),ok=$("#pok"),cancel=$("#pcancel"),skip=$("#pskip");
+    p1.value="";p2.value="";err.textContent="";p2.hidden=mode!=="set";skip.hidden=mode!=="set";
+    $("#ptext").textContent=mode==="set"
+      ?"Set a passphrase to encrypt this day's content. There is no recovery — if it's lost, the content is gone for good."
+      :"Enter the passphrase to decrypt this entry.";
+    m.hidden=false;p1.focus();
+    const close=v=>{m.hidden=true;ok.onclick=null;cancel.onclick=null;skip.onclick=null;p1.onkeydown=null;res(v)};
+    cancel.onclick=()=>close(null);
+    skip.onclick=()=>close("skip");
+    ok.onclick=()=>{
+      if(!p1.value){err.textContent="Passphrase can't be empty.";return}
+      if(mode==="set"&&p1.value!==p2.value){err.textContent="Passphrases don't match.";return}
+      close(p1.value);
+    };
+    p1.onkeydown=e=>{if(e.key==="Enter"&&mode!=="set")ok.onclick()};
+  });
+}
+
+function lockUI(d){
+  const locked=d.s&&d.c; // sealed AND encrypted (content hidden, needs passphrase to view)
+  document.querySelectorAll("#md [data-f], #plan input, #plan button, #pa").forEach(e=>e.disabled=!!d.s);
+  $("#sb").textContent=d.s?"Unseal":"Seal day";
+  if(!d.s){$("#sh").textContent="Seal this day into the hash chain. Sealed days are locked and tamper-evident.";return}
+  const chain="sha256 "+d.s.h.slice(0,20)+"… ← "+(d.s.p==="GENESIS"?"genesis":d.s.p.slice(0,10)+"…");
+  $("#sh").textContent=(locked?"[ ENCRYPTED // SEALED ] ":"[ SEALED ] ")+chain;
+}
+async function unlockDay(d){
+  if(!d.c)return true; // sealed but not encrypted — nothing to unlock
+  const pass=await askPass("enter");
+  if(pass==null)return false;
+  try{
+    const plain=await decBody(d.c,pass);
+    PLAIN_FIELDS.forEach(k=>{if(plain[k]!==undefined)d[k]=plain[k]});
+    return true;
+  }catch(e){say("Wrong passphrase, or this entry is corrupted.");return false}
+}
+$("#sb").onclick=async()=>{
+  // Always operate on the real stored object, never on window._d directly — when viewing a
+  // sealed+encrypted day, window._d is a transient decrypted display copy (see openDay),
+  // and changes made to it are intentionally never saved back (see changed()'s guard).
+  const d=store[cur]||window._d,sh=$("#sh");
+  if(!window.crypto||!crypto.subtle){sh.textContent="Encryption is unavailable in this browser context.";return}
+  const ks=sealed().filter(k=>k!==cur);
+  if(d.s){
+    if(sealed().pop()!==cur){sh.textContent="Ledger is append-only: only the latest seal can be removed.";return}
+    if(d.c){
+      // window._d already holds the decrypted plaintext from opening this day — reuse it
+      // instead of prompting for the passphrase a second time in the same session.
+      if(window._d&&window._d._view)PLAIN_FIELDS.forEach(k=>{d[k]=window._d[k]});
+      else{const ok=await unlockDay(d);if(!ok)return}
+      delete d.c;
+    }
+    delete d.s;
+  }else{
+    if(ks.length&&ks[ks.length-1]>cur){sh.textContent="Ledger is append-only: seal days in chronological order.";return}
+    const choice=await askPass("set"); // a passphrase string, "skip", or null (cancel)
+    if(choice===null)return;
+    let enc=null;
+    if(choice!=="skip")enc=await encBody(Object.fromEntries(PLAIN_FIELDS.map(k=>[k,d[k]])),choice);
+    const p=ks.length?store[ks[ks.length-1]].s.h:"GENESIS";
+    const hashSrc=enc?p+"|"+cur+"|"+enc.salt+enc.iv+enc.ct:p+"|"+cur+"|"+body(d);
+    d.s={h:await sha(hashSrc),p,at:new Date().toISOString()};
+    if(enc){
+      d.c=enc;
+      PLAIN_FIELDS.forEach(k=>{
+        if(k==="plan")d[k]=[];
+        else if(k==="intel")d[k]=["","","","","",""];
+        else if(k==="les")d[k]=["","",""];
+        else if(k==="m"||k==="bd"||k==="fd"||k==="hd"||k==="ld")d[k]=0;
+        else d[k]="";
+      });
+    }
+  }
+  delete d._view; // d is now the authoritative object going forward, editable or re-locked
+  window._d=d;
+  changed();lockUI(d);
+  document.querySelectorAll("#md [data-f]").forEach(e=>{const v=dget(d,e.dataset.f);if(e.type==="checkbox")e.checked=!!v;else e.value=v==null?"":v});
+  planRows(d);
+  if(d.s)flashGlitch(); // sealing is the one real "event" in this app — a bigger payoff than the ambient rare glitch
+};
+$("#vf").onclick=async()=>{
+  if(!window.crypto||!crypto.subtle){say("Hashing unavailable here.");return}
+  const ks=sealed();if(!ks.length){say("No sealed days yet.");return}
+  let prev="GENESIS";
+  for(const k of ks){const d=store[k];
+    const hashSrc=d.c?prev+"|"+k+"|"+d.c.salt+d.c.iv+d.c.ct:prev+"|"+k+"|"+body(d);
+    if(d.s.p!==prev||await sha(hashSrc)!==d.s.h){say("CHAIN BROKEN at "+k+" — entry was altered or reordered.");return}
+    prev=d.s.h}
+  say("Chain intact · "+ks.length+" sealed day"+(ks.length>1?"s":"")+" · head "+prev.slice(0,12)+"…");
+};
+function sig(){
+  const ks=Object.keys(store).filter(k=>k.startsWith(year+"-")&&store[k].m>0),av=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  const sg=$("#sg");sg.textContent="";
+  [["bd","Body"],["fd","Focus"],["hd","Health"],["ld","Learning"]].forEach(([f,n])=>{
+    const w=ks.filter(k=>store[k][f]).map(k=>store[k].m),o=ks.filter(k=>!store[k][f]).map(k=>store[k].m);
+    const r=document.createElement("div");r.className="sr";
+    const a=document.createElement("span");a.textContent=n;
+    const b=document.createElement("div");b.className="sb";const i=document.createElement("i");b.appendChild(i);
+    const c=document.createElement("span");c.style.color="var(--mut)";
+    if(w.length<3||o.length<3){c.textContent="needs 3+ days each way"}
+    else{const x=av(w),y=av(o);i.style.width=x*10+"%";c.textContent=x.toFixed(1)+" done · "+y.toFixed(1)+" skipped · Δ "+(x-y>=0?"+":"")+(x-y).toFixed(1)}
+    r.append(a,b,c);sg.appendChild(r);
+  });
+  const wk=$("#wk");wk.textContent="";
+  [1,2,3,4,5,6,0].forEach(w=>{
+    const v=ks.filter(k=>new Date(k+"T00:00:00").getDay()===w).map(k=>store[k].m);
+    const c=document.createElement("div"),i=document.createElement("i");
+    i.style.height=(v.length?av(v)*10:0)+"%";
+    const l=document.createElement("span");l.textContent=WD[w].slice(0,3)+(v.length?" "+av(v).toFixed(1):"");
+    c.append(i,l);wk.appendChild(c);
+  });
+}
+let rc=0;
+$("#rs").onclick=async()=>{
+  const b=$("#rs");
+  if(!rc){b.textContent="Confirm reset?";b.classList.add("warn");say("This erases every day. Click again within 5 s.");
+    rc=setTimeout(()=>{rc=0;b.textContent="Reset";b.classList.remove("warn");say("")},5000);return}
+  clearTimeout(rc);rc=0;b.textContent="Reset";b.classList.remove("warn");
+  busy=true;Object.keys(timers).forEach(k=>clearTimeout(timers[k]));timers={};
+  if(!$("#md").hidden){$("#md").hidden=true;cur=null}
+  const ks=Object.keys(store);store={};cache();render();say("Resetting…");let bad=0;
+  if(db&&uid){for(const k of ks){try{await col.doc("d"+k).delete()}catch(x){bad++}}}
+  busy=false;say(bad?"Reset locally; "+bad+" cloud entries could not be deleted.":"All data erased.");
+};
+fields("#intel","intel",6,"Insight");fields("#les","les",3,"Lesson");
+render();
+
+/* =====================================================================================
+   CYBERPUNK BACKDROP SYSTEM v2 — three coordinated layers, all built on the same hard
+   performance rules used throughout this project: no ctx.filter blur, no per-element
+   shadowBlur in any per-frame loop, every glow is a pre-rendered sprite reused via
+   drawImage, frame rate capped ~30fps, devicePixelRatio capped at 1.5, everything stops
+   to a single static frame under prefers-reduced-motion.
+
+   Layer A — #bg canvas: deep-parallax layered 3D city. Multiple depth bands of
+             silhouette buildings scroll at different speeds (classic parallax trick —
+             cheap, just different translate speeds per layer) with neon window-lights
+             and a glowing horizon. Mouse/scroll position drives a gentle camera drift.
+   Layer B — #rain canvas: Matrix-style falling glyph rain, composited with
+             mix-blend-mode:screen over layer A so the two visually combine without
+             either canvas needing to know about the other. Runs its own independent
+             cheap column-based draw (one fillText per active column per frame, ~40-70
+             columns) — the same technique terminal-style-design's matrix-rain recipe
+             uses, adapted to two alternating neon colors instead of one phosphor.
+   Layer C — body.glitching: a rare, theatrical full-page glitch "event", NOT a
+             continuous effect. Driven by toggling one class on <body> for ~220ms: CSS
+             handles a stepped transform shift on .page and a color-fringe overlay via
+             .glitch-flash (two flat translucent gradient bars, no filter). This is far
+             more dramatic than v1's tiny canvas jitter, but it is still only a few
+             composited CSS properties animating for a fifth of a second, not a per-
+             frame cost — exactly the "rare event, not a texture" principle this whole
+             family's glitch guidance is built on.
+   ===================================================================================== */
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Layer C: theatrical glitch event (shared trigger for both canvases too) ---------- */
+let glitchActive=false;
+function flashGlitch(){
+  if(RM)return;
+  document.body.classList.add("glitching");
+  glitchActive=true;
+  clearTimeout(flashGlitch._t);
+  flashGlitch._t=setTimeout(()=>{document.body.classList.remove("glitching");glitchActive=false},230);
+}
+// ambient rare trigger — small per-frame-batch probability, same "rare event" discipline
+// as every other skill in this family; never continuous, never more than ~once every
+// several seconds even in the worst case.
+let glitchCooldown=0;
+
+/* ---------- Layer A: deep-parallax city ---------- */
+const cv=$("#bg"),cx=cv.getContext("2d");
+let W=0,H=0,mx=0,my=0,tx=0,ty=0,c1=[244,255,43],c2=[43,246,255],bgc=[9,6,15],fr=0,lastT=0;
+let glowC1=null,glowC2=null,spriteColKey="";
+function fit(){const d=Math.min(devicePixelRatio||1,1.5);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)}
+function fgc(){
+  const cs=getComputedStyle(document.documentElement),a=cs.getPropertyValue("--c1").trim(),b=cs.getPropertyValue("--c2").trim(),g=cs.getPropertyValue("--bg").trim();
+  if(/^#[0-9a-f]{6}$/i.test(a))c1=[1,3,5].map(i=>parseInt(a.substr(i,2),16));
+  if(/^#[0-9a-f]{6}$/i.test(b))c2=[1,3,5].map(i=>parseInt(b.substr(i,2),16));
+  if(/^#[0-9a-f]{6}$/i.test(g))bgc=[1,3,5].map(i=>parseInt(g.substr(i,2),16));
+  glowC1=null;glowC2=null;
+}
+function sprite(rgb,size){
+  const s=size||160,g=document.createElement("canvas");g.width=g.height=s;const gc=g.getContext("2d");
+  const rg=gc.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  rg.addColorStop(0,"rgba("+rgb.join(",")+",.65)");rg.addColorStop(.4,"rgba("+rgb.join(",")+",.18)");rg.addColorStop(1,"rgba("+rgb.join(",")+",0)");
+  gc.fillStyle=rg;gc.fillRect(0,0,s,s);return g;
+}
+// three depth bands of buildings, pre-seeded once (not regenerated per frame)
+function seedBand(n,minH,maxH){return Array.from({length:n},()=>({w:.03+Math.random()*.05,h:minH+Math.random()*(maxH-minH),lit:Math.random()<.4}))}
+const bandFar=seedBand(14,.08,.22), bandMid=seedBand(11,.14,.34), bandNear=seedBand(8,.2,.46);
+function frame(ts){
+  if(!RM)requestAnimationFrame(frame);
+  if(ts-lastT<33)return; // ~30fps cap
+  lastT=ts;
+  const t=RM?0:ts/1000;fr++;
+  if(fr%30===1)fgc();
+  if(!glowC1){glowC1=sprite(c1);glowC2=sprite(c2)}
+  tx+=(mx-tx)*.04;ty+=(my-ty)*.04;
+
+  // rare ambient glitch trigger, independent of the seal-day event trigger above
+  if(!RM&&!glitchActive){
+    glitchCooldown-=1;
+    if(glitchCooldown<=0&&Math.random()<0.0025){flashGlitch();glitchCooldown=240}
+  }
+
+  cx.fillStyle="rgb("+bgc.join(",")+")";cx.fillRect(0,0,W,H);
+  const horizonY=H*.64+ty*16;
+
+  // neon horizon glow — sprite strip, cheap
+  for(let x=-40;x<W+40;x+=180)cx.drawImage(glowC1,x-90+tx*10,horizonY-90,180,180);
+
+  // perspective floor grid below horizon
+  cx.lineWidth=1;
+  for(let i=0;i<=9;i++){
+    const y=horizonY+(H-horizonY)*(i/9)*(i/9);
+    cx.strokeStyle="rgba("+c2.join(",")+","+(.05+i*.012)+")";
+    cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke();
+  }
+  const vanishX=W*.5+tx*70;
+  for(let i=-9;i<=9;i++){
+    cx.strokeStyle="rgba("+c2.join(",")+","+(.04+(9-Math.abs(i))*.004)+")";
+    cx.beginPath();cx.moveTo(vanishX,horizonY);cx.lineTo(vanishX+i*150,H);cx.stroke();
+  }
+
+  // --- three parallax bands, each scrolling at its own speed (classic cheap parallax) ---
+  // far band: slow drift, small, dim
+  drawBand(bandFar, horizonY, 0.12, t*4+tx*8, 0.42, 1);
+  // mid band: medium drift
+  drawBand(bandMid, horizonY, 0.22, t*9+tx*20, 0.64, 1.3);
+  // near band: fastest drift, tallest, brightest window-lights
+  drawBand(bandNear, horizonY, 0.34, t*16+tx*36, 0.92, 1.8);
+
+  // drifting "today" marker, unchanged role from v1 but now reacts subtly to the glitch
+  const px=W*.5+Math.sin(t*.15)*W*.22+tx*40,py=horizonY-100-Math.cos(t*.2)*16;
+  const pulse=.5+.5*Math.sin(t*2.2);
+  cx.drawImage(glowC2,px-45,py-45,90,90);
+  cx.fillStyle="rgba("+c2.join(",")+","+(.7+.3*pulse)+")";
+  cx.beginPath();cx.arc(px,py,2.4,0,7);cx.fill();
+}
+// draws one parallax band of building silhouettes with a neon top-rule and sparse window glow
+function drawBand(band,horizonY,heightScale,scrollX,alpha,topWeight){
+  const bw=W/band.length;
+  band.forEach((b,i)=>{
+    const x=((i*bw-scrollX)%(W+bw)+(W+bw))%(W+bw)-bw;
+    const h=b.h*H*heightScale, y=horizonY-h, w=bw*.72;
+    cx.fillStyle="rgba("+bgc.map((v,idx)=>Math.min(255,v+(idx===2?10:4))).join(",")+","+alpha+")";
+    cx.fillRect(x,y,w,h+H);
+    cx.strokeStyle="rgba("+(i%2?c1:c2).join(",")+","+(.35*alpha+.15)+")";
+    cx.lineWidth=topWeight;
+    cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+w,y);cx.stroke();
+    if(b.lit){ // a couple of flat window-light dots — no glow sprite here, too many instances; flat fill is the cheap choice
+      cx.fillStyle="rgba("+c2.join(",")+","+(.5*alpha)+")";
+      cx.fillRect(x+w*.25,y+h*.2,2,2);
+      cx.fillRect(x+w*.6,y+h*.4,2,2);
+    }
+  });
+}
+fit();fgc();
+addEventListener("resize",()=>{fit();rainFit();if(RM)requestAnimationFrame(frame)});
+addEventListener("pointermove",e=>{mx=(e.clientX/W-.5)*2;my=(e.clientY/H-.5)*2},{passive:true});
+addEventListener("pointerleave",()=>{mx=0;my=0},{passive:true});
+if(RM){$("#tt").addEventListener("click",()=>setTimeout(()=>{fgc();frame(0)},50))}
+requestAnimationFrame(frame);
+
+/* ---------- Layer B: Matrix-style data rain ---------- */
+const rcv=$("#rain"),rx=rcv.getContext("2d");
+const GLYPHS="アイウエオカキクケコサシスセソ0123456789ABCDEF$#&%+-".split("");
+let rainCols=[],rainFS=15,rainLastT=0;
+function rainFit(){
+  const d=Math.min(devicePixelRatio||1,1.5);
+  rcv.width=innerWidth*d;rcv.height=innerHeight*d;rx.setTransform(d,0,0,d,0,0);
+  const cols=Math.ceil(innerWidth/rainFS);
+  rainCols=Array.from({length:cols},(_,i)=>({y:Math.random()*-innerHeight,sp:1.4+Math.random()*2.2,on:Math.random()<0.55,ch:GLYPHS[Math.random()*GLYPHS.length|0],c2:Math.random()<0.18}));
+}
+function rainFrame(ts){
+  if(!RM)requestAnimationFrame(rainFrame);
+  if(ts-rainLastT<40)return; // slightly slower than the main backdrop — rain reads fine at ~25fps and this halves cost further
+  rainLastT=ts;
+  // fade trail with one low-alpha rect instead of clearRect — cheap persistence effect
+  rx.fillStyle="rgba(9,6,15,.14)";rx.fillRect(0,0,innerWidth,innerHeight);
+  rx.font=rainFS+"px JetBrains Mono, monospace";
+  rainCols.forEach((col,i)=>{
+    if(!col.on)return;
+    const x=i*rainFS;
+    rx.fillStyle=col.c2?"rgba("+c2.join(",")+",.8)":"rgba("+c1.join(",")+",.55)";
+    rx.fillText(col.ch,x,col.y);
+    col.y+=col.sp*rainFS*.5;
+    if(Math.random()<0.1)col.ch=GLYPHS[Math.random()*GLYPHS.length|0];
+    if(col.y>innerHeight+rainFS){col.y=Math.random()*-200;col.on=Math.random()<0.55;col.c2=Math.random()<0.18}
+  });
+}
+rainFit();
+if(!RM)requestAnimationFrame(rainFrame);
+else{rx.fillStyle="rgb(9,6,15)";rx.fillRect(0,0,innerWidth,innerHeight);} // single static (empty) frame under reduced motion
+
+/* initial "boot" flicker on the headline + one guaranteed glitch pulse shortly after load,
+   so the richer effects system announces itself once instead of only ever firing by chance */
+if(!RM){
+  $("#h1").classList.add("boot");
+  setTimeout(flashGlitch,900);
+}
+
+(async()=>{
+  try{
+    const user=await claude.use("user"),d=await claude.use("db");
+    if(!user||!d)return;
+    const id=await user.id();if(!id)return;
+    db=d;uid=id;col=db.collection("data/users/"+uid);
+    col.onSnapshot(snap=>{
+      if(busy)return;
+      snap.docs.forEach(s=>{const k=s.id.slice(1);if(s.id[0]!=="d"||k===cur||timers[k])return;s.exists?store[k]=s.data():delete store[k]});
+      cache();render();
+    },()=>{db=null});
+  }catch(e){db=null}
+})();
+</script>
+</body>
+</html>
