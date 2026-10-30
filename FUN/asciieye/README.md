@@ -32,15 +32,7 @@ It renders a detailed almond-shaped eye with a slit pupil, a fibrous iris, a fie
 - tkinter (included with most Python installs, see [Troubleshooting](#troubleshooting))
 - A monospace font (the program picks the first available one of Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, Liberation Mono, Courier New, Courier)
 
-## Installation
 
-```bash
-git clone https://github.com/<your-username>/<your-repo>.git
-cd <your-repo>
-pip install numpy
-```
-
-## Usage
 
 ```bash
 python sauron_eye.py
@@ -117,9 +109,6 @@ Issues and pull requests are welcome. Ideas for future work:
 - Export to GIF / MP4
 - Additional palettes (for example a cold blue eye)
 
-## License
-
-Add your license here (for example MIT) and include a `LICENSE` file in the repository.
 
 ## Disclaimer
 
