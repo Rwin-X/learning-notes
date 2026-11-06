@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculator</title>
+
+  <!-- Thin geometric font. If you are offline, the fallback fonts are used. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- Colors: all of them live here, in one place ---------- */
+    :root {
+      --bg: #eceef2;
+      --panel: #f8f9fb;
+      --ink: #1c2230;
+      --mute: #8a93a3;
+      --line: #dde1e8;
+      --accent: #2f55d4;
+      --error: #c4473d;
+      --eq: #6b7487;
+    }
+
+    /* ---------- Page ---------- */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: "Jost", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+    }
+
+    /* ---------- Live background: a layer behind the calculator ---------- */
+    .background {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* One equation = a row of small pieces (tokens), for example: 7  x  8  =  56 */
+    .equation {
+      position: absolute;
+      display: flex;
+      align-items: baseline;
+      gap: 0.45em;
+      white-space: nowrap;
+      font-size: var(--size, 32px);
+      font-weight: 200;
+      color: var(--eq);
+
+      /* The whole equation slowly floats up and fades away */
+      animation: drift var(--life, 9s) linear forwards;
+    }
+
+    @keyframes drift {
+      0%   { opacity: 1; transform: translateY(0); }
+      78%  { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+
+    /* Equations created from the real calculation of the user */
+    .equation.mine { color: var(--ink); }
+
+    /* Each piece appears after the previous one: first the numbers, then the answer */
+    .token {
+      display: inline-block;
+      opacity: 0;
+      animation: tokenIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      animation-delay: calc(var(--t, 0) * 380ms);
+    }
+
+    @keyframes tokenIn {
+      from { opacity: 0; transform: translateY(10px); filter: blur(5px); }
+      to   { opacity: var(--alpha, 0.6); transform: translateY(0); filter: blur(0); }
+    }
+
+    /* The answer pops in with a small overshoot and gets underlined */
+    .token.result {
+      position: relative;
+      color: var(--accent);
+      animation: resultIn 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      animation-delay: calc(var(--t, 0) * 380ms);
+    }
+
+    @keyframes resultIn {
+      0%   { opacity: 0; transform: scale(0.7); filter: blur(6px); }
+      60%  { opacity: 1; transform: scale(1.12); filter: blur(0); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .token.result::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -2px;
+      height: 1px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: underline 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+      animation-delay: calc(var(--t, 0) * 380ms + 500ms);
+    }
+
+    @keyframes underline {
+      to { transform: scaleX(1); }
+    }
+
+    /* ---------- Calculator panel ---------- */
+    .calculator {
+      position: relative;
+      z-index: 1;           /* stays above the background layer */
+      width: min(360px, 92vw);
+      padding: 28px 22px 22px;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      /* Translucent glass: the equations in the background stay visible behind the panel */
+      background: rgba(248, 249, 251, 0.6);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+    }
+
+    /* ---------- Display ---------- */
+    .display {
+      padding: 0 12px;
+      text-align: right;
+    }
+
+    .history {
+      height: 22px;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--mute);
+    }
+
+    /* The number area clips its content, so new digits slide in from below */
+    .current {
+      height: 76px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      overflow: hidden;
+      font-size: 60px;
+      font-weight: 200;
+      line-height: 1.2;
+      transition: font-size 0.25s ease;
+    }
+
+    .current.medium { font-size: 42px; }
+    .current.small  { font-size: 30px; }
+    .current.error  { color: var(--error); }
+
+    .current span { display: inline-block; }
+
+    /* Every new digit rises into place */
+    .current span.enter {
+      animation: rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes rise {
+      from { transform: translateY(70%); opacity: 0; filter: blur(5px); }
+      to   { transform: translateY(0);   opacity: 1; filter: blur(0); }
+    }
+
+    /* Small fade used for the history line */
+    .history.fade { animation: fade 0.35s ease; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Error feedback: the display shakes once */
+    .display.shake { animation: shake 0.4s ease; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%      { transform: translateX(-8px); }
+      40%      { transform: translateX(7px); }
+      60%      { transform: translateX(-4px); }
+      80%      { transform: translateX(3px); }
+    }
+
+    /* ---------- A line that is drawn and then erased on every calculation ---------- */
+    .line {
+      position: relative;
+      height: 2px;
+      margin: 14px 12px 18px;
+      border-radius: 1px;
+      background: var(--line);
+      overflow: hidden;
+    }
+
+    .line::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      transform: scaleX(0);
+    }
+
+    .line.sweep::after {
+      animation: sweep 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    @keyframes sweep {
+      0%     { transform-origin: left;  transform: scaleX(0); }
+      50%    { transform-origin: left;  transform: scaleX(1); }
+      50.01% { transform-origin: right; transform: scaleX(1); }
+      100%   { transform-origin: right; transform: scaleX(0); }
+    }
+
+    /* ---------- Buttons layout ---------- */
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    button {
+      position: relative;
+      isolation: isolate;   /* keeps the glow layer behind the text */
+      overflow: hidden;
+      padding: 20px 0;
+      border: 0;
+      border-radius: 20px;
+      background: none;
+      color: var(--ink);
+      font: inherit;
+      font-size: 26px;
+      font-weight: 300;
+      cursor: pointer;
+      transition: transform 0.15s ease, color 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+
+      /* On page load the buttons appear one after another */
+      animation: appear 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+      animation-delay: calc(var(--i, 0) * 30ms);
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: scale(0.88); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* A soft glow follows the pointer inside the button */
+    button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle 70px at var(--x, 50%) var(--y, 50%),
+                                  rgba(47, 85, 212, 0.16), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    @media (hover: hover) {
+      button:hover::before { opacity: 1; }
+    }
+
+    button:active,
+    button.pressed { transform: scale(0.93); }
+
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+
+    /* ---------- Button types ---------- */
+    .clear {
+      color: var(--mute);
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .operator { color: var(--accent); }
+
+    /* A small bar slides in under the selected operator */
+    .operator::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 9px;
+      width: 16px;
+      height: 2px;
+      border-radius: 1px;
+      background: var(--accent);
+      transform: translateX(-50%) scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .operator.active::after { transform: translateX(-50%) scaleX(1); }
+
+    .equals {
+      grid-row: span 2;      /* two rows tall */
+      border-radius: 24px;
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .equals::before {
+      background: radial-gradient(circle 90px at var(--x, 50%) var(--y, 50%),
+                                  rgba(255, 255, 255, 0.25), transparent 70%);
+    }
+
+    .zero { grid-column: span 2; }   /* two columns wide */
+
+    /* ---------- Respect the system setting for reduced motion ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Equations are added to this layer by JavaScript -->
+  <div class="background" id="background"></div>
+
+  <div class="calculator" id="calculator">
+
+    <div class="display" id="display">
+      <div class="history" id="history"></div>
+      <div class="current" id="current"></div>
+    </div>
+
+    <div class="line" id="line"></div>
+
+    <!-- data-key is the keyboard key that triggers the button -->
+    <div class="buttons">
+      <button class="clear" data-key="Escape" onclick="clearAll()">AC</button>
+      <button class="clear" data-key="Backspace" onclick="deleteLast()">DEL</button>
+      <button class="operator" data-key="/" onclick="chooseOperator('/')">&divide;</button>
+      <button class="operator" data-key="*" onclick="chooseOperator('*')">&times;</button>
+
+      <button data-key="7" onclick="appendNumber('7')">7</button>
+      <button data-key="8" onclick="appendNumber('8')">8</button>
+      <button data-key="9" onclick="appendNumber('9')">9</button>
+      <button class="operator" data-key="-" onclick="chooseOperator('-')">&minus;</button>
+
+      <button data-key="4" onclick="appendNumber('4')">4</button>
+      <button data-key="5" onclick="appendNumber('5')">5</button>
+      <button data-key="6" onclick="appendNumber('6')">6</button>
+      <button class="operator" data-key="+" onclick="chooseOperator('+')">+</button>
+
+      <button data-key="1" onclick="appendNumber('1')">1</button>
+      <button data-key="2" onclick="appendNumber('2')">2</button>
+      <button data-key="3" onclick="appendNumber('3')">3</button>
+      <button class="equals" data-key="Enter" onclick="calculate()">=</button>
+
+      <button class="zero" data-key="0" onclick="appendNumber('0')">0</button>
+      <button data-key="." onclick="appendNumber('.')">.</button>
+    </div>
+  </div>
+
+  <script>
+    // ---------- State (the data the calculator remembers) ----------
+    let currentInput = "0";       // the number being typed right now
+    let previousInput = "";       // the first number, saved when an operator is pressed
+    let operator = null;          // "+", "-", "*", "/" or null
+    let waitingForSecond = false; // true right after an operator is pressed
+    let justCalculated = false;   // true right after "=" was pressed
+    let lastExpression = "";      // text such as "12 + 3 =" shown after a calculation
+    let shownText = "";           // the text currently drawn on the display
+
+    // Symbols used only for showing the operator on screen
+    const operatorSymbols = { "+": "+", "-": "\u2212", "*": "\u00d7", "/": "\u00f7" };
+
+    // Elements we need many times
+    const displayEl = document.getElementById("display");
+    const historyEl = document.getElementById("history");
+    const currentEl = document.getElementById("current");
+    const lineEl = document.getElementById("line");
+    const backgroundEl = document.getElementById("background");
+
+    // ---------- Helper: restart a CSS animation ----------
+    function replayAnimation(element, className) {
+      element.classList.remove(className);
+      void element.offsetWidth; // forces the browser to forget the old animation
+      element.classList.add(className);
+    }
+
+    // ---------- Draw the main number, one span per character ----------
+    function renderCurrent(text) {
+      currentEl.innerHTML = "";
+
+      for (let i = 0; i < text.length; i++) {
+        const span = document.createElement("span");
+        span.textContent = text[i];
+
+        // Only characters that changed get the "rise" animation
+        if (text[i] !== shownText[i]) {
+          span.classList.add("enter");
+        }
+        currentEl.appendChild(span);
+      }
+
+      shownText = text;
+
+      // Long numbers get a smaller font so they still fit
+      currentEl.classList.toggle("medium", text.length > 8 && text.length <= 12);
+      currentEl.classList.toggle("small", text.length > 12);
+      currentEl.classList.toggle("error", text === "Error");
+    }
+
+    // ---------- Update the whole screen ----------
+    function updateDisplay() {
+      renderCurrent(currentInput);
+
+      // History line: "12 +" while typing, "12 + 3 =" after a calculation
+      let historyText = lastExpression;
+      if (operator !== null) {
+        historyText = previousInput + " " + operatorSymbols[operator];
+      }
+      if (historyEl.textContent !== historyText) {
+        historyEl.textContent = historyText;
+        replayAnimation(historyEl, "fade");
+      }
+
+      // Mark the pending operator button
+      document.querySelectorAll(".operator").forEach(function (button) {
+        button.classList.toggle("active", button.dataset.key === operator);
+      });
+    }
+
+    // ---------- Digit and decimal point buttons ----------
+    function appendNumber(digit) {
+      // Start a fresh number after "=" or after choosing an operator
+      if (justCalculated || waitingForSecond) {
+        currentInput = "0";
+        if (justCalculated) lastExpression = "";
+        justCalculated = false;
+        waitingForSecond = false;
+      }
+
+      // Do not allow two decimal points in one number
+      if (digit === "." && currentInput.includes(".")) return;
+
+      // Replace the leading zero, unless we are typing "0."
+      if (currentInput === "0" && digit !== ".") {
+        currentInput = digit;
+      } else {
+        currentInput = currentInput + digit;
+      }
+
+      updateDisplay();
+    }
+
+    // ---------- Operator buttons (+, -, *, /) ----------
+    function chooseOperator(op) {
+      if (currentInput === "Error") return;
+
+      // If a full expression is already typed (for example 2 + 3 and then +),
+      // calculate it first so the operations can be chained
+      if (operator !== null && !waitingForSecond) {
+        calculate();
+      }
+
+      previousInput = currentInput;
+      operator = op;
+      waitingForSecond = true;
+      justCalculated = false;
+      updateDisplay();
+    }
+
+    // ---------- Equals button ----------
+    function calculate() {
+      // Nothing to calculate yet
+      if (operator === null || waitingForSecond) return;
+
+      const a = parseFloat(previousInput);
+      const b = parseFloat(currentInput);
+      let result;
+
+      if (operator === "+") result = a + b;
+      if (operator === "-") result = a - b;
+      if (operator === "*") result = a * b;
+      if (operator === "/") {
+        if (b === 0) {
+          // Division by zero is not allowed
+          currentInput = "Error";
+          previousInput = "";
+          lastExpression = "";
+          operator = null;
+          justCalculated = true;
+          updateDisplay();
+          replayAnimation(displayEl, "shake");
+          return;
+        }
+        result = a / b;
+      }
+
+      // Round to avoid floating point noise (for example 0.1 + 0.2)
+      result = Math.round(result * 1e10) / 1e10;
+
+      // The pieces of this calculation, used by the background animation
+      const equationTokens = [previousInput, operatorSymbols[operator], currentInput, "=", String(result)];
+
+      lastExpression = previousInput + " " + operatorSymbols[operator] + " " + currentInput + " =";
+      currentInput = String(result);
+      previousInput = "";
+      operator = null;
+      justCalculated = true;
+
+      updateDisplay();
+      replayAnimation(lineEl, "sweep");
+      spawnEquation(equationTokens, true); // show the real calculation in the background
+    }
+
+    // ---------- AC button: reset everything ----------
+    function clearAll() {
+      currentInput = "0";
+      previousInput = "";
+      lastExpression = "";
+      operator = null;
+      waitingForSecond = false;
+      justCalculated = false;
+      updateDisplay();
+    }
+
+    // ---------- DEL button: remove the last character ----------
+    function deleteLast() {
+      if (waitingForSecond) return;
+
+      if (currentInput === "Error" || justCalculated) {
+        clearAll();
+        return;
+      }
+
+      if (currentInput.length > 1) {
+        currentInput = currentInput.slice(0, -1);
+      } else {
+        currentInput = "0";
+      }
+
+      updateDisplay();
+    }
+
+    // =====================================================
+    // Live background: equations that write themselves
+    // =====================================================
+
+    // Users who turned off animations in their system get no background equations
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Random whole number between min and max (both included)
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Build a random equation. The last item of the list is always the answer.
+    function makeEquation() {
+      const type = randomInt(0, 5);
+      let a, b, r;
+
+      if (type === 0) {                       // addition
+        a = randomInt(10, 99);
+        b = randomInt(10, 99);
+        return [a, operatorSymbols["+"], b, "=", a + b].map(String);
+      }
+      if (type === 1) {                       // subtraction
+        a = randomInt(20, 99);
+        b = randomInt(10, a - 1);
+        return [a, operatorSymbols["-"], b, "=", a - b].map(String);
+      }
+      if (type === 2) {                       // multiplication
+        a = randomInt(2, 12);
+        b = randomInt(2, 12);
+        return [a, operatorSymbols["*"], b, "=", a * b].map(String);
+      }
+      if (type === 3) {                       // division (always a whole answer)
+        b = randomInt(2, 12);
+        r = randomInt(2, 12);
+        return [b * r, operatorSymbols["/"], b, "=", r].map(String);
+      }
+      if (type === 4) {                       // square
+        a = randomInt(2, 15);
+        return [a + "\u00b2", "=", a * a].map(String);
+      }
+      r = randomInt(2, 15);                   // square root
+      return ["\u221a" + (r * r), "=", r].map(String);
+    }
+
+    // Create one equation in the background layer
+    function spawnEquation(tokens, isMine) {
+      if (reduceMotion) return;
+
+      const equation = document.createElement("div");
+      equation.className = "equation";
+      if (isMine) equation.classList.add("mine");
+
+      // Random size and brightness. Equations from the user are bigger and clearer.
+      const scale = window.innerWidth < 600 ? 0.7 : 1;
+      const size = isMine ? randomInt(56, 84) : randomInt(28, 64);
+      const alpha = isMine ? 1 : 0.35 + Math.random() * 0.4;
+      equation.style.setProperty("--size", Math.round(size * scale) + "px");
+      equation.style.setProperty("--alpha", alpha.toFixed(2));
+      equation.style.setProperty("--life", isMine ? "12s" : "9s");
+
+      // One span per piece. --t tells the CSS when the piece should appear.
+      tokens.forEach(function (text, index) {
+        const token = document.createElement("span");
+        token.className = "token";
+        if (index === tokens.length - 1) token.classList.add("result");
+        token.style.setProperty("--t", index);
+        token.textContent = text;
+        equation.appendChild(token);
+      });
+
+      backgroundEl.appendChild(equation);
+
+      // Look for a spot that does not touch another equation
+      const others = Array.from(backgroundEl.children)
+        .filter(function (item) { return item !== equation; })
+        .map(function (item) { return item.getBoundingClientRect(); });
+      const width = equation.offsetWidth;
+      const height = equation.offsetHeight;
+      let x = 0;
+      let y = 0;
+      let placed = false;
+
+      for (let tries = 0; tries < 20 && !placed; tries++) {
+        x = Math.random() * Math.max(0, window.innerWidth - width);
+        y = Math.random() * Math.max(0, window.innerHeight - height);
+
+        const touchesOther = others.some(function (box) {
+          return x < box.right + 12 && x + width > box.left - 12 &&
+                 y < box.bottom + 12 && y + height > box.top - 12;
+        });
+        if (!touchesOther) placed = true;
+      }
+
+      // The user's own equation is always shown. Random ones are skipped when there is no space.
+      if (!placed && !isMine) {
+        equation.remove();
+        return;
+      }
+
+      equation.style.left = x + "px";
+      equation.style.top = y + "px";
+
+      // Remove the element when its floating animation is finished
+      equation.addEventListener("animationend", function (event) {
+        if (event.animationName === "drift") equation.remove();
+      });
+    }
+
+    // Add a random equation from time to time
+    function spawnRandomEquation() {
+      if (document.hidden) return;                       // do nothing in a hidden tab
+      if (backgroundEl.children.length >= 12) return;     // never fill the screen
+      spawnEquation(makeEquation(), false);
+    }
+
+    // A first group appears one by one when the page opens, then new ones keep coming
+    for (let i = 0; i < 6; i++) {
+      setTimeout(spawnRandomEquation, 200 + i * 350);
+    }
+    setInterval(spawnRandomEquation, 1100);
+
+    // ---------- Button setup: load animation order and pointer glow ----------
+    document.querySelectorAll(".buttons button").forEach(function (button, index) {
+      // The CSS uses --i to delay each button a little more than the previous one
+      button.style.setProperty("--i", index);
+
+      // Move the glow to the pointer position inside the button
+      button.addEventListener("pointermove", function (event) {
+        const box = button.getBoundingClientRect();
+        button.style.setProperty("--x", (event.clientX - box.left) + "px");
+        button.style.setProperty("--y", (event.clientY - box.top) + "px");
+      });
+    });
+
+    // ---------- Keyboard support ----------
+    document.addEventListener("keydown", function (event) {
+      let key = event.key;
+      if (key === "=") key = "Enter";
+
+      const button = document.querySelector('button[data-key="' + key + '"]');
+      if (!button) return;
+
+      event.preventDefault();
+      button.click();
+
+      // Show the pressed look for a moment
+      button.classList.add("pressed");
+      setTimeout(function () { button.classList.remove("pressed"); }, 120);
+    });
+
+    // ---------- First draw ----------
+    updateDisplay();
+  </script>
+</body>
+</html>
