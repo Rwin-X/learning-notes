@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>آموزش جاوااسکریپت از صفر تا پیشرفته</title>
+<meta name="description" content="دوره کامل خودآموز جاوااسکریپت (JavaScript) برای فارسی‌زبانان: ۱۲ ماژول، تمرین، آزمون و پروژه">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script>
+/* Apply the saved theme before first paint to avoid a flash. */
+try{var s=JSON.parse(localStorage.getItem('jsc.v1')||'{}');if(s.theme)document.documentElement.setAttribute('data-theme',s.theme);}catch(e){}
+</script>
+<style>
+/* ============================================================
+   DESIGN TOKENS — dark by default, light via [data-theme="light"]
+   ============================================================ */
+:root{
+  --bg:#0b0d12;--bg2:#10131a;--card:#141824;--card2:#1a1f2e;--border:#252b3b;--border2:#323a50;
+  --text:#e9ecf4;--muted:#9ba4ba;--faint:#6b7590;
+  --code-bg:#0a0c11;--code-text:#d7dcea;
+  --sx-kw:#c792ea;--sx-str:#a5e075;--sx-num:#f9a76c;--sx-com:#6c7a96;--sx-fn:#7cc4ff;--sx-bi:#ffd479;--sx-op:#89ddff;--sx-re:#ff8fab;--sx-tag:#ff7b8e;--sx-attr:#ffcb6b;
+  --info:#60a5fa;--tip:#34d399;--warn:#fbbf24;--danger:#f87171;--exercise:#a78bfa;--quiz:#22d3ee;
+  --accent:#38bdf8;--accent-text:var(--accent);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.28);
+  --radius:14px;--sidebar-w:310px;--toc-w:220px;
+  --sans:"Vazirmatn",Tahoma,"Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,"JetBrains Mono","Cascadia Code",Consolas,"SF Mono",Menlo,monospace;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f5f6fa;--bg2:#ffffff;--card:#ffffff;--card2:#f0f2f8;--border:#dfe3ee;--border2:#c9cfdf;
+  --text:#141a2a;--muted:#525c75;--faint:#7a849c;
+  --code-bg:#f6f8fc;--code-text:#1f2937;
+  --sx-kw:#7c3aed;--sx-str:#15803d;--sx-num:#c2410c;--sx-com:#6b7280;--sx-fn:#0369a1;--sx-bi:#a16207;--sx-op:#0e7490;--sx-re:#be123c;--sx-tag:#be123c;--sx-attr:#a16207;
+  --info:#1d4ed8;--tip:#047857;--warn:#a16207;--danger:#b91c1c;--exercise:#6d28d9;--quiz:#0e7490;
+  --accent-text:color-mix(in srgb,var(--accent) 62%,#000);
+  --shadow:0 1px 2px rgba(20,26,42,.06),0 8px 24px rgba(20,26,42,.08);
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.95;-webkit-font-smoothing:antialiased}
+a{color:var(--accent-text);text-decoration:none}a:hover{text-decoration:underline}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+::selection{background:color-mix(in srgb,var(--accent) 35%,transparent)}
+code,pre,kbd,.ltr{direction:ltr;unicode-bidi:isolate;text-align:left;font-family:var(--mono)}
+code{font-size:.88em;background:var(--card2);border:1px solid var(--border);padding:.08em .4em;border-radius:6px;color:var(--accent-text);display:inline-block;line-height:1.5}
+kbd{background:var(--card2);border:1px solid var(--border2);border-bottom-width:2px;padding:0 .45em;border-radius:6px;font-size:.85em}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;inset-inline-start:8px;top:-60px;background:var(--accent);color:#000;padding:8px 14px;border-radius:8px;z-index:200}
+.skip:focus{top:8px}
+
+/* ============================================================ LAYOUT */
+.app{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;overflow:auto;background:var(--bg2);border-inline-end:1px solid var(--border);padding:16px 14px 40px;z-index:60;scrollbar-width:thin}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 6px 14px;font-weight:800;font-size:1.05rem;color:var(--text)}
+.brand .logo{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:#f7df1e;color:#111;font:800 15px var(--mono);box-shadow:0 4px 14px rgba(247,223,30,.25)}
+.brand small{display:block;color:var(--muted);font-weight:500;font-size:.74rem;line-height:1.3}
+.nav-link{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;color:var(--muted);font-size:.93rem;line-height:1.5}
+.nav-link:hover{background:var(--card2);color:var(--text);text-decoration:none}
+.nav-link[aria-current="page"]{background:var(--card2);color:var(--text);font-weight:700}
+.nav-sep{height:1px;background:var(--border);margin:12px 4px}
+.mod{margin:4px 0;border-radius:12px}
+.mod>summary{list-style:none;display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;cursor:pointer;font-weight:700;font-size:.93rem;line-height:1.5}
+.mod>summary::-webkit-details-marker{display:none}
+.mod>summary:hover{background:var(--card2)}
+.mod .dot{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font:700 12px var(--mono);background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent-text);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.mod .mtitle{flex:1;min-width:0}
+.mod .pct{font-size:.72rem;color:var(--muted);font-weight:600}
+.mbar{height:3px;border-radius:3px;background:var(--border);margin:0 10px 4px;overflow:hidden}
+.mbar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .5s}
+.lessons{margin:2px 0 8px;padding:0 0 0 0;list-style:none;border-inline-start:2px solid color-mix(in srgb,var(--accent) 35%,transparent);margin-inline-start:22px}
+.lessons a{display:flex;gap:8px;align-items:flex-start;padding:5px 10px;font-size:.86rem;color:var(--muted);line-height:1.6;border-radius:8px}
+.lessons a:hover{color:var(--text);background:var(--card2);text-decoration:none}
+.lessons a[aria-current="page"]{color:var(--text);background:color-mix(in srgb,var(--accent) 14%,transparent);font-weight:700}
+.lessons .tick{flex:none;width:16px;height:16px;margin-top:5px;border-radius:50%;border:1.5px solid var(--border2);display:grid;place-items:center;font-size:10px;color:#000}
+.lessons .done .tick{background:var(--accent);border-color:var(--accent)}
+.main-col{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;padding:10px clamp(12px,3vw,28px);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.icon-btn{display:inline-grid;place-items:center;min-width:40px;height:40px;padding:0 10px;border-radius:11px;border:1px solid var(--border);background:var(--card);color:var(--text);transition:background .2s,border-color .2s}
+.icon-btn:hover{background:var(--card2);border-color:var(--border2)}
+#menuBtn{display:none}
+.searchbox{position:relative;flex:1;max-width:520px}
+.searchbox input{width:100%;height:40px;padding:0 14px;border-radius:11px;border:1px solid var(--border);background:var(--card);color:var(--text)}
+.searchbox input::placeholder{color:var(--faint)}
+.results{position:absolute;inset-inline:0;top:46px;background:var(--card);border:1px solid var(--border2);border-radius:12px;box-shadow:var(--shadow);max-height:min(60vh,460px);overflow:auto;display:none;z-index:70}
+.results.open{display:block}
+.results a{display:block;padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);line-height:1.7}
+.results a:last-child{border:0}.results a:hover,.results a:focus{background:var(--card2);text-decoration:none}
+.results small{display:block;color:var(--muted);font-size:.8rem}
+.results mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;border-radius:3px;padding:0 2px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:11px;border:1px solid var(--border);background:var(--card);font-size:.88rem;white-space:nowrap}
+.spacer{flex:1}
+.content{width:100%;max-width:1180px;margin:0 auto;padding:28px clamp(14px,3vw,32px) 90px;display:grid;grid-template-columns:minmax(0,1fr);gap:34px}
+.content.has-toc{grid-template-columns:minmax(0,1fr) var(--toc-w)}
+.toc{position:sticky;top:78px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;font-size:.86rem;border-inline-start:2px solid var(--border);padding-inline-start:14px}
+.toc b{display:block;margin-bottom:6px;color:var(--muted);font-size:.78rem;letter-spacing:.02em}
+.toc a{display:block;padding:3px 0;color:var(--muted);line-height:1.6}
+.toc a.active{color:var(--accent-text);font-weight:700}
+.page{min-width:0;animation:rise .45s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ============================================================ GENERIC COMPONENTS */
+h1,h2,h3,h4{line-height:1.5;margin:0 0 .5em}
+h1{font-size:clamp(1.7rem,3.2vw,2.35rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.4rem;font-weight:800}
+h3{font-size:1.14rem;font-weight:700}
+p{margin:0 0 1em}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:16px}
+.grid.cols-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.grid.cols-3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:6px 16px;border-radius:11px;border:1px solid var(--border2);background:var(--card2);color:var(--text);font-weight:600;font-size:.92rem;transition:transform .15s,background .2s,border-color .2s}
+.btn:hover{background:var(--border);text-decoration:none}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#07090d}
+.btn.primary:hover{filter:brightness(1.08);background:var(--accent)}
+.btn.sm{min-height:32px;padding:2px 11px;font-size:.82rem;border-radius:9px}
+.btn.danger{border-color:color-mix(in srgb,var(--danger) 60%,transparent);color:var(--danger)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.muted{color:var(--muted)}
+.badge-pill{display:inline-block;padding:1px 10px;border-radius:99px;font-size:.76rem;font-weight:700;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent-text);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+.crumbs{font-size:.86rem;color:var(--muted);margin-bottom:10px}
+.hero{padding:clamp(22px,4vw,44px);border-radius:22px;border:1px solid var(--border);background:radial-gradient(900px 300px at 85% -20%,color-mix(in srgb,var(--accent) 22%,transparent),transparent),var(--card);position:relative;overflow:hidden}
+.hero p.lead{font-size:1.1rem;color:var(--muted);max-width:62ch}
+.ring{--p:0;width:var(--s,96px);height:var(--s,96px);border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--border) 0);position:relative;flex:none}
+.ring::before{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--card)}
+.ring span{position:relative;font-weight:800;font-size:1.15rem}
+.progress{height:8px;border-radius:8px;background:var(--border);overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--accent);border-radius:8px;transition:width .5s}
+.mcard{display:flex;flex-direction:column;gap:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);padding:16px;color:var(--text);transition:transform .2s,border-color .2s;border-top:3px solid var(--accent)}
+.mcard:hover{transform:translateY(-3px);border-color:var(--accent);text-decoration:none}
+.mcard .num{font:800 .8rem var(--mono);color:var(--accent-text)}
+.mcard h3{margin:0;font-size:1.02rem}
+.mcard p{margin:0;font-size:.88rem;color:var(--muted);line-height:1.8}
+.roadmap{display:flex;flex-wrap:wrap;gap:0;position:relative;padding:8px 0}
+.rm{flex:1 1 150px;min-width:140px;text-align:center;padding:10px 8px;position:relative}
+.rm .node{width:48px;height:48px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;font:800 14px var(--mono);color:#07090d;background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 22%,transparent)}
+.rm.done .node{box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 22%,transparent),0 0 22px color-mix(in srgb,var(--accent) 60%,transparent)}
+.rm a{color:var(--text);font-size:.86rem;font-weight:700;line-height:1.5;display:block}
+.rm small{color:var(--muted)}
+table.t{width:100%;border-collapse:collapse;font-size:.92rem;margin:0 0 1.2em;display:block;overflow-x:auto}
+table.t th,table.t td{border:1px solid var(--border);padding:8px 12px;text-align:start;vertical-align:top;line-height:1.7}
+table.t th{background:var(--card2);font-weight:700}
+table.t td code{white-space:pre-wrap}
+ul.list,ol.list{margin:0 0 1em;padding-inline-start:1.5em}
+ul.list li,ol.list li{margin-bottom:.35em}
+
+/* section blocks in lessons */
+.lesson-head{margin-bottom:22px}
+.lesson-head .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.sec{margin:34px 0;scroll-margin-top:84px}
+.sec>h2{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.sec>h2 .ic{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:10px;background:color-mix(in srgb,var(--accent) 16%,transparent);font-size:18px}
+.page h3{scroll-margin-top:84px;color:var(--accent-text);margin-top:1.6em}
+.callout{--c:var(--info);border-radius:12px;padding:14px 18px;margin:1.1em 0;border:1px solid color-mix(in srgb,var(--c) 35%,transparent);border-inline-start:5px solid var(--c);background:color-mix(in srgb,var(--c) 9%,var(--card))}
+.callout .ct{font-weight:800;color:var(--c);margin-bottom:4px;display:flex;gap:8px;align-items:center}
+.callout p:last-child{margin-bottom:0}
+.callout.tip{--c:var(--tip)}.callout.warning{--c:var(--warn)}.callout.danger{--c:var(--danger)}.callout.exercise{--c:var(--exercise)}.callout.quiz{--c:var(--quiz)}.callout.analogy{--c:var(--accent-text)}
+
+/* ============================================================ CODE: highlighter + editor + output */
+.tk-kw{color:var(--sx-kw)}.tk-str{color:var(--sx-str)}.tk-num{color:var(--sx-num)}.tk-com{color:var(--sx-com);font-style:italic}
+.tk-fn{color:var(--sx-fn)}.tk-bi{color:var(--sx-bi)}.tk-op{color:var(--sx-op)}.tk-re{color:var(--sx-re)}.tk-tag{color:var(--sx-tag)}.tk-attr{color:var(--sx-attr)}
+.cb{margin:1.2em 0;border:1px solid var(--border);border-radius:14px;background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+.cb-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--card2)}
+.cb-title{flex:1;min-width:140px;font-weight:700;font-size:.92rem}
+.cb-desc{padding:10px 14px 0;font-size:.92rem;color:var(--muted)}
+.cb-body{padding:12px}
+.ed{position:relative;direction:ltr;background:var(--code-bg);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ed pre,.ed textarea{margin:0;padding:12px 14px;font:13.5px/1.65 var(--mono);white-space:pre;tab-size:2;border:0;letter-spacing:0;text-align:left;direction:ltr;word-spacing:0}
+.ed pre{position:absolute;inset:0;overflow:hidden;pointer-events:none;color:var(--code-text)}
+.ed pre code{all:unset;font:inherit;white-space:pre}
+.ed textarea{position:relative;display:block;width:100%;background:transparent;color:transparent;caret-color:var(--text);resize:none;overflow:auto;outline:none;max-height:520px;min-height:48px}
+.ed.editing{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.ed textarea::selection{background:color-mix(in srgb,var(--accent) 38%,transparent);color:transparent}
+.out{margin-top:10px;border:1px solid var(--border);border-radius:10px;background:var(--code-bg);overflow:hidden}
+.out[hidden]{display:none}
+.out-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 12px;font-size:.78rem;color:var(--muted);border-bottom:1px solid var(--border);background:var(--card2)}
+.out-b{padding:8px 14px;font:13px/1.65 var(--mono);direction:ltr;text-align:left;max-height:340px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.ln{display:block;padding:1px 0}
+.ln.warn{color:var(--warn)}.ln.error{color:var(--danger)}.ln.info{color:var(--info)}.ln.sys{color:var(--faint);font-style:italic}
+.err-fa{direction:rtl;text-align:right;font-family:var(--sans);font-size:.92rem;line-height:1.8;margin:6px 0 2px;padding:8px 12px;border-radius:9px;background:color-mix(in srgb,var(--danger) 12%,transparent);border:1px solid color-mix(in srgb,var(--danger) 40%,transparent);color:var(--text);white-space:normal}
+.err-fa b{color:var(--danger)}
+.prev{margin-top:10px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff}
+.prev[hidden]{display:none}
+.prev iframe{display:block;width:100%;height:230px;border:0;background:#fff}
+.expect{margin-top:8px;font-size:.82rem;color:var(--muted)}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.cmp>div{border-radius:12px;border:1px solid var(--border);overflow:hidden;background:var(--card)}
+.cmp .lab{padding:6px 12px;font-weight:800;font-size:.86rem}
+.cmp .bad .lab{background:color-mix(in srgb,var(--danger) 18%,transparent);color:var(--danger)}
+.cmp .good .lab{background:color-mix(in srgb,var(--tip) 18%,transparent);color:var(--tip)}
+.cmp .ed{border:0;border-radius:0}
+.mistake{margin:18px 0}
+.mistake .why{margin-top:8px;font-size:.94rem}
+
+/* exercises */
+.ex{border:1px solid color-mix(in srgb,var(--exercise) 40%,var(--border));border-radius:14px;margin:16px 0;background:var(--card);overflow:hidden}
+.ex-h{display:flex;align-items:center;gap:10px;padding:10px 14px;background:color-mix(in srgb,var(--exercise) 10%,var(--card2));font-weight:800}
+.lvl{font-size:.74rem;padding:1px 10px;border-radius:99px;font-weight:800}
+.lvl.easy{background:color-mix(in srgb,var(--tip) 20%,transparent);color:var(--tip)}
+.lvl.medium{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.lvl.hard{background:color-mix(in srgb,var(--danger) 20%,transparent);color:var(--danger)}
+.ex-b{padding:14px}
+details.fold{border:1px solid var(--border);border-radius:10px;margin:10px 0;background:var(--card2)}
+details.fold>summary{cursor:pointer;padding:8px 14px;font-weight:700;font-size:.92rem;list-style:none}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"◂";display:inline-block;margin-inline-end:8px;transition:transform .2s;color:var(--accent-text)}
+details.fold[open]>summary::before{transform:rotate(-90deg)}
+details.fold>.fold-b{padding:4px 14px 14px}
+
+/* quiz */
+.quiz{border:1px solid color-mix(in srgb,var(--quiz) 40%,var(--border));border-radius:14px;background:var(--card);padding:16px;margin:14px 0}
+.quiz .qn{font-weight:800;color:var(--quiz);font-size:.82rem;margin-bottom:4px}
+.quiz .q{font-weight:700;margin-bottom:10px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:start;width:100%;padding:9px 14px;border-radius:11px;border:1px solid var(--border2);background:var(--card2);line-height:1.7;transition:border-color .15s,background .15s}
+.opt:hover:not([disabled]){border-color:var(--quiz)}
+.opt .k{flex:none;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font:700 .74rem var(--mono);background:var(--border);margin-top:2px}
+.opt.right{border-color:var(--tip);background:color-mix(in srgb,var(--tip) 14%,var(--card2))}
+.opt.wrong{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 14%,var(--card2))}
+.opt[disabled]{cursor:default}
+.fb{margin-top:10px;padding:10px 14px;border-radius:10px;font-size:.93rem;display:none}
+.fb.show{display:block}
+.fb.ok{background:color-mix(in srgb,var(--tip) 12%,transparent);border:1px solid color-mix(in srgb,var(--tip) 40%,transparent)}
+.fb.no{background:color-mix(in srgb,var(--danger) 12%,transparent);border:1px solid color-mix(in srgb,var(--danger) 40%,transparent)}
+.complete-bar{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-top:30px;padding:16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card)}
+.nav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.nav-pn a{display:block;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text)}
+.nav-pn a:hover{border-color:var(--accent);text-decoration:none}
+.nav-pn small{display:block;color:var(--muted)}
+.nav-pn .nx{text-align:end}
+
+/* tests, summary, badges */
+.score-big{font-size:2.6rem;font-weight:800;color:var(--accent-text)}
+.review{border-inline-start:4px solid var(--danger);padding:10px 14px;margin:10px 0;background:var(--card);border-radius:10px;border:1px solid var(--border)}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.bdg{text-align:center;padding:14px 8px;border-radius:14px;border:1px solid var(--border);background:var(--card);filter:grayscale(1);opacity:.55}
+.bdg.on{filter:none;opacity:1;border-color:var(--accent);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 25%,transparent)}
+.bdg .em{font-size:2rem;line-height:1.2}
+.bdg small{display:block;color:var(--muted);font-size:.74rem;line-height:1.5}
+
+/* study plan */
+.plan-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.plan-tabs button[aria-pressed="true"]{background:var(--accent);color:#07090d;border-color:var(--accent)}
+.plan-row.done td{opacity:.55}
+.chk{width:20px;height:20px;accent-color:var(--accent)}
+
+/* playground */
+.pg{display:grid;gap:14px}
+.snips{display:flex;flex-wrap:wrap;gap:8px}
+.snip{display:inline-flex;gap:2px;border:1px solid var(--border2);border-radius:10px;overflow:hidden;background:var(--card2)}
+.snip button{border:0;background:transparent;padding:4px 12px;font-size:.86rem}
+.snip button:hover{background:var(--border)}
+
+/* event loop widget */
+.evl{border:1px solid var(--border);border-radius:14px;background:var(--card);padding:14px;margin:1.2em 0}
+.evl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0}
+.evl-box{border:1px solid var(--border2);border-radius:12px;padding:8px 10px;min-height:110px;background:var(--card2)}
+.evl-box h4{margin:0 0 6px;font-size:.84rem;color:var(--accent-text)}
+.evl-item{direction:ltr;text-align:left;font:12.5px var(--mono);padding:3px 8px;margin:3px 0;border-radius:7px;background:color-mix(in srgb,var(--accent) 18%,transparent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);animation:pop .3s ease}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+.evl-msg{min-height:3.4em;padding:10px 14px;border-radius:10px;background:color-mix(in srgb,var(--info) 10%,transparent);border:1px solid color-mix(in srgb,var(--info) 35%,transparent)}
+
+#toTop{position:fixed;inset-inline-start:18px;bottom:18px;z-index:55;opacity:0;pointer-events:none;transition:opacity .25s}
+#toTop.show{opacity:1;pointer-events:auto}
+.toast{position:fixed;inset-inline:0;bottom:22px;margin:auto;width:max-content;max-width:90vw;padding:10px 18px;border-radius:12px;background:var(--card2);border:1px solid var(--border2);box-shadow:var(--shadow);z-index:300;animation:rise .3s ease}
+.backdrop{display:none}
+dialog{border:1px solid var(--border2);border-radius:16px;background:var(--card);color:var(--text);padding:22px;max-width:min(92vw,440px)}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+
+/* ============================================================ RESPONSIVE */
+@media (max-width:1100px){.content.has-toc{grid-template-columns:minmax(0,1fr)}.toc{display:none}}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .sidebar{position:fixed;inset-block:0;inset-inline-start:0;width:min(86vw,340px);transform:translateX(100%);transition:transform .3s;box-shadow:var(--shadow)}
+  html[dir="rtl"] .sidebar{transform:translateX(100%)}
+  body.menu-open .sidebar{transform:none}
+  body.menu-open .backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:55}
+  #menuBtn{display:inline-grid}
+  .chip.hide-sm{display:none}
+  .nav-pn{grid-template-columns:1fr}
+}
+@media (max-width:520px){body{font-size:15.5px}.cb-body{padding:8px}.ed pre,.ed textarea{font-size:12.5px}.topbar{gap:6px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{.sidebar,.topbar,#toTop,.toc{display:none}.app{display:block}}
+
+/* ---- graded exam radios ---- */
+.opt input[type="radio"]{position:absolute;opacity:0;pointer-events:none}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+label.opt{cursor:pointer}
+label.opt.sel{border-color:var(--quiz);background:color-mix(in srgb,var(--quiz) 14%,var(--card2))}
+fieldset.quiz{margin-inline:0}
+fieldset.quiz legend{padding:0 6px}
+.ed-host{min-width:0}
+
+.btn[hidden],[hidden]{display:none!important}
+.prompt-row{display:block;margin-top:8px;font-size:.86rem}
+.prompt-row[hidden]{display:none}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">پرش به محتوای اصلی</a>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="فهرست دوره"></aside>
+  <div class="main-col">
+    <header class="topbar">
+      <button class="icon-btn" id="menuBtn" aria-label="باز و بسته کردن فهرست" aria-controls="sidebar" aria-expanded="false">☰</button>
+      <div class="searchbox" role="search">
+        <input id="searchInput" type="search" placeholder="جستجو در درس‌ها…  ( / )" aria-label="جستجو در درس‌ها" autocomplete="off">
+        <div class="results" id="searchResults" role="listbox" aria-label="نتایج جستجو"></div>
+      </div>
+      <span class="spacer"></span>
+      <span class="chip hide-sm" id="streakChip" title="روزهای متوالی مطالعه">🔥 <b id="streakNum">۰</b> روز</span>
+      <a class="chip" id="ringChip" href="#/progress" title="پیشرفت کل دوره">📈 <b id="ringNum">۰٪</b></a>
+      <button class="icon-btn" id="themeBtn" aria-label="تغییر پوسته تیره و روشن">🌙</button>
+    </header>
+    <main id="main" class="content" tabindex="-1"></main>
+  </div>
+</div>
+<div class="backdrop" id="backdrop"></div>
+<button class="icon-btn" id="toTop" aria-label="بازگشت به بالای صفحه">↑</button>
+<dialog id="confirmDlg" aria-labelledby="dlgTitle">
+  <h3 id="dlgTitle">مطمئن هستید؟</h3>
+  <p id="dlgText"></p>
+  <div class="row" style="justify-content:flex-end">
+    <button class="btn" id="dlgNo">انصراف</button>
+    <button class="btn danger" id="dlgYes">بله، انجام شود</button>
+  </div>
+</dialog>
+<noscript><p style="padding:2rem">برای استفاده از این دوره باید جاوااسکریپت مرورگر فعال باشد.</p></noscript>
+
+<script>
+/* ───── core.js ───── */
+'use strict';
+/* =====================================================================
+   SECTION 1 — UTILITIES
+   ===================================================================== */
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const toFa = (n) => String(n).replace(/\d/g, (d) => FA_DIGITS[d]);
+
+/** Normalizes Persian/Arabic text so that search is forgiving. */
+function normalizeText(text) {
+  return String(text).toLowerCase()
+    .replace(/[ً-ٰٟـ]/g, '')
+    .replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/ۀ/g, 'ه').replace(/ة/g, 'ه')
+    .replace(/[۰-۹]/g, (d) => FA_DIGITS.indexOf(d))
+    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+    .replace(/‌/g, ' ');
+}
+
+/** Converts standalone numbers in prose to Persian digits (never touches code or Latin-adjacent digits). */
+function persianizeDigits(htmlText) {
+  return htmlText.replace(/&#\d+;|<[^>]*>|\d+(?:\.\d+)?/g, (match, offset, whole) => {
+    if (match[0] === '&' || match[0] === '<') return match;
+    const prev = whole[offset - 1] || '';
+    const next = whole[offset + match.length] || '';
+    if (/[A-Za-z_$]/.test(prev) || /[A-Za-z_$]/.test(next)) return match;
+    return toFa(match);
+  });
+}
+
+/** Inline mini-markup used by all lesson text: `code`, **bold**, and Persian digits in prose. */
+function md(text) {
+  return String(text).split(/(`[^`]+`)/g).map((part) => {
+    if (part.length > 2 && part[0] === '`' && part.endsWith('`')) return '<code>' + escapeHtml(part.slice(1, -1)) + '</code>';
+    return persianizeDigits(escapeHtml(part).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>'));
+  }).join('');
+}
+
+/** Plain text version of md() input, used for search indexing. */
+const stripMarkup = (text) => String(text).replace(/[`*]/g, '');
+
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+function todayKey(offsetDays = 0) { const d = new Date(); d.setDate(d.getDate() + offsetDays); return d.toLocaleDateString('en-CA'); }
+function shuffleSeeded(array, seed) {
+  const a = array.slice(); let s = seed >>> 0 || 1;
+  const rnd = () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function toast(message) {
+  const node = document.createElement('div');
+  node.className = 'toast'; node.setAttribute('role', 'status'); node.textContent = message;
+  document.body.appendChild(node);
+  setTimeout(() => node.remove(), 2200);
+}
+function confirmDialog(title, text) {
+  return new Promise((resolve) => {
+    const dlg = $('#confirmDlg');
+    $('#dlgTitle').textContent = title; $('#dlgText').textContent = text;
+    const finish = (value) => { dlg.close(); resolve(value); };
+    $('#dlgYes').onclick = () => finish(true);
+    $('#dlgNo').onclick = () => finish(false);
+    dlg.oncancel = () => resolve(false);
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else resolve(window.confirm(text));
+  });
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (err) { /* ignored */ } ta.remove();
+  }
+  toast('کپی شد ✓');
+}
+
+/* =====================================================================
+   SECTION 2 — PERSISTENT STORE (localStorage with safe fallback)
+   ===================================================================== */
+const Store = {
+  KEY: 'jsc.v1',
+  data: null,
+  defaults() {
+    return { done: {}, quiz: {}, tests: {}, final: null, last: null, theme: 'dark', plan: { choice: 8, checks: {} }, days: [], snippets: [], playground: '', openModules: {} };
+  },
+  load() {
+    let parsed = {};
+    try { parsed = JSON.parse(localStorage.getItem(this.KEY)) || {}; } catch (e) { parsed = {}; }
+    this.data = Object.assign(this.defaults(), parsed);
+  },
+  save() { try { localStorage.setItem(this.KEY, JSON.stringify(this.data)); } catch (e) { /* storage unavailable: keep in memory */ } },
+  reset() { this.data = this.defaults(); try { localStorage.removeItem(this.KEY); } catch (e) { /* ignored */ } },
+  touchDay() {
+    const t = todayKey();
+    if (!this.data.days.includes(t)) { this.data.days.push(t); this.data.days = this.data.days.slice(-400); this.save(); }
+  },
+  streak() {
+    const set = new Set(this.data.days);
+    let offset = set.has(todayKey()) ? 0 : -1, count = 0;
+    while (set.has(todayKey(offset))) { count++; offset--; }
+    return count;
+  },
+};
+
+/* =====================================================================
+   SECTION 3 — MODULE METADATA (12 modules, one accent colour each)
+   Lessons are attached later through JSCourse.addLessons(...)
+   ===================================================================== */
+const MODULE_META = [
+  { icon: '🚀', color: '#38bdf8', title: 'شروع کار', en: 'Getting Started', badge: 'کاشف', summary: 'جاوااسکریپت چیست، کجا اجرا می‌شود و چگونه محیط کار و اولین برنامه‌تان را آماده کنید.',
+    topics: ['جاوااسکریپت چیست و کجا اجرا می‌شود', 'تاریخچه کوتاه', 'ساخت محیط کار: VS Code، کنسول مرورگر، تگ script، Node.js', 'اولین برنامه', 'خواندن پیام‌های خطا'] },
+  { icon: '🧱', color: '#34d399', title: 'مبانی زبان', en: 'Fundamentals', badge: 'بنیان‌گذار', summary: 'متغیرها، انواع داده، عملگرها، تبدیل نوع و ورودی/خروجی؛ آجرهای اصلی هر برنامه.',
+    topics: ['توضیح‌ها (Comment)', 'var / let / const', 'قواعد نام‌گذاری', 'انواع داده و typeof', 'عملگرها و == در برابر ===', 'تبدیل نوع (Coercion)', 'رشته‌های قالب‌دار', 'console، alert و prompt'] },
+  { icon: '🔀', color: '#fbbf24', title: 'کنترل جریان', en: 'Control Flow', badge: 'مسیریاب', summary: 'شرط‌ها و حلقه‌ها؛ یاد می‌گیرید برنامه چطور تصمیم بگیرد و کارها را تکرار کند.',
+    topics: ['if / else و عملگر سه‌تایی', 'switch', 'truthy و falsy', 'ارزیابی کوتاه‌مدار، ?? و ?.', 'حلقه‌های for، while، do-while، for...of، for...in', 'break، continue و برچسب‌ها'] },
+  { icon: '⚙️', color: '#f472b6', title: 'توابع', en: 'Functions', badge: 'سازنده', summary: 'از تابع ساده تا closure، بازگشت و call/apply/bind؛ قلب جاوااسکریپت.',
+    topics: ['تعریف و عبارت تابع', 'تابع پیکانی', 'پارامتر پیش‌فرض، rest و spread', 'دامنه (Scope) و Hoisting', 'Closure', 'Callback و توابع مرتبه بالا', 'توابع خالص، IIFE و بازگشت', 'call / apply / bind'] },
+  { icon: '🗂️', color: '#a78bfa', title: 'آرایه‌ها و اشیا', en: 'Arrays & Objects', badge: 'ساختاردهنده', summary: 'ذخیره و پردازش مجموعه داده‌ها: متدهای آرایه، اشیا، Map/Set، JSON و تغییرناپذیری.',
+    topics: ['ساخت آرایه و متدهای اصلی', 'map، filter، reduce و ...', 'اشیا و متدها', 'Destructuring و Spread', 'کپی سطحی و عمیق', 'Map، Set، WeakMap', 'JSON', 'Immutability'] },
+  { icon: '🔤', color: '#fb923c', title: 'رشته، عدد، تاریخ و RegExp', en: 'Strings, Numbers, Date & RegExp', badge: 'واژه‌پرداز', summary: 'کار با متن، عدد و زمان؛ قالب‌بندی با Intl (حتی تقویم فارسی) و عبارت‌های باقاعده.',
+    topics: ['متدهای رشته', 'عدد، Math و دقت اعشار', 'Date', 'Intl و تقویم فارسی', 'مبانی RegExp', 'الگوهای کاربردی'] },
+  { icon: '🖱️', color: '#2dd4bf', title: 'DOM و رویدادها', en: 'DOM & Events', badge: 'رابط‌ساز', summary: 'صفحه وب را زنده کنید: انتخاب و ساخت عناصر، رویدادها، فرم‌ها و ذخیره‌سازی مرورگر.',
+    topics: ['درخت DOM و انتخاب عناصر', 'ساخت، تغییر و حذف گره‌ها', 'کلاس‌ها و استایل', 'رویدادها، Bubbling، Capturing', 'Event Delegation', 'فرم‌ها و اعتبارسنجی', 'localStorage / sessionStorage', 'IntersectionObserver'] },
+  { icon: '🧬', color: '#f87171', title: 'شی‌گرایی', en: 'Object-Oriented JS', badge: 'معمار', summary: 'this، prototype، کلاس‌ها، وراثت، فیلدهای خصوصی و ترکیب در برابر وراثت.',
+    topics: ['کلمه this', 'تابع سازنده و prototype', 'کلاس‌های ES6', 'extends و super', 'getter / setter / static / #private', 'Composition و Mixin'] },
+  { icon: '⏳', color: '#60a5fa', title: 'جاوااسکریپت ناهمگام', en: 'Asynchronous JS', badge: 'زمان‌شناس', summary: 'Event Loop، Promise، async/await و fetch؛ کار با کارهایی که زمان می‌برند.',
+    topics: ['همگام در برابر ناهمگام', 'Call Stack و Event Loop', 'setTimeout و setInterval', 'Callback Hell', 'Promise و ترکیب‌کننده‌ها', 'async / await', 'مدیریت خطا', 'fetch و AbortController'] },
+  { icon: '✨', color: '#818cf8', title: 'جاوااسکریپت مدرن', en: 'Modern JS (ES6+)', badge: 'نوآور', summary: 'ماژول‌ها، تکرارگرها، مولدها، Proxy و ابزارهای تازه زبان.',
+    topics: ['import / export', 'Iterator و Generator', 'Symbol', 'Proxy و Reflect', 'Tagged Template', 'structuredClone و متدهای تازه', 'import پویا', 'Web Worker'] },
+  { icon: '🛡️', color: '#a3e635', title: 'تمرین حرفه‌ای', en: 'Professional Practice', badge: 'حرفه‌ای', summary: 'اشکال‌زدایی، کد تمیز، کارایی، امنیت، تست و ابزارهای دنیای واقعی.',
+    topics: ['Debugging و DevTools', 'خطاهای رایج', 'کد تمیز و نام‌گذاری', 'Debounce / Throttle / Memoization', 'امنیت: XSS و eval', 'تست', 'npm، باندلر، Git', 'نگاهی به TypeScript'] },
+  { icon: '🏗️', color: '#e879f9', title: 'پروژه‌ها', en: 'Projects', badge: 'استاد', summary: 'هشت پروژه کوچک از ساده تا سخت، با راهنمای گام‌به‌گام و راه‌حل کامل.',
+    topics: ['شمارنده', 'فهرست کارها', 'ماشین‌حساب', 'برنامه آزمون', 'ساعت و کرنومتر', 'نقل‌قول تصادفی با API', 'سبد خرید', 'ردیاب هزینه با Canvas'] },
+];
+
+/* =====================================================================
+   SECTION 4 — COURSE REGISTRY (public API used by the data parts)
+   Lesson schema (see README in Part 1 notes):
+   { id, title, minutes, goal, explain:[blocks], examples:[{title,desc,code,out}],
+     mistakes:[{title,bad,good,why}], tip:{title,text}, exercises:[{level,statement,hint,solution,starter}],
+     quiz:[{type,q,code,options,answer,explain}] }
+   ===================================================================== */
+const JSCourse = {
+  modules: MODULE_META.map((meta, index) => Object.assign({ index, lessons: [], test: null }, meta)),
+  finalExam: null,
+  _flat: null,
+  addLessons(moduleIndex, lessons) {
+    const mod = this.modules[moduleIndex];
+    if (!mod) throw new Error('Unknown module index: ' + moduleIndex);
+    lessons.forEach((lesson) => {
+      lesson.module = moduleIndex;
+      lesson.id = lesson.id || `m${moduleIndex}-l${mod.lessons.length + 1}`;
+      mod.lessons.push(lesson);
+    });
+    this._flat = null;
+  },
+  setModuleTest(moduleIndex, questions) { this.modules[moduleIndex].test = questions; },
+  setFinalExam(questions) { this.finalExam = questions; },
+  flat() {
+    if (!this._flat) this._flat = this.modules.flatMap((m) => m.lessons);
+    return this._flat;
+  },
+  lesson(id) { return this.flat().find((l) => l.id === id) || null; },
+  neighbors(id) {
+    const list = this.flat(); const i = list.findIndex((l) => l.id === id);
+    return { prev: list[i - 1] || null, next: list[i + 1] || null };
+  },
+  /** Final exam = override if provided, otherwise a seeded sample of 30 from the module tests (≈3 per module). */
+  buildFinalExam(seed) {
+    if (this.finalExam && this.finalExam.length) return this.finalExam.slice(0, 30);
+    const picked = [];
+    this.modules.forEach((m) => {
+      if (m.test && m.test.length) picked.push(...shuffleSeeded(m.test.map((q) => Object.assign({ from: m.index }, q)), seed + m.index).slice(0, 3));
+    });
+    return shuffleSeeded(picked, seed).slice(0, 30);
+  },
+};
+window.JSCourse = JSCourse;
+
+/* ---- progress helpers ---- */
+const Progress = {
+  isDone: (id) => Boolean(Store.data.done[id]),
+  module(index) {
+    const lessons = JSCourse.modules[index].lessons;
+    const done = lessons.filter((l) => Progress.isDone(l.id)).length;
+    return { done, total: lessons.length, pct: lessons.length ? Math.round((done / lessons.length) * 100) : 0 };
+  },
+  overall() {
+    const all = JSCourse.flat(); const done = all.filter((l) => Progress.isDone(l.id)).length;
+    return { done, total: all.length, pct: all.length ? Math.round((done / all.length) * 100) : 0 };
+  },
+  badge(index) {
+    const m = Progress.module(index); const test = Store.data.tests[index];
+    const unlocked = m.total > 0 && m.done === m.total;
+    return { unlocked, star: unlocked && test && test.pct >= 80 };
+  },
+  markDone(id) { Store.data.done[id] = Date.now(); Store.touchDay(); Store.save(); },
+  unmarkDone(id) { delete Store.data.done[id]; Store.save(); },
+};
+
+
+/* ───── highlight.js ───── */
+/* =====================================================================
+   SECTION 5 — LIGHTWEIGHT SYNTAX HIGHLIGHTER (JS, HTML, CSS)
+   tokenizeJS() is also reused by the sandbox loop-guard transformer.
+   ===================================================================== */
+const JS_KEYWORDS = new Set(('break case catch class const continue debugger default delete do else export extends finally for function if import in instanceof let new of return static super switch this throw try typeof var void while with yield async await get set true false null undefined').split(' '));
+const JS_REGEX_PREFIX_WORDS = new Set(['return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'yield', 'await']);
+const JS_BUILTINS = new Set(('console Math JSON Object Array String Number Boolean Symbol BigInt Promise Map Set WeakMap WeakSet Date RegExp Error TypeError RangeError SyntaxError ReferenceError Proxy Reflect Intl document window globalThis localStorage sessionStorage fetch setTimeout setInterval clearTimeout clearInterval requestAnimationFrame queueMicrotask structuredClone parseInt parseFloat isNaN isFinite NaN Infinity AbortController URL FormData Worker Function Iterator').split(' '));
+const NUMBER_RE = /(?:0[xX][\da-fA-F_]+|0[bB][01_]+|0[oO][0-7_]+|\d[\d_]*\.?[\d_]*(?:[eE][+-]?\d+)?|\.\d[\d_]*(?:[eE][+-]?\d+)?)n?/y;
+
+/** Splits JavaScript source into tokens: {type, text}. Types: ws com str num id kw bi fn op re punct */
+function tokenizeJS(src) {
+  const tokens = []; const n = src.length; const braceStack = []; let i = 0; let prev = null;
+  const emit = (type, text) => { tokens.push({ type, text }); if (type !== 'ws' && type !== 'com') prev = { type, text }; };
+  const readTemplate = (start) => {
+    while (i < n) {
+      const c = src[i];
+      if (c === '\\') { i += 2; continue; }
+      if (c === '`') { i++; emit('str', src.slice(start, i)); return; }
+      if (c === '$' && src[i + 1] === '{') { emit('str', src.slice(start, i)); emit('op', '${'); i += 2; braceStack.push(0); return; }
+      i++;
+    }
+    emit('str', src.slice(start, i));
+  };
+  const regexAllowed = () => !prev || (prev.type === 'op') || (prev.type === 'punct' && !')]}'.includes(prev.text)) || (prev.type === 'kw' && JS_REGEX_PREFIX_WORDS.has(prev.text));
+  while (i < n) {
+    const c = src[i];
+    if (/\s/.test(c)) { let j = i + 1; while (j < n && /\s/.test(src[j])) j++; emit('ws', src.slice(i, j)); i = j; continue; }
+    if (c === '/' && src[i + 1] === '/') { let j = src.indexOf('\n', i); if (j < 0) j = n; emit('com', src.slice(i, j)); i = j; continue; }
+    if (c === '/' && src[i + 1] === '*') { let j = src.indexOf('*/', i + 2); j = j < 0 ? n : j + 2; emit('com', src.slice(i, j)); i = j; continue; }
+    if (c === '"' || c === "'") {
+      let j = i + 1;
+      while (j < n && src[j] !== c && src[j] !== '\n') { if (src[j] === '\\') j++; j++; }
+      j = Math.min(n, j + 1); emit('str', src.slice(i, j)); i = j; continue;
+    }
+    if (c === '`') { const start = i; i++; readTemplate(start); continue; }
+    if (c === '/' && regexAllowed()) {
+      let j = i + 1, inClass = false;
+      while (j < n && src[j] !== '\n') {
+        if (src[j] === '\\') { j += 2; continue; }
+        if (src[j] === '[') inClass = true; else if (src[j] === ']') inClass = false;
+        else if (src[j] === '/' && !inClass) break;
+        j++;
+      }
+      if (src[j] === '/') { j++; while (j < n && /[a-z]/i.test(src[j])) j++; emit('re', src.slice(i, j)); i = j; continue; }
+    }
+    if (/[\d]/.test(c) || (c === '.' && /\d/.test(src[i + 1] || ''))) {
+      NUMBER_RE.lastIndex = i; const m = NUMBER_RE.exec(src);
+      if (m) { emit('num', m[0]); i += m[0].length; continue; }
+    }
+    if (/[A-Za-z_$À-￿]/.test(c)) {
+      let j = i + 1; while (j < n && /[\w$À-￿]/.test(src[j])) j++;
+      const word = src.slice(i, j); let k = j; while (k < n && (src[k] === ' ' || src[k] === '\t')) k++;
+      const afterDot = prev && prev.type === 'punct' && prev.text === '.';
+      let type = 'id';
+      if (!afterDot && JS_KEYWORDS.has(word)) type = 'kw';
+      else if (src[k] === '(') type = 'fn';
+      else if (!afterDot && JS_BUILTINS.has(word)) type = 'bi';
+      emit(type, word); i = j; continue;
+    }
+    if (c === '{') { if (braceStack.length) braceStack[braceStack.length - 1]++; emit('punct', c); i++; continue; }
+    if (c === '}') {
+      if (braceStack.length && braceStack[braceStack.length - 1] === 0) { braceStack.pop(); emit('op', '}'); i++; readTemplate(i); continue; }
+      if (braceStack.length) braceStack[braceStack.length - 1]--;
+      emit('punct', c); i++; continue;
+    }
+    if ('()[];,.'.includes(c)) { if (c === '.' && src.startsWith('...', i)) { emit('op', '...'); i += 3; continue; } emit('punct', c); i++; continue; }
+    let j = i + 1; while (j < n && '+-*/%=<>!&|^~?:'.includes(src[j])) j++;
+    emit('op', src.slice(i, j)); i = j;
+  }
+  return tokens;
+}
+
+const TOKEN_CLASS = { kw: 'tk-kw', str: 'tk-str', num: 'tk-num', com: 'tk-com', fn: 'tk-fn', bi: 'tk-bi', op: 'tk-op', re: 'tk-re' };
+function highlightJS(src) {
+  return tokenizeJS(src).map((t) => {
+    const cls = TOKEN_CLASS[t.type];
+    return cls ? `<span class="${cls}">${escapeHtml(t.text)}</span>` : escapeHtml(t.text);
+  }).join('');
+}
+
+function highlightCSS(src) {
+  let out = '', buf = '', i = 0, depth = 0, inValue = false;
+  const flush = (cls) => {
+    if (!buf) return;
+    if (inValue && !cls) {
+      out += escapeHtml(buf).replace(/(&quot;[^&]*&quot;|&#39;[^&]*&#39;)|(#[0-9a-fA-F]{3,8}\b|-?\d*\.?\d+[a-z%]*)/g, (m, s, num) => s ? `<span class="tk-str">${s}</span>` : `<span class="tk-num">${num}</span>`);
+    } else out += cls ? `<span class="${cls}">${escapeHtml(buf)}</span>` : escapeHtml(buf);
+    buf = '';
+  };
+  while (i < src.length) {
+    const c = src[i];
+    if (c === '/' && src[i + 1] === '*') { flush(depth ? (inValue ? '' : 'tk-attr') : 'tk-fn'); let e = src.indexOf('*/', i + 2); e = e < 0 ? src.length : e + 2; out += `<span class="tk-com">${escapeHtml(src.slice(i, e))}</span>`; i = e; continue; }
+    if (c === '{') { flush('tk-fn'); out += '{'; depth++; inValue = false; i++; continue; }
+    if (c === '}') { flush(inValue ? '' : 'tk-attr'); out += '}'; depth = Math.max(0, depth - 1); inValue = false; i++; continue; }
+    if (c === ':' && depth > 0 && !inValue) { flush('tk-attr'); out += ':'; inValue = true; i++; continue; }
+    if (c === ';') { flush(inValue ? '' : 'tk-attr'); out += ';'; inValue = false; i++; continue; }
+    buf += c; i++;
+  }
+  flush(depth ? (inValue ? '' : 'tk-attr') : 'tk-fn');
+  return out;
+}
+
+function highlightTag(tag) {
+  const m = /^<(\/?)([a-zA-Z][\w-]*)([\s\S]*?)(\/?)>$/.exec(tag);
+  if (!m) return escapeHtml(tag);
+  const attrs = m[3].replace(/([^\s=]+)(?:(=)("[^"]*"|'[^']*'|[^\s>]+))?/g, (all, name, eq, val) => ` <span class="tk-attr">${escapeHtml(name)}</span>` + (eq ? `=<span class="tk-str">${escapeHtml(val)}</span>` : '')).replace(/^\s+/, ' ');
+  return `&lt;${m[1]}<span class="tk-tag">${m[2]}</span>${attrs}${m[4]}&gt;`;
+}
+function highlightHTML(src) {
+  const re = /<!-{2}[\s\S]*?-->|<script\b[^>]*>[\s\S]*?<\/script>|<style\b[^>]*>[\s\S]*?<\/style>|<\/?[a-zA-Z][^>]*>/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(src))) {
+    out += escapeHtml(src.slice(last, m.index)); const text = m[0]; last = m.index + text.length;
+    if (text.startsWith('<!' + '--')) { out += `<span class="tk-com">${escapeHtml(text)}</span>`; continue; }
+    const block = /^(<(script|style)\b[^>]*>)([\s\S]*?)(<\/\2>)$/i.exec(text);
+    if (block) { out += highlightTag(block[1]) + (block[2].toLowerCase() === 'script' ? highlightJS(block[3]) : highlightCSS(block[3])) + highlightTag(block[4]); continue; }
+    out += highlightTag(text);
+  }
+  return out + escapeHtml(src.slice(last));
+}
+
+/** Entry point. lang: js | ts | json | html | css | anything else = plain text. */
+function highlight(code, lang = 'js') {
+  switch (lang) {
+    case 'js': case 'ts': case 'json': case 'javascript': return highlightJS(code);
+    case 'html': case 'xml': return highlightHTML(code);
+    case 'css': return highlightCSS(code);
+    default: return escapeHtml(code);
+  }
+}
+
+
+/* ───── runtime.js ───── */
+/* =====================================================================
+   SECTION 6 — SANDBOX RUNTIME
+   This function is serialised with toString() and executed INSIDE the
+   sandboxed iframe (sandbox="allow-scripts", no same-origin). It must stay
+   fully self-contained. In Node tests it is run with a fake `post`.
+   ===================================================================== */
+function sandboxRuntime(post, config) {
+  const g = typeof window !== 'undefined' ? window : globalThis;
+  const MAX_LINES = 400;
+  let lineCount = 0, halted = false, spent = 0, count = 0, lastCheck = Date.now();
+  const send = (message) => { try { post(message); } catch (e) { /* parent gone */ } };
+
+  /* ---------- Node-style value inspection (port of the essential rules) ---------- */
+  const IDENT = /^[a-zA-Z_][a-zA-Z_0-9]*$/;
+  function quote(str) {
+    let q = "'"; if (str.includes("'")) q = !str.includes('"') ? '"' : (!str.includes('`') && !str.includes('${') ? '`' : "'");
+    let out = str.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/\t/g, '\\t').replace(/\r/g, '\\r');
+    if (q === "'") out = out.replace(/'/g, "\\'");
+    return q + out + q;
+  }
+  function ctorNameOf(obj) {
+    let o = obj;
+    while (o) {
+      const d = Object.getOwnPropertyDescriptor(o, 'constructor');
+      if (d && typeof d.value === 'function' && d.value.name !== '') return d.value.name;
+      o = Object.getPrototypeOf(o);
+    }
+    return null;
+  }
+  function formatPrimitive(v) {
+    if (v === null) return 'null';
+    switch (typeof v) {
+      case 'undefined': return 'undefined';
+      case 'string': return quote(v);
+      case 'number': return Object.is(v, -0) ? '-0' : String(v);
+      case 'bigint': return v + 'n';
+      case 'boolean': return String(v);
+      case 'symbol': return v.toString();
+      default: return String(v);
+    }
+  }
+  function functionBase(fn) {
+    const src = Function.prototype.toString.call(fn); const name = fn.name;
+    if (/^class[\s{]/.test(src)) {
+      const parent = Object.getPrototypeOf(fn);
+      const ext = parent && parent !== Function.prototype && parent.name ? ` extends ${parent.name}` : '';
+      return `[class ${name || '(anonymous)'}${ext}]`;
+    }
+    const kind = (fn.constructor && fn.constructor.name) || 'Function';
+    return `[${kind}${name ? ': ' + name : ' (anonymous)'}]`;
+  }
+  function groupArrayElements(ctx, output, value) {
+    let totalLength = 0, maxLength = 0, i = 0;
+    let outputLength = output.length;
+    if (output.length > 100) outputLength--;
+    const separatorSpace = 2, dataLen = new Array(outputLength);
+    for (; i < outputLength; i++) { const len = output[i].length; dataLen[i] = len; totalLength += len + separatorSpace; if (maxLength < len) maxLength = len; }
+    const actualMax = maxLength + separatorSpace;
+    if (actualMax * 3 + ctx.indentationLvl < 80 && (totalLength / actualMax > 5 || maxLength <= 6)) {
+      const averageBias = Math.sqrt(actualMax - totalLength / output.length);
+      const biasedMax = Math.max(actualMax - 3 - averageBias, 1);
+      const columns = Math.min(Math.round(Math.sqrt(2.5 * biasedMax * outputLength) / biasedMax), Math.floor((80 - ctx.indentationLvl) / actualMax), 12, 15);
+      if (columns <= 1) return output;
+      const tmp = [], maxLineLength = [];
+      for (let c = 0; c < columns; c++) { let lineLength = 0; for (let j = c; j < output.length; j += columns) if (dataLen[j] > lineLength) lineLength = dataLen[j]; maxLineLength.push(lineLength + separatorSpace); }
+      let padStart = true;
+      if (value !== undefined) for (let k = 0; k < output.length; k++) if (typeof value[k] !== 'number' && typeof value[k] !== 'bigint') { padStart = false; break; }
+      for (let r = 0; r < outputLength; r += columns) {
+        const max = Math.min(r + columns, outputLength); let str = '', j = r;
+        for (; j < max - 1; j++) { const cell = `${output[j]}, `; str += padStart ? cell.padStart(maxLineLength[j - r]) : cell.padEnd(maxLineLength[j - r]); }
+        if (padStart) str += output[j].padStart(maxLineLength[j - r] - separatorSpace); else str += output[j];
+        tmp.push(str);
+      }
+      if (output.length > 100) tmp.push(output[outputLength]);
+      output = tmp;
+    }
+    return output;
+  }
+  function reduceToSingleString(ctx, output, base, braces, isArray, recurseTimes, value) {
+    const entries = output.length;
+    if (isArray && entries > 6) output = groupArrayElements(ctx, output, value);
+    if (ctx.currentDepth - recurseTimes < 3 && entries === output.length) {
+      const start = output.length + ctx.indentationLvl + braces[0].length + base.length + 10;
+      let total = output.length + start, ok = total + output.length <= 80;
+      for (let i = 0; ok && i < output.length; i++) { total += output[i].length; if (total > 80) ok = false; }
+      if (ok && (base === '' || !base.includes('\n'))) {
+        const joined = output.join(', ');
+        if (!joined.includes('\n')) return `${base ? base + ' ' : ''}${braces[0]} ${joined} ${braces[1]}`;
+      }
+    }
+    const indentation = '\n' + ' '.repeat(ctx.indentationLvl);
+    return `${base ? base + ' ' : ''}${braces[0]}${indentation}  ${output.join(',' + indentation + '  ')}${indentation}${braces[1]}`;
+  }
+  function formatProperty(ctx, obj, recurseTimes, key, isArrayItem) {
+    const desc = Object.getOwnPropertyDescriptor(obj, key) || { value: obj[key], enumerable: true };
+    let str;
+    if (desc.value !== undefined || !(desc.get || desc.set)) {
+      ctx.indentationLvl += 2; str = formatValue(ctx, desc.value, recurseTimes); ctx.indentationLvl -= 2;
+    } else str = desc.get ? (desc.set ? '[Getter/Setter]' : '[Getter]') : '[Setter]';
+    if (isArrayItem) return str;
+    let name;
+    if (typeof key === 'symbol') name = `[${key.toString()}]`;
+    else name = IDENT.test(key) ? key : quote(key);
+    return `${name}: ${str}`;
+  }
+  function formatValue(ctx, v, recurseTimes) {
+    if (v === null || (typeof v !== 'object' && typeof v !== 'function')) return formatPrimitive(v);
+    if (ctx.seen.includes(v)) {
+      if (!ctx.circular.has(v)) ctx.circular.set(v, ctx.circular.size + 1);
+      return `[Circular *${ctx.circular.get(v)}]`;
+    }
+    return formatRaw(ctx, v, recurseTimes);
+  }
+  function formatRaw(ctx, v, recurseTimes) {
+    let keys = Object.keys(v); const symbols = Object.getOwnPropertySymbols(v).filter((s) => Object.prototype.propertyIsEnumerable.call(v, s));
+    keys = keys.concat(symbols);
+    const ctorName = ctorNameOf(v); let tag = ''; try { tag = v[Symbol.toStringTag]; } catch (e) { tag = ''; }
+    let braces = ['{', '}'], base = '', isArray = false, entriesFn = null;
+    if (Array.isArray(v)) {
+      isArray = true; keys = keys.filter((k) => typeof k === 'symbol' || !/^\d+$/.test(k));
+      braces = [(ctorName !== 'Array' ? `${ctorName}(${v.length}) ` : '') + '[', ']'];
+      if (v.length === 0 && keys.length === 0) return braces[0] + ']';
+      entriesFn = () => {
+        const out = []; let holes = 0; const limit = Math.min(v.length, 100);
+        const flushHoles = () => { if (holes) { out.push(`<${holes} empty item${holes > 1 ? 's' : ''}>`); holes = 0; } };
+        for (let i = 0; i < limit; i++) { if (!(i in v)) { holes++; continue; } flushHoles(); out.push(formatProperty(ctx, v, recurseTimes, String(i), true)); }
+        flushHoles();
+        if (v.length > limit) out.push(`... ${v.length - limit} more item${v.length - limit > 1 ? 's' : ''}`);
+        return out;
+      };
+    } else if (typeof Set !== 'undefined' && v instanceof Set) {
+      braces = [`${ctorName}(${v.size}) {`, '}']; if (v.size === 0 && keys.length === 0) return `${ctorName}(0) {}`;
+      entriesFn = () => { const out = []; ctx.indentationLvl += 2; for (const item of v) out.push(formatValue(ctx, item, recurseTimes)); ctx.indentationLvl -= 2; return out; };
+    } else if (typeof Map !== 'undefined' && v instanceof Map) {
+      braces = [`${ctorName}(${v.size}) {`, '}']; if (v.size === 0 && keys.length === 0) return `${ctorName}(0) {}`;
+      entriesFn = () => { const out = []; ctx.indentationLvl += 2; for (const [k, val] of v) out.push(`${formatValue(ctx, k, recurseTimes)} => ${formatValue(ctx, val, recurseTimes)}`); ctx.indentationLvl -= 2; return out; };
+    } else if (typeof v === 'function') {
+      base = functionBase(v); keys = keys.filter((k) => k !== 'prototype'); if (keys.length === 0) return base;
+    } else if (v instanceof RegExp) { base = String(v); if (keys.length === 0) return base; }
+    else if (v instanceof Date) { base = isNaN(v) ? 'Invalid Date' : v.toISOString(); if (keys.length === 0) return base; }
+    else if (v instanceof Error) {
+      base = `${v.name}: ${v.message}`; if (recurseTimes > 0) base = `[${base}]`;
+      keys = keys.filter((k) => k !== 'stack' && k !== 'message'); if (keys.length === 0) return base;
+    } else if (typeof WeakMap !== 'undefined' && (v instanceof WeakMap || v instanceof WeakSet)) return `${ctorName} { <items unknown> }`;
+    else if (typeof Promise !== 'undefined' && v instanceof Promise) return 'Promise { <pending> }';
+    else if (typeof Node !== 'undefined' && v instanceof Node) {
+      if (v.nodeType === 1) return v.cloneNode(false).outerHTML.replace(/<\/[^>]+>$/, '');
+      return `[${ctorName}]`;
+    } else if (v instanceof Number || v instanceof String || v instanceof Boolean || (typeof BigInt !== 'undefined' && v instanceof BigInt) || (typeof Symbol !== 'undefined' && v instanceof Symbol)) {
+      base = `[${ctorName}: ${formatPrimitive(v.valueOf())}]`; if (v instanceof String) keys = keys.filter((k) => !/^\d+$/.test(k)); if (keys.length === 0) return base;
+    } else {
+      let prefix = '';
+      if (ctorName === 'Object') { if (tag && tag !== 'Object') prefix = `Object [${tag}] `; }
+      else if (ctorName === null) prefix = '[Object: null prototype] ';
+      else prefix = ctorName + ' ' + (tag && tag !== ctorName ? `[${tag}] ` : '');
+      braces[0] = prefix + '{';
+      if (keys.length === 0) return `${braces[0]}}`;
+    }
+    if (recurseTimes > ctx.depth) return `[${isArray ? 'Array' : (ctorName || 'Object: null prototype')}]`;
+    recurseTimes++; ctx.seen.push(v); ctx.currentDepth = recurseTimes;
+    const output = entriesFn ? entriesFn() : [];
+    for (const key of keys) output.push(formatProperty(ctx, v, recurseTimes, key, false));
+    ctx.seen.pop();
+    if (ctx.circular.has(v)) base = `<ref *${ctx.circular.get(v)}>` + (base ? ' ' + base : '');
+    if (base.startsWith('<ref') && braces[0] === '{' && !output.length) return base;
+    return reduceToSingleString(ctx, output, base, braces, isArray, recurseTimes, isArray ? v : undefined);
+  }
+  function inspect(value, depth) { return formatValue({ seen: [], circular: new Map(), indentationLvl: 0, currentDepth: 0, depth: depth === undefined ? 2 : depth }, value, 0); }
+
+  function formatArgs(args) {
+    let first = args[0], rest = args.slice(1), text = '';
+    if (typeof first === 'string' && first.includes('%') && rest.length) {
+      let idx = 0;
+      text = first.replace(/%[sdifjoOc%]/g, (m) => {
+        if (m === '%%') return '%'; if (idx >= rest.length) return m;
+        const a = rest[idx++];
+        switch (m) {
+          case '%s': return typeof a === 'string' ? a : (typeof a === 'object' && a !== null ? inspect(a, 0) : formatPrimitive(a).replace(/^'(.*)'$/, '$1'));
+          case '%d': return typeof a === 'bigint' ? a + 'n' : String(Number(a));
+          case '%i': return typeof a === 'bigint' ? a + 'n' : String(parseInt(a, 10));
+          case '%f': return String(parseFloat(a));
+          case '%j': try { return JSON.stringify(a); } catch (e) { return '[Circular]'; }
+          case '%c': return '';
+          default: return inspect(a, 4);
+        }
+      });
+      rest = rest.slice(idx);
+      return [text].concat(rest.map((a) => (typeof a === 'string' ? a : inspect(a)))).join(' ');
+    }
+    return args.map((a) => (typeof a === 'string' ? a : inspect(a))).join(' ');
+  }
+
+  /* ---------- console ---------- */
+  let groupIndent = ''; const counters = {}, timers = {};
+  function emit(level, text) {
+    if (halted) return;
+    if (++lineCount > MAX_LINES) { halted = true; send({ kind: 'log', level: 'sys', text: '… خروجی بیش از حد طولانی بود؛ اجرا متوقف شد.' }); send({ kind: 'halt' }); return; }
+    if (groupIndent) text = text.split('\n').map((l) => groupIndent + l).join('\n');
+    send({ kind: 'log', level, text });
+  }
+  function renderTable(data, columns) {
+    if (data === null || typeof data !== 'object') return formatArgs([data]);
+    const rows = [];
+    if (data instanceof Map) { let i = 0; for (const [k, v] of data) rows.push([String(i++), v, k]); }
+    else if (data instanceof Set) { let i = 0; for (const v of data) rows.push([String(i++), v]); }
+    else Object.keys(data).forEach((k) => rows.push([k, data[k]]));
+    const cols = []; let hasValues = false;
+    const cell = (v) => inspect(v, 0).replace(/\n\s*/g, ' ');
+    const body = rows.map(([idx, row]) => {
+      if (row !== null && typeof row === 'object' && !(row instanceof Date)) { Object.keys(row).forEach((k) => { if (!cols.includes(k)) cols.push(k); }); return { idx, row }; }
+      hasValues = true; return { idx, val: row };
+    });
+    const use = columns && Array.isArray(columns) ? columns : cols;
+    const head = ['(index)'].concat(use); if (hasValues) head.push('Values');
+    const matrix = body.map((r) => { const line = [r.idx]; use.forEach((c) => line.push(r.row && Object.prototype.hasOwnProperty.call(r.row, c) ? cell(r.row[c]) : '')); if (hasValues) line.push('val' in r ? cell(r.val) : ''); return line; });
+    const widths = head.map((h, i) => Math.max(h.length, ...matrix.map((m) => m[i].length)) + 2);
+    const line = (l, m, r) => l + widths.map((w) => '─'.repeat(w)).join(m) + r;
+    const fmtRow = (cells) => '│' + cells.map((c, i) => ' ' + c + ' '.repeat(widths[i] - c.length - 1)).join('│') + '│';
+    return [line('┌', '┬', '┐'), fmtRow(head), line('├', '┼', '┤')].concat(matrix.map(fmtRow), [line('└', '┴', '┘')]).join('\n');
+  }
+  const fakeConsole = {
+    log: (...a) => emit('log', formatArgs(a)), info: (...a) => emit('info', formatArgs(a)), debug: (...a) => emit('log', formatArgs(a)),
+    warn: (...a) => emit('warn', formatArgs(a)), error: (...a) => emit('error', formatArgs(a)),
+    trace: (...a) => emit('error', 'Trace: ' + formatArgs(a)),
+    assert: (cond, ...a) => { if (!cond) emit('error', 'Assertion failed' + (a.length ? ': ' + formatArgs(a) : '')); },
+    dir: (v, o) => emit('log', inspect(v, o && o.depth !== undefined ? o.depth : 2)),
+    table: (d, c) => emit('log', renderTable(d, c)),
+    group: (...a) => { if (a.length) emit('log', formatArgs(a)); groupIndent += '  '; }, groupCollapsed: (...a) => fakeConsole.group(...a),
+    groupEnd: () => { groupIndent = groupIndent.slice(2); },
+    count: (label = 'default') => { counters[label] = (counters[label] || 0) + 1; emit('log', `${label}: ${counters[label]}`); },
+    countReset: (label = 'default') => { counters[label] = 0; },
+    time: (label = 'default') => { timers[label] = performance.now(); },
+    timeEnd: (label = 'default') => { if (label in timers) { emit('log', `${label}: ${(performance.now() - timers[label]).toFixed(3)}ms`); delete timers[label]; } },
+    timeLog: (label = 'default', ...a) => { if (label in timers) emit('log', `${label}: ${(performance.now() - timers[label]).toFixed(3)}ms${a.length ? ' ' + formatArgs(a) : ''}`); },
+    clear: () => send({ kind: 'clear' }),
+  };
+  try { Object.defineProperty(g, 'console', { value: fakeConsole, configurable: true, writable: true }); } catch (e) { g.console = fakeConsole; }
+
+  /* ---------- guards, dialogs, storage ---------- */
+  g.__g = function () {
+    if ((++count & 1023) === 0) {
+      const now = Date.now(), gap = now - lastCheck; lastCheck = now;
+      if (gap < 400) { spent += gap; if (spent > 3000) { spent = 0; const err = new Error('Loop ran for more than 3 seconds (possible infinite loop)'); err.name = 'InfiniteLoopError'; throw err; } }
+    }
+  };
+  const answers = (config.answers || []).slice();
+  g.alert = (m) => emit('info', '🔔 alert: ' + String(m === undefined ? '' : m));
+  g.confirm = (m) => { emit('info', '❓ confirm: ' + String(m) + ' → true'); return true; };
+  g.prompt = (m, def) => { const a = answers.length ? answers.shift() : (def !== undefined ? def : ''); emit('info', `⌨️ prompt: ${m} → ${JSON.stringify(a)}`); return a; };
+  function makeStorage(initial, persistNs) {
+    const data = Object.assign({}, initial);
+    const sync = () => { if (persistNs) send({ kind: 'ls', ns: persistNs, data }); };
+    const api = {
+      getItem: (k) => (Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null),
+      setItem: (k, v) => { data[String(k)] = String(v); sync(); },
+      removeItem: (k) => { delete data[k]; sync(); },
+      clear: () => { Object.keys(data).forEach((k) => delete data[k]); sync(); },
+      key: (i) => (Object.keys(data)[i] === undefined ? null : Object.keys(data)[i]),
+    };
+    return new Proxy(api, {
+      get: (t, p) => (p === 'length' ? Object.keys(data).length : (p in t ? t[p] : (typeof p === 'string' && p in data ? data[p] : undefined))),
+      set: (t, p, v) => { data[String(p)] = String(v); sync(); return true; },
+      deleteProperty: (t, p) => { delete data[p]; sync(); return true; },
+      has: (t, p) => p in t || p in data, ownKeys: () => Object.keys(data),
+      getOwnPropertyDescriptor: (t, p) => (p in data ? { value: data[p], enumerable: true, configurable: true, writable: true } : undefined),
+    });
+  }
+  try { Object.defineProperty(g, 'localStorage', { value: makeStorage(config.ls || {}, config.ns), configurable: true }); } catch (e) { /* not overridable */ }
+  try { Object.defineProperty(g, 'sessionStorage', { value: makeStorage({}, null), configurable: true }); } catch (e) { /* not overridable */ }
+
+  /* ---------- idle tracking (timers + fetch) so the parent knows when a run has finished ---------- */
+  let active = 0, idleTimer = null; const live = new Map();
+  const realSetTimeout = g.setTimeout.bind(g), realSetInterval = g.setInterval.bind(g), realClearTimeout = g.clearTimeout.bind(g), realClearInterval = g.clearInterval.bind(g);
+  const scheduleIdle = () => { if (idleTimer) realClearTimeout(idleTimer); idleTimer = realSetTimeout(() => { if (active === 0 && !halted) send({ kind: 'idle' }); }, 80); };
+  g.setTimeout = (fn, ms, ...args) => {
+    const id = realSetTimeout(() => { live.delete(id); active--; try { if (typeof fn === 'function') fn(...args); } finally { scheduleIdle(); } }, ms);
+    live.set(id, 'timeout'); active++; return id;
+  };
+  g.setInterval = (fn, ms, ...args) => { const id = realSetInterval(() => { if (typeof fn === 'function') fn(...args); }, ms); live.set(id, 'interval'); active++; return id; };
+  const clearAny = (real) => (id) => { if (live.has(id)) { live.delete(id); active--; scheduleIdle(); } real(id); };
+  g.clearTimeout = clearAny(realClearTimeout); g.clearInterval = clearAny(realClearInterval);
+  if (typeof g.fetch === 'function') {
+    const realFetch = g.fetch.bind(g);
+    const todo = (n) => ({ userId: 1, id: n, title: n === 1 ? 'delectus aut autem' : 'quis ut nam facilis et officia qui', completed: n % 2 === 0 });
+    const post = (n) => ({ userId: Math.ceil(n / 10), id: n, title: n === 1 ? 'sunt aut facere repellat provident occaecati excepturi optio reprehenderit' : 'qui est esse', body: 'quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto' });
+    const user = (n) => ({ id: n, name: n === 1 ? 'Leanne Graham' : 'Ervin Howell', username: n === 1 ? 'Bret' : 'Antonette', email: n === 1 ? 'Sincere@april.biz' : 'Shanna@melissa.tv', phone: '1-770-736-8031 x56442', website: 'hildegard.org', company: { name: 'Romaguera-Crona' } });
+    const quotes = [['The only way to do great work is to love what you do.', 'Steve Jobs'], ['Simplicity is the soul of efficiency.', 'Austin Freeman'], ['First, solve the problem. Then, write the code.', 'John Johnson'], ['Programs must be written for people to read.', 'Harold Abelson'], ['Talk is cheap. Show me the code.', 'Linus Torvalds']];
+    const offlineMock = (url) => {
+      let u; try { u = new URL(url); } catch (e) { return undefined; }
+      const p = u.pathname.replace(/\/+$/, '');
+      if (u.hostname === 'jsonplaceholder.typicode.com') {
+        let m;
+        if ((m = /^\/todos\/(\d+)$/.exec(p))) return todo(+m[1]); if (p === '/todos') return [1, 2, 3, 4, 5].map(todo);
+        if ((m = /^\/posts\/(\d+)\/comments$/.exec(p))) return [1, 2, 3].map((i) => ({ postId: +m[1], id: i, name: 'id labore ex et quam laborum', email: 'Eliseo@gardner.biz', body: 'laudantium enim quasi est quidem magnam voluptate ipsam eos' }));
+        if ((m = /^\/posts\/(\d+)$/.exec(p))) return post(+m[1]); if (p === '/posts') return [1, 2, 3, 4, 5].map(post);
+        if ((m = /^\/users\/(\d+)$/.exec(p))) return user(+m[1]); if (p === '/users') return [1, 2, 3].map(user);
+      }
+      if (u.hostname === 'dummyjson.com' && /^\/quotes\/random$/.test(p)) { const q = quotes[Math.floor(Math.random() * quotes.length)]; return { id: 1, quote: q[0], author: q[1] }; }
+      return undefined;
+    };
+    g.fetch = (input, init) => {
+      active++;
+      const finish = () => { active--; scheduleIdle(); };
+      return realFetch(input, init).then((r) => { finish(); return r; }, (err) => {
+        finish();
+        const url = typeof input === 'string' ? input : (input && input.url) || '';
+        const data = err && err.name !== 'AbortError' ? offlineMock(url) : undefined;
+        if (data === undefined) throw err;
+        emit('sys', '(شبکه در دسترس نبود؛ داده نمونه آفلاین برای این آدرس برگردانده شد)');
+        return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      });
+    };
+  }
+
+  /* ---------- error reporting ---------- */
+  function report(err, line) {
+    if (halted) return;
+    const e = err && typeof err === 'object' ? err : { name: 'Error', message: String(err) };
+    send({ kind: 'error', name: e.name || 'Error', message: String(e.message === undefined ? e : e.message), line: line || null });
+  }
+  g.addEventListener('error', (ev) => { report(ev.error || { name: 'Error', message: ev.message }, ev.lineno); ev.preventDefault(); scheduleIdle(); });
+  g.addEventListener('unhandledrejection', (ev) => { report(ev.reason, null); ev.preventDefault(); scheduleIdle(); });
+
+  /* ---------- run the learner's code (JS mode only; HTML mode carries its own scripts) ---------- */
+  function runUserCode() {
+    const code = config.code;
+    const AsyncFunction = Object.getPrototypeOf(async function () { /* probe */ }).constructor;
+    let classicOk = true;
+    try { new Function(code); } catch (e) {
+      classicOk = false;
+      if (/\bawait\b/.test(code)) { try { new AsyncFunction(code); } catch (e2) { classicOk = true; } }
+    }
+    if (classicOk) {
+      const s = document.createElement('script'); s.textContent = code; document.head.appendChild(s);
+    } else {
+      new AsyncFunction(code).call(g).catch((err) => report(err, null));
+    }
+    scheduleIdle();
+  }
+  if (config.lang === 'html') {
+    g.addEventListener('load', () => scheduleIdle());
+  } else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runUserCode);
+  else runUserCode();
+  return { inspect, formatArgs, renderTable };
+}
+
+
+/* ───── runner.js ───── */
+/* =====================================================================
+   SECTION 7 — SANDBOX RUNNER (parent side)
+   Builds a sandboxed iframe per run, relays console output through
+   postMessage, adds a loop guard and a hard timeout.
+   ===================================================================== */
+
+/** Inserts a guard call at the start of every braced loop body so infinite loops throw instead of freezing the tab. */
+function guardLoops(code) {
+  const tokens = tokenizeJS(code);
+  const sig = []; tokens.forEach((t, i) => { if (t.type !== 'ws' && t.type !== 'com') sig.push(i); });
+  const insertAfter = new Set();
+  const isPunct = (idx, ch) => idx !== undefined && tokens[idx].type === 'punct' && tokens[idx].text === ch;
+  for (let s = 0; s < sig.length; s++) {
+    const t = tokens[sig[s]];
+    if (t.type !== 'kw') continue;
+    if (t.text === 'do' && isPunct(sig[s + 1], '{')) { insertAfter.add(sig[s + 1]); continue; }
+    if (t.text !== 'for' && t.text !== 'while') continue;
+    let open = s + 1;
+    if (tokens[sig[open]] && tokens[sig[open]].text === 'await') open++;
+    if (!isPunct(sig[open], '(')) continue;
+    let depth = 0, close = -1;
+    for (let k = open; k < sig.length; k++) {
+      const tk = tokens[sig[k]];
+      if (tk.type === 'punct' && tk.text === '(') depth++;
+      else if (tk.type === 'punct' && tk.text === ')') { depth--; if (depth === 0) { close = k; break; } }
+    }
+    if (close > 0 && isPunct(sig[close + 1], '{')) insertAfter.add(sig[close + 1]);
+  }
+  return tokens.map((t, i) => (insertAfter.has(i) ? t.text + ' __g();' : t.text)).join('');
+}
+function guardHtmlScripts(html) {
+  return html.replace(/(<script\b(?![^>]*\bsrc=)[^>]*>)([\s\S]*?)(<\/script>)/gi, (m, open, body, close) => open + guardLoops(body) + close);
+}
+
+/** Persian-friendly explanations for the most common JavaScript error messages. */
+function explainError(name, message) {
+  const rules = [
+    [/^(.+) is not defined$/, (m) => `نام «${m[1]}» تعریف نشده است. املای آن را بررسی کنید (حروف بزرگ و کوچک مهم‌اند) و مطمئن شوید قبل از استفاده، آن را با let یا const تعریف کرده‌اید.`],
+    [/Cannot access '(.+)' before initialization/, (m) => `به «${m[1]}» قبل از تعریف شدنش دسترسی پیدا کرده‌اید. let و const را باید قبل از استفاده بنویسید (این وضعیت «ناحیه مرده زمانی» نام دارد).`],
+    [/Assignment to constant variable/, () => 'متغیری که با const تعریف شده را نمی‌توان دوباره مقداردهی کرد. اگر مقدار باید تغییر کند از let استفاده کنید.'],
+    [/Cannot read propert(?:y|ies) of (undefined|null) \(reading '(.+)'\)/, (m) => `می‌خواهید ویژگی «${m[2]}» را از ${m[1]} بخوانید. احتمالاً مقدار قبلی وجود ندارد؛ مقدارش را بررسی کنید یا از ?. استفاده کنید.`],
+    [/Cannot set propert(?:y|ies) of (undefined|null) \(setting '(.+)'\)/, (m) => `می‌خواهید روی ${m[1]} ویژگی «${m[2]}» را مقداردهی کنید؛ ابتدا باید خود شیء ساخته شود.`],
+    [/(.+) is not a function/, (m) => `«${m[1]}» تابع نیست، اما آن را فراخوانی کرده‌اید. نوع مقدار و املای نام را بررسی کنید.`],
+    [/(.+) is not iterable/, (m) => `«${m[1]}» قابل پیمایش نیست. for...of و spread فقط روی آرایه، رشته، Map، Set و موارد مشابه کار می‌کنند.`],
+    [/(.+) is not a constructor/, (m) => `«${m[1]}» را نمی‌توان با new ساخت؛ باید کلاس یا تابع سازنده باشد.`],
+    [/Identifier '(.+)' has already been declared/, (m) => `نام «${m[1]}» پیش‌تر در همین دامنه تعریف شده است. نام دیگری انتخاب کنید یا تعریف تکراری را حذف کنید.`],
+    [/Missing initializer in const declaration/, () => 'متغیر const باید همان لحظه تعریف مقدار بگیرد: const x = 5;'],
+    [/Unexpected end of input/, () => 'کد ناتمام است؛ احتمالاً یک پرانتز، آکولاد یا کروشه باز مانده و بسته نشده است.'],
+    [/Unexpected token/, () => 'در این نقطه نویسه‌ای آمده که زبان انتظارش را نداشت. معمولاً یک ویرگول، پرانتز یا آکولاد جا افتاده یا اضافه است.'],
+    [/Invalid or unexpected token/, () => 'نویسه نامعتبر در کد دارید؛ مثلاً یک گیومه بسته نشده یا کاراکتر غیرمجاز.'],
+    [/Unexpected identifier/, () => 'یک نام در جای غیرمنتظره آمده است؛ احتمالاً بین دو عبارت عملگر یا ; جا افتاده.'],
+    [/Unexpected string/, () => 'یک رشته در جای نادرست آمده است؛ شاید ویرگول یا عملگری قبل از آن جا افتاده.'],
+    [/Maximum call stack size exceeded/, () => 'تابع بی‌نهایت بار خودش را صدا زده است (بازگشت بدون شرط توقف). یک «حالت پایه» برای توقف اضافه کنید.'],
+    [/Invalid array length/, () => 'طول آرایه باید عددی صحیح و نامنفی باشد.'],
+    [/Invalid time value/, () => 'تاریخ نامعتبر است و نمی‌توان آن را قالب‌بندی کرد.'],
+    [/Failed to fetch|NetworkError|Load failed/, () => 'ارتباط شبکه برقرار نشد (اینترنت قطع است یا سرور اجازه دسترسی نمی‌دهد).'],
+    [/Loop ran for more than 3 seconds/, () => 'حلقه بیش از ۳ ثانیه اجرا شد و برای محافظت از مرورگر متوقف شد. معمولاً شرط پایان حلقه هرگز نادرست نمی‌شود.'],
+    [/Converting circular structure to JSON/, () => 'شیء به خودش ارجاع می‌دهد (ارجاع حلقوی) و JSON.stringify نمی‌تواند آن را تبدیل کند.'],
+    [/Unexpected token .* in JSON|is not valid JSON|JSON\.parse/, () => 'متن ورودی JSON معتبر نیست. گیومه‌های دوتایی، ویرگول‌ها و آکولادها را بررسی کنید.'],
+  ];
+  for (const [re, make] of rules) { const m = re.exec(message); if (m) return make(m); }
+  const typeNames = { ReferenceError: 'ارجاع به چیزی که وجود ندارد', TypeError: 'استفاده نادرست از نوع داده', SyntaxError: 'اشتباه نوشتاری در کد', RangeError: 'مقدار خارج از بازه مجاز', InfiniteLoopError: 'حلقه بی‌پایان' };
+  return typeNames[name] ? `${typeNames[name]} (${name}). متن خطا را با دقت بخوانید؛ معمولاً خود پیام و شماره خط محل مشکل را نشان می‌دهد.` : '';
+}
+
+const SandboxStorage = {
+  KEY: 'jsc.sandboxLS',
+  all() { try { return JSON.parse(localStorage.getItem(this.KEY)) || {}; } catch (e) { return {}; } },
+  get(ns) { return (ns && this.all()[ns]) || {}; },
+  set(ns, data) { if (!ns) return; const all = this.all(); all[ns] = data; try { localStorage.setItem(this.KEY, JSON.stringify(all)); } catch (e) { /* quota */ } },
+  clear() { try { localStorage.removeItem(this.KEY); } catch (e) { /* ignored */ } },
+};
+
+const Sandbox = {
+  nextId: 1, runs: new Map(), listening: false,
+  isDomCode(code) { return /\b(document|innerHTML|querySelector|getElementById|addEventListener|IntersectionObserver|createElement|getElementsBy)\b|window\.(?!location)/.test(code); },
+  jsonForScript(value) { return JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029'); },
+  buildDoc(id, opts) {
+    const config = { id, lang: opts.lang, ns: opts.ns || null, ls: SandboxStorage.get(opts.ns), answers: opts.answers || [], code: opts.lang === 'html' ? '' : guardLoops(opts.code) };
+    const bootstrap = '<scr' + 'ipt>(' + sandboxRuntime.toString() + ')(function(m){m.__jsc=' + id + ';parent.postMessage(m,"*")},' + this.jsonForScript(config) + ');</scr' + 'ipt>';
+    if (opts.lang === 'html') {
+      let html = guardHtmlScripts(opts.code);
+      if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m) => m + bootstrap);
+      if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m) => m + '<head>' + bootstrap + '</head>');
+      return '<!doctype html><html><head><meta charset="utf-8">' + bootstrap + '</head><body>' + html + '</body></html>';
+    }
+    return '<!doctype html><html><head><meta charset="utf-8"><style>body{font:15px/1.6 system-ui,sans-serif;margin:12px;color:#111;background:#fff}</style>' + bootstrap + '</head><body></body></html>';
+  },
+  listen() {
+    if (this.listening) return; this.listening = true;
+    window.addEventListener('message', (event) => {
+      const data = event.data; if (!data || typeof data !== 'object' || !('__jsc' in data)) return;
+      const run = this.runs.get(data.__jsc); if (!run || event.source !== run.frame.contentWindow) return;
+      run.handle(data);
+    });
+  },
+  /**
+   * opts: { code, lang:'js'|'html', ns, answers, host:Element (iframe container), onLine(level,text), onError(info), onClear(), onEnd(reason) }
+   * Returns { stop() }.
+   */
+  run(opts) {
+    this.listen();
+    const id = this.nextId++;
+    const frame = document.createElement('iframe');
+    frame.setAttribute('sandbox', 'allow-scripts'); frame.setAttribute('title', 'پیش‌نمایش اجرای کد'); frame.srcdoc = this.buildDoc(id, opts);
+    opts.host.replaceChildren(frame);
+    const dom = opts.lang === 'html' || this.isDomCode(opts.code);
+    let finished = false, timer = null;
+    const end = (reason) => { if (finished) return; finished = true; clearTimeout(timer); if (!dom || reason === 'halt' || reason === 'timeout') this.runs.delete(id); if (!dom || reason === 'timeout' || reason === 'halt') frame.remove(); opts.onEnd && opts.onEnd(reason); };
+    const handle = (m) => {
+      switch (m.kind) {
+        case 'log': opts.onLine(m.level, m.text); break;
+        case 'clear': opts.onClear && opts.onClear(); break;
+        case 'ls': SandboxStorage.set(m.ns, m.data); break;
+        case 'error': opts.onError && opts.onError({ name: m.name, message: m.message, line: m.line }); end('error'); break;
+        case 'idle': end('idle'); break;
+        case 'halt': end('halt'); break;
+        default: break;
+      }
+    };
+    this.runs.set(id, { frame, handle });
+    if (!dom) timer = setTimeout(() => { if (!finished) { opts.onLine('sys', '⏹ اجرا پس از ۲۰ ثانیه متوقف شد (احتمالاً setInterval یا کار ناتمام).'); end('timeout'); } }, 20000);
+    return { dom, stop() { if (!finished) { finished = true; clearTimeout(timer); } Sandbox.runs.delete(id); frame.remove(); } };
+  },
+};
+
+
+/* ───── ui-editor.js ───── */
+/* =====================================================================
+   SECTION 8 — CODE EDITOR + RUNNABLE CODE BLOCK COMPONENTS
+   ===================================================================== */
+Sandbox.stopAll = function () { this.runs.forEach((r) => r.frame.remove()); this.runs.clear(); };
+
+/** Textarea-over-<pre> editor with live syntax highlighting. */
+function createEditor(host, { code, lang = 'js', readOnly = true, onRun }) {
+  host.classList.add('ed');
+  const pre = document.createElement('pre'); pre.setAttribute('aria-hidden', 'true');
+  const codeEl = document.createElement('code'); pre.appendChild(codeEl);
+  const ta = document.createElement('textarea');
+  Object.assign(ta, { spellcheck: false, readOnly, wrap: 'off', value: code });
+  ['autocapitalize', 'autocomplete', 'autocorrect'].forEach((a) => ta.setAttribute(a, 'off'));
+  ta.setAttribute('dir', 'ltr'); ta.setAttribute('aria-label', 'ویرایشگر کد (برای اجرا Ctrl+Enter)');
+  host.append(pre, ta);
+  let trapTab = true;
+  const render = () => {
+    codeEl.innerHTML = highlight(ta.value, lang) + '\n';
+    ta.rows = Math.max(2, ta.value.split('\n').length);
+    pre.scrollTop = ta.scrollTop; pre.scrollLeft = ta.scrollLeft;
+  };
+  ta.addEventListener('input', render);
+  ta.addEventListener('scroll', () => { pre.scrollTop = ta.scrollTop; pre.scrollLeft = ta.scrollLeft; });
+  ta.addEventListener('focus', () => host.classList.toggle('editing', !ta.readOnly));
+  ta.addEventListener('blur', () => host.classList.remove('editing'));
+  ta.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); onRun && onRun(); return; }
+    if (ta.readOnly) return;
+    if (e.key === 'Escape') { trapTab = false; return; }
+    if (e.key === 'Tab' && trapTab) {
+      e.preventDefault();
+      const { selectionStart: s, selectionEnd: en, value } = ta;
+      if (s !== en || e.shiftKey) {
+        const lineStart = value.lastIndexOf('\n', s - 1) + 1; const block = value.slice(lineStart, en);
+        const changed = e.shiftKey ? block.replace(/^( {1,2}|\t)/gm, '') : block.replace(/^/gm, '  ');
+        ta.setRangeText(changed, lineStart, en, 'select'); ta.selectionStart = lineStart;
+      } else document.execCommand && document.execCommand('insertText', false, '  ') || ta.setRangeText('  ', s, en, 'end');
+      render(); return;
+    }
+    trapTab = true;
+    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+      const { selectionStart: s, value } = ta; const lineStart = value.lastIndexOf('\n', s - 1) + 1;
+      const indent = /^[ \t]*/.exec(value.slice(lineStart, s))[0]; const before = value[s - 1], after = value[s];
+      e.preventDefault();
+      let insert = '\n' + indent;
+      if ('{[('.includes(before)) { insert += '  '; if ((before === '{' && after === '}') || (before === '[' && after === ']') || (before === '(' && after === ')')) insert += '\n' + indent; }
+      ta.setRangeText(insert, s, ta.selectionEnd, 'end');
+      if (insert.endsWith('\n' + indent) && insert.length > indent.length + 3) ta.selectionStart = ta.selectionEnd = s + insert.length - indent.length - 1;
+      render();
+    }
+  });
+  render();
+  return {
+    get value() { return ta.value; },
+    set value(v) { ta.value = v; render(); },
+    setReadOnly(flag) { ta.readOnly = flag; },
+    focus() { ta.focus(); },
+    refresh: render,
+  };
+}
+
+/* ---- code block registry: HTML strings carry only an id, behaviour is attached by hydrateCodeBlocks() ---- */
+const CodeBlocks = { specs: [], reset() { this.specs = []; } };
+
+/**
+ * spec: { title, desc, code, lang='js', out (expected sample output), runnable=true, editable=false, ns, compact }
+ */
+function codeBlockHTML(spec) {
+  const id = CodeBlocks.specs.push(spec) - 1;
+  const lang = spec.lang || 'js';
+  const runnable = spec.runnable !== false && (lang === 'js' || lang === 'html');
+  return `<div class="cb" data-cb="${id}">
+    <div class="cb-head">
+      <span class="cb-title">${spec.title ? md(spec.title) : ''}</span>
+      <span class="badge-pill" dir="ltr">${lang === 'js' ? 'JavaScript' : lang.toUpperCase()}</span>
+      <button class="btn sm" data-act="copy" type="button" aria-label="کپی کد">📋 کپی</button>
+      ${runnable ? '<button class="btn sm" data-act="edit" type="button" aria-pressed="false">✏️ ویرایش</button><button class="btn sm" data-act="reset" type="button" hidden>↺ بازنشانی</button>' : ''}
+      ${runnable ? '<button class="btn sm primary" data-act="run" type="button">▶ اجرا</button>' : ''}
+    </div>
+    ${spec.desc ? `<div class="cb-desc">${md(spec.desc)}</div>` : ''}
+    <div class="cb-body">
+      <div class="ed-host"></div>
+      ${runnable ? `<label class="prompt-row muted" hidden>پاسخ‌های prompt (چند پاسخ را با | جدا کنید): <input class="prompt-in" dir="auto" style="min-width:200px;height:32px;border-radius:8px;border:1px solid var(--border2);background:var(--card2);padding:0 10px" value="${escapeHtml(spec.answers || '')}"></label>
+      <div class="prev" hidden></div>
+      <div class="out" hidden><div class="out-h"><span class="out-t">خروجی</span><span><span class="out-s"></span> <button class="btn sm" data-act="clear" type="button">پاک کردن</button></span></div><div class="out-b" role="log" aria-live="polite" tabindex="0"></div></div>` : ''}
+    </div>
+  </div>`;
+}
+
+function hydrateCodeBlocks(root) {
+  $$('.cb[data-cb]', root).forEach((el) => {
+    const spec = CodeBlocks.specs[Number(el.dataset.cb)]; if (!spec || el.dataset.ready) return; el.dataset.ready = '1';
+    const lang = spec.lang || 'js';
+    const runnable = spec.runnable !== false && (lang === 'js' || lang === 'html');
+    const editor = createEditor($('.ed-host', el), { code: spec.code, lang, readOnly: !spec.editable, onRun: () => run() });
+    el._editor = editor;
+    const outBox = $('.out', el), outBody = $('.out-b', el), outStatus = $('.out-s', el), prev = $('.prev', el), promptRow = $('.prompt-row', el);
+    let handle = null, hadOutput = false;
+    const addLine = (level, text) => { hadOutput = true; const s = document.createElement('span'); s.className = 'ln ' + level; s.textContent = text; outBody.appendChild(s); outBody.scrollTop = outBody.scrollHeight; };
+    const showSample = () => { if (spec.out === undefined || !outBox) return; outBox.hidden = false; $('.out-t', el).textContent = 'خروجی نمونه'; outStatus.textContent = '(برای دیدن خروجی واقعی ▶ بزنید)'; outBody.replaceChildren(); String(spec.out).split('\n').forEach((l) => addLine('sys', l)); hadOutput = false; };
+    const syncPrompt = () => { if (promptRow) promptRow.hidden = !/\bprompt\s*\(/.test(editor.value); };
+    syncPrompt();
+    function run() {
+      if (!runnable) return;
+      if (handle) handle.stop();
+      outBox.hidden = false; $('.out-t', el).textContent = 'خروجی'; outBody.replaceChildren(); hadOutput = false; outStatus.textContent = '⏳ در حال اجرا…';
+      prev.hidden = true;
+      const answers = $('.prompt-in', el).value ? $('.prompt-in', el).value.split('|') : [];
+      handle = Sandbox.run({
+        code: editor.value, lang, ns: spec.ns, answers, host: prev,
+        onLine: addLine,
+        onClear: () => { outBody.replaceChildren(); },
+        onError: ({ name, message, line }) => {
+          addLine('error', `Uncaught ${name}: ${message}${line ? `   (خط ${toFa(line)})` : ''}`);
+          const tip = explainError(name, message);
+          if (tip) { const d = document.createElement('div'); d.className = 'err-fa'; d.innerHTML = '<b>راهنمای خطا:</b> ' + escapeHtml(tip); outBody.appendChild(d); }
+        },
+        onEnd: (reason) => {
+          if (reason === 'error') outStatus.textContent = '✗ خطا';
+          else { outStatus.textContent = '✓ پایان اجرا'; if (!hadOutput && !handle.dom) addLine('sys', '(برنامه خروجی‌ای نداشت؛ برای دیدن نتیجه از console.log استفاده کنید.)'); }
+        },
+      });
+      prev.hidden = !handle.dom;
+    }
+    el.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-act]'); if (!btn || !el.contains(btn)) return;
+      const act = btn.dataset.act;
+      if (act === 'copy') copyText(editor.value);
+      else if (act === 'run') run();
+      else if (act === 'clear') { outBody.replaceChildren(); outStatus.textContent = ''; if (handle) { handle.stop(); handle = null; } prev.hidden = true; showSample(); if (spec.out === undefined) outBox.hidden = true; }
+      else if (act === 'reset') { editor.value = spec.code; syncPrompt(); }
+      else if (act === 'edit') {
+        const on = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', String(on)); btn.textContent = on ? '🔒 قفل' : '✏️ ویرایش';
+        $('[data-act="reset"]', el).hidden = !on; editor.setReadOnly(!on); if (on) editor.focus();
+      }
+    });
+    el.addEventListener('input', syncPrompt);
+    if (spec.editable) { const eb = $('[data-act="edit"]', el); if (eb) { eb.setAttribute('aria-pressed', 'true'); eb.textContent = '🔒 قفل'; $('[data-act="reset"]', el).hidden = false; } }
+    if (runnable) showSample();
+    if (spec.autorun) run();
+  });
+}
+
+
+/* ───── ui-lesson.js ───── */
+/* =====================================================================
+   SECTION 9 — LESSON RENDERING (blocks → HTML) + QUIZ / EXAM COMPONENTS
+   ===================================================================== */
+const Widgets = {}; // name → () => html ; optional Widgets[name].mount(root)
+
+const CALLOUT_META = {
+  info: { icon: 'ℹ️', title: 'یادآوری' }, tip: { icon: '💡', title: 'نکته' }, warning: { icon: '⚠️', title: 'هشدار' },
+  danger: { icon: '⛔', title: 'خطای رایج' }, exercise: { icon: '🧪', title: 'تمرین' }, quiz: { icon: '❓', title: 'سؤال' }, analogy: { icon: '🧩', title: 'مثال از زندگی واقعی' },
+};
+function calloutHTML(kind, title, text) {
+  const meta = CALLOUT_META[kind] || CALLOUT_META.info;
+  const paragraphs = String(text).split('\n\n').map((p) => `<p>${md(p)}</p>`).join('');
+  return `<div class="callout ${kind}" role="note"><div class="ct"><span aria-hidden="true">${meta.icon}</span>${md(title || meta.title)}</div>${paragraphs}</div>`;
+}
+
+let headingCounter = 0;
+/** Renders one explanation block. Collects h3 headings for the table of contents. */
+function blockHTML(block, toc) {
+  switch (block.t) {
+    case 'h': { const id = 'h' + (++headingCounter); toc && toc.push({ id, text: stripMarkup(block.text), level: 3 }); return `<h3 id="${id}">${md(block.text)}</h3>`; }
+    case 'p': return String(block.text).split('\n\n').map((p) => `<p>${md(p)}</p>`).join('');
+    case 'ul': case 'ol': return `<${block.t} class="list">${block.items.map((i) => `<li>${md(i)}</li>`).join('')}</${block.t}>`;
+    case 'callout': return calloutHTML(block.kind || 'info', block.title, block.text);
+    case 'analogy': return calloutHTML('analogy', block.title, block.text);
+    case 'code': return codeBlockHTML({ title: block.title, desc: block.desc, code: block.code, lang: block.lang || 'js', runnable: block.run !== false && (block.lang || 'js') === 'js' ? true : block.run === true, out: block.out, ns: block.ns });
+    case 'table': return `<table class="t"><thead><tr>${block.head.map((h) => `<th>${md(h)}</th>`).join('')}</tr></thead><tbody>${block.rows.map((r) => `<tr>${r.map((c) => `<td>${md(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    case 'widget': return Widgets[block.name] ? Widgets[block.name](block) : '';
+    case 'html': return block.html;
+    default: return '';
+  }
+}
+
+function sectionHTML(id, icon, title, inner) {
+  return `<section class="sec" id="${id}" aria-labelledby="${id}-t"><h2 id="${id}-t"><span class="ic" aria-hidden="true">${icon}</span>${title}</h2>${inner}</section>`;
+}
+
+/* ---------- instant-feedback quiz (lessons) ---------- */
+function normalizeQuestion(q) {
+  const options = q.type === 'tf' ? ['درست', 'نادرست'] : q.options;
+  const answer = q.type === 'tf' ? (q.answer === true || q.answer === 0 ? 0 : 1) : q.answer;
+  return Object.assign({}, q, { options, answer });
+}
+const optionHTML = (q, o) => (q.type === 'output' ? `<code>${escapeHtml(o)}</code>` : md(o));
+function questionBodyHTML(q) {
+  const typeLabel = { mcq: 'چندگزینه‌ای', tf: 'درست / نادرست', output: 'پیش‌بینی خروجی' }[q.type] || 'سؤال';
+  return `<div class="qn">${typeLabel}</div><div class="q">${md(q.q)}</div>${q.code ? codeBlockHTML({ code: q.code, runnable: false, lang: 'js' }) : ''}`;
+}
+function quizHTML(questions) {
+  return questions.map(normalizeQuestion).map((q, i) => `<div class="quiz" data-qi="${i}">
+    <div class="qn">سؤال ${toFa(i + 1)} از ${toFa(questions.length)}</div>${questionBodyHTML(q)}
+    <div class="opts" role="group" aria-label="گزینه‌ها">${q.options.map((o, k) => `<button type="button" class="opt" data-k="${k}"><span class="k" aria-hidden="true">${'ABCDEF'[k]}</span><span>${optionHTML(q, o)}</span></button>`).join('')}</div>
+    <div class="fb" role="status"></div></div>`).join('');
+}
+function hydrateQuiz(root, questions, lessonId) {
+  const qs = questions.map(normalizeQuestion); let answered = 0, correct = 0;
+  $$('.quiz', root).forEach((box) => {
+    const q = qs[Number(box.dataset.qi)];
+    box.addEventListener('click', (e) => {
+      const btn = e.target.closest('.opt'); if (!btn || btn.disabled) return;
+      const pick = Number(btn.dataset.k); const ok = pick === q.answer;
+      $$('.opt', box).forEach((b) => { b.disabled = true; if (Number(b.dataset.k) === q.answer) b.classList.add('right'); });
+      if (!ok) btn.classList.add('wrong');
+      const fb = $('.fb', box); fb.className = 'fb show ' + (ok ? 'ok' : 'no');
+      fb.innerHTML = `<b>${ok ? '✅ درست است!' : '❌ نادرست.'}</b> ${md(q.explain || '')}`;
+      answered++; if (ok) correct++;
+      if (answered === qs.length) {
+        Store.data.quiz[lessonId] = { score: correct, total: qs.length, date: Date.now() }; Store.touchDay(); Store.save();
+        toast(`نتیجه آزمونک: ${toFa(correct)} از ${toFa(qs.length)}`);
+      }
+    });
+  });
+}
+
+/* ---------- graded test (module tests / final exam) ---------- */
+function examHTML(questions, name) {
+  return `<form class="exam" data-exam="${name}" novalidate>${questions.map(normalizeQuestion).map((q, i) => `<fieldset class="quiz" data-qi="${i}" style="min-width:0">
+    <legend class="qn">سؤال ${toFa(i + 1)} از ${toFa(questions.length)}</legend>${questionBodyHTML(q).replace('<div class="qn">', '<div class="qn" style="display:none">')}
+    <div class="opts">${q.options.map((o, k) => `<label class="opt"><input type="radio" name="q${i}" value="${k}"><span class="k" aria-hidden="true">${'ABCDEF'[k]}</span><span>${optionHTML(q, o)}</span></label>`).join('')}</div></fieldset>`).join('')}
+    <div class="row" style="margin-top:16px"><button class="btn primary" type="submit">ثبت پاسخ‌ها و دیدن نتیجه</button><span class="muted" data-role="count"></span></div></form>`;
+}
+function hydrateExam(root, questions, onSubmit) {
+  const qs = questions.map(normalizeQuestion); const form = $('form.exam', root);
+  const count = $('[data-role="count"]', form);
+  const update = () => { count.textContent = `${toFa($$('input:checked', form).length)} از ${toFa(qs.length)} سؤال پاسخ داده شده`; $$('.opt', form).forEach((l) => l.classList.toggle('sel', l.querySelector('input').checked)); };
+  form.addEventListener('change', update); update();
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const missing = qs.filter((q, i) => !$(`input[name="q${i}"]:checked`, form)).length;
+    if (missing && !(await confirmDialog('بعضی سؤال‌ها بی‌پاسخ هستند', `${toFa(missing)} سؤال را پاسخ نداده‌اید و نمره منفی ندارد. ثبت شود؟`))) return;
+    const picks = qs.map((q, i) => { const c = $(`input[name="q${i}"]:checked`, form); return c ? Number(c.value) : null; });
+    onSubmit(picks);
+  });
+}
+function reviewHTML(questions, picks) {
+  const qs = questions.map(normalizeQuestion);
+  const wrong = qs.map((q, i) => ({ q, i, pick: picks[i] })).filter((x) => x.pick !== x.q.answer);
+  if (!wrong.length) return '<div class="callout tip"><div class="ct">🏆 همه پاسخ‌ها درست بود!</div><p>هیچ سؤال اشتباهی برای مرور وجود ندارد.</p></div>';
+  return `<h3>مرور پاسخ‌های اشتباه (${toFa(wrong.length)})</h3>` + wrong.map(({ q, i, pick }) => `<div class="review">
+    <b>سؤال ${toFa(i + 1)}:</b> ${md(q.q)}${q.code ? `<pre class="ltr" style="background:var(--code-bg);padding:10px;border-radius:8px;overflow:auto"><code>${highlight(q.code)}</code></pre>` : ''}
+    <p style="margin:6px 0">پاسخ شما: <b style="color:var(--danger)">${pick === null ? 'بدون پاسخ' : optionHTML(q, q.options[pick])}</b></p>
+    <p style="margin:6px 0">پاسخ درست: <b style="color:var(--tip)">${optionHTML(q, q.options[q.answer])}</b></p>
+    <p style="margin:0">${md(q.explain || '')}</p></div>`).join('');
+}
+
+/* ---------- lesson page ---------- */
+function exerciseHTML(ex, lessonId, index) {
+  const levelFa = { easy: 'آسان', medium: 'متوسط', hard: 'دشوار' }[ex.level] || ex.level;
+  return `<div class="ex"><div class="ex-h"><span aria-hidden="true">🧪</span> تمرین ${toFa(index + 1)} <span class="lvl ${ex.level}">${levelFa}</span></div><div class="ex-b">
+    ${String(ex.statement).split('\n\n').map((p) => `<p>${md(p)}</p>`).join('')}
+    <details class="fold"><summary>💭 راهنمایی</summary><div class="fold-b">${md(ex.hint)}</div></details>
+    ${codeBlockHTML({ title: 'ویرایشگر تمرین', code: ex.starter || '// کد خود را اینجا بنویسید\n', editable: true, ns: `${lessonId}:ex${index}`, lang: ex.lang || 'js' })}
+    <details class="fold"><summary>✅ راه‌حل (ابتدا خودتان تلاش کنید)</summary><div class="fold-b">${codeBlockHTML({ title: 'راه‌حل پیشنهادی', code: ex.solution, ns: `${lessonId}:sol${index}`, lang: ex.lang || 'js' })}${ex.explain ? `<p>${md(ex.explain)}</p>` : ''}</div></details></div></div>`;
+}
+function projectHTML(lesson) {
+  const p = lesson.project;
+  const lang = p.lang || 'html';
+  let html = `<h3>الزامات پروژه</h3><ul class="list">${p.requirements.map((r) => `<li>${md(r)}</li>`).join('')}</ul>`;
+  html += `<h3>گام‌های پیشنهادی</h3>` + p.steps.map((s, i) => `<details class="fold"><summary>گام ${toFa(i + 1)}: ${md(s.title)}</summary><div class="fold-b">${String(s.text).split('\n\n').map((t) => `<p>${md(t)}</p>`).join('')}${s.code ? codeBlockHTML({ code: s.code, lang: s.lang || 'js', runnable: false }) : ''}</div></details>`).join('');
+  html += `<h3>میزکار شما</h3>` + codeBlockHTML({ title: 'کد شروع (ویرایش و اجرا کنید)', code: p.starter, lang, editable: true, ns: `${lesson.id}:work` });
+  html += `<details class="fold"><summary>🔓 راه‌حل کامل (فقط بعد از تلاش خودتان)</summary><div class="fold-b">${codeBlockHTML({ title: 'راه‌حل نهایی', code: p.solution, lang, ns: `${lesson.id}:solution` })}${p.notes ? `<p>${md(p.notes)}</p>` : ''}</div></details>`;
+  return html;
+}
+
+function renderLessonPage(lesson) {
+  CodeBlocks.reset(); headingCounter = 0;
+  const mod = JSCourse.modules[lesson.module]; const toc = []; const nb = JSCourse.neighbors(lesson.id);
+  const addSec = (id, icon, title) => toc.push({ id, text: `${icon} ${title}`, level: 2 });
+  let body = '';
+  addSec('s-goal', '🎯', 'هدف'); body += sectionHTML('s-goal', '🎯', 'هدف درس', `<p>${md(lesson.goal)}</p>`);
+  addSec('s-explain', '📖', 'توضیح');
+  body += sectionHTML('s-explain', '📖', 'توضیح', (lesson.explain || []).map((b) => blockHTML(b, toc)).join(''));
+  if (lesson.project) { addSec('s-project', '🏗️', 'پروژه'); body += sectionHTML('s-project', '🏗️', 'پروژه گام‌به‌گام', projectHTML(lesson)); }
+  if (lesson.examples && lesson.examples.length) {
+    addSec('s-examples', '💻', 'مثال‌ها');
+    body += sectionHTML('s-examples', '💻', 'مثال‌های کد', `<p class="muted">هر مثال را اجرا کنید، سپس با دکمه «ویرایش» کد را تغییر دهید و دوباره اجرا کنید. (میان‌بر: <kbd>Ctrl</kbd>+<kbd>Enter</kbd>)</p>` + lesson.examples.map((ex, i) => codeBlockHTML({ title: `${toFa(i + 1)}. ${ex.title}`, desc: ex.desc, code: ex.code, lang: ex.lang || 'js', out: ex.out, ns: `${lesson.id}:e${i}`, answers: ex.answers })).join(''));
+  }
+  if (lesson.mistakes && lesson.mistakes.length) {
+    addSec('s-mistakes', '⚠️', 'اشتباهات رایج');
+    body += sectionHTML('s-mistakes', '⚠️', 'اشتباهات رایج', lesson.mistakes.map((m) => `<div class="mistake"><h3 style="margin-top:.2em">${md(m.title)}</h3><div class="cmp">
+      <div class="bad"><div class="lab">❌ نادرست</div>${codeBlockHTML({ code: m.bad, runnable: m.run === true, lang: 'js' }).replace('class="cb"', 'class="cb" style="margin:0;border:0;border-radius:0;box-shadow:none"')}</div>
+      <div class="good"><div class="lab">✅ درست</div>${codeBlockHTML({ code: m.good, runnable: m.run === true, lang: 'js' }).replace('class="cb"', 'class="cb" style="margin:0;border:0;border-radius:0;box-shadow:none"')}</div></div>
+      <p class="why"><b>چرا؟</b> ${md(m.why)}</p></div>`).join(''));
+  }
+  if (lesson.tip) { addSec('s-tip', '💡', 'نکته حرفه‌ای'); body += sectionHTML('s-tip', '💡', 'نکته حرفه‌ای', calloutHTML('tip', lesson.tip.title || 'بهترین روش', lesson.tip.text)); }
+  if (lesson.exercises && lesson.exercises.length) { addSec('s-ex', '🧪', 'تمرین‌ها'); body += sectionHTML('s-ex', '🧪', 'تمرین‌ها', lesson.exercises.map((ex, i) => exerciseHTML(ex, lesson.id, i)).join('')); }
+  if (lesson.quiz && lesson.quiz.length) { addSec('s-quiz', '❓', 'آزمونک'); body += sectionHTML('s-quiz', '❓', 'آزمونک', quizHTML(lesson.quiz)); }
+  addSec('s-done', '✅', 'پایان درس');
+  const done = Progress.isDone(lesson.id);
+  body += `<section class="sec" id="s-done"><div class="complete-bar"><div><b>${done ? '🎉 این درس را کامل کرده‌اید.' : 'درس را تمام کردید؟'}</b><div class="muted" style="font-size:.88rem">پیشرفت شما در مرورگر ذخیره می‌شود.</div></div>
+    <button class="btn ${done ? '' : 'primary'}" id="completeBtn" type="button" aria-pressed="${done}">${done ? '✓ تکمیل شد (لغو)' : '✅ علامت‌گذاری درس به‌عنوان تکمیل‌شده'}</button></div>
+    <nav class="nav-pn" aria-label="ناوبری درس‌ها">${nb.prev ? `<a href="#/l/${nb.prev.id}" rel="prev"><small>→ درس قبلی</small>${md(nb.prev.title)}</a>` : '<span></span>'}${nb.next ? `<a class="nx" href="#/l/${nb.next.id}" rel="next"><small>درس بعدی ←</small>${md(nb.next.title)}</a>` : `<a class="nx" href="#/test/${lesson.module}"><small>پایان ماژول</small>آزمون ماژول ←</a>`}</nav></section>`;
+  const head = `<header class="lesson-head"><div class="crumbs"><a href="#/m/${mod.index}">${mod.icon} ماژول ${toFa(mod.index)}: ${md(mod.title)}</a></div><h1>${md(lesson.title)}</h1>
+    <div class="meta"><span class="badge-pill">⏱ حدود ${toFa(lesson.minutes || 20)} دقیقه</span><span class="badge-pill">${lesson.project ? '🏗️ پروژه' : '📘 درس'}</span></div></header>`;
+  const tocHTML = `<nav class="toc" aria-label="فهرست این درس"><b>در این درس</b>${toc.map((t) => `<a href="#${t.id}" data-toc="${t.id}" style="padding-inline-start:${t.level === 3 ? 12 : 0}px;${t.level === 3 ? 'font-size:.82rem' : ''}">${md(t.text)}</a>`).join('')}</nav>`;
+  return { html: `<article class="page">${head}${body}</article>${tocHTML}`, toc };
+}
+
+function hydrateLesson(root, lesson) {
+  hydrateCodeBlocks(root);
+  if (lesson.quiz) hydrateQuiz(root, lesson.quiz, lesson.id);
+  Object.keys(Widgets).forEach((name) => { if (Widgets[name].mount) $$(`[data-widget="${name}"]`, root).forEach((n) => Widgets[name].mount(n)); });
+  const btn = $('#completeBtn', root);
+  btn.addEventListener('click', () => {
+    if (Progress.isDone(lesson.id)) { Progress.unmarkDone(lesson.id); toast('علامت تکمیل برداشته شد'); }
+    else {
+      Progress.markDone(lesson.id); toast('🎉 آفرین! درس تکمیل شد');
+      const mod = Progress.module(lesson.module);
+      if (mod.done === mod.total) toast(`🏅 نشان «${JSCourse.modules[lesson.module].badge}» باز شد!`);
+    }
+    App.refreshChrome(); App.route({ keepScroll: true });
+    $('#s-done') && $('#s-done').scrollIntoView({ block: 'center' });
+  });
+  const links = $$('.toc a', root); const spy = new IntersectionObserver((entries) => {
+    entries.forEach((en) => { if (en.isIntersecting) { links.forEach((a) => a.classList.toggle('active', a.dataset.toc === en.target.id)); } });
+  }, { rootMargin: '-80px 0px -70% 0px' });
+  links.forEach((a) => { const t = document.getElementById(a.dataset.toc); if (t) spy.observe(t); });
+  App.cleanups.push(() => spy.disconnect());
+}
+
+
+/* ───── widgets.js ───── */
+/* =====================================================================
+   SECTION 10 — INTERACTIVE WIDGETS (usable from lessons with {t:'widget', name})
+   ===================================================================== */
+(function registerEventLoopWidget() {
+  const CODE = ["console.log('A');", "setTimeout(() => console.log('B'), 0);", "Promise.resolve().then(() => console.log('C'));", "console.log('D');"];
+  const S = (line, stack, web, micro, tasks, log, msg) => ({ line, stack, web, micro, tasks, log, msg });
+  const STEPS = [
+    S(-1, [], [], [], [], [], 'برنامه هنوز شروع نشده است. با «قدم بعدی» اجرا را مرحله‌به‌مرحله دنبال کنید. جاوااسکریپت فقط یک پشته (Call Stack) دارد و هر لحظه فقط یک کار را انجام می‌دهد.'),
+    S(-1, ['main()'], [], [], [], [], 'کل اسکریپت مانند یک تابع بزرگ به نام main() روی Call Stack قرار می‌گیرد.'),
+    S(0, ['main()', "console.log('A')"], [], [], [], [], 'خط اول: console.log پشته را پر می‌کند. این کار همگام است و بلافاصله انجام می‌شود.'),
+    S(0, ['main()'], [], [], [], ['A'], 'خروجی «A» چاپ شد و تابع از پشته خارج شد.'),
+    S(1, ['main()', 'setTimeout(cb, 0)'], [], [], [], ['A'], 'خط دوم: setTimeout خودش کار را انجام نمی‌دهد؛ فقط از مرورگر می‌خواهد یک زمان‌سنج بسازد.'),
+    S(1, ['main()'], ['timer: cbB'], [], [], ['A'], 'زمان‌سنج در Web APIs (خارج از جاوااسکریپت) شروع به کار می‌کند. پشته آزاد شد و برنامه ادامه می‌دهد.'),
+    S(1, ['main()'], [], [], ['cbB'], ['A'], 'زمان‌سنج ۰ میلی‌ثانیه‌ای تمام شد، اما callback اجازه ندارد وسط کار بپرد؛ در صف وظایف (Task Queue) منتظر می‌ماند.'),
+    S(2, ['main()', 'promise.then(cb)'], [], [], ['cbB'], ['A'], 'خط سوم: Promise.resolve() همین حالا آماده است و then یک callback ثبت می‌کند.'),
+    S(2, ['main()'], [], ['cbC'], ['cbB'], ['A'], 'callback مربوط به Promise وارد صف ریزوظایف (Microtask Queue) شد. این صف از Task Queue اولویت بالاتری دارد.'),
+    S(3, ['main()', "console.log('D')"], [], ['cbC'], ['cbB'], ['A'], 'خط چهارم: هنوز داخل main() هستیم؛ هر کد همگام تا پایان کار خودش را می‌کند.'),
+    S(3, ['main()'], [], ['cbC'], ['cbB'], ['A', 'D'], 'خروجی «D» چاپ شد. هر دو callback همچنان منتظرند.'),
+    S(-1, [], [], ['cbC'], ['cbB'], ['A', 'D'], 'main() تمام شد و پشته خالی است. حالا Event Loop وارد کار می‌شود.'),
+    S(-1, ['cbC'], [], [], ['cbB'], ['A', 'D'], 'قانون اول Event Loop: قبل از هر چیز، همه ریزوظایف را اجرا کن. پس cbC روی پشته می‌رود.'),
+    S(-1, [], [], [], ['cbB'], ['A', 'D', 'C'], 'خروجی «C» چاپ شد. صف ریزوظایف خالی است.'),
+    S(-1, ['cbB'], [], [], [], ['A', 'D', 'C'], 'قانون دوم: حالا فقط یک وظیفه از Task Queue برداشته می‌شود؛ cbB روی پشته می‌رود.'),
+    S(-1, [], [], [], [], ['A', 'D', 'C', 'B'], 'خروجی «B» چاپ شد. ترتیب نهایی: A، D، C، B. با اینکه setTimeout قبل از Promise نوشته شد، اولویت با ریزوظایف است.'),
+  ];
+  const box = (title, items) => `<div class="evl-box"><h4>${title}</h4>${items.map((i) => `<div class="evl-item">${escapeHtml(i)}</div>`).join('')}</div>`;
+  const widget = () => `<div class="evl" data-widget="eventLoop"><b>🎬 شبیه‌ساز Event Loop</b><pre class="ltr" style="margin:10px 0;background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;overflow:auto;font-size:13px" data-role="code"></pre><div data-role="grid"></div><div class="evl-msg" data-role="msg" role="status" aria-live="polite"></div><div class="row" style="margin-top:10px"><button class="btn sm" data-a="prev" type="button">→ قدم قبلی</button><button class="btn sm primary" data-a="next" type="button">قدم بعدی ←</button><button class="btn sm" data-a="reset" type="button">↺ از اول</button><span class="muted" data-role="count"></span></div></div>`;
+  widget.mount = (node) => {
+    let i = 0;
+    const draw = () => {
+      const s = STEPS[i];
+      $('[data-role="code"]', node).innerHTML = CODE.map((l, n) => `<span style="display:block;${n === s.line ? 'background:color-mix(in srgb,var(--warn) 22%,transparent);border-radius:4px' : ''}">${highlightJS(l)}</span>`).join('');
+      $('[data-role="grid"]', node).innerHTML = `<div class="evl-grid">${box('📚 Call Stack', s.stack.slice().reverse())}${box('🌐 Web APIs', s.web)}${box('⚡ Microtask Queue', s.micro)}${box('📬 Task Queue', s.tasks)}${box('🖥️ Console', s.log)}</div>`;
+      $('[data-role="msg"]', node).textContent = s.msg;
+      $('[data-role="count"]', node).textContent = `مرحله ${toFa(i + 1)} از ${toFa(STEPS.length)}`;
+      $('[data-a="prev"]', node).disabled = i === 0; $('[data-a="next"]', node).disabled = i === STEPS.length - 1;
+    };
+    node.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-a]'); if (!b) return;
+      if (b.dataset.a === 'next' && i < STEPS.length - 1) i++; else if (b.dataset.a === 'prev' && i > 0) i--; else if (b.dataset.a === 'reset') i = 0;
+      draw();
+    });
+    draw();
+  };
+  Widgets.eventLoop = widget;
+})();
+
+
+/* ───── ui-pages.js ───── */
+/* =====================================================================
+   SECTION 11 — PAGES (home, module, tests, progress, study plan)
+   Every page function returns { html, mount?(root), toc? }.
+   ===================================================================== */
+const accentStyle = (mod) => `style="--accent:${mod.color}"`;
+const lessonLink = (l) => `#/l/${l.id}`;
+
+function firstUnfinishedLesson() { return JSCourse.flat().find((l) => !Progress.isDone(l.id)) || JSCourse.flat()[0] || null; }
+
+function homePage() {
+  const overall = Progress.overall(); const last = Store.data.last && Store.data.last.lessonId ? JSCourse.lesson(Store.data.last.lessonId) : null;
+  const target = last || firstUnfinishedLesson(); const started = Boolean(last) || overall.done > 0;
+  const cont = target ? `<a class="btn primary" href="${lessonLink(target)}">${started ? '▶ ادامه از جایی که ماندید' : '🚀 شروع دوره'}</a><span class="muted" style="font-size:.88rem">${md(target.title)}</span>` : '<span class="muted">محتوای درس‌ها بارگذاری نشده است.</span>';
+  const totalMinutes = JSCourse.flat().reduce((s, l) => s + (l.minutes || 20), 0);
+  return { html: `<div class="page">
+    <section class="hero"><span class="badge-pill">دوره رایگان و خودآموز</span>
+      <h1 style="margin-top:12px">آموزش جاوااسکریپت <span style="color:var(--accent-text)">از صفر تا پیشرفته</span></h1>
+      <p class="lead">دوازده ماژول، درس‌های مرحله‌به‌مرحله با مثال‌های اجراشدنی، تمرین، آزمون و پروژه. هر کدی که می‌بینید را همین‌جا اجرا و ویرایش کنید.</p>
+      <div class="row">${cont}<a class="btn" href="#/plan">🗓️ برنامه مطالعه</a><a class="btn" href="#/playground">🧪 زمین‌بازی</a></div></section>
+    <div class="grid cols-3" style="margin:22px 0">
+      <div class="card row"><div class="ring" style="--p:${overall.pct}"><span>${toFa(overall.pct)}٪</span></div><div><b>پیشرفت کل</b><div class="muted">${toFa(overall.done)} از ${toFa(overall.total)} درس</div></div></div>
+      <div class="card"><b>🔥 رکورد مطالعه</b><div class="score-big">${toFa(Store.streak())}</div><div class="muted">روز متوالی</div></div>
+      <div class="card"><b>⏱ زمان تقریبی دوره</b><div class="score-big">${toFa(Math.round(totalMinutes / 60))}</div><div class="muted">ساعت مطالعه و تمرین</div></div></div>
+    <h2>نقشه راه</h2><div class="card"><div class="roadmap">${JSCourse.modules.map((m) => { const p = Progress.module(m.index); return `<div class="rm ${p.total && p.done === p.total ? 'done' : ''}" ${accentStyle(m)}><div class="node">${toFa(m.index)}</div><a href="#/m/${m.index}">${md(m.title)}</a><small>${p.total ? toFa(p.pct) + '٪' : m.icon}</small></div>`; }).join('')}</div></div>
+    <div class="grid cols-2" style="margin:24px 0"><div class="card"><h3>👥 این دوره برای چه کسانی است؟</h3><ul class="list"><li>کسانی که هیچ تجربه برنامه‌نویسی ندارند و می‌خواهند از پایه شروع کنند.</li><li>دانشجویان و علاقه‌مندان به وب که می‌خواهند مفاهیم را عمیق و اصولی بفهمند.</li><li>برنامه‌نویسان زبان‌های دیگر که به جاوااسکریپت مدرن مهاجرت می‌کنند.</li><li>کسانی که برای مصاحبه شغلی مرور منظم می‌خواهند.</li></ul></div>
+      <div class="card"><h3>✅ پیش‌نیازها</h3><ul class="list"><li>کار با رایانه و مرورگر وب در حد عادی.</li><li>آشنایی ابتدایی با HTML مفید است، اما ضروری نیست.</li><li>یک ویرایشگر کد (VS Code) و مرورگر مدرن؛ برای شروع حتی همین صفحه کافی است.</li><li>روزی ۳۰ تا ۶۰ دقیقه وقت و تمرین مداوم.</li></ul></div></div>
+    <h2>ماژول‌ها</h2><div class="grid cols-3">${JSCourse.modules.map((m) => { const p = Progress.module(m.index); return `<a class="mcard" href="#/m/${m.index}" ${accentStyle(m)}><span class="num">ماژول ${toFa(m.index)} · ${m.icon}</span><h3>${md(m.title)}</h3><p>${md(m.summary)}</p><div class="progress" aria-hidden="true"><i style="width:${p.pct}%"></i></div><small class="muted">${p.total ? `${toFa(p.done)} از ${toFa(p.total)} درس` : 'به‌زودی'}</small></a>`; }).join('')}</div>
+    <h2 style="margin-top:34px">ویژگی‌های دوره</h2><div class="grid cols-3">${[['▶️', 'اجرای زنده کد', 'همه مثال‌ها قابل اجرا و ویرایش‌اند؛ اجرا در محیط ایزوله انجام می‌شود.'], ['🧪', 'تمرین در سه سطح', 'آسان، متوسط و دشوار با راهنمایی و راه‌حل پنهان.'], ['🏅', 'نشان و آزمون', 'آزمون هر ماژول، آزمون پایانی و نشان برای هر ماژول.'], ['🔎', 'جستجوی فوری', 'جستجو در عنوان و متن تمام درس‌ها (میان‌بر: /).'], ['📚', 'برگه تقلب و واژه‌نامه', 'مرور سریع نحو و اصطلاحات فارسی ـ انگلیسی.'], ['💾', 'ذخیره پیشرفت', 'همه چیز در مرورگر خودتان ذخیره می‌شود.']].map(([i, t, d]) => `<div class="card"><div style="font-size:1.6rem">${i}</div><b>${t}</b><p class="muted" style="margin:4px 0 0;font-size:.9rem">${d}</p></div>`).join('')}</div></div>` };
+}
+
+function modulePage(index) {
+  const m = JSCourse.modules[index]; if (!m) return notFoundPage(); const p = Progress.module(index); const test = Store.data.tests[index]; const bd = Progress.badge(index);
+  return { html: `<div class="page" ${accentStyle(m)}><div class="crumbs"><a href="#/">خانه</a> › ماژول ${toFa(index)}</div>
+    <div class="hero"><span class="badge-pill">${m.icon} ماژول ${toFa(index)} · ${escapeHtml(m.en)}</span><h1 style="margin-top:12px">${md(m.title)}</h1><p class="lead">${md(m.summary)}</p>
+      <div class="progress" style="max-width:420px"><i style="width:${p.pct}%"></i></div><p class="muted" style="margin-top:6px">${toFa(p.done)} از ${toFa(p.total)} درس تکمیل شده · نشان «${m.badge}»: ${bd.unlocked ? '🏅 باز شده' + (bd.star ? ' ⭐' : '') : '🔒 قفل'}</p></div>
+    <div class="grid cols-2" style="margin:20px 0"><div class="card"><h3>📌 سرفصل‌ها</h3><ul class="list">${m.topics.map((t) => `<li>${md(t)}</li>`).join('')}</ul></div>
+    <div class="card"><h3>📘 درس‌ها</h3>${m.lessons.length ? `<ol class="list">${m.lessons.map((l) => `<li><a href="${lessonLink(l)}">${md(l.title)}</a> ${Progress.isDone(l.id) ? '✅' : ''}<small class="muted"> · ${toFa(l.minutes || 20)} دقیقه</small></li>`).join('')}</ol>` : '<p class="muted">درس‌های این ماژول هنوز بارگذاری نشده‌اند.</p>'}
+      ${m.test ? `<a class="btn primary" href="#/test/${index}">🏁 آزمون ماژول${test ? ` (بهترین نتیجه: ${toFa(test.best)}٪)` : ''}</a>` : ''}</div></div></div>` };
+}
+
+function notFoundPage() { return { html: '<div class="page card"><h1>صفحه پیدا نشد</h1><p>آدرس درخواستی وجود ندارد.</p><a class="btn primary" href="#/">بازگشت به خانه</a></div>' }; }
+
+/* ---------- module test + final exam ---------- */
+function resultCard(title, score, total, pct, passed) {
+  return `<div class="card row" style="margin:16px 0"><div class="ring" style="--p:${pct};--s:110px"><span>${toFa(pct)}٪</span></div><div><h2 style="margin:0">${title}</h2><div class="score-big" style="font-size:1.8rem">${toFa(score)} از ${toFa(total)}</div><p style="margin:0">${passed ? '🎉 قبول شدید (حداقل نمره ۷۰٪).' : 'برای قبولی حداقل ۷۰٪ لازم است؛ درس‌ها را مرور کنید و دوباره تلاش کنید.'}</p></div></div>`;
+}
+function testPage(index) {
+  const m = JSCourse.modules[index]; if (!m) return notFoundPage();
+  if (!m.test || !m.test.length) return { html: `<div class="page card" ${accentStyle(m)}><h1>آزمون ماژول ${toFa(index)}</h1><p class="muted">آزمون این ماژول هنوز بارگذاری نشده است.</p><a class="btn" href="#/m/${index}">بازگشت به ماژول</a></div>` };
+  return { html: `<div class="page" ${accentStyle(m)}><div class="crumbs"><a href="#/m/${index}">${m.icon} ماژول ${toFa(index)}: ${md(m.title)}</a> › آزمون</div><h1>🏁 آزمون ماژول ${toFa(index)}</h1>
+    <p class="muted">${toFa(m.test.length)} سؤال. نمره منفی ندارد؛ در پایان پاسخ‌های اشتباه همراه با توضیح نمایش داده می‌شوند.</p><div id="examArea">${examHTML(m.test, 'm' + index)}</div></div>`,
+    mount(root) {
+      hydrateCodeBlocks(root);
+      hydrateExam(root, m.test, (picks) => {
+        const score = picks.filter((p, i) => p === normalizeQuestion(m.test[i]).answer).length; const pct = Math.round((score / m.test.length) * 100);
+        const prev = Store.data.tests[index]; Store.data.tests[index] = { score, total: m.test.length, pct, best: Math.max(pct, prev ? prev.best : 0), date: Date.now() }; Store.touchDay(); Store.save();
+        $('#examArea', root).innerHTML = resultCard('نتیجه آزمون', score, m.test.length, pct, pct >= 70) + reviewHTML(m.test, picks) + `<div class="row" style="margin-top:16px"><a class="btn primary" href="#/test/${index}" onclick="setTimeout(App.route,0)">↺ تلاش دوباره</a><a class="btn" href="#/m/${index}">بازگشت به ماژول</a></div>`;
+        hydrateCodeBlocks(root); App.refreshChrome(); window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    } };
+}
+
+let finalExamState = null;
+function finalPage() {
+  if (!finalExamState) finalExamState = { seed: (Date.now() % 100000) + 1 };
+  const questions = JSCourse.buildFinalExam(finalExamState.seed);
+  if (!questions.length) return { html: '<div class="page card"><h1>آزمون پایانی</h1><p class="muted">برای ساخته شدن آزمون پایانی، ابتدا باید آزمون ماژول‌ها بارگذاری شده باشند.</p></div>' };
+  const prior = Store.data.final;
+  return { html: `<div class="page"><h1>🎓 آزمون پایانی دوره</h1><p class="muted">${toFa(questions.length)} سؤال از همه ماژول‌ها${prior ? ` · بهترین نتیجه قبلی: ${toFa(prior.best)}٪` : ''}.</p><div id="examArea">${examHTML(questions, 'final')}</div></div>`,
+    mount(root) {
+      hydrateCodeBlocks(root);
+      hydrateExam(root, questions, (picks) => {
+        const score = picks.filter((p, i) => p === normalizeQuestion(questions[i]).answer).length; const pct = Math.round((score / questions.length) * 100);
+        Store.data.final = { score, total: questions.length, pct, best: Math.max(pct, prior ? prior.best : 0), date: Date.now() }; Store.touchDay(); Store.save(); finalExamState = null;
+        $('#examArea', root).innerHTML = resultCard('نتیجه آزمون پایانی', score, questions.length, pct, pct >= 70) + completionSummaryHTML() + reviewHTML(questions, picks) + `<div class="row" style="margin-top:16px"><a class="btn primary" href="#/final" onclick="setTimeout(App.route,0)">↺ آزمون جدید</a><a class="btn" href="#/progress">پیشرفت من</a></div>`;
+        hydrateCodeBlocks(root); App.refreshChrome(); window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    } };
+}
+
+function completionSummaryHTML() {
+  const overall = Progress.overall(); const quizzes = Object.values(Store.data.quiz); const quizAvg = quizzes.length ? Math.round(quizzes.reduce((s, q) => s + q.score / q.total, 0) / quizzes.length * 100) : 0;
+  const rows = JSCourse.modules.map((m) => { const t = Store.data.tests[m.index]; const p = Progress.module(m.index); return `<tr><td>${m.icon} ${md(m.title)}</td><td>${toFa(p.done)}/${toFa(p.total)}</td><td>${t ? toFa(t.best) + '٪' : '—'}</td><td>${Progress.badge(m.index).unlocked ? '🏅' : '🔒'}</td></tr>`; }).join('');
+  const f = Store.data.final;
+  return `<div class="card" style="margin:16px 0"><h3>📋 خلاصه پیشرفت دوره</h3><div class="grid cols-3" style="margin-bottom:12px"><div><b>درس‌های تکمیل‌شده</b><div class="score-big" style="font-size:1.6rem">${toFa(overall.done)}/${toFa(overall.total)}</div></div><div><b>میانگین آزمونک‌ها</b><div class="score-big" style="font-size:1.6rem">${toFa(quizAvg)}٪</div></div><div><b>آزمون پایانی</b><div class="score-big" style="font-size:1.6rem">${f ? toFa(f.best) + '٪' : '—'}</div></div></div>
+  <table class="t"><thead><tr><th>ماژول</th><th>درس‌ها</th><th>بهترین آزمون</th><th>نشان</th></tr></thead><tbody>${rows}</tbody></table>
+  ${f && f.best >= 70 && overall.total && overall.done === overall.total ? '<div class="callout tip"><div class="ct">🎓 تبریک! دوره را به پایان رساندید</div><p>همه درس‌ها را کامل و آزمون پایانی را با موفقیت گذراندید. قدم بعدی: پروژه‌های شخصی بسازید و کدتان را در GitHub منتشر کنید.</p></div>' : ''}</div>`;
+}
+
+function progressPage() {
+  const overall = Progress.overall();
+  return { html: `<div class="page"><h1>📈 پیشرفت من</h1>
+    <div class="grid cols-3" style="margin-bottom:18px"><div class="card row"><div class="ring" style="--p:${overall.pct}"><span>${toFa(overall.pct)}٪</span></div><div><b>پیشرفت کل</b><div class="muted">${toFa(overall.done)} از ${toFa(overall.total)} درس</div></div></div>
+      <div class="card"><b>🔥 رکورد فعلی</b><div class="score-big">${toFa(Store.streak())}</div><div class="muted">روز متوالی · ${toFa(Store.data.days.length)} روز مطالعه در کل</div></div>
+      <div class="card"><b>🏅 نشان‌ها</b><div class="score-big">${toFa(JSCourse.modules.filter((m) => Progress.badge(m.index).unlocked).length)}/${toFa(JSCourse.modules.length)}</div><div class="muted">نشان باز شده</div></div></div>
+    <h2>نشان‌ها</h2><div class="badge-grid">${JSCourse.modules.map((m) => { const b = Progress.badge(m.index); return `<div class="bdg ${b.unlocked ? 'on' : ''}" ${accentStyle(m)}><div class="em">${m.icon}${b.star ? '⭐' : ''}</div><b>${escapeHtml(m.badge)}</b><small>${b.unlocked ? 'ماژول ' + toFa(m.index) + ' کامل شد' : 'ماژول ' + toFa(m.index) + ' را کامل کنید'}</small></div>`; }).join('')}</div>
+    <h2 style="margin-top:28px">خلاصه دوره</h2>${completionSummaryHTML()}
+    <div class="card" style="margin-top:20px;border-color:color-mix(in srgb,var(--danger) 40%,var(--border))"><h3>♻️ بازنشانی</h3><p class="muted">همه پیشرفت‌ها، نمره‌ها، قطعه‌کدهای ذخیره‌شده و تنظیمات پاک می‌شوند. این کار برگشت‌پذیر نیست.</p><button class="btn danger" id="resetBtn" type="button">حذف همه پیشرفت‌ها</button></div></div>`,
+    mount(root) {
+      $('#resetBtn', root).addEventListener('click', async () => {
+        if (await confirmDialog('بازنشانی کامل؟', 'تمام پیشرفت و داده‌های شما پاک می‌شود. ادامه می‌دهید؟')) { const theme = Store.data.theme; Store.reset(); Store.data.theme = theme; SandboxStorage.clear(); Store.save(); toast('همه چیز بازنشانی شد'); App.refreshChrome(); location.hash = '#/'; App.route(); }
+      });
+    } };
+}
+
+/* ---------- study plan: topics of all modules are spread over 8 / 12 / 20 weeks ---------- */
+const PLAN_SETTINGS = { 8: { daysPerWeek: 6, label: 'فشرده' }, 12: { daysPerWeek: 5, label: 'متعادل' }, 20: { daysPerWeek: 4, label: 'آرام' } };
+function buildPlan(weeks) {
+  const items = [];
+  JSCourse.modules.forEach((m) => {
+    m.topics.forEach((t) => items.push({ text: t, mod: m.index, minutes: m.index === 11 ? 70 : 35 }));
+    if (m.index < 11) items.push({ text: `آزمون ماژول ${toFa(m.index)} و مرور اشتباهات`, mod: m.index, minutes: 40, link: `#/test/${m.index}` });
+  });
+  items.push({ text: 'آزمون پایانی دوره', mod: 11, minutes: 60, link: '#/final' });
+  const result = []; const total = items.length;
+  for (let w = 0; w < weeks; w++) result.push(items.slice(Math.floor((w * total) / weeks), Math.floor(((w + 1) * total) / weeks)));
+  return result;
+}
+function planPage() {
+  const choice = Store.data.plan.choice; const settings = PLAN_SETTINGS[choice]; const plan = buildPlan(choice); const checks = Store.data.plan.checks;
+  const doneCount = plan.reduce((s, week, w) => s + week.filter((_, t) => checks[`${choice}:${w}:${t}`]).length, 0); const totalCount = plan.reduce((s, w) => s + w.length, 0);
+  const rows = plan.map((week, w) => {
+    const minutes = week.reduce((s, i) => s + i.minutes, 0); const daily = Math.max(15, Math.round(minutes / settings.daysPerWeek / 5) * 5);
+    const allDone = week.every((_, t) => checks[`${choice}:${w}:${t}`]);
+    return `<tr class="plan-row ${allDone ? 'done' : ''}"><td><b>هفته ${toFa(w + 1)}</b></td><td>${week.map((item, t) => { const key = `${choice}:${w}:${t}`; return `<label style="display:flex;gap:8px;align-items:flex-start;margin-bottom:4px" ${accentStyle(JSCourse.modules[item.mod])}><input class="chk" type="checkbox" data-key="${key}" ${checks[key] ? 'checked' : ''}><span><small class="badge-pill">${toFa(item.mod)}</small> ${item.link ? `<a href="${item.link}">${item.text}</a>` : md(item.text)}</span></label>`; }).join('')}</td><td>≈ ${toFa(daily)} دقیقه<br><small class="muted">${toFa(settings.daysPerWeek)} روز در هفته</small></td></tr>`;
+  }).join('');
+  return { html: `<div class="page"><h1>🗓️ برنامه مطالعه</h1><p class="muted">یکی از سه برنامه را انتخاب کنید. سرفصل‌های همه ماژول‌ها به‌طور مساوی بین هفته‌ها پخش شده‌اند. هر مورد را که تمام کردید تیک بزنید؛ تیک‌ها در مرورگر ذخیره می‌شوند.</p>
+    <div class="plan-tabs" role="group" aria-label="انتخاب برنامه">${[8, 12, 20].map((n) => `<button class="btn" type="button" data-plan="${n}" aria-pressed="${n === choice}">${toFa(n)} هفته · ${PLAN_SETTINGS[n].label}</button>`).join('')}</div>
+    <div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><b>پیشرفت این برنامه</b><span>${toFa(doneCount)} از ${toFa(totalCount)}</span></div><div class="progress" style="margin-top:8px"><i style="width:${totalCount ? Math.round(doneCount / totalCount * 100) : 0}%"></i></div></div>
+    <table class="t"><thead><tr><th>هفته</th><th>کارهای این هفته</th><th>زمان روزانه</th></tr></thead><tbody>${rows}</tbody></table></div>`,
+    mount(root) {
+      $$('[data-plan]', root).forEach((b) => b.addEventListener('click', () => { Store.data.plan.choice = Number(b.dataset.plan); Store.save(); App.route({ keepScroll: true }); }));
+      $$('.chk', root).forEach((c) => c.addEventListener('change', () => { if (c.checked) { Store.data.plan.checks[c.dataset.key] = 1; Store.touchDay(); } else delete Store.data.plan.checks[c.dataset.key]; Store.save(); App.route({ keepScroll: true }); }));
+    } };
+}
+
+
+/* ───── ui-tools.js ───── */
+/* =====================================================================
+   SECTION 12 — TOOL PAGES (playground, cheat-sheet, glossary)
+   ===================================================================== */
+const PLAYGROUND_DEFAULT = `// به زمین‌بازی خوش آمدید! هر کدی بنویسید و Ctrl+Enter را بزنید.
+const names = ['سارا', 'علی', 'نگار'];
+const greetings = names.map((name, i) => \`\${i + 1}. سلام \${name}!\`);
+console.log(greetings.join('\\n'));
+console.table(names.map((name) => ({ name, length: name.length })));
+`;
+const PLAYGROUND_HTML = `<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<body style="font-family: sans-serif; padding: 16px">
+  <h2 id="title">سلام دنیا</h2>
+  <button id="btn">کلیک کن</button>
+  <script>
+    let clicks = 0;
+    document.getElementById('btn').addEventListener('click', () => {
+      clicks++;
+      document.getElementById('title').textContent = 'تعداد کلیک: ' + clicks;
+      console.log('clicked', clicks);
+    });
+  <\/script>
+</body>
+</html>
+`;
+
+function playgroundPage() {
+  const state = { lang: 'js' };
+  const snippetsHTML = () => (Store.data.snippets.length ? Store.data.snippets.map((s) => `<span class="snip"><button type="button" data-load="${s.id}">${escapeHtml(s.name)}</button><button type="button" data-del="${s.id}" aria-label="حذف ${escapeHtml(s.name)}">✕</button></span>`).join('') : '<span class="muted">هنوز قطعه‌کدی ذخیره نکرده‌اید.</span>');
+  const blockSpec = (code, lang) => codeBlockHTML({ title: 'ویرایشگر آزاد', code, lang, editable: true, ns: 'playground' });
+  CodeBlocks.reset();
+  return { html: `<div class="page"><h1>🧪 زمین‌بازی جاوااسکریپت</h1><p class="muted">یک ویرایشگر آزاد با کنسول. کد شما به‌طور خودکار ذخیره می‌شود. برای کار با DOM حالت HTML را انتخاب کنید.</p>
+    <div class="row" style="margin-bottom:10px"><label>حالت: <select id="pgLang" style="height:36px;border-radius:9px;border:1px solid var(--border2);background:var(--card2);padding:0 8px"><option value="js">JavaScript</option><option value="html">HTML + JS</option></select></label>
+      <input id="snipName" placeholder="نام قطعه‌کد" aria-label="نام قطعه‌کد" style="height:36px;border-radius:9px;border:1px solid var(--border2);background:var(--card2);padding:0 10px"><button class="btn sm" id="snipSave" type="button">💾 ذخیره قطعه‌کد</button><button class="btn sm" id="pgNew" type="button">📄 جدید</button></div>
+    <div id="pgBlock">${blockSpec(Store.data.playground || PLAYGROUND_DEFAULT, 'js')}</div>
+    <h3>قطعه‌کدهای ذخیره‌شده</h3><div class="snips" id="snipList">${snippetsHTML()}</div></div>`,
+    mount(root) {
+      const holder = $('#pgBlock', root); hydrateCodeBlocks(root);
+      const editor = () => $('.cb', holder)._editor;
+      const swap = (code, lang) => { CodeBlocks.reset(); state.lang = lang; holder.innerHTML = blockSpec(code, lang); hydrateCodeBlocks(holder); wire(); };
+      const wire = () => { const ta = $('textarea', holder); ta.addEventListener('input', debounce(() => { if (state.lang === 'js') { Store.data.playground = editor().value; Store.save(); } }, 400)); };
+      wire();
+      $('#pgLang', root).addEventListener('change', (e) => swap(e.target.value === 'html' ? PLAYGROUND_HTML : (Store.data.playground || PLAYGROUND_DEFAULT), e.target.value));
+      $('#pgNew', root).addEventListener('click', () => swap(state.lang === 'html' ? PLAYGROUND_HTML : '', state.lang));
+      const list = $('#snipList', root);
+      $('#snipSave', root).addEventListener('click', () => {
+        const name = $('#snipName', root).value.trim() || `قطعه ${toFa(Store.data.snippets.length + 1)}`;
+        Store.data.snippets.push({ id: 's' + Date.now(), name, lang: state.lang, code: editor().value }); Store.save(); list.innerHTML = snippetsHTML(); $('#snipName', root).value = ''; toast('ذخیره شد ✓');
+      });
+      list.addEventListener('click', (e) => {
+        const load = e.target.closest('[data-load]'), del = e.target.closest('[data-del]');
+        if (load) { const s = Store.data.snippets.find((x) => x.id === load.dataset.load); if (s) { $('#pgLang', root).value = s.lang || 'js'; swap(s.code, s.lang || 'js'); } }
+        if (del) { Store.data.snippets = Store.data.snippets.filter((x) => x.id !== del.dataset.del); Store.save(); list.innerHTML = snippetsHTML(); }
+      });
+    } };
+}
+
+function filterableList(rootSelector, inputSelector, itemSelector) {
+  const input = $(inputSelector); const items = $$(itemSelector, $(rootSelector));
+  input.addEventListener('input', () => { const q = normalizeText(input.value.trim()); items.forEach((it) => { it.hidden = q && !normalizeText(it.textContent).includes(q); }); });
+}
+function cheatsheetPage() {
+  const sections = typeof CHEATSHEET !== 'undefined' ? CHEATSHEET : [];
+  return { html: `<div class="page"><h1>📚 برگه تقلب جاوااسکریپت</h1><p class="muted">مرجع سریع نحو و متدهای پرکاربرد. در جدول جستجو کنید.</p>
+    <input id="csFilter" type="search" placeholder="جستجو در برگه تقلب…" aria-label="جستجو در برگه تقلب" style="width:100%;max-width:420px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--card);padding:0 14px;margin-bottom:16px">
+    <div id="csRoot" class="grid cols-2">${sections.map((s) => `<section class="card" data-cs><h3 style="margin-top:0">${s.icon || '▪'} ${md(s.title)}</h3><table class="t"><tbody>${s.rows.map((r) => `<tr><td style="width:55%"><code>${escapeHtml(r[0])}</code></td><td>${md(r[1])}</td></tr>`).join('')}</tbody></table></section>`).join('')}</div></div>`,
+    mount() { filterableList('#csRoot', '#csFilter', '[data-cs] tr'); } };
+}
+function glossaryPage() {
+  const terms = (typeof GLOSSARY !== 'undefined' ? GLOSSARY : []).slice().sort((a, b) => a.fa.localeCompare(b.fa, 'fa'));
+  return { html: `<div class="page"><h1>📖 واژه‌نامه فارسی ـ انگلیسی</h1><p class="muted">${toFa(terms.length)} اصطلاح پرکاربرد برنامه‌نویسی با معنی کوتاه.</p>
+    <input id="glFilter" type="search" placeholder="جستجوی اصطلاح فارسی یا انگلیسی…" aria-label="جستجوی واژه‌نامه" style="width:100%;max-width:420px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--card);padding:0 14px;margin-bottom:16px">
+    <div id="glRoot" class="grid cols-2">${terms.map((t) => `<div class="card" data-gl><b>${escapeHtml(t.fa)}</b> <span class="ltr badge-pill" dir="ltr">${escapeHtml(t.en)}</span><p class="muted" style="margin:6px 0 0;font-size:.92rem">${md(t.def)}</p></div>`).join('')}</div></div>`,
+    mount() { filterableList('#glRoot', '#glFilter', '[data-gl]'); } };
+}
+
+
+/* ───── data-reference.js ───── */
+/* =====================================================================
+   SECTION 14 — REFERENCE DATA: cheat-sheet + Persian/English glossary
+   ===================================================================== */
+const CHEATSHEET = [
+  { icon: '🧱', title: 'متغیرها و انواع', rows: [
+    ['let x = 1;', 'متغیر قابل تغییر با دامنه بلوکی'], ['const y = 2;', 'ثابت؛ مقدار آن دوباره تخصیص نمی‌شود'], ['typeof value', 'نوع مقدار را به‌صورت رشته برمی‌گرداند'],
+    ['Number("42")', 'تبدیل رشته به عدد'], ['String(42)', 'تبدیل به رشته'], ['Boolean(0)', 'تبدیل به بولی (false)'], ['x ?? "پیش‌فرض"', 'فقط برای null و undefined مقدار پیش‌فرض می‌دهد'], ['obj?.a?.b', 'دسترسی امن؛ اگر چیزی نبود undefined می‌دهد'],
+  ] },
+  { icon: '🔀', title: 'کنترل جریان', rows: [
+    ['if (a) {} else if (b) {} else {}', 'شرط چندحالته'], ['a ? x : y', 'عملگر سه‌تایی'], ['switch (v) { case 1: break; default: }', 'انتخاب بین چند حالت'],
+    ['for (let i = 0; i < n; i++) {}', 'حلقه شمارشی'], ['for (const x of arr) {}', 'پیمایش مقدارهای آرایه'], ['for (const k in obj) {}', 'پیمایش کلیدهای شیء'], ['while (cond) {}', 'تا وقتی شرط درست است'], ['break / continue', 'خروج از حلقه / رفتن به تکرار بعد'],
+  ] },
+  { icon: '⚙️', title: 'توابع', rows: [
+    ['function f(a, b = 1) {}', 'تابع با پارامتر پیش‌فرض'], ['const f = (a) => a * 2;', 'تابع پیکانی'], ['function f(...args) {}', 'پارامتر rest'], ['f(...arr)', 'گسترش آرایه به آرگومان‌ها'],
+    ['f.call(ctx, a, b)', 'فراخوانی با this مشخص'], ['f.apply(ctx, [a, b])', 'مانند call با آرایه'], ['const g = f.bind(ctx)', 'تابع جدید با this ثابت'], ['(() => { })();', 'IIFE: اجرای فوری'],
+  ] },
+  { icon: '📋', title: 'متدهای آرایه', rows: [
+    ['arr.push(x) / arr.pop()', 'افزودن / حذف از انتها'], ['arr.unshift(x) / arr.shift()', 'افزودن / حذف از ابتدا'], ['arr.slice(1, 3)', 'کپی بخشی از آرایه (بدون تغییر اصل)'], ['arr.splice(i, n, ...items)', 'حذف یا درج در جا'],
+    ['arr.map(fn)', 'آرایه جدید با تبدیل هر عضو'], ['arr.filter(fn)', 'آرایه جدید از اعضای تأییدشده'], ['arr.reduce((acc, x) => acc + x, 0)', 'ترکیب اعضا در یک مقدار'], ['arr.find(fn) / arr.findIndex(fn)', 'اولین عضو / اندیس مطابق'],
+    ['arr.some(fn) / arr.every(fn)', 'حداقل یکی / همه شرط را دارند'], ['arr.includes(x)', 'آیا وجود دارد؟'], ['arr.sort((a, b) => a - b)', 'مرتب‌سازی عددی (اصل را تغییر می‌دهد)'], ['arr.flat() / arr.flatMap(fn)', 'مسطح‌کردن آرایه تودرتو'],
+    ['arr.join(", ")', 'ساخت رشته از اعضا'], ['Array.from({ length: 3 }, (_, i) => i)', 'ساخت آرایه ۰، ۱، ۲'],
+  ] },
+  { icon: '🗂️', title: 'اشیا، Map و Set', rows: [
+    ['const { a, b } = obj;', 'Destructuring شیء'], ['const [x, y] = arr;', 'Destructuring آرایه'], ['{ ...obj, a: 1 }', 'کپی سطحی با تغییر'], ['Object.keys(obj)', 'آرایه کلیدها'], ['Object.values(obj)', 'آرایه مقدارها'],
+    ['Object.entries(obj)', 'آرایه جفت‌های [کلید، مقدار]'], ['structuredClone(obj)', 'کپی عمیق'], ['new Map([[k, v]])', 'نگاشت با هر نوع کلید'], ['new Set(arr)', 'مجموعه مقدارهای یکتا'], ['JSON.stringify(obj) / JSON.parse(str)', 'تبدیل شیء به متن و برعکس'],
+  ] },
+  { icon: '🔤', title: 'رشته و عدد', rows: [
+    ['str.length', 'طول رشته'], ['str.slice(1, 4)', 'برش رشته'], ['str.split(" ")', 'تبدیل به آرایه'], ['str.trim()', 'حذف فاصله‌های دو سر'], ['str.includes("a")', 'آیا شامل است؟'], ['str.replaceAll("a", "b")', 'جایگزینی همه موارد'],
+    ['str.padStart(3, "0")', 'پر کردن از ابتدا'], ['`سلام ${name}`', 'رشته قالب‌دار'], ['num.toFixed(2)', 'رشته با دو رقم اعشار'], ['Math.round(x) / Math.floor(x) / Math.ceil(x)', 'گرد کردن'], ['Math.max(...arr)', 'بزرگ‌ترین مقدار'], ['new Intl.NumberFormat("fa-IR").format(n)', 'قالب‌بندی عدد فارسی'],
+  ] },
+  { icon: '🖱️', title: 'DOM و رویدادها', rows: [
+    ['document.querySelector(".a")', 'اولین عنصر مطابق'], ['document.querySelectorAll("li")', 'همه عناصر مطابق'], ['el.textContent = "متن"', 'تغییر متن امن'], ['el.classList.toggle("on")', 'افزودن/حذف کلاس'],
+    ['el.setAttribute("id", "x")', 'تنظیم ویژگی'], ['document.createElement("div")', 'ساخت عنصر'], ['parent.append(child)', 'افزودن فرزند'], ['el.remove()', 'حذف عنصر'],
+    ['el.addEventListener("click", fn)', 'ثبت رویداد'], ['e.preventDefault()', 'جلوگیری از رفتار پیش‌فرض'], ['e.target.closest(".item")', 'پیدا کردن عنصر والد برای Event Delegation'], ['localStorage.setItem(k, v)', 'ذخیره دائمی در مرورگر'],
+  ] },
+  { icon: '🧬', title: 'کلاس و شی‌گرایی', rows: [
+    ['class A { constructor() {} }', 'تعریف کلاس'], ['class B extends A { }', 'وراثت'], ['super(...)', 'فراخوانی سازنده والد'], ['static create() {}', 'متد متعلق به کلاس'], ['#secret = 1;', 'فیلد خصوصی'], ['get value() {}', 'getter'], ['Object.create(proto)', 'ساخت شیء با prototype مشخص'], ['x instanceof A', 'آیا نمونه‌ای از A است؟'],
+  ] },
+  { icon: '⏳', title: 'ناهمگام', rows: [
+    ['setTimeout(fn, 1000)', 'اجرای یک‌باره بعد از ۱ ثانیه'], ['setInterval(fn, 1000)', 'اجرای تکراری'], ['new Promise((resolve, reject) => {})', 'ساخت Promise'], ['p.then(f).catch(g).finally(h)', 'زنجیره Promise'],
+    ['await Promise.all([p1, p2])', 'اجرای موازی و انتظار برای همه'], ['await Promise.allSettled(list)', 'نتیجه همه، حتی ناموفق‌ها'], ['await Promise.race(list)', 'اولین نتیجه'], ['async function f() { await x; }', 'تابع ناهمگام'],
+    ['try { } catch (e) { } finally { }', 'مدیریت خطا'], ['const res = await fetch(url); const data = await res.json();', 'دریافت JSON'], ['new AbortController()', 'لغو درخواست fetch'],
+  ] },
+  { icon: '🔎', title: 'عبارت باقاعده (RegExp)', rows: [
+    ['/\\d+/g', 'یک یا چند رقم، در همه جا'], ['/^[\\w.-]+@[\\w-]+\\.\\w+$/', 'الگوی ساده ایمیل'], ['/^09\\d{9}$/', 'شماره موبایل ایران'], ['str.match(/a/g)', 'همه تطابق‌ها'], ['re.test(str)', 'آیا مطابقت دارد؟'], ['str.replace(/a/g, "b")', 'جایگزینی با الگو'], ['(?<year>\\d{4})', 'گروه نام‌دار'],
+  ] },
+];
+
+const GLOSSARY = [
+  { fa: 'متغیر', en: 'Variable', def: 'نامی برای نگهداری یک مقدار در حافظه.' },
+  { fa: 'ثابت', en: 'Constant', def: 'متغیری که با `const` تعریف می‌شود و دوباره تخصیص نمی‌گیرد.' },
+  { fa: 'تابع', en: 'Function', def: 'بلوکی از کد که می‌توان بارها آن را فراخوانی کرد.' },
+  { fa: 'پارامتر', en: 'Parameter', def: 'نامی که هنگام تعریف تابع برای ورودی می‌نویسیم.' },
+  { fa: 'آرگومان', en: 'Argument', def: 'مقداری که هنگام فراخوانی تابع به آن می‌دهیم.' },
+  { fa: 'مقدار بازگشتی', en: 'Return value', def: 'نتیجه‌ای که تابع با `return` بیرون می‌دهد.' },
+  { fa: 'دامنه', en: 'Scope', def: 'محدوده‌ای از کد که یک متغیر در آن قابل دیدن است.' },
+  { fa: 'بالابری', en: 'Hoisting', def: 'رفتار جاوااسکریپت در شناختن تعریف‌ها پیش از اجرای کد.' },
+  { fa: 'بستار', en: 'Closure', def: 'تابعی که به متغیرهای دامنه بیرونی خودش دسترسی دارد، حتی بعد از پایان آن دامنه.' },
+  { fa: 'فراخوان برگشتی', en: 'Callback', def: 'تابعی که به‌عنوان آرگومان به تابع دیگر داده می‌شود تا بعداً صدا زده شود.' },
+  { fa: 'تابع مرتبه بالا', en: 'Higher-order function', def: 'تابعی که تابع می‌گیرد یا تابع برمی‌گرداند.' },
+  { fa: 'تابع خالص', en: 'Pure function', def: 'تابعی که با ورودی یکسان همیشه خروجی یکسان می‌دهد و اثر جانبی ندارد.' },
+  { fa: 'اثر جانبی', en: 'Side effect', def: 'تغییری که تابع بیرون از خودش ایجاد می‌کند، مثل نوشتن در کنسول.' },
+  { fa: 'بازگشت', en: 'Recursion', def: 'فراخوانی تابع توسط خودش.' },
+  { fa: 'حلقه', en: 'Loop', def: 'ساختاری برای تکرار یک کد.' },
+  { fa: 'شرط', en: 'Condition', def: 'عبارتی که درست یا نادرست بودنش مسیر اجرا را تعیین می‌کند.' },
+  { fa: 'عملگر', en: 'Operator', def: 'نمادی مثل `+` یا `===` که روی مقدارها عملی انجام می‌دهد.' },
+  { fa: 'عبارت', en: 'Expression', def: 'کدی که یک مقدار تولید می‌کند.' },
+  { fa: 'دستور', en: 'Statement', def: 'یک واحد کامل اجرایی مانند `let x = 1;`.' },
+  { fa: 'نوع داده', en: 'Data type', def: 'دسته‌بندی مقدارها، مثل عدد، رشته و بولی.' },
+  { fa: 'رشته', en: 'String', def: 'دنباله‌ای از نویسه‌ها، مثل `"سلام"`.' },
+  { fa: 'بولی', en: 'Boolean', def: 'مقدار `true` یا `false`.' },
+  { fa: 'تهی', en: 'null', def: 'مقداری که عمداً «هیچ» را نشان می‌دهد.' },
+  { fa: 'تعریف‌نشده', en: 'undefined', def: 'مقدار متغیری که هنوز مقدار نگرفته است.' },
+  { fa: 'تبدیل نوع', en: 'Type coercion', def: 'تبدیل خودکار یک نوع به نوع دیگر، مثلاً در `"5" * 2`.' },
+  { fa: 'آرایه', en: 'Array', def: 'فهرستی مرتب از مقدارها با اندیس عددی.' },
+  { fa: 'شیء', en: 'Object', def: 'مجموعه‌ای از جفت‌های کلید و مقدار.' },
+  { fa: 'ویژگی', en: 'Property', def: 'یک جفت کلید و مقدار در شیء.' },
+  { fa: 'متد', en: 'Method', def: 'تابعی که به‌عنوان ویژگی یک شیء ذخیره شده است.' },
+  { fa: 'تجزیه ساختاری', en: 'Destructuring', def: 'بیرون کشیدن مقدارها از آرایه یا شیء در متغیرهای جدا.' },
+  { fa: 'عملگر گسترش', en: 'Spread operator', def: 'نوشتار `...` برای پخش اعضای آرایه یا شیء.' },
+  { fa: 'پارامتر باقی‌مانده', en: 'Rest parameter', def: 'نوشتار `...args` برای جمع‌کردن آرگومان‌های اضافه در یک آرایه.' },
+  { fa: 'کپی سطحی', en: 'Shallow copy', def: 'کپی فقط لایه اول؛ اشیای تودرتو مشترک می‌مانند.' },
+  { fa: 'کپی عمیق', en: 'Deep copy', def: 'کپی کامل همه لایه‌ها.' },
+  { fa: 'تغییرناپذیری', en: 'Immutability', def: 'تغییر ندادن داده اصلی و ساختن نسخه جدید به‌جای آن.' },
+  { fa: 'الگوی رشته‌ای', en: 'Template literal', def: 'رشته‌ای با بک‌تیک که می‌تواند عبارت‌ها را در `${}` بپذیرد.' },
+  { fa: 'عبارت باقاعده', en: 'Regular expression', def: 'الگویی برای جستجو و تطبیق متن.' },
+  { fa: 'درخت DOM', en: 'DOM tree', def: 'نمایش درختی صفحه HTML که جاوااسکریپت می‌تواند آن را تغییر دهد.' },
+  { fa: 'گره', en: 'Node', def: 'هر عضو درخت DOM، مثل عنصر یا متن.' },
+  { fa: 'رویداد', en: 'Event', def: 'اتفاقی مثل کلیک یا فشردن کلید که می‌توان به آن واکنش نشان داد.' },
+  { fa: 'شنونده رویداد', en: 'Event listener', def: 'تابعی که هنگام وقوع یک رویداد اجرا می‌شود.' },
+  { fa: 'حباب‌زنی رویداد', en: 'Event bubbling', def: 'بالا رفتن رویداد از عنصر هدف تا والدهایش.' },
+  { fa: 'نمایندگی رویداد', en: 'Event delegation', def: 'ثبت یک شنونده روی والد برای مدیریت رویداد فرزندان.' },
+  { fa: 'ذخیره‌ساز محلی', en: 'localStorage', def: 'فضای ذخیره دائمی کلید-مقدار در مرورگر.' },
+  { fa: 'پروتوتایپ', en: 'Prototype', def: 'شیئی که اشیای دیگر ویژگی‌های ارثی خود را از آن می‌گیرند.' },
+  { fa: 'کلاس', en: 'Class', def: 'نقشه‌ای برای ساخت اشیای هم‌ساختار.' },
+  { fa: 'نمونه', en: 'Instance', def: 'شیئی که از روی یک کلاس ساخته شده است.' },
+  { fa: 'سازنده', en: 'Constructor', def: 'متدی که هنگام ساخت نمونه اجرا می‌شود.' },
+  { fa: 'وراثت', en: 'Inheritance', def: 'گرفتن ویژگی‌ها و رفتار از کلاس یا شیء دیگر.' },
+  { fa: 'کپسوله‌سازی', en: 'Encapsulation', def: 'پنهان کردن جزئیات داخلی و عرضه یک رابط ساده.' },
+  { fa: 'چندریختی', en: 'Polymorphism', def: 'رفتار متفاوت یک متد در کلاس‌های مختلف.' },
+  { fa: 'ترکیب', en: 'Composition', def: 'ساخت رفتار پیچیده از کنار هم گذاشتن اجزای ساده.' },
+  { fa: 'همگام', en: 'Synchronous', def: 'اجرای کارها یکی‌یکی و به ترتیب.' },
+  { fa: 'ناهمگام', en: 'Asynchronous', def: 'کاری که شروع می‌شود و نتیجه‌اش بعداً می‌رسد، بدون مسدود کردن برنامه.' },
+  { fa: 'حلقه رویداد', en: 'Event loop', def: 'سازوکاری که صف‌ها را بررسی می‌کند و کارها را روی پشته می‌گذارد.' },
+  { fa: 'پشته فراخوانی', en: 'Call stack', def: 'ساختاری که فراخوانی‌های در حال اجرا را نگه می‌دارد.' },
+  { fa: 'صف وظایف', en: 'Task queue', def: 'صفی از callbackهای منتظر اجرا مثل setTimeout.' },
+  { fa: 'صف ریزوظایف', en: 'Microtask queue', def: 'صف با اولویت بالا برای callbackهای Promise.' },
+  { fa: 'قول', en: 'Promise', def: 'شیئی که نتیجه آینده یک عملیات ناهمگام را نمایندگی می‌کند.' },
+  { fa: 'ناهمگام‌نویسی ساده', en: 'async / await', def: 'نحو خواناتر برای کار با Promise.' },
+  { fa: 'جهنم callback', en: 'Callback hell', def: 'تودرتوی زیاد callbackها که خواندن کد را دشوار می‌کند.' },
+  { fa: 'دریافت', en: 'Fetch', def: 'API مرورگر برای ارسال درخواست شبکه.' },
+  { fa: 'ماژول', en: 'Module', def: 'فایلی که می‌تواند چیزهایی را export و در جای دیگر import کند.' },
+  { fa: 'تکرارگر', en: 'Iterator', def: 'شیئی که اعضای یک مجموعه را یکی‌یکی تحویل می‌دهد.' },
+  { fa: 'مولد', en: 'Generator', def: 'تابعی با `function*` که اجرایش را می‌توان متوقف و ادامه داد.' },
+  { fa: 'وکیل', en: 'Proxy', def: 'شیئی که دسترسی به شیء دیگر را رهگیری و سفارشی می‌کند.' },
+  { fa: 'نماد', en: 'Symbol', def: 'مقداری یکتا که اغلب به‌عنوان کلید ویژگی استفاده می‌شود.' },
+  { fa: 'اشکال‌زدایی', en: 'Debugging', def: 'یافتن و رفع خطاهای برنامه.' },
+  { fa: 'نقطه توقف', en: 'Breakpoint', def: 'نقطه‌ای در کد که اجرا در آن متوقف می‌شود تا بررسی کنیم.' },
+  { fa: 'کد تمیز', en: 'Clean code', def: 'کدی ساده، خوانا و قابل نگهداری.' },
+  { fa: 'بازآرایی', en: 'Refactoring', def: 'بهبود ساختار کد بدون تغییر رفتار آن.' },
+  { fa: 'تأخیر در اجرا', en: 'Debounce', def: 'اجرای تابع فقط پس از مدتی بی‌فعالیتی.' },
+  { fa: 'محدودسازی نرخ', en: 'Throttle', def: 'اجازه اجرای تابع حداکثر یک بار در هر بازه زمانی.' },
+  { fa: 'حافظه‌گذاری', en: 'Memoization', def: 'ذخیره نتیجه فراخوانی‌های قبلی برای جلوگیری از محاسبه تکراری.' },
+  { fa: 'حمله XSS', en: 'Cross-site scripting', def: 'تزریق اسکریپت مخرب به صفحه از راه ورودی کاربر.' },
+  { fa: 'بسته‌بند', en: 'Bundler', def: 'ابزاری که فایل‌های پروژه را برای مرورگر یکجا می‌کند.' },
+  { fa: 'مدیر بسته', en: 'Package manager', def: 'ابزاری مثل npm برای نصب و مدیریت کتابخانه‌ها.' },
+  { fa: 'زمان اجرا', en: 'Runtime', def: 'محیطی که کد را اجرا می‌کند، مثل مرورگر یا Node.js.' },
+  { fa: 'مفسر', en: 'Interpreter', def: 'برنامه‌ای که کد را خط به خط اجرا می‌کند.' },
+  { fa: 'کنسول', en: 'Console', def: 'ابزار نمایش خروجی و پیام‌های خطا.' },
+  { fa: 'API', en: 'API', def: 'رابطی که برنامه‌ها از راه آن با هم یا با سرویس‌ها گفتگو می‌کنند.' },
+  { fa: 'JSON', en: 'JSON', def: 'قالب متنی سبک برای تبادل داده.' },
+];
+
+
+/* ───── ui-app.js ───── */
+/* =====================================================================
+   SECTION 13 — APP: router, sidebar, search, theme, shortcuts, boot
+   ===================================================================== */
+const NAV_LINKS = [['#/', '🏠', 'خانه'], ['#/plan', '🗓️', 'برنامه مطالعه'], ['#/progress', '📈', 'پیشرفت و نشان‌ها'], ['#/cheatsheet', '📚', 'برگه تقلب'], ['#/glossary', '📖', 'واژه‌نامه'], ['#/playground', '🧪', 'زمین‌بازی'], ['#/final', '🎓', 'آزمون پایانی']];
+
+const App = {
+  cleanups: [], rendered: false, current: null, searchIndex: null,
+
+  parse() {
+    const h = location.hash || '#/';
+    if (!h.startsWith('#/')) return null;
+    const [path, query] = h.slice(2).split('?');
+    return { parts: path.split('/').filter(Boolean).map(decodeURIComponent), query: new URLSearchParams(query || '') };
+  },
+
+  build(r) {
+    const [kind, arg] = r.parts;
+    switch (kind) {
+      case undefined: return Object.assign(homePage(), { title: 'خانه' });
+      case 'm': return Object.assign(modulePage(Number(arg)), { title: 'ماژول' });
+      case 'l': {
+        const lesson = JSCourse.lesson(arg); if (!lesson) return notFoundPage();
+        Store.data.last = { lessonId: lesson.id }; Store.touchDay(); Store.save();
+        const page = renderLessonPage(lesson);
+        return { html: page.html, hasToc: true, title: stripMarkup(lesson.title), accent: JSCourse.modules[lesson.module].color, mount: (root) => hydrateLesson(root, lesson) };
+      }
+      case 'test': return Object.assign(testPage(Number(arg)), { title: 'آزمون ماژول' });
+      case 'final': return Object.assign(finalPage(), { title: 'آزمون پایانی' });
+      case 'plan': return Object.assign(planPage(), { title: 'برنامه مطالعه' });
+      case 'progress': return Object.assign(progressPage(), { title: 'پیشرفت من' });
+      case 'cheatsheet': return Object.assign(cheatsheetPage(), { title: 'برگه تقلب' });
+      case 'glossary': return Object.assign(glossaryPage(), { title: 'واژه‌نامه' });
+      case 'playground': return Object.assign(playgroundPage(), { title: 'زمین‌بازی' });
+      default: return notFoundPage();
+    }
+  },
+
+  route(opts = {}) {
+    const parsed = App.parse();
+    if (!parsed && App.rendered) return;          // in-page anchors such as #main are not routes
+    const r = parsed || { parts: [], query: new URLSearchParams() };
+    const y = window.scrollY;
+    App.cleanups.splice(0).forEach((fn) => fn());
+    Sandbox.stopAll(); CodeBlocks.reset(); headingCounter = 0;
+    const page = App.build(r); const main = $('#main');
+    main.className = 'content' + (page.hasToc ? ' has-toc' : '');
+    main.style.setProperty('--accent', page.accent || '');
+    if (!page.accent) main.style.removeProperty('--accent');
+    main.innerHTML = page.html;
+    if (page.accent) document.documentElement.style.setProperty('--page-accent', page.accent);
+    hydrateCodeBlocks(main);
+    page.mount && page.mount(main);
+    document.title = (page.title ? page.title + ' | ' : '') + 'آموزش جاوااسکریپت';
+    window.scrollTo(0, opts.keepScroll ? y : 0);
+    App.rendered = true; App.current = r;
+    App.refreshChrome();
+    document.body.classList.remove('menu-open'); $('#menuBtn').setAttribute('aria-expanded', 'false');
+  },
+
+  /* ---------- sidebar + top bar ---------- */
+  refreshChrome() {
+    const side = $('#sidebar'); const scroll = side.scrollTop; const hash = location.hash || '#/';
+    const currentLesson = hash.startsWith('#/l/') ? JSCourse.lesson(decodeURIComponent(hash.slice(4).split('?')[0])) : null;
+    const currentModule = currentLesson ? currentLesson.module : (hash.startsWith('#/m/') || hash.startsWith('#/test/') ? Number(hash.split('/')[2]) : -1);
+    const link = (href, text, extra = '') => `<a class="nav-link" href="${href}" ${hash === href ? 'aria-current="page"' : ''} ${extra}>${text}</a>`;
+    side.innerHTML = `<a class="brand" href="#/" style="text-decoration:none"><span class="logo" aria-hidden="true">JS</span><span>آموزش جاوااسکریپت<small>از صفر تا پیشرفته</small></span></a>
+      <nav aria-label="صفحه‌های اصلی">${NAV_LINKS.map(([href, icon, text]) => link(href, `<span aria-hidden="true">${icon}</span> ${text}`)).join('')}</nav><div class="nav-sep"></div>
+      <nav aria-label="ماژول‌ها و درس‌ها">${JSCourse.modules.map((m) => {
+        const p = Progress.module(m.index); const open = m.index === currentModule || Store.data.openModules[m.index];
+        return `<details class="mod" data-mod="${m.index}" ${open ? 'open' : ''} ${accentStyle(m)}><summary><span class="dot" aria-hidden="true">${toFa(m.index)}</span><span class="mtitle">${md(m.title)}</span><span class="pct">${p.total ? toFa(p.pct) + '٪' : ''}</span></summary>
+          <div class="mbar" aria-hidden="true"><i style="width:${p.pct}%"></i></div>
+          <ul class="lessons">${m.lessons.map((l) => `<li><a href="#/l/${l.id}" class="${Progress.isDone(l.id) ? 'done' : ''}" ${currentLesson && currentLesson.id === l.id ? 'aria-current="page"' : ''}><span class="tick" aria-hidden="true">${Progress.isDone(l.id) ? '✓' : ''}</span><span>${md(l.title)}</span></a></li>`).join('')}
+          ${m.test ? `<li><a href="#/test/${m.index}" ${hash === '#/test/' + m.index ? 'aria-current="page"' : ''}><span class="tick" aria-hidden="true">${Store.data.tests[m.index] ? '✓' : ''}</span><span>🏁 آزمون ماژول</span></a></li>` : ''}
+          ${!m.lessons.length ? '<li><span class="muted" style="padding:5px 10px;display:block;font-size:.82rem">درس‌ها بارگذاری نشده‌اند</span></li>' : ''}</ul></details>`;
+      }).join('')}</nav>`;
+    side.scrollTop = scroll;
+    $$('details.mod', side).forEach((d) => d.addEventListener('toggle', () => { Store.data.openModules[d.dataset.mod] = d.open; Store.save(); }));
+    $$('a', side).forEach((a) => a.addEventListener('click', () => { document.body.classList.remove('menu-open'); }));
+    const cur = $('.lessons a[aria-current="page"]', side); if (cur && !App.sideScrolled) { cur.scrollIntoView({ block: 'nearest' }); }
+    const overall = Progress.overall();
+    $('#streakNum').textContent = toFa(Store.streak()); $('#ringNum').textContent = toFa(overall.pct) + '٪';
+    $('#themeBtn').textContent = Store.data.theme === 'light' ? '☀️' : '🌙';
+  },
+
+  /* ---------- search ---------- */
+  buildSearchIndex() {
+    const textOf = (l) => {
+      const parts = [l.title, l.goal];
+      (l.explain || []).forEach((b) => { parts.push(b.text || '', b.title || '', (b.items || []).join(' '), b.t === 'code' ? b.code : '', (b.rows || []).flat().join(' ')); });
+      (l.examples || []).forEach((e) => parts.push(e.title, e.desc || '', e.code));
+      (l.mistakes || []).forEach((m) => parts.push(m.title, m.why));
+      if (l.tip) parts.push(l.tip.text); (l.exercises || []).forEach((x) => parts.push(x.statement));
+      if (l.project) parts.push((l.project.requirements || []).join(' '));
+      return stripMarkup(parts.join(' \n '));
+    };
+    App.searchIndex = JSCourse.flat().map((lesson) => { const raw = textOf(lesson); return { lesson, raw, text: normalizeText(raw), title: normalizeText(stripMarkup(lesson.title)) }; });
+  },
+  search(query) {
+    if (!App.searchIndex || App.searchIndex.length !== JSCourse.flat().length) App.buildSearchIndex();
+    const terms = normalizeText(query).split(/\s+/).filter(Boolean); if (!terms.length) return [];
+    return App.searchIndex.map((entry) => {
+      let score = 0;
+      for (const t of terms) {
+        const inTitle = entry.title.includes(t), count = entry.text.split(t).length - 1;
+        if (!inTitle && !count) return null; score += (inTitle ? 10 : 0) + Math.min(count, 5);
+      }
+      return { entry, score };
+    }).filter(Boolean).sort((a, b) => b.score - a.score).slice(0, 8);
+  },
+  snippet(entry, terms) {
+    const lower = entry.raw.toLowerCase(); let pos = -1;
+    for (const t of terms) { pos = lower.indexOf(t.toLowerCase()); if (pos >= 0) break; }
+    const start = Math.max(0, pos - 40); let s = entry.raw.slice(start, start + 120).replace(/\s+/g, ' ');
+    s = escapeHtml(s); terms.forEach((t) => { if (t.length > 1) s = s.replace(new RegExp(escapeHtml(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), (m) => `<mark>${m}</mark>`); });
+    return (start > 0 ? '… ' : '') + s + ' …';
+  },
+  initSearch() {
+    const input = $('#searchInput'), box = $('#searchResults');
+    const close = () => { box.classList.remove('open'); box.innerHTML = ''; };
+    const doSearch = () => {
+      const q = input.value.trim(); if (!q) return close();
+      const terms = q.split(/\s+/); const hits = App.search(q);
+      box.innerHTML = hits.length ? hits.map(({ entry }) => `<a href="#/l/${entry.lesson.id}" role="option"><b>${md(entry.lesson.title)}</b><small>${JSCourse.modules[entry.lesson.module].icon} ماژول ${toFa(entry.lesson.module)} · ${App.snippet(entry, terms)}</small></a>`).join('') : '<div style="padding:12px 14px" class="muted">نتیجه‌ای پیدا نشد. عبارت دیگری امتحان کنید.</div>';
+      box.classList.add('open');
+    };
+    input.addEventListener('input', debounce(doSearch, 120));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { close(); input.blur(); }
+      if (e.key === 'Enter') { const first = $('a', box); if (first) { location.hash = first.getAttribute('href'); close(); input.blur(); } }
+      if (e.key === 'ArrowDown') { const first = $('a', box); if (first) { e.preventDefault(); first.focus(); } }
+    });
+    box.addEventListener('click', () => { close(); input.value = ''; });
+    box.addEventListener('keydown', (e) => { const a = document.activeElement; if (e.key === 'ArrowDown' && a.nextElementSibling) { e.preventDefault(); a.nextElementSibling.focus(); } if (e.key === 'ArrowUp' && a.previousElementSibling) { e.preventDefault(); a.previousElementSibling.focus(); } if (e.key === 'Escape') { close(); input.focus(); } });
+    document.addEventListener('click', (e) => { if (!e.target.closest('.searchbox')) close(); });
+  },
+
+  /* ---------- boot ---------- */
+  validateCourse() {
+    const seen = new Set();
+    JSCourse.flat().forEach((l) => { if (seen.has(l.id)) console.warn('Duplicate lesson id:', l.id); seen.add(l.id); if (!l.goal || !l.explain) console.warn('Lesson is missing goal/explain:', l.id); });
+  },
+  init() {
+    Store.load();
+    document.documentElement.setAttribute('data-theme', Store.data.theme || 'dark');
+    App.validateCourse(); Sandbox.listen(); App.initSearch();
+    $('#themeBtn').addEventListener('click', () => { Store.data.theme = Store.data.theme === 'light' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', Store.data.theme); Store.save(); App.refreshChrome(); });
+    $('#menuBtn').addEventListener('click', () => { const open = document.body.classList.toggle('menu-open'); $('#menuBtn').setAttribute('aria-expanded', String(open)); });
+    $('#backdrop').addEventListener('click', () => { document.body.classList.remove('menu-open'); $('#menuBtn').setAttribute('aria-expanded', 'false'); });
+    $('#toTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    window.addEventListener('scroll', () => $('#toTop').classList.toggle('show', window.scrollY > 600), { passive: true });
+    window.addEventListener('hashchange', () => App.route());
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[href^="#s-"], .toc a'); if (!a) return;
+      e.preventDefault(); const t = document.getElementById(a.getAttribute('href').slice(1)); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    document.addEventListener('keydown', (e) => {
+      const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+      if (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey) { e.preventDefault(); $('#searchInput').focus(); return; }
+      if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+      const hash = location.hash;
+      if ((e.key === 'n' || e.key === 'p') && hash.startsWith('#/l/')) {
+        const nb = JSCourse.neighbors(decodeURIComponent(hash.slice(4))); const target = e.key === 'n' ? nb.next : nb.prev; if (target) location.hash = '#/l/' + target.id;
+      }
+    });
+    if (!location.hash) history.replaceState(null, '', '#/');
+    App.route();
+  },
+};
+
+document.addEventListener('DOMContentLoaded', () => App.init());
+
+</script>
+<!-- ======================= COURSE DATA PARTS =======================
+     Parts 2–4 (lessons) are added here, each inside its own <script> block,
+     BEFORE the closing body tag. The engine boots on DOMContentLoaded. -->
+
+</body>
+</html>
