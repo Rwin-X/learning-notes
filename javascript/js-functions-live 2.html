@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaScript Functions: Live Examples</title>
+<style>
+:root { --bg:#f6f8fb; --card:#fff; --text:#1c2733; --muted:#5d6b7a; --line:#d7dee8; --accent:#2f6db5; --code:#f0f3f8; --err:#b42318; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#12171e; --card:#1a212b; --text:#e6ebf2; --muted:#98a6b8; --line:#2b3644; --accent:#6aa5ec; --code:#10151c; --err:#ff8a80; }
+}
+* { box-sizing: border-box; }
+body { margin:0; padding:24px 16px 64px; background:var(--bg); color:var(--text); font:16px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
+main { max-width:860px; margin:0 auto; }
+h1 { font-size:1.7rem; margin:0 0 4px; }
+.intro { color:var(--muted); margin:0 0 16px; }
+.toolbar { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+button { font:inherit; font-size:.9rem; padding:6px 14px; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:6px; cursor:pointer; }
+button.ghost { background:transparent; color:var(--accent); }
+button:hover { opacity:.88; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
+.card h2 { font-size:1.05rem; margin:0 0 10px; }
+.card h2 span { color:var(--muted); font-weight:400; margin-right:6px; }
+textarea { width:100%; display:block; font:13.5px/1.5 Consolas, "Courier New", monospace; background:var(--code); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:10px; resize:vertical; tab-size:2; }
+.actions { display:flex; gap:8px; margin:10px 0 8px; }
+.out { margin:0; min-height:2.2em; padding:8px 10px; font:13.5px/1.5 Consolas, "Courier New", monospace; background:var(--code); border-left:3px solid var(--accent); border-radius:4px; white-space:pre-wrap; overflow-x:auto; }
+.out.err { border-left-color:var(--err); color:var(--err); }
+.out:empty::before { content:"Output appears here"; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>JavaScript Functions: Live Examples</h1>
+  <p class="intro">Every example is editable and runs in your browser. Change the code, press Run, and compare the output with your prediction.</p>
+  <div class="toolbar">
+    <button id="runAll">Run all</button>
+    <button id="clearAll" class="ghost">Clear outputs</button>
+  </div>
+  <div id="list"></div>
+</main>
+<script>
+const examples = [
+["Function declaration, call and default parameter", `function greet(name, greeting = "Hello") {
+  return greeting + ", " + name + "!";
+}
+console.log(greet("Sara"));
+console.log(greet("Ali", "Welcome"));
+console.log(typeof greet);`],
+
+["Rest, spread and destructured parameters", `function sum(...numbers) {
+  return numbers.reduce((total, n) => total + n, 0);
+}
+console.log(sum(1, 2, 3, 4));
+console.log(Math.max(...[3, 9, 4]));
+
+function createUser({ name, role = "user" } = {}) {
+  return { name, role };
+}
+console.log(createUser({ name: "Sara" }));`],
+
+["Arrow functions and implicit return", `const square = x => x * x;
+const add = (a, b) => a + b;
+const makePoint = (x, y) => ({ x, y });
+
+console.log(square(9), add(2, 3));
+console.log(makePoint(3, 4));
+console.log([1, 2, 3].map(n => n * 10));`],
+
+["Closure: private state", `function createCounter(start = 0) {
+  let count = start;
+  return () => ++count;
+}
+const a = createCounter();
+const b = createCounter(100);
+console.log(a(), a(), a());
+console.log(b(), b());`],
+
+["map, filter, reduce", `const numbers = [1, 2, 3, 4, 5, 6];
+const result = numbers
+  .filter(n => n % 2 === 0)
+  .map(n => n * n)
+  .reduce((sum, n) => sum + n, 0);
+console.log(result);
+console.log(numbers.some(n => n > 5), numbers.every(n => n > 0));`],
+
+["Recursion: factorial and flatten", `const factorial = n => (n <= 1 ? 1 : n * factorial(n - 1));
+const flatten = items =>
+  items.reduce((flat, item) => flat.concat(Array.isArray(item) ? flatten(item) : item), []);
+
+console.log(factorial(10));
+console.log(flatten([1, [2, [3, [4]], 5]]));`],
+
+["this, bind and call", `const user = {
+  name: "Sara",
+  greet() { return "Hi, I am " + this.name; }
+};
+console.log(user.greet());
+
+const bound = user.greet.bind({ name: "Ali" });
+console.log(bound());
+console.log(user.greet.call({ name: "Reza" }));`],
+
+["Currying and composition", `const curriedAdd = a => b => c => a + b + c;
+const pipe = (...fns) => input => fns.reduce((acc, fn) => fn(acc), input);
+
+console.log(curriedAdd(1)(2)(3));
+const shout = pipe(s => s.trim(), s => s.toUpperCase(), s => s + "!");
+console.log(shout("  hello  "));`],
+
+["Memoization", `function memoize(fn) {
+  const cache = new Map();
+  return n => {
+    if (!cache.has(n)) cache.set(n, fn(n));
+    return cache.get(n);
+  };
+}
+const fib = memoize(n => (n < 2 ? n : fib(n - 1) + fib(n - 2)));
+console.log(fib(50));`],
+
+["async/await and Promise.all", `const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+async function task(name, ms) {
+  await sleep(ms);
+  return name + " done";
+}
+
+const start = Date.now();
+const results = await Promise.all([task("a", 200), task("b", 200), task("c", 200)]);
+console.log(results);
+console.log("ran in parallel:", Date.now() - start < 400);`],
+
+["Generators and lazy sequences", `function* naturals() {
+  let n = 1;
+  while (true) yield n++;
+}
+function* take(iterable, count) {
+  let taken = 0;
+  for (const item of iterable) {
+    if (taken++ >= count) return;
+    yield item;
+  }
+}
+console.log([...take(naturals(), 5)]);`],
+
+["Error handling in functions", `function parseAge(input) {
+  const age = Number(input);
+  if (!Number.isInteger(age) || age < 0) {
+    throw new RangeError("Age must be a non-negative integer");
+  }
+  return age;
+}
+for (const value of ["42", "abc", "-5"]) {
+  try {
+    console.log(parseAge(value));
+  } catch (error) {
+    console.log(error.name + ": " + error.message);
+  }
+}`],
+
+["Pure vs impure functions", `let total = 0;
+function addToTotal(n) {      // impure: changes outside state
+  total += n;
+  return total;
+}
+const add = (a, b) => a + b;  // pure
+const addItem = (list, item) => [...list, item];
+
+const original = [1, 2];
+const updated = addItem(original, 3);
+console.log(add(2, 3), add(2, 3));
+console.log(original, updated);
+console.log(addToTotal(5), addToTotal(5));`],
+
+["Debounce", `const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function debounce(fn, wait) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), wait);
+  };
+}
+
+const search = debounce(query => console.log("search for:", query), 100);
+search("j");
+search("ja");
+search("jav");
+await sleep(250);
+console.log("only the last call ran");`],
+
+["Retry with exponential backoff", `const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+async function retry(task, retries = 3, delay = 50) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await task(attempt);
+    } catch (error) {
+      if (attempt >= retries) throw error;
+      console.log("attempt " + (attempt + 1) + " failed, waiting " + delay + " ms");
+      await sleep(delay);
+      delay *= 2;
+    }
+  }
+}
+
+const flaky = async attempt => {
+  if (attempt < 2) throw new Error("temporary failure");
+  return "succeeded on attempt " + (attempt + 1);
+};
+console.log(await retry(flaky));`],
+
+["Event emitter built from closures", `function createEmitter() {
+  const handlers = new Map();
+  return {
+    on(event, handler) {
+      if (!handlers.has(event)) handlers.set(event, new Set());
+      handlers.get(event).add(handler);
+      return () => handlers.get(event).delete(handler);
+    },
+    emit(event, ...args) {
+      (handlers.get(event) || []).forEach(handler => handler(...args));
+    }
+  };
+}
+
+const emitter = createEmitter();
+const off = emitter.on("greet", name => console.log("hello", name));
+emitter.emit("greet", "Sara");
+off();
+emitter.emit("greet", "nobody hears this");
+console.log("done");`],
+
+["Promise chain: then, catch, finally", `const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+await sleep(20)
+  .then(() => { console.log("step 1"); return 10; })
+  .then(value => { console.log("step 2 got", value); throw new Error("something failed"); })
+  .catch(error => { console.log("caught:", error.message); return "recovered"; })
+  .then(value => console.log("after catch:", value))
+  .finally(() => console.log("finally always runs"));`],
+
+["groupBy with reduce", `const groupBy = (items, keyFn) =>
+  items.reduce((groups, item) => {
+    const key = keyFn(item);
+    (groups[key] = groups[key] || []).push(item);
+    return groups;
+  }, {});
+
+const words = ["apple", "avocado", "banana", "blueberry", "cherry"];
+console.log(groupBy(words, w => w[0]));
+console.log(groupBy([1, 2, 3, 4, 5], n => (n % 2 ? "odd" : "even")));`],
+
+["IIFE and the module pattern", `const idGenerator = (() => {
+  let current = 0;
+  return {
+    next: () => ++current,
+    reset: () => { current = 0; }
+  };
+})();
+
+console.log(idGenerator.next(), idGenerator.next(), idGenerator.next());
+idGenerator.reset();
+console.log(idGenerator.next());
+console.log(typeof current);`],
+
+["Timeout wrapper with Promise.race", `const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function withTimeout(promise, ms) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error("Timed out after " + ms + " ms")), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+console.log(await withTimeout(sleep(50).then(() => "finished in time"), 200));
+try {
+  await withTimeout(sleep(500), 100);
+} catch (error) {
+  console.log(error.message);
+}`],
+
+["Class with method chaining", `class QueryBuilder {
+  constructor(table) {
+    this.table = table;
+    this.conditions = [];
+    this.limitValue = null;
+  }
+  where(condition) { this.conditions.push(condition); return this; }
+  limit(count) { this.limitValue = count; return this; }
+  build() {
+    let query = "SELECT * FROM " + this.table;
+    if (this.conditions.length) query += " WHERE " + this.conditions.join(" AND ");
+    if (this.limitValue !== null) query += " LIMIT " + this.limitValue;
+    return query;
+  }
+}
+console.log(new QueryBuilder("users").where("age > 18").where("active = 1").limit(10).build());`],
+
+["Function properties: name, length, custom fields", `function example(a, b, c = 3, ...rest) {}
+console.log(example.name, example.length);
+
+function visit() {
+  visit.count += 1;
+  return visit.count;
+}
+visit.count = 0;
+visit();
+visit();
+console.log(visit.count);
+console.log(typeof visit, visit instanceof Object);`],
+
+["Functions that return functions, and callbacks", `function multiplier(factor) {
+  return number => number * factor;
+}
+function repeat(times, action) {
+  for (let i = 0; i < times; i++) action(i);
+}
+
+const double = multiplier(2);
+const triple = multiplier(3);
+console.log(double(7), triple(7));
+repeat(3, index => console.log("step", index));`],
+
+["Hoisting: declarations vs expressions", `console.log(early("Ali"));  // works: declarations are hoisted
+function early(name) {
+  return "Hi, " + name;
+}
+
+try {
+  late();
+} catch (error) {
+  console.log(error.name + ": " + error.message);
+}
+const late = function () {
+  return "ready";
+};
+console.log(late());`],
+
+["Closures in loops: var vs let", `const withVar = [];
+for (var i = 0; i < 3; i++) {
+  withVar.push(() => i);
+}
+const withLet = [];
+for (let j = 0; j < 3; j++) {
+  withLet.push(() => j);
+}
+console.log("var:", withVar.map(fn => fn()));
+console.log("let:", withLet.map(fn => fn()));`],
+
+["Sorting with comparator functions", `const people = [
+  { name: "Sara", age: 31 },
+  { name: "Ali", age: 25 },
+  { name: "Reza", age: 31 }
+];
+const byAge = [...people].sort((a, b) => a.age - b.age);
+const byAgeThenName = [...people].sort(
+  (a, b) => b.age - a.age || a.name.localeCompare(b.name)
+);
+console.log(byAge.map(p => p.name));
+console.log(byAgeThenName.map(p => p.name));
+console.log([10, 9, 1].sort(), [10, 9, 1].sort((a, b) => a - b));`],
+
+["once: run a function a single time", `function once(fn) {
+  let called = false;
+  let result;
+  return (...args) => {
+    if (!called) {
+      called = true;
+      result = fn(...args);
+    }
+    return result;
+  };
+}
+
+const init = once(() => {
+  console.log("initializing...");
+  return "ready";
+});
+console.log(init(), init(), init());`],
+
+["Throttle", `const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function throttle(fn, interval) {
+  let last = -Infinity;
+  return (...args) => {
+    const now = Date.now();
+    if (now - last >= interval) {
+      last = now;
+      return fn(...args);
+    }
+  };
+}
+
+let runs = 0;
+const onScroll = throttle(() => { runs += 1; }, 100);
+for (let i = 0; i < 10; i++) onScroll();
+console.log("after burst:", runs);
+await sleep(150);
+onScroll();
+console.log("after waiting:", runs);`],
+
+["Partial application", `const partial = (fn, ...preset) => (...later) => fn(...preset, ...later);
+const request = (method, url, body) =>
+  method + " " + url + (body ? " " + JSON.stringify(body) : "");
+
+const get = partial(request, "GET");
+const postToUsers = partial(request, "POST", "/users");
+console.log(get("/health"));
+console.log(postToUsers({ name: "Sara" }));`],
+
+["Trampoline: deep recursion without overflow", `const trampoline = fn => (...args) => {
+  let result = fn(...args);
+  while (typeof result === "function") result = result();
+  return result;
+};
+const sumTo = trampoline(function go(n, acc = 0) {
+  return n === 0 ? acc : () => go(n - 1, acc + n);
+});
+console.log(sumTo(1000000));
+
+const plainSum = n => (n === 0 ? 0 : n + plainSum(n - 1));
+try {
+  plainSum(1000000);
+} catch (error) {
+  console.log("plain recursion:", error.name);
+}`],
+
+["Async middleware pipeline", `function createPipeline() {
+  const stack = [];
+  return {
+    use(fn) { stack.push(fn); return this; },
+    run(ctx) {
+      const dispatch = i => {
+        const fn = stack[i];
+        return fn ? Promise.resolve(fn(ctx, () => dispatch(i + 1))) : Promise.resolve();
+      };
+      return dispatch(0);
+    }
+  };
+}
+
+const app = createPipeline()
+  .use(async (ctx, next) => { ctx.trace.push("logger:before"); await next(); ctx.trace.push("logger:after"); })
+  .use(async (ctx, next) => { ctx.trace.push("auth"); await next(); })
+  .use(async ctx => { ctx.trace.push("handler"); });
+
+const ctx = { trace: [] };
+await app.run(ctx);
+console.log(ctx.trace.join(" > "));`],
+
+["Custom iterable with a generator method", `class Range {
+  constructor(start, end, step = 1) {
+    this.start = start;
+    this.end = end;
+    this.step = step;
+  }
+  *[Symbol.iterator]() {
+    for (let value = this.start; value <= this.end; value += this.step) yield value;
+  }
+}
+
+console.log([...new Range(1, 10, 3)]);
+console.log(Math.max(...new Range(0, 50, 5)));
+for (const n of new Range(1, 3)) console.log("item", n);`]
+];
+
+const AsyncFn = Object.getPrototypeOf(async function () {}).constructor;
+
+function fmt(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "function") return "[Function: " + (v.name || "anonymous") + "]";
+  if (v === undefined || typeof v === "number" || typeof v === "bigint" || typeof v === "symbol") return String(v);
+  if (v instanceof Error) return v.name + ": " + v.message;
+  try { return JSON.stringify(v); } catch (e) { return String(v); }
+}
+
+async function run(card) {
+  const out = card.querySelector(".out");
+  out.textContent = "";
+  out.classList.remove("err");
+  const log = (...args) => { out.textContent += args.map(fmt).join(" ") + "\n"; };
+  const fakeConsole = { log, info: log, warn: log, error: log };
+  try {
+    await new AsyncFn("console", card.querySelector("textarea").value)(fakeConsole);
+    if (!out.textContent) out.textContent = "(no output)";
+  } catch (error) {
+    out.textContent += error.name + ": " + error.message;
+    out.classList.add("err");
+  }
+}
+
+function fit(area) { area.rows = area.value.split("\n").length + 1; }
+
+const list = document.getElementById("list");
+examples.forEach(([title, code], i) => {
+  const card = document.createElement("section");
+  card.className = "card";
+  card.innerHTML = '<h2><span></span></h2><textarea spellcheck="false"></textarea>' +
+    '<div class="actions"><button>Run</button><button class="ghost">Reset</button></div><pre class="out"></pre>';
+  card.querySelector("h2").append(String(i + 1).padStart(2, "0") + " " + title);
+  card.querySelector("h2 span").remove();
+  const area = card.querySelector("textarea");
+  area.value = code;
+  fit(area);
+  area.addEventListener("input", () => fit(area));
+  const [runBtn, resetBtn] = card.querySelectorAll("button");
+  runBtn.addEventListener("click", () => run(card));
+  resetBtn.addEventListener("click", () => { area.value = code; fit(area); });
+  list.append(card);
+});
+
+document.getElementById("runAll").addEventListener("click", async () => {
+  for (const card of list.children) await run(card);
+});
+document.getElementById("clearAll").addEventListener("click", () => {
+  list.querySelectorAll(".out").forEach(o => { o.textContent = ""; o.classList.remove("err"); });
+});
+</script>
+</body>
+</html>
