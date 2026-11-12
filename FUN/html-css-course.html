@@ -1,0 +1,2089 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دوره کامل HTML و CSS | از صفر تا پیشرفته</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #fbfaf8;
+    --bg-elevated: #ffffff;
+    --bg-code: #1e1e2e;
+    --text: #1a1a2e;
+    --text-soft: #5a5a72;
+    --text-faint: #8a8aa0;
+    --border: #e4e2dd;
+    --border-soft: #edebe6;
+    --accent: #2d6a4f;
+    --accent-soft: #e8f3ee;
+    --accent2: #9a5b13;
+    --accent2-soft: #f7ede0;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --mono: 'JetBrains Mono', Consolas, monospace;
+    --sans: 'Vazirmatn', system-ui, Tahoma, sans-serif;
+    --shadow: 0 1px 3px rgba(26,26,46,0.06), 0 1px 2px rgba(26,26,46,0.04);
+    --shadow-lg: 0 8px 24px rgba(26,26,46,0.08);
+    color-scheme: light dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14141f;
+      --bg-elevated: #1c1c2b;
+      --bg-code: #0f0f18;
+      --text: #ececf4;
+      --text-soft: #a8a8bd;
+      --text-faint: #6f6f85;
+      --border: #2e2e42;
+      --border-soft: #262638;
+      --accent: #5fb98f;
+      --accent-soft: #1a2e26;
+      --accent2: #d99a4e;
+      --accent2-soft: #2e2416;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 16px;
+  }
+
+  ::selection { background: var(--accent-soft); color: var(--accent); }
+
+  a { color: var(--accent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  h1, h2, h3, h4 { font-family: var(--sans); font-weight: 800; line-height: 1.3; margin: 0 0 .6em; }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.7rem); }
+  h2 { font-size: clamp(1.5rem, 3vw, 2rem); border-bottom: 2px solid var(--border-soft); padding-bottom: .5em; }
+  h3 { font-size: clamp(1.15rem, 2vw, 1.4rem); color: var(--accent); }
+  h4 { font-size: 1.05rem; }
+  p { margin: 0 0 1em; color: var(--text-soft); }
+  code { font-family: var(--mono); background: var(--accent-soft); color: var(--accent); padding: .15em .45em; border-radius: 5px; font-size: .9em; direction: ltr; unicode-bidi: embed; }
+
+  /* ---------- Layout shell ---------- */
+  .layout { display: flex; min-height: 100vh; max-width: 1500px; margin: 0 auto; }
+
+  /* sidebar via checkbox hack for mobile toggle */
+  #nav-toggle { display: none; }
+
+  .sidebar {
+    width: 290px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 22px;
+    border-left: 1px solid var(--border);
+    background: var(--bg-elevated);
+    scrollbar-width: thin;
+  }
+  .sidebar-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 1.15rem; margin-bottom: 1.4em;
+    padding-bottom: 1em; border-bottom: 1px solid var(--border-soft);
+  }
+  .sidebar-brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .nav-section { margin-bottom: 1.4em; }
+  .nav-section > span {
+    display: block; font-size: .78rem; color: var(--text-faint);
+    font-weight: 600; margin-bottom: .5em; padding-inline-start: .2em;
+  }
+  .nav-section a {
+    display: block; padding: .45em .6em; border-radius: var(--radius-sm);
+    color: var(--text-soft); text-decoration: none; font-size: .92rem;
+    transition: background .15s, color .15s;
+  }
+  .nav-section a:hover { background: var(--accent-soft); color: var(--accent); }
+
+  .nav-toggle-label {
+    display: none;
+    position: fixed; z-index: 50; bottom: 20px; left: 20px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    align-items: center; justify-content: center;
+    box-shadow: var(--shadow-lg); cursor: pointer; font-size: 1.4rem;
+  }
+
+  main { flex: 1; min-width: 0; padding: 48px clamp(20px, 5vw, 72px); }
+
+  .hero {
+    padding: 40px 0 56px;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 48px;
+  }
+  .hero .eyebrow { color: var(--accent2); font-weight: 600; margin-bottom: .7em; font-size: .95rem; }
+  .hero p.lead { font-size: 1.15rem; max-width: 62ch; }
+  .hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1.4em; }
+  .badge {
+    background: var(--accent-soft); color: var(--accent);
+    padding: .4em .9em; border-radius: 999px; font-size: .85rem; font-weight: 600;
+  }
+  .badge.alt { background: var(--accent2-soft); color: var(--accent2); }
+
+  section.lesson {
+    margin-bottom: 64px;
+    padding-top: 8px;
+    scroll-margin-top: 20px;
+  }
+  section.lesson .lesson-num {
+    font-size: .85rem; color: var(--text-faint); font-weight: 600; margin-bottom: .3em;
+  }
+
+  .why-box {
+    background: var(--accent-soft);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin: 1.2em 0;
+    border-inline-start: 4px solid var(--accent);
+  }
+  .why-box p { color: var(--text); margin: 0; }
+  .why-box strong { color: var(--accent); }
+
+  /* code + live preview grid */
+  .demo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 1.4em 0;
+  }
+  @media (max-width: 760px) { .demo { grid-template-columns: 1fr; } }
+
+  .code-panel, .preview-panel {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .panel-label {
+    font-size: .78rem; font-weight: 600; padding: 9px 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .code-panel .panel-label { background: #2a2a3d; color: #b8b8d0; }
+  .preview-panel .panel-label { background: var(--accent-soft); color: var(--accent); }
+  .panel-label .dots { display: flex; gap: 5px; margin-inline-end: 4px; }
+  .panel-label .dots span { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .panel-label .dots span:nth-child(1) { background: #ff6159; }
+  .panel-label .dots span:nth-child(2) { background: #ffbd2e; }
+  .panel-label .dots span:nth-child(3) { background: #28ca41; }
+
+  pre {
+    margin: 0; padding: 18px 20px; background: var(--bg-code);
+    overflow-x: auto; direction: ltr; text-align: left;
+  }
+  pre code {
+    background: none; color: #d4d4e4; padding: 0; font-size: .88rem; line-height: 1.7;
+  }
+  .tok-tag { color: #f0a0c0; }
+  .tok-attr { color: #9ecbff; }
+  .tok-str { color: #c3e88d; }
+  .tok-cmt { color: #6a6a85; font-style: italic; }
+  .tok-sel { color: #ffd580; }
+  .tok-prop { color: #9ecbff; }
+  .tok-val { color: #c3e88d; }
+
+  .preview-panel .preview-body {
+    padding: 22px; background: var(--bg-elevated);
+    min-height: 90px;
+    display: flex; align-items: center; justify-content: center;
+    direction: ltr; text-align: center;
+  }
+  .preview-panel.light-force .preview-body { background: #fff; color: #1a1a2e; }
+
+  .mistake-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 1.4em 0; }
+  @media (max-width: 760px) { .mistake-grid { grid-template-columns: 1fr; } }
+  .mistake-card { border-radius: var(--radius); padding: 18px 20px; border: 1px solid var(--border); }
+  .mistake-card.bad { background: #fdf2f2; border-color: #f3d4d4; }
+  .mistake-card.good { background: var(--accent-soft); border-color: var(--border); }
+  @media (prefers-color-scheme: dark) { .mistake-card.bad { background: #2b1818; border-color: #4a2525; } }
+  .mistake-card .tag { font-weight: 700; font-size: .85rem; margin-bottom: .5em; display: flex; align-items: center; gap: 6px; }
+  .mistake-card.bad .tag { color: #c0392b; }
+  .mistake-card.good .tag { color: var(--accent); }
+  .mistake-card pre { background: transparent; padding: 0; }
+  .mistake-card.bad code, .mistake-card.good code { color: var(--text); background: none; }
+
+  details.exercise {
+    background: var(--accent2-soft);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin: 1.4em 0;
+    border: 1px solid var(--border);
+  }
+  details.exercise summary {
+    cursor: pointer; font-weight: 700; color: var(--accent2);
+    display: flex; align-items: center; gap: 8px;
+    list-style: none;
+  }
+  details.exercise summary::-webkit-details-marker { display: none; }
+  details.exercise summary::before { content: '▶'; font-size: .7em; transition: transform .2s; }
+  details.exercise[open] summary::before { transform: rotate(90deg); }
+  details.exercise .answer { margin-top: 1em; padding-top: 1em; border-top: 1px dashed var(--border); }
+
+  table { border-collapse: collapse; width: 100%; margin: 1.2em 0; }
+  th, td { border: 1px solid var(--border); padding: .6em .9em; text-align: start; }
+  th { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  tr:nth-child(even) { background: var(--border-soft); }
+
+  .scrollx { overflow-x: auto; }
+
+  footer.site-footer {
+    text-align: center; padding: 40px 20px; color: var(--text-faint);
+    font-size: .9rem; border-top: 1px solid var(--border-soft); margin-top: 40px;
+  }
+
+  @media (max-width: 960px) {
+    .sidebar { position: fixed; inset-inline-start: 0; top: 0; z-index: 40;
+      transform: translateX(110%); transition: transform .25s ease; width: 78vw; max-width: 320px; }
+    html[dir="rtl"] .sidebar { transform: translateX(-110%); }
+    #nav-toggle:checked ~ .layout .sidebar { transform: translateX(0); }
+    .nav-toggle-label { display: flex; }
+    main { padding: 32px 20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; animation: none !important; }
+  }
+
+  @keyframes demo-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  /* demo-only hover helpers (pure CSS, used inside live-preview panels) */
+  .demo-link-fake { display: inline-block; }
+  .demo-hover-btn { transition: background .2s; }
+  .demo-hover-btn:hover { background: #1e4d38 !important; }
+  .demo-hover-box { transition: transform .25s ease, box-shadow .25s ease; }
+  .demo-hover-box:hover { transform: translateY(-6px); box-shadow: 0 12px 24px rgba(0,0,0,.2); }
+  .demo-hover-card { transition: transform .25s, box-shadow .25s; }
+  .demo-hover-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
+</style>
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" class="nav-toggle-label" aria-label="باز و بسته کردن منو">☰</label>
+<div class="layout">
+<nav class="sidebar" aria-label="فهرست مطالب">
+  <div class="sidebar-brand"><span class="dot"></span> HTML &amp; CSS صفر تا صد</div>
+
+  <div class="nav-section">
+    <span>شروع</span>
+    <a href="#intro">چطور وب کار می‌کند</a>
+    <a href="#doc-structure">ساختار سند HTML</a>
+  </div>
+
+  <div class="nav-section">
+    <span>HTML پایه</span>
+    <a href="#text-tags">متن و تیترها</a>
+    <a href="#links-images">لینک و تصویر</a>
+    <a href="#lists">لیست‌ها</a>
+    <a href="#semantic">تگ‌های معنایی</a>
+    <a href="#tables">جدول‌ها</a>
+    <a href="#forms">فرم‌ها</a>
+    <a href="#media">صوت، ویدیو و iframe</a>
+    <a href="#a11y-seo">دسترس‌پذیری و SEO</a>
+  </div>
+
+  <div class="nav-section">
+    <span>CSS پایه</span>
+    <a href="#css-intro">افزودن CSS و سلکتورها</a>
+    <a href="#specificity">اولویت و ارث‌بری</a>
+    <a href="#box-model">مدل جعبه</a>
+    <a href="#units">واحدها</a>
+    <a href="#colors">رنگ‌ها و گرادیان</a>
+    <a href="#typography">تایپوگرافی</a>
+    <a href="#display-position">display و position</a>
+  </div>
+
+  <div class="nav-section">
+    <span>چیدمان مدرن</span>
+    <a href="#flexbox">Flexbox</a>
+    <a href="#grid">Grid</a>
+    <a href="#responsive">ریسپانسیو</a>
+    <a href="#variables">متغیرهای CSS</a>
+  </div>
+
+  <div class="nav-section">
+    <span>CSS پیشرفته</span>
+    <a href="#pseudo">شبه‌کلاس و شبه‌عنصر</a>
+    <a href="#transitions">ترنزیشن و انیمیشن</a>
+    <a href="#modern-css">ویژگی‌های مدرن CSS</a>
+    <a href="#architecture">معماری و BEM</a>
+  </div>
+
+  <div class="nav-section">
+    <span>پروژه‌ها</span>
+    <a href="#project-landing">لندینگ‌پیج</a>
+    <a href="#project-profile">کارت پروفایل</a>
+    <a href="#project-portfolio">پورتفولیو</a>
+  </div>
+
+  <div class="nav-section">
+    <span>جمع‌بندی</span>
+    <a href="#cheatsheet">چیت‌شیت</a>
+    <a href="#roadmap">قدم بعدی</a>
+  </div>
+</nav>
+
+<main>
+<div class="hero">
+  <div class="eyebrow">دوره آموزشی کامل</div>
+  <h1>HTML و CSS را از صفر تا پیشرفته یاد بگیرید</h1>
+  <p class="lead">این صفحه یک دوره کامل است: هر درس شامل توضیح ساده، کد نمونه، نتیجه زنده، اشتباه رایج و یک تمرین کوچک است. از اولین تگ HTML شروع می‌کنیم و به Grid، انیمیشن و سه پروژه کامل می‌رسیم.</p>
+  <div class="hero-badges">
+    <span class="badge">بدون نیاز به دانش قبلی</span>
+    <span class="badge alt">فقط HTML و CSS</span>
+    <span class="badge">۳ پروژه کامل</span>
+  </div>
+</div>
+
+<section class="lesson" id="intro">
+  <div class="lesson-num">درس ۱</div>
+  <h2>وب چطور کار می‌کند؟</h2>
+  <p>وقتی آدرس یک سایت را در مرورگر می‌زنید، مرورگر یک درخواست به یک سرور می‌فرستد. سرور یک فایل <strong>HTML</strong> (ساختار صفحه) به همراه <strong>CSS</strong> (ظاهر صفحه) و معمولاً <strong>JavaScript</strong> (رفتار صفحه) برمی‌گرداند. مرورگر این‌ها را می‌خواند و صفحه‌ای که می‌بینید را می‌سازد.</p>
+  <div class="why-box">
+    <p><strong>چرا مهم است؟</strong> HTML محتوا و معنای صفحه را مشخص می‌کند (این یک تیتر است، این یک لینک است)، و CSS نحوه نمایش آن را تعیین می‌کند (رنگ، فاصله، چیدمان). این دوره فقط روی این دو تمرکز دارد.</p>
+  </div>
+</section>
+
+<section class="lesson" id="doc-structure">
+  <div class="lesson-num">درس ۲</div>
+  <h2>ساختار سند، Doctype، Head و Viewport</h2>
+  <p>هر فایل HTML با <code>&lt;!DOCTYPE html&gt;</code> شروع می‌شود که به مرورگر می‌گوید این یک سند HTML5 است. سپس تگ <code>&lt;html&gt;</code> همه چیز را در بر می‌گیرد و شامل دو بخش است: <code>&lt;head&gt;</code> (اطلاعات پنهان مثل عنوان صفحه و متادیتا) و <code>&lt;body&gt;</code> (محتوای قابل مشاهده).</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>index.html</div>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="fa" dir="rtl"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport"
+        content="width=device-width,
+                 initial-scale=1.0"&gt;
+  &lt;title&gt;صفحه من&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;سلام دنیا!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="direction:rtl;">
+        <h1 style="margin:0; font-size:1.6rem;">سلام دنیا!</h1>
+      </div>
+    </div>
+  </div>
+
+  <p><code>meta charset="UTF-8"</code> تضمین می‌کند حروف فارسی درست نمایش داده شوند. <code>viewport</code> (دید) باعث می‌شود صفحه در موبایل درست مقیاس شود — بدون آن، صفحه در گوشی خیلی کوچک و فشرده دیده می‌شود.</p>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>&lt;html&gt;
+&lt;head&gt;&lt;/head&gt;
+&lt;body&gt;...&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">نبود <code>meta charset</code> و <code>viewport</code> باعث مشکلات نمایش می‌شود.</p>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" ...&gt;
+  &lt;title&gt;...&lt;/title&gt;
+&lt;/head&gt;</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">همیشه این سه خط را در ابتدای <code>head</code> قرار دهید.</p>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک سند خالی HTML بسازید</summary>
+    <div class="answer">
+      <p>یک فایل بسازید که عنوان صفحه (title) آن «درباره من» باشد و در body فقط یک <code>h1</code> با نام شما باشد.</p>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="fa"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;درباره من&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;نام شما&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="text-tags">
+  <div class="lesson-num">درس ۳</div>
+  <h2>متن، تیترها و پاراگراف</h2>
+  <p>HTML شش سطح تیتر دارد: <code>h1</code> تا <code>h6</code>. <code>h1</code> مهم‌ترین عنوان صفحه است و باید فقط یک‌بار در هر صفحه استفاده شود. پاراگراف‌ها با <code>&lt;p&gt;</code> نوشته می‌شوند.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>text.html</div>
+      <pre><code>&lt;h1&gt;عنوان اصلی&lt;/h1&gt;
+&lt;h2&gt;زیرعنوان&lt;/h2&gt;
+&lt;p&gt;این یک پاراگراف است که
+  &lt;strong&gt;مهم&lt;/strong&gt; و
+  &lt;em&gt;تاکیدی&lt;/em&gt; دارد.&lt;/p&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="display:block; text-align:right; direction:rtl;">
+        <h1 style="font-size:1.4rem; margin:0 0 .3em;">عنوان اصلی</h1>
+        <h2 style="font-size:1.1rem; margin:0 0 .3em; border:none; color:inherit;">زیرعنوان</h2>
+        <p style="margin:0;">این یک پاراگراف است که <strong>مهم</strong> و <em>تاکیدی</em> دارد.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>&lt;h1&gt;عنوان&lt;/h1&gt;
+&lt;h1&gt;عنوان دیگر&lt;/h1&gt;
+&lt;h4&gt;زیربخش&lt;/h4&gt;</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">چند <code>h1</code> در یک صفحه و پرش از h1 به h4 به ساختار معنایی صفحه آسیب می‌زند.</p>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>&lt;h1&gt;عنوان&lt;/h1&gt;
+&lt;h2&gt;بخش&lt;/h2&gt;
+&lt;h3&gt;زیربخش&lt;/h3&gt;</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">یک <code>h1</code> در هر صفحه، و سطح‌ها را پله‌پله کاهش دهید.</p>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک بیوگرافی کوتاه بنویسید</summary>
+    <div class="answer">
+      <p>یک h1 با نامتان، یک h2 با عنوان «درباره من» و یک پاراگراف با دو جمله درباره خودتان بسازید؛ از <code>strong</code> برای یک کلمه مهم استفاده کنید.</p>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="links-images">
+  <div class="lesson-num">درس ۴</div>
+  <h2>لینک‌ها و تصاویر</h2>
+  <p>لینک‌ها با <code>&lt;a href="..."&gt;</code> ساخته می‌شوند. تصاویر با <code>&lt;img src="..." alt="..."&gt;</code> نمایش داده می‌شوند — ویژگی <code>alt</code> (متن جایگزین) برای افرادی که از صفحه‌خوان استفاده می‌کنند یا تصویر بارگذاری نمی‌شود، ضروری است.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>links.html</div>
+      <pre><code>&lt;a href="https://example.com"
+   target="_blank"
+   rel="noopener"&gt;
+  مشاهده سایت
+&lt;/a&gt;
+
+&lt;img src="cat.jpg"
+     alt="یک گربه نارنجی"
+     width="120"&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="direction:rtl; flex-direction:column; gap:10px;">
+        <a href="#" class="demo-link-fake">مشاهده سایت ↗</a>
+        <div style="width:120px; height:90px; background:linear-gradient(135deg,#f0a868,#e07856); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:.75rem;">تصویر گربه 🐱</div>
+      </div>
+    </div>
+  </div>
+
+  <p><code>target="_blank"</code> لینک را در تب جدید باز می‌کند؛ همیشه آن را با <code>rel="noopener"</code> همراه کنید تا صفحه جدید به صفحه اصلی دسترسی نداشته باشد (مسئله امنیتی).</p>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>&lt;img src="cat.jpg"&gt;</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">بدون <code>alt</code>، صفحه‌خوان‌ها نمی‌توانند تصویر را توصیف کنند.</p>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>&lt;img src="cat.jpg"
+     alt="گربه نارنجی روی مبل"&gt;</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">همیشه <code>alt</code> توصیفی بنویسید.</p>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک لینک و یک تصویر اضافه کنید</summary>
+    <div class="answer">
+      <pre><code>&lt;a href="https://wikipedia.org"&gt;ویکی‌پدیا&lt;/a&gt;
+&lt;img src="profile.jpg" alt="عکس پروفایل من"&gt;</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="lists">
+  <div class="lesson-num">درس ۵</div>
+  <h2>لیست‌ها</h2>
+  <p>دو نوع اصلی لیست داریم: <code>&lt;ul&gt;</code> (لیست بدون‌ترتیب، با نقطه) و <code>&lt;ol&gt;</code> (لیست مرتب، با شماره). هر آیتم با <code>&lt;li&gt;</code> مشخص می‌شود.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>lists.html</div>
+      <pre><code>&lt;ul&gt;
+  &lt;li&gt;چای&lt;/li&gt;
+  &lt;li&gt;قهوه&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;آرد را الک کنید&lt;/li&gt;
+  &lt;li&gt;تخم‌مرغ اضافه کنید&lt;/li&gt;
+&lt;/ol&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="display:block; text-align:right; direction:rtl;">
+        <ul style="margin:0 0 10px; padding-inline-start:20px;"><li>چای</li><li>قهوه</li></ul>
+        <ol style="margin:0; padding-inline-start:20px;"><li>آرد را الک کنید</li><li>تخم‌مرغ اضافه کنید</li></ol>
+      </div>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: لیست خریدتان را بنویسید</summary>
+    <div class="answer">
+      <pre><code>&lt;ul&gt;
+  &lt;li&gt;نان&lt;/li&gt;
+  &lt;li&gt;شیر&lt;/li&gt;
+  &lt;li&gt;تخم‌مرغ&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="semantic">
+  <div class="lesson-num">درس ۶</div>
+  <h2>تگ‌های معنایی (Semantic)</h2>
+  <p>به‌جای استفاده از <code>&lt;div&gt;</code> برای همه چیز، HTML5 تگ‌هایی دارد که معنای بخش را مشخص می‌کنند: <code>header</code> (سربرگ)، <code>nav</code> (ناوبری)، <code>main</code> (محتوای اصلی)، <code>section</code> (بخش)، <code>article</code> (مقاله مستقل)، <code>aside</code> (محتوای جانبی) و <code>footer</code> (پاورقی).</p>
+
+  <div class="why-box">
+    <p><strong>چرا مهم است؟</strong> تگ‌های معنایی به موتورهای جستجو و صفحه‌خوان‌ها کمک می‌کنند ساختار صفحه را بفهمند، و کد را برای توسعه‌دهندگان دیگر خواناتر می‌کند.</p>
+  </div>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>semantic.html</div>
+      <pre><code>&lt;header&gt;
+  &lt;nav&gt;منو&lt;/nav&gt;
+&lt;/header&gt;
+&lt;main&gt;
+  &lt;article&gt;
+    &lt;h2&gt;عنوان مقاله&lt;/h2&gt;
+    &lt;p&gt;متن مقاله...&lt;/p&gt;
+  &lt;/article&gt;
+  &lt;aside&gt;مطالب مرتبط&lt;/aside&gt;
+&lt;/main&gt;
+&lt;footer&gt;© ۱۴۰۴&lt;/footer&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="display:block; direction:rtl; text-align:right; padding:14px; gap:0;">
+        <div style="background:var(--accent-soft); padding:6px 10px; border-radius:6px; font-size:.8rem; margin-bottom:6px;">هدر: منو</div>
+        <div style="background:var(--border-soft); padding:6px 10px; border-radius:6px; font-size:.8rem; margin-bottom:6px;">مقاله: عنوان و متن</div>
+        <div style="background:var(--accent2-soft); padding:6px 10px; border-radius:6px; font-size:.8rem; margin-bottom:6px;">کناری: مطالب مرتبط</div>
+        <div style="background:var(--border-soft); padding:6px 10px; border-radius:6px; font-size:.8rem;">فوتر: © ۱۴۰۴</div>
+      </div>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک صفحه خبری ساده بسازید</summary>
+    <div class="answer">
+      <p>یک <code>header</code> با <code>h1</code>، یک <code>main</code> شامل یک <code>article</code>، و یک <code>footer</code> بسازید.</p>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="tables">
+  <div class="lesson-num">درس ۷</div>
+  <h2>جدول‌ها</h2>
+  <p>جدول‌ها فقط برای نمایش داده‌های جدولی استفاده می‌شوند (نه برای چیدمان صفحه). ساختار اصلی: <code>table</code> → <code>thead</code>/<code>tbody</code> → <code>tr</code> (ردیف) → <code>th</code>/<code>td</code> (سلول).</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>table.html</div>
+      <pre><code>&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;نام&lt;/th&gt;
+      &lt;th&gt;سن&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;سارا&lt;/td&gt;
+      &lt;td&gt;۲۸&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="display:block; direction:rtl;">
+        <table style="margin:0; font-size:.85rem;">
+          <thead><tr><th>نام</th><th>سن</th></tr></thead>
+          <tbody><tr><td>سارا</td><td>۲۸</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: جدول نمرات بسازید</summary>
+    <div class="answer">
+      <pre><code>&lt;table&gt;
+  &lt;tr&gt;&lt;th&gt;درس&lt;/th&gt;&lt;th&gt;نمره&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;ریاضی&lt;/td&gt;&lt;td&gt;۱۸&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="forms">
+  <div class="lesson-num">درس ۸</div>
+  <h2>فرم‌ها و انواع Input</h2>
+  <p>فرم‌ها با <code>&lt;form&gt;</code> ساخته می‌شوند و شامل فیلدهای ورودی مثل <code>&lt;input&gt;</code>، <code>&lt;textarea&gt;</code> و <code>&lt;select&gt;</code> هستند. هر input باید یک <code>&lt;label&gt;</code> (برچسب) مرتبط داشته باشد تا کاربر بداند چه چیزی وارد کند.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>form.html</div>
+      <pre><code>&lt;form&gt;
+  &lt;label for="email"&gt;ایمیل&lt;/label&gt;
+  &lt;input type="email" id="email"
+         required&gt;
+
+  &lt;label for="age"&gt;سن&lt;/label&gt;
+  &lt;input type="number" id="age"
+         min="0" max="120"&gt;
+
+  &lt;button type="submit"&gt;
+    ارسال
+  &lt;/button&gt;
+&lt;/form&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="display:flex; flex-direction:column; gap:8px; direction:rtl; text-align:right; align-items:stretch;">
+        <label style="font-size:.85rem;">ایمیل</label>
+        <input type="email" placeholder="you@example.com" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); font-family:inherit;" disabled>
+        <button style="padding:7px; border-radius:6px; border:none; background:var(--accent); color:#fff; font-family:inherit; cursor:default;">ارسال</button>
+      </div>
+    </div>
+  </div>
+
+  <p>اعتبارسنجی بومی (native validation) با ویژگی‌هایی مثل <code>required</code> (الزامی)، <code>min</code>/<code>max</code>، <code>minlength</code> و <code>pattern</code> بدون نیاز به JavaScript انجام می‌شود. مرورگر خودش پیام خطا نشان می‌دهد.</p>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>ایمیل:
+&lt;input type="text"&gt;</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">بدون <code>label</code> متصل و بدون <code>type</code> درست، دسترس‌پذیری و اعتبارسنجی از بین می‌رود.</p>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>&lt;label for="e"&gt;ایمیل&lt;/label&gt;
+&lt;input type="email" id="e"&gt;</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;"><code>for</code> و <code>id</code> باید یکسان باشند تا کلیک روی برچسب، فوکوس را به input ببرد.</p>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: فرم ثبت‌نام کوتاه بسازید</summary>
+    <div class="answer">
+      <pre><code>&lt;form&gt;
+  &lt;label for="name"&gt;نام&lt;/label&gt;
+  &lt;input type="text" id="name" required&gt;
+  &lt;label for="pass"&gt;رمز عبور&lt;/label&gt;
+  &lt;input type="password" id="pass" minlength="8" required&gt;
+  &lt;button type="submit"&gt;ثبت‌نام&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="media">
+  <div class="lesson-num">درس ۹</div>
+  <h2>صوت، ویدیو، iframe و SVG درون‌خطی</h2>
+  <p>تگ‌های <code>&lt;audio&gt;</code> و <code>&lt;video&gt;</code> به همراه ویژگی <code>controls</code> پخش‌کننده بومی مرورگر را فعال می‌کنند. <code>&lt;iframe&gt;</code> محتوای یک صفحه دیگر را درون صفحه شما نمایش می‌دهد (مثلاً نقشه یا ویدیوی یوتیوب). <code>&lt;svg&gt;</code> گرافیک برداری است که مستقیماً در HTML نوشته می‌شود.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>media.html</div>
+      <pre><code>&lt;video controls width="240"&gt;
+  &lt;source src="clip.mp4"
+          type="video/mp4"&gt;
+&lt;/video&gt;
+
+&lt;svg viewBox="0 0 100 100"
+     width="60"&gt;
+  &lt;circle cx="50" cy="50" r="40"
+          fill="currentColor"/&gt;
+&lt;/svg&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="gap:16px;">
+        <div style="width:110px; height:70px; background:#2a2a3d; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.3rem;">▶</div>
+        <svg viewBox="0 0 100 100" width="50" style="color:var(--accent);"><circle cx="50" cy="50" r="40" fill="currentColor"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک SVG ساده بسازید</summary>
+    <div class="answer">
+      <pre><code>&lt;svg viewBox="0 0 100 100" width="80"&gt;
+  &lt;rect x="10" y="10" width="80" height="80"
+        rx="12" fill="tomato"/&gt;
+&lt;/svg&gt;</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="a11y-seo">
+  <div class="lesson-num">درس ۱۰</div>
+  <h2>دسترس‌پذیری (Accessibility) و مبانی SEO</h2>
+  <p>دسترس‌پذیری یعنی صفحه برای همه، از جمله افراد با معلولیت، قابل استفاده باشد. چند اصل پایه: همیشه <code>alt</code> برای تصاویر، کنتراست رنگ کافی، ترتیب منطقی تیترها، و استفاده از ویژگی‌های <code>aria-*</code> وقتی تگ معنایی مناسب وجود ندارد.</p>
+
+  <table>
+    <thead><tr><th>ویژگی ARIA</th><th>کاربرد</th></tr></thead>
+    <tbody>
+      <tr><td><code>aria-label</code></td><td>برچسب نامرئی برای صفحه‌خوان</td></tr>
+      <tr><td><code>aria-hidden</code></td><td>پنهان کردن عنصر تزئینی از صفحه‌خوان</td></tr>
+      <tr><td><code>role</code></td><td>تعیین نقش عنصر (مثل role="button")</td></tr>
+    </tbody>
+  </table>
+
+  <p>برای SEO (بهینه‌سازی برای موتورهای جستجو)، این‌ها مهم‌اند: <code>&lt;title&gt;</code> توصیفی، <code>meta name="description"</code>، یک <code>h1</code> واحد، و متن <code>alt</code> معنادار روی تصاویر.</p>
+
+  <div class="why-box">
+    <p><strong>چرا مهم است؟</strong> دسترس‌پذیری و SEO هر دو از همان پایه می‌آیند: HTML معنادار. وقتی تگ‌ها را درست استفاده کنید، هم برای انسان‌ها و هم برای ماشین‌ها (موتور جستجو، صفحه‌خوان) قابل‌فهم‌تر می‌شود.</p>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک head دوستدار SEO بنویسید</summary>
+    <div class="answer">
+      <pre><code>&lt;title&gt;فروشگاه کتاب آنلاین | کتاب‌باز&lt;/title&gt;
+&lt;meta name="description"
+      content="خرید آنلاین کتاب با ارسال سریع"&gt;</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="css-intro">
+  <div class="lesson-num">درس ۱۱</div>
+  <h2>روش‌های افزودن CSS و سلکتورها</h2>
+  <p>سه روش برای افزودن CSS وجود دارد: <strong>درون‌خطی</strong> (inline، با ویژگی style)، <strong>داخلی</strong> (internal، با تگ <code>&lt;style&gt;</code> در head) و <strong>خارجی</strong> (external، با فایل جدا و <code>&lt;link&gt;</code>). روش خارجی برای پروژه‌های واقعی بهترین است چون CSS از HTML جدا می‌ماند.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>selectors.css</div>
+      <pre><code><span class="tok-cmt">/* سلکتور تگ */</span>
+<span class="tok-sel">p</span> { <span class="tok-prop">color</span>: <span class="tok-val">gray</span>; }
+
+<span class="tok-cmt">/* سلکتور کلاس */</span>
+<span class="tok-sel">.card</span> { <span class="tok-prop">padding</span>: <span class="tok-val">16px</span>; }
+
+<span class="tok-cmt">/* سلکتور آیدی */</span>
+<span class="tok-sel">#header</span> { <span class="tok-prop">height</span>: <span class="tok-val">60px</span>; }
+
+<span class="tok-cmt">/* ترکیبی: فرزند مستقیم */</span>
+<span class="tok-sel">.card &gt; p</span> { <span class="tok-prop">margin</span>: <span class="tok-val">0</span>; }</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="display:block; direction:rtl; text-align:right;">
+        <div style="background:var(--border-soft); padding:16px; border-radius:8px;">
+          <p style="margin:0; color:var(--text-soft);">این یک کارت با سلکتور کلاس است</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>سلکتورها با <strong>ویرگول</strong> ترکیب می‌شوند (برای چند عنصر)، با <strong>فاصله</strong> یعنی فرزند در هر عمقی، و با <strong>&gt;</strong> یعنی فقط فرزند مستقیم.</p>
+
+  <details class="exercise">
+    <summary>تمرین: سه نوع سلکتور بنویسید</summary>
+    <div class="answer">
+      <pre><code>h1 { color: navy; }
+.highlight { background: yellow; }
+#main-title { font-size: 2rem; }</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="specificity">
+  <div class="lesson-num">درس ۱۲</div>
+  <h2>اولویت (Specificity) و ارث‌بری (Inheritance)</h2>
+  <p>وقتی چند قانون CSS با یک عنصر تداخل دارند، مرورگر بر اساس <strong>اولویت</strong> تصمیم می‌گیرد کدام اعمال شود. ترتیب قدرت (از کم به زیاد): سلکتور تگ &lt; کلاس &lt; آیدی &lt; <code>style</code> درون‌خطی &lt; <code>!important</code>.</p>
+
+  <div class="why-box">
+    <p><strong>چرا مهم است؟</strong> خیلی از باگ‌های CSS به خاطر اولویت نادرست پیش می‌آیند — استایلی که نوشته‌اید اعمال نمی‌شود چون یک سلکتور قوی‌تر در جای دیگر آن را بازنویسی می‌کند.</p>
+  </div>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>specificity.css</div>
+      <pre><code><span class="tok-sel">p</span> { <span class="tok-prop">color</span>: <span class="tok-val">blue</span>; }
+<span class="tok-sel">.note</span> { <span class="tok-prop">color</span>: <span class="tok-val">green</span>; }
+<span class="tok-sel">#warn</span> { <span class="tok-prop">color</span>: <span class="tok-val">red</span>; }
+
+<span class="tok-cmt">/* #warn برنده می‌شود چون
+   آیدی از کلاس قوی‌تر است */</span></code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="direction:rtl;">
+        <p style="color:#c0392b; margin:0; font-weight:600;">این متن قرمز است</p>
+      </div>
+    </div>
+  </div>
+
+  <p><strong>ارث‌بری</strong> یعنی بعضی ویژگی‌ها (مثل <code>color</code> و <code>font-family</code>) به‌طور خودکار از والد به فرزند منتقل می‌شوند، اما ویژگی‌های جعبه‌ای (مثل <code>margin</code> و <code>border</code>) ارث‌بری نمی‌شوند.</p>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>.btn { color: red !important; }
+#submit { color: blue; }</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">استفاده زیاد از <code>!important</code> دیباگ کردن را سخت می‌کند.</p>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>.btn { color: red; }
+.btn--primary { color: blue; }</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">از کلاس‌های دقیق‌تر به‌جای <code>!important</code> استفاده کنید.</p>
+    </div>
+  </div>
+</section>
+
+<section class="lesson" id="box-model">
+  <div class="lesson-num">درس ۱۳</div>
+  <h2>مدل جعبه (Box Model)</h2>
+  <p>هر عنصر HTML یک جعبه مستطیلی است که از چهار لایه تشکیل شده: <strong>content</strong> (محتوا)، <strong>padding</strong> (فاصله داخلی)، <strong>border</strong> (حاشیه) و <strong>margin</strong> (فاصله خارجی).</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>box.css</div>
+      <pre><code><span class="tok-sel">.box</span> {
+  <span class="tok-prop">box-sizing</span>: <span class="tok-val">border-box</span>;
+  <span class="tok-prop">width</span>: <span class="tok-val">160px</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">16px</span>;
+  <span class="tok-prop">border</span>: <span class="tok-val">3px solid #2d6a4f</span>;
+  <span class="tok-prop">margin</span>: <span class="tok-val">10px</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body">
+        <div style="width:140px; padding:14px; border:3px solid var(--accent); background:var(--accent-soft); border-radius:4px; font-size:.8rem;">محتوا</div>
+      </div>
+    </div>
+  </div>
+
+  <p><code>box-sizing: border-box</code> باعث می‌شود <code>padding</code> و <code>border</code> داخل عرض/ارتفاع تعریف‌شده حساب شوند، نه اضافه بر آن — این باعث می‌شود چیدمان‌ها قابل پیش‌بینی‌تر باشند.</p>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>.box {
+  width: 200px;
+  padding: 20px;
+  /* عرض واقعی: 240px! */
+}</code></pre>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>* { box-sizing: border-box; }
+.box { width: 200px; padding: 20px; }
+/* عرض واقعی: دقیقاً 200px */</code></pre>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک جعبه با حاشیه گرد بسازید</summary>
+    <div class="answer">
+      <pre><code>.box {
+  box-sizing: border-box;
+  padding: 20px;
+  border: 2px dashed gray;
+  border-radius: 12px;
+}</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="units">
+  <div class="lesson-num">درس ۱۴</div>
+  <h2>واحدها (Units)</h2>
+  <p><code>px</code> واحد مطلق (پیکسل ثابت) است. <code>rem</code> نسبت به اندازه فونت ریشه (معمولاً ۱۶px) است و برای تایپوگرافی ریسپانسیو بهترین انتخاب است. <code>em</code> نسبت به فونت والد است. <code>%</code>، <code>vw</code> و <code>vh</code> نسبت به والد یا اندازه صفحه نمایش هستند.</p>
+
+  <table>
+    <thead><tr><th>واحد</th><th>نسبت به</th><th>کاربرد پیشنهادی</th></tr></thead>
+    <tbody>
+      <tr><td><code>px</code></td><td>مقدار ثابت</td><td>border، سایه</td></tr>
+      <tr><td><code>rem</code></td><td>فونت ریشه (html)</td><td>فونت، فاصله‌گذاری</td></tr>
+      <tr><td><code>em</code></td><td>فونت والد مستقیم</td><td>فاصله داخل یک کامپوننت</td></tr>
+      <tr><td><code>%</code></td><td>اندازه والد</td><td>عرض ستون‌ها</td></tr>
+      <tr><td><code>vw/vh</code></td><td>عرض/ارتفاع صفحه</td><td>سکشن‌های تمام‌صفحه</td></tr>
+    </tbody>
+  </table>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>units.css</div>
+      <pre><code><span class="tok-sel">html</span> { <span class="tok-prop">font-size</span>: <span class="tok-val">16px</span>; }
+<span class="tok-sel">.title</span> { <span class="tok-prop">font-size</span>: <span class="tok-val">1.5rem</span>; } <span class="tok-cmt">/* 24px */</span>
+<span class="tok-sel">.hero</span> { <span class="tok-prop">min-height</span>: <span class="tok-val">60vh</span>; }</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="direction:rtl;">
+        <span style="font-size:1.5rem; font-weight:700;">عنوان با rem</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>p { font-size: 16px; }
+h1 { font-size: 32px; }</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">فونت با <code>px</code> به تنظیمات دسترس‌پذیری مرورگر کاربر واکنش نشان نمی‌دهد.</p>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>p { font-size: 1rem; }
+h1 { font-size: 2rem; }</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">با <code>rem</code>، اگر کاربر فونت پیش‌فرض مرورگر را بزرگ کند، همه چیز متناسب بزرگ می‌شود.</p>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: با rem و vh کار کنید</summary>
+    <div class="answer">
+      <pre><code>.section { min-height: 100vh; padding: 2rem; }
+.heading { font-size: 2.5rem; }</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="colors">
+  <div class="lesson-num">درس ۱۵</div>
+  <h2>رنگ‌ها، گرادیان و سایه</h2>
+  <p>رنگ را می‌توان با نام (<code>tomato</code>)، هگز (<code>#2d6a4f</code>)، <code>rgb()</code>، <code>hsl()</code> یا فرمت جدیدتر <code>oklch()</code> تعریف کرد. <code>hsl</code> (رنگ، اشباع، روشنی) برای ساخت تم‌های رنگی مرتبط راحت‌تر از هگز است.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>colors.css</div>
+      <pre><code><span class="tok-sel">.a</span> { <span class="tok-prop">background</span>: <span class="tok-val">hsl(152 40% 30%)</span>; }
+<span class="tok-sel">.b</span> {
+  <span class="tok-prop">background</span>: <span class="tok-val">linear-gradient(135deg,
+    #2d6a4f, #74c69d)</span>;
+}
+<span class="tok-sel">.c</span> {
+  <span class="tok-prop">box-shadow</span>: <span class="tok-val">0 4px 12px
+    rgba(0,0,0,.15)</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="gap:12px;">
+        <div style="width:50px; height:50px; border-radius:8px; background:hsl(152 40% 30%);"></div>
+        <div style="width:50px; height:50px; border-radius:8px; background:linear-gradient(135deg,#2d6a4f,#74c69d);"></div>
+        <div style="width:50px; height:50px; border-radius:8px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,.25);"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک کارت با گرادیان و سایه بسازید</summary>
+    <div class="answer">
+      <pre><code>.card {
+  background: linear-gradient(135deg, #9a5b13, #e0a95c);
+  box-shadow: 0 8px 20px rgba(154,91,19,.3);
+  border-radius: 12px;
+}</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="typography">
+  <div class="lesson-num">درس ۱۶</div>
+  <h2>تایپوگرافی، وب‌فونت و RTL</h2>
+  <p>برای فونت دلخواه، از <code>@font-face</code> یا سرویس‌هایی مثل Google Fonts استفاده می‌شود. همیشه یک فونت جایگزین (fallback) مثل <code>system-ui</code> تعریف کنید تا اگر فونت اصلی بارگذاری نشد، صفحه زشت نشود.</p>
+
+  <p>برای صفحات راست‌به‌چپ، به‌جای <code>margin-left</code>/<code>margin-right</code> از ویژگی‌های <strong>منطقی (logical properties)</strong> مثل <code>margin-inline-start</code> و <code>padding-inline-end</code> استفاده کنید — این‌ها خودکار بر اساس جهت صفحه (<code>dir</code>) سمت درست را انتخاب می‌کنند.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>typography.css</div>
+      <pre><code><span class="tok-sel">body</span> {
+  <span class="tok-prop">font-family</span>: <span class="tok-val">'Vazirmatn',
+    system-ui, Tahoma, sans-serif</span>;
+  <span class="tok-prop">line-height</span>: <span class="tok-val">1.8</span>;
+}
+<span class="tok-sel">.card</span> {
+  <span class="tok-prop">margin-inline-start</span>: <span class="tok-val">16px</span>;
+  <span class="tok-prop">padding-inline-end</span>: <span class="tok-val">12px</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="direction:rtl; text-align:right;">
+        <p style="margin:0; line-height:1.9;">متنی با line-height مناسب و فونت فارسی خوانا، که در فضای کافی نفس می‌کشد.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>.card { margin-right: 16px; }
+/* در RTL نتیجه برعکس می‌شود */</code></pre>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>.card { margin-inline-start: 16px; }
+/* خودکار با جهت صفحه هماهنگ است */</code></pre>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک پاراگراف خوانا بسازید</summary>
+    <div class="answer">
+      <pre><code>p {
+  max-width: 65ch;
+  line-height: 1.8;
+  font-size: 1.05rem;
+}</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="display-position">
+  <div class="lesson-num">درس ۱۷</div>
+  <h2>Display، Position، Z-index و Overflow</h2>
+  <p><code>display</code> نحوه قرارگیری عنصر در جریان صفحه را تعیین می‌کند: <code>block</code> (کل عرض را می‌گیرد)، <code>inline</code> (در ادامه متن)، <code>inline-block</code>، <code>none</code> (مخفی). <code>position</code> کنترل می‌کند عنصر نسبت به چه چیزی مکان‌یابی شود: <code>static</code> (پیش‌فرض)، <code>relative</code>، <code>absolute</code>، <code>fixed</code>، <code>sticky</code>.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>position.css</div>
+      <pre><code><span class="tok-sel">.parent</span> { <span class="tok-prop">position</span>: <span class="tok-val">relative</span>; }
+<span class="tok-sel">.badge</span> {
+  <span class="tok-prop">position</span>: <span class="tok-val">absolute</span>;
+  <span class="tok-prop">top</span>: <span class="tok-val">-8px</span>;
+  <span class="tok-prop">inset-inline-end</span>: <span class="tok-val">-8px</span>;
+  <span class="tok-prop">z-index</span>: <span class="tok-val">2</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body">
+        <div style="position:relative; width:90px; height:60px; background:var(--border-soft); border-radius:8px;">
+          <span style="position:absolute; top:-8px; left:-8px; background:#c0392b; color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:.7rem;">۳</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p><code>overflow: hidden</code> محتوای اضافه بر اندازه جعبه را قطع می‌کند؛ <code>overflow: auto</code> در صورت نیاز اسکرول‌بار نشان می‌دهد.</p>
+
+  <details class="exercise">
+    <summary>تمرین: یک نشان (badge) روی یک آیکون بسازید</summary>
+    <div class="answer">
+      <pre><code>.icon-wrap { position: relative; }
+.badge {
+  position: absolute;
+  top: -6px; inset-inline-end: -6px;
+  background: crimson; color: white;
+  border-radius: 999px;
+  font-size: .7rem; padding: 2px 6px;
+}</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="flexbox">
+  <div class="lesson-num">درس ۱۸</div>
+  <h2>Flexbox کامل</h2>
+  <p>Flexbox برای چیدمان یک‌بعدی (ردیفی یا ستونی) عالی است. با <code>display: flex</code> روی والد شروع می‌شود؛ سپس <code>justify-content</code> چیدمان در جهت اصلی (افقی به‌طور پیش‌فرض) و <code>align-items</code> چیدمان در جهت عمود را کنترل می‌کند.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>flex-basic.css</div>
+      <pre><code><span class="tok-sel">.row</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">flex</span>;
+  <span class="tok-prop">gap</span>: <span class="tok-val">12px</span>;
+  <span class="tok-prop">justify-content</span>: <span class="tok-val">space-between</span>;
+  <span class="tok-prop">align-items</span>: <span class="tok-val">center</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده: مثال ۱</div>
+      <div class="preview-body">
+        <div style="display:flex; gap:10px; justify-content:space-between; align-items:center; width:100%;">
+          <div style="width:30px; height:30px; background:var(--accent); border-radius:6px;"></div>
+          <div style="width:30px; height:50px; background:var(--accent2); border-radius:6px;"></div>
+          <div style="width:30px; height:20px; background:var(--accent); border-radius:6px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>برای چیدمان ستونی از <code>flex-direction: column</code> استفاده کنید. ویژگی‌های <code>flex-grow</code>، <code>flex-shrink</code> و <code>flex-basis</code> (یا خلاصه <code>flex</code>) کنترل می‌کنند هر آیتم چقدر فضا بگیرد.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>flex-grow.css</div>
+      <pre><code><span class="tok-sel">.sidebar</span> { <span class="tok-prop">flex</span>: <span class="tok-val">0 0 100px</span>; }
+<span class="tok-sel">.content</span> { <span class="tok-prop">flex</span>: <span class="tok-val">1</span>; }
+<span class="tok-cmt">/* سایدبار ثابت، محتوا باقی فضا را می‌گیرد */</span></code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده: مثال ۲</div>
+      <div class="preview-body">
+        <div style="display:flex; gap:8px; width:100%;">
+          <div style="flex:0 0 50px; height:40px; background:var(--accent2); border-radius:6px; font-size:.65rem; display:flex; align-items:center; justify-content:center; color:#fff;">ثابت</div>
+          <div style="flex:1; height:40px; background:var(--accent); border-radius:6px; font-size:.65rem; display:flex; align-items:center; justify-content:center; color:#fff;">انعطاف‌پذیر</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>flex-wrap برای چیدمان چندخطی</h3>
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>flex-wrap.css</div>
+      <pre><code><span class="tok-sel">.tags</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">flex</span>;
+  <span class="tok-prop">flex-wrap</span>: <span class="tok-val">wrap</span>;
+  <span class="tok-prop">gap</span>: <span class="tok-val">8px</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده: مثال ۳</div>
+      <div class="preview-body">
+        <div style="display:flex; flex-wrap:wrap; gap:6px; width:100%;">
+          <span style="background:var(--accent-soft); color:var(--accent); padding:4px 10px; border-radius:999px; font-size:.7rem;">طراحی</span>
+          <span style="background:var(--accent-soft); color:var(--accent); padding:4px 10px; border-radius:999px; font-size:.7rem;">توسعه</span>
+          <span style="background:var(--accent2-soft); color:var(--accent2); padding:4px 10px; border-radius:999px; font-size:.7rem;">وب</span>
+          <span style="background:var(--accent-soft); color:var(--accent); padding:4px 10px; border-radius:999px; font-size:.7rem;">CSS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>.row {
+  display: flex;
+  justify-content: center;
+}
+/* align-items را فراموش کرده */</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">فراموش کردن <code>align-items</code> باعث می‌شود آیتم‌ها در محور عمودی کشیده یا نامرتب شوند.</p>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>.row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">همیشه هر دو محور را آگاهانه تنظیم کنید و برای فاصله از <code>gap</code> استفاده کنید نه margin.</p>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک نوار ناوبری با Flexbox بسازید</summary>
+    <div class="answer">
+      <pre><code>nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+nav ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+}</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="grid">
+  <div class="lesson-num">درس ۱۹</div>
+  <h2>Grid کامل</h2>
+  <p>CSS Grid برای چیدمان دوبعدی (ردیف و ستون همزمان) ساخته شده. با <code>display: grid</code> شروع می‌شود و <code>grid-template-columns</code> تعداد و اندازه ستون‌ها را مشخص می‌کند.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>grid-basic.css</div>
+      <pre><code><span class="tok-sel">.gallery</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">grid</span>;
+  <span class="tok-prop">grid-template-columns</span>: <span class="tok-val">repeat(3, 1fr)</span>;
+  <span class="tok-prop">gap</span>: <span class="tok-val">10px</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده: مثال ۱</div>
+      <div class="preview-body">
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; width:100%;">
+          <div style="height:30px; background:var(--accent); border-radius:5px;"></div>
+          <div style="height:30px; background:var(--accent2); border-radius:5px;"></div>
+          <div style="height:30px; background:var(--accent); border-radius:5px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>auto-fit و minmax برای گرید خودکار و ریسپانسیو</h3>
+  <p>ترکیب <code>repeat(auto-fit, minmax(...))</code> تعداد ستون‌ها را بر اساس فضای موجود خودکار تنظیم می‌کند — بدون نیاز به media query برای این بخش.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>grid-autofit.css</div>
+      <pre><code><span class="tok-sel">.cards</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">grid</span>;
+  <span class="tok-prop">grid-template-columns</span>:
+    <span class="tok-val">repeat(auto-fit, minmax(140px, 1fr))</span>;
+  <span class="tok-prop">gap</span>: <span class="tok-val">14px</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده: مثال ۲</div>
+      <div class="preview-body">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(60px,1fr)); gap:6px; width:100%;">
+          <div style="height:34px; background:var(--border-soft); border:1px solid var(--border); border-radius:5px;"></div>
+          <div style="height:34px; background:var(--border-soft); border:1px solid var(--border); border-radius:5px;"></div>
+          <div style="height:34px; background:var(--border-soft); border:1px solid var(--border); border-radius:5px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>grid-template-areas برای چیدمان صفحه</h3>
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>grid-areas.css</div>
+      <pre><code><span class="tok-sel">.page</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">grid</span>;
+  <span class="tok-prop">grid-template-columns</span>: <span class="tok-val">200px 1fr</span>;
+  <span class="tok-prop">grid-template-areas</span>:
+    <span class="tok-val">"header header"
+    "sidebar main"
+    "footer footer"</span>;
+}
+<span class="tok-sel">.header</span> { <span class="tok-prop">grid-area</span>: <span class="tok-val">header</span>; }
+<span class="tok-sel">.sidebar</span> { <span class="tok-prop">grid-area</span>: <span class="tok-val">sidebar</span>; }</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده: مثال ۳</div>
+      <div class="preview-body" style="display:block;">
+        <div style="display:grid; grid-template-columns:55px 1fr; grid-template-areas:'h h' 's m' 'f f'; gap:4px; width:100%; font-size:.6rem;">
+          <div style="grid-area:h; background:var(--accent); color:#fff; padding:6px; border-radius:4px; text-align:center;">هدر</div>
+          <div style="grid-area:s; background:var(--accent2-soft); padding:6px; border-radius:4px; text-align:center;">کناری</div>
+          <div style="grid-area:m; background:var(--border-soft); padding:6px; border-radius:4px; text-align:center;">اصلی</div>
+          <div style="grid-area:f; background:var(--border-soft); padding:6px; border-radius:4px; text-align:center;">فوتر</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>.gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+/* در موبایل هم سه ستون می‌ماند! */</code></pre>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>.gallery {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(160px, 1fr));
+}</code></pre>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک گالری تصویر ریسپانسیو بسازید</summary>
+    <div class="answer">
+      <pre><code>.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.gallery img { width: 100%; border-radius: 8px; }</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="responsive">
+  <div class="lesson-num">درس ۲۰</div>
+  <h2>ریسپانسیو: Media Query، Mobile-first، clamp() و Container Queries</h2>
+  <p><code>@media</code> اجازه می‌دهد استایل متفاوتی برای اندازه‌های مختلف صفحه تعریف کنید. رویکرد <strong>mobile-first</strong> یعنی ابتدا برای موبایل استایل بنویسید، سپس با <code>min-width</code> برای صفحات بزرگ‌تر آن را گسترش دهید.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>responsive.css</div>
+      <pre><code><span class="tok-cmt">/* پایه: موبایل */</span>
+<span class="tok-sel">.grid</span> { <span class="tok-prop">grid-template-columns</span>: <span class="tok-val">1fr</span>; }
+
+<span class="tok-cmt">/* از ۶۴۰ پیکسل به بالا */</span>
+<span class="tok-sel">@media (min-width: 640px)</span> {
+  <span class="tok-sel">.grid</span> { <span class="tok-prop">grid-template-columns</span>: <span class="tok-val">1fr 1fr</span>; }
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="direction:rtl; font-size:.8rem;">
+        کوچک کنید عرض مرورگر را برای دیدن اثر واقعی media query در همین صفحه
+      </div>
+    </div>
+  </div>
+
+  <h3>clamp() برای تایپوگرافی سیال</h3>
+  <p><code>clamp(min, ideal, max)</code> یک مقدار را بین حداقل و حداکثر، بر اساس عرض صفحه، به‌صورت نرم تغییر می‌دهد — بدون نیاز به چند media query برای فونت.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>clamp.css</div>
+      <pre><code><span class="tok-sel">h1</span> {
+  <span class="tok-prop">font-size</span>: <span class="tok-val">clamp(1.5rem, 4vw, 3rem)</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body">
+        <span style="font-size:clamp(1.1rem, 4vw, 2rem); font-weight:800;">عنوان سیال</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Container Queries</h3>
+  <p>برخلاف media query که بر اساس عرض <em>کل صفحه</em> است، <code>@container</code> بر اساس عرض <em>خود والد</em> استایل می‌دهد — بسیار مفید برای کامپوننت‌های قابل استفاده مجدد در جاهای مختلف صفحه.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>container.css</div>
+      <pre><code><span class="tok-sel">.wrapper</span> { <span class="tok-prop">container-type</span>: <span class="tok-val">inline-size</span>; }
+
+<span class="tok-sel">@container (min-width: 300px)</span> {
+  <span class="tok-sel">.card</span> { <span class="tok-prop">flex-direction</span>: <span class="tok-val">row</span>; }
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="font-size:.78rem;">کارت بر اساس عرض ظرف خودش، نه کل صفحه، چیدمان را تغییر می‌دهد</div>
+    </div>
+  </div>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>@media (max-width: 1200px) { ... }
+@media (max-width: 900px) { ... }
+/* desktop-first: شروع از بزرگ،
+   محدود کردن با max-width */</code></pre>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>/* پایه برای موبایل */
+@media (min-width: 640px) { ... }
+@media (min-width: 1024px) { ... }</code></pre>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک تیتر سیال بسازید</summary>
+    <div class="answer">
+      <pre><code>.hero-title {
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1.1;
+}</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="variables">
+  <div class="lesson-num">درس ۲۱</div>
+  <h2>متغیرهای CSS، calc() و کلاس‌های کمکی</h2>
+  <p>متغیرهای CSS (Custom Properties) با <code>--نام</code> تعریف و با <code>var(--نام)</code> استفاده می‌شوند. معمولاً روی <code>:root</code> تعریف می‌شوند تا در کل صفحه در دسترس باشند — این دقیقاً همان روشی است که در این صفحه برای حالت روشن/تاریک استفاده شده.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>variables.css</div>
+      <pre><code><span class="tok-sel">:root</span> {
+  <span class="tok-prop">--space</span>: <span class="tok-val">16px</span>;
+  <span class="tok-prop">--brand</span>: <span class="tok-val">#2d6a4f</span>;
+}
+<span class="tok-sel">.card</span> {
+  <span class="tok-prop">padding</span>: <span class="tok-val">var(--space)</span>;
+  <span class="tok-prop">border-color</span>: <span class="tok-val">var(--brand)</span>;
+  <span class="tok-prop">width</span>: <span class="tok-val">calc(100% - var(--space) * 2)</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body">
+        <div style="padding:16px; border:2px solid var(--accent); border-radius:8px; font-size:.78rem;">کارت با متغیر</div>
+      </div>
+    </div>
+  </div>
+
+  <p><code>calc()</code> اجازه می‌دهد واحدهای مختلف را با هم جمع یا تفریق کنید، مثل <code>width: calc(100% - 40px)</code>.</p>
+
+  <div class="why-box">
+    <p><strong>چرا مهم است؟</strong> تغییر یک متغیر در <code>:root</code> کل صفحه را به‌روز می‌کند — دقیقاً مثل تم تاریک همین صفحه که فقط با تغییر مقدار چند متغیر رنگی ساخته شده است.</p>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک سیستم فاصله‌گذاری با متغیر بسازید</summary>
+    <div class="answer">
+      <pre><code>:root {
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 32px;
+}
+.card { padding: var(--space-md); margin-bottom: var(--space-lg); }</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="pseudo">
+  <div class="lesson-num">درس ۲۲</div>
+  <h2>شبه‌کلاس‌ها و شبه‌عنصرها</h2>
+  <p><strong>شبه‌کلاس</strong> (مثل <code>:hover</code>) حالت خاصی از یک عنصر موجود را هدف می‌گیرد. <strong>شبه‌عنصر</strong> (مثل <code>::before</code>) محتوای مجازی جدیدی می‌سازد که در DOM واقعی وجود ندارد.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>pseudo.css</div>
+      <pre><code><span class="tok-sel">.btn:hover</span> { <span class="tok-prop">background</span>: <span class="tok-val">#1e4d38</span>; }
+<span class="tok-sel">.btn:focus-visible</span> { <span class="tok-prop">outline</span>: <span class="tok-val">2px solid #2d6a4f</span>; }
+
+<span class="tok-sel">.quote::before</span> {
+  <span class="tok-prop">content</span>: <span class="tok-val">"❝"</span>;
+  <span class="tok-prop">color</span>: <span class="tok-val">var(--accent)</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده (موس را روی دکمه ببرید)</div>
+      <div class="preview-body">
+        <button class="demo-hover-btn" style="padding:8px 18px; border-radius:8px; border:none; background:var(--accent); color:#fff; font-family:inherit; cursor:pointer;">روی من بیا</button>
+      </div>
+    </div>
+  </div>
+
+  <p>مهم‌ترین شبه‌کلاس‌ها در این دوره (که بدون جاوااسکریپت تعامل می‌سازند): <code>:checked</code> (برای چک‌باکس/رادیو)، <code>:target</code> (برای عنصری که لینک لنگر به آن اشاره دارد) و <code>:has()</code> (برای انتخاب والد بر اساس فرزندش). این‌ها دقیقاً همان ابزارهایی هستند که منوی کشویی همین صفحه و آکاردئون‌های آینده را می‌سازند.</p>
+
+  <h3>تب‌های CSS-only با :target</h3>
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>tabs.html</div>
+      <pre><code>&lt;a href="#tab1"&gt;تب ۱&lt;/a&gt;
+&lt;a href="#tab2"&gt;تب ۲&lt;/a&gt;
+
+&lt;div id="tab1" class="panel"&gt;محتوای ۱&lt;/div&gt;
+&lt;div id="tab2" class="panel"&gt;محتوای ۲&lt;/div&gt;
+
+&lt;style&gt;
+.panel { display: none; }
+.panel:target { display: block; }
+&lt;/style&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="font-size:.8rem;">با کلیک روی لینک‌های لنگر، :target تغییر می‌کند و پنل مربوطه نمایش داده می‌شود — این همان تکنیکی است که در بخش پروژه‌ها می‌بینید</div>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک دکمه با حالت hover و focus بسازید</summary>
+    <div class="answer">
+      <pre><code>.btn { transition: transform .15s; }
+.btn:hover { transform: translateY(-2px); }
+.btn:focus-visible { outline: 3px solid orange; }</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="transitions">
+  <div class="lesson-num">درس ۲۳</div>
+  <h2>Transform، Transition و @keyframes</h2>
+  <p><code>transition</code> تغییرات تدریجی بین دو حالت (مثل حالت عادی و hover) را نرم می‌کند. <code>transform</code> عنصر را بدون تأثیر بر چیدمان صفحه جابه‌جا، بزرگ یا چرخان می‌کند — این باعث می‌شود انیمیشن‌های transform بسیار روان‌تر از انیمیشن روی width/height باشند.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>transition.css</div>
+      <pre><code><span class="tok-sel">.card</span> {
+  <span class="tok-prop">transition</span>: <span class="tok-val">transform .25s ease,
+    box-shadow .25s ease</span>;
+}
+<span class="tok-sel">.card:hover</span> {
+  <span class="tok-prop">transform</span>: <span class="tok-val">translateY(-6px)</span>;
+  <span class="tok-prop">box-shadow</span>: <span class="tok-val">0 12px 24px rgba(0,0,0,.15)</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده (موس را روی کارت ببرید)</div>
+      <div class="preview-body">
+        <div class="demo-hover-box" style="width:90px; height:60px; background:var(--accent-soft); border-radius:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>@keyframes برای انیمیشن‌های چندمرحله‌ای</h3>
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>keyframes.css</div>
+      <pre><code><span class="tok-sel">@keyframes pulse</span> {
+  <span class="tok-val">0%, 100%</span> { <span class="tok-prop">transform</span>: <span class="tok-val">scale(1)</span>; }
+  <span class="tok-val">50%</span> { <span class="tok-prop">transform</span>: <span class="tok-val">scale(1.08)</span>; }
+}
+<span class="tok-sel">.dot</span> {
+  <span class="tok-prop">animation</span>: <span class="tok-val">pulse 1.6s ease-in-out infinite</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body">
+        <div style="width:24px; height:24px; border-radius:50%; background:var(--accent); animation:demo-pulse 1.6s ease-in-out infinite;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="why-box">
+    <p><strong>چرا مهم است؟</strong> انیمیشن روی <code>transform</code> و <code>opacity</code> توسط مرورگر با GPU پردازش می‌شود و روان است؛ انیمیشن روی <code>width</code>، <code>top</code> یا <code>margin</code> باعث محاسبه مجدد چیدمان و کندی می‌شود.</p>
+  </div>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>.box:hover { width: 220px; left: 10px; }
+/* روی layout اثر می‌گذارد، کند است */</code></pre>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>.box:hover { transform: scale(1.1) translateX(10px); }
+/* فقط GPU، روان و سریع */</code></pre>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک انیمیشن چرخش بسازید</summary>
+    <div class="answer">
+      <pre><code>@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loader {
+  animation: spin 1s linear infinite;
+}</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="modern-css">
+  <div class="lesson-num">درس ۲۴</div>
+  <h2>CSS مدرن: Nesting، aspect-ratio، object-fit، Scroll-snap و color-mix</h2>
+  <p>CSS امروز قابلیت‌هایی دارد که قبلاً فقط با پیش‌پردازنده‌هایی مثل Sass ممکن بود. این‌ها در مرورگرهای مدرن پشتیبانی می‌شوند، اما چون نسبتاً جدیدند، در پروژه‌های حساس بهتر است سازگاری را بررسی کنید.</p>
+
+  <h3>Nesting (تودرتو نویسی)</h3>
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>nesting.css</div>
+      <pre><code><span class="tok-sel">.card</span> {
+  <span class="tok-prop">padding</span>: <span class="tok-val">16px</span>;
+
+  <span class="tok-sel">&amp;:hover</span> { <span class="tok-prop">box-shadow</span>: <span class="tok-val">var(--shadow-lg)</span>; }
+
+  <span class="tok-sel">&amp; h3</span> { <span class="tok-prop">color</span>: <span class="tok-val">var(--accent)</span>; }
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="font-size:.8rem;">با nesting، سلکتورهای مرتبط داخل همدیگر نوشته می‌شوند — کد خواناتر و کوتاه‌تر</div>
+    </div>
+  </div>
+
+  <h3>aspect-ratio و object-fit</h3>
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>aspect.css</div>
+      <pre><code><span class="tok-sel">.thumb</span> {
+  <span class="tok-prop">aspect-ratio</span>: <span class="tok-val">16 / 9</span>;
+  <span class="tok-prop">object-fit</span>: <span class="tok-val">cover</span>;
+  <span class="tok-prop">width</span>: <span class="tok-val">100%</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body">
+        <div style="width:140px; aspect-ratio:16/9; background:linear-gradient(135deg,#2d6a4f,#74c69d); border-radius:8px;"></div>
+      </div>
+    </div>
+  </div>
+  <p><code>aspect-ratio</code> نسبت عرض به ارتفاع را ثابت نگه می‌دارد (مثلاً برای تصاویر یا ویدیو)، و <code>object-fit: cover</code> باعث می‌شود تصویر بدون کشیدگی، فضا را پر کند.</p>
+
+  <h3>Scroll-snap برای اسکرول قاب‌به‌قاب</h3>
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>snap.css</div>
+      <pre><code><span class="tok-sel">.slider</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">flex</span>;
+  <span class="tok-prop">overflow-x</span>: <span class="tok-val">auto</span>;
+  <span class="tok-prop">scroll-snap-type</span>: <span class="tok-val">x mandatory</span>;
+}
+<span class="tok-sel">.slide</span> { <span class="tok-prop">scroll-snap-align</span>: <span class="tok-val">center</span>; }</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده (اسکرول افقی کنید)</div>
+      <div class="preview-body" style="overflow-x:auto; scroll-snap-type:x mandatory; gap:8px; justify-content:flex-start;">
+        <div style="flex:0 0 60px; height:50px; background:var(--accent); border-radius:6px; scroll-snap-align:center;"></div>
+        <div style="flex:0 0 60px; height:50px; background:var(--accent2); border-radius:6px; scroll-snap-align:center;"></div>
+        <div style="flex:0 0 60px; height:50px; background:var(--accent); border-radius:6px; scroll-snap-align:center;"></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>color-mix()</h3>
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>color-mix.css</div>
+      <pre><code><span class="tok-sel">.tint</span> {
+  <span class="tok-prop">background</span>: <span class="tok-val">color-mix(in srgb,
+    var(--accent) 20%, white)</span>;
+}</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body">
+        <div style="width:70px; height:50px; border-radius:8px; background:color-mix(in srgb, var(--accent) 25%, white);"></div>
+      </div>
+    </div>
+  </div>
+  <p><code>color-mix()</code> دو رنگ را با نسبت دلخواه ترکیب می‌کند — مفید برای ساخت نسخه‌های روشن‌تر یا تیره‌تر یک رنگ پایه بدون نیاز به محاسبه دستی هگز جدید.</p>
+
+  <div class="why-box">
+    <p><strong>یادداشت سازگاری:</strong> Nesting و <code>:has()</code> در مرورگرهای مدرن (۲۰۲۳ به بعد) پشتیبانی می‌شوند. برای پروژه‌هایی که باید مرورگرهای خیلی قدیمی را پشتیبانی کنند، سازگاری را در caniuse.com بررسی کنید.</p>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک تصویر thumbnail با نسبت ثابت بسازید</summary>
+    <div class="answer">
+      <pre><code>.thumb {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 50%;
+  width: 80px;
+}</code></pre>
+    </div>
+  </details>
+</section>
+
+<section class="lesson" id="architecture">
+  <div class="lesson-num">درس ۲۵</div>
+  <h2>معماری نام‌گذاری (BEM) و ریست CSS</h2>
+  <p><strong>BEM</strong> مخفف Block__Element--Modifier است، یک روش نام‌گذاری کلاس که خوانایی و قابلیت نگهداری CSS را بالا می‌برد: <code>block</code> یک کامپوننت مستقل است، <code>block__element</code> بخشی از آن، و <code>block--modifier</code> حالت متفاوتی از آن.</p>
+
+  <div class="demo">
+    <div class="code-panel">
+      <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>bem.html</div>
+      <pre><code>&lt;div class="card card--featured"&gt;
+  &lt;h3 class="card__title"&gt;عنوان&lt;/h3&gt;
+  &lt;p class="card__text"&gt;متن&lt;/p&gt;
+  &lt;button class="card__btn"&gt;
+    بیشتر
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+    <div class="preview-panel">
+      <div class="panel-label">نتیجه زنده</div>
+      <div class="preview-body" style="display:block; direction:rtl; text-align:right;">
+        <div style="border:2px solid var(--accent); padding:12px; border-radius:10px; font-size:.8rem;">
+          <h4 style="margin:0 0 4px; color:var(--accent);">عنوان</h4>
+          <p style="margin:0;">متن</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>مزیت BEM این است که کلاس‌ها دیگر به والد خاصی وابسته نیستند، بنابراین تداخل سلکتورها و مشکلات اولویت (مثل درس ۱۲) کمتر رخ می‌دهد.</p>
+
+  <h3>ریست CSS (CSS Reset)</h3>
+  <p>مرورگرهای مختلف استایل پیش‌فرض متفاوتی برای تگ‌ها دارند. یک ریست ساده این تفاوت‌ها را حذف می‌کند تا نقطه شروع یکسانی داشته باشید:</p>
+
+  <div class="code-panel" style="max-width:500px;">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>reset.css</div>
+    <pre><code><span class="tok-sel">*, *::before, *::after</span> {
+  <span class="tok-prop">box-sizing</span>: <span class="tok-val">border-box</span>;
+  <span class="tok-prop">margin</span>: <span class="tok-val">0</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">0</span>;
+}
+<span class="tok-sel">img, video</span> { <span class="tok-prop">max-width</span>: <span class="tok-val">100%</span>; <span class="tok-prop">display</span>: <span class="tok-val">block</span>; }</code></pre>
+  </div>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="tag">✕ اشتباه رایج</div>
+      <pre><code>.title-red { color: red; }
+.box1 .special-child-text { }</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">نام‌گذاری بر اساس ظاهر (نه نقش) و سلکتورهای عمیق و وابسته به ساختار.</p>
+    </div>
+    <div class="mistake-card good">
+      <div class="tag">✓ روش درست</div>
+      <pre><code>.alert--danger { color: red; }
+.card__title { }</code></pre>
+      <p style="margin-top:.6em; font-size:.9rem;">نام‌گذاری بر اساس نقش، مستقل از ظاهر فعلی یا محل قرارگیری.</p>
+    </div>
+  </div>
+
+  <details class="exercise">
+    <summary>تمرین: یک کامپوننت را با BEM نام‌گذاری کنید</summary>
+    <div class="answer">
+      <pre><code>&lt;div class="alert alert--success"&gt;
+  &lt;p class="alert__text"&gt;با موفقیت ذخیره شد&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+  </details>
+</section>
+<section class="lesson" id="project-landing" style="scroll-margin-top:20px;">
+  <div class="lesson-num">پروژه ۱</div>
+  <h2>لندینگ‌پیج مینیمال</h2>
+  <p>در این پروژه یک صفحه فرود ساده برای یک محصول فرضی می‌سازیم: یک هدر با عنوان، یک بخش ویژگی‌ها با Grid، و یک دکمه فراخوان به عمل (CTA).</p>
+
+  <h3>گام ۱: ساختار HTML</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>landing.html</div>
+    <pre><code>&lt;section class="hero-land"&gt;
+  &lt;h1&gt;دستیار یادداشت‌برداری هوشمند&lt;/h1&gt;
+  &lt;p&gt;ایده‌هایتان را سریع‌تر از همیشه ثبت کنید&lt;/p&gt;
+  &lt;a href="#" class="cta"&gt;شروع رایگان&lt;/a&gt;
+&lt;/section&gt;
+
+&lt;section class="features"&gt;
+  &lt;div class="feature"&gt;
+    &lt;h3&gt;سریع&lt;/h3&gt;
+    &lt;p&gt;بدون تاخیر، فوری ذخیره می‌شود&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="feature"&gt;
+    &lt;h3&gt;امن&lt;/h3&gt;
+    &lt;p&gt;داده‌های شما رمزنگاری می‌شود&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="feature"&gt;
+    &lt;h3&gt;ساده&lt;/h3&gt;
+    &lt;p&gt;رابط کاربری بدون پیچیدگی&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+  </div>
+
+  <h3>گام ۲: استایل هیرو با Flexbox</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>landing.css (بخش ۱)</div>
+    <pre><code><span class="tok-sel">.hero-land</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">flex</span>;
+  <span class="tok-prop">flex-direction</span>: <span class="tok-val">column</span>;
+  <span class="tok-prop">align-items</span>: <span class="tok-val">center</span>;
+  <span class="tok-prop">text-align</span>: <span class="tok-val">center</span>;
+  <span class="tok-prop">gap</span>: <span class="tok-val">16px</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">60px 20px</span>;
+}
+<span class="tok-sel">.hero-land h1</span> {
+  <span class="tok-prop">font-size</span>: <span class="tok-val">clamp(1.8rem, 5vw, 3rem)</span>;
+}
+<span class="tok-sel">.cta</span> {
+  <span class="tok-prop">background</span>: <span class="tok-val">var(--accent)</span>;
+  <span class="tok-prop">color</span>: <span class="tok-val">white</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">12px 28px</span>;
+  <span class="tok-prop">border-radius</span>: <span class="tok-val">999px</span>;
+  <span class="tok-prop">text-decoration</span>: <span class="tok-val">none</span>;
+  <span class="tok-prop">transition</span>: <span class="tok-val">transform .2s</span>;
+}
+<span class="tok-sel">.cta:hover</span> { <span class="tok-prop">transform</span>: <span class="tok-val">scale(1.05)</span>; }</code></pre>
+  </div>
+
+  <h3>گام ۳: بخش ویژگی‌ها با Grid</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>landing.css (بخش ۲)</div>
+    <pre><code><span class="tok-sel">.features</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">grid</span>;
+  <span class="tok-prop">grid-template-columns</span>: <span class="tok-val">repeat(auto-fit, minmax(180px, 1fr))</span>;
+  <span class="tok-prop">gap</span>: <span class="tok-val">20px</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">40px 20px</span>;
+}
+<span class="tok-sel">.feature</span> {
+  <span class="tok-prop">background</span>: <span class="tok-val">var(--accent-soft)</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">24px</span>;
+  <span class="tok-prop">border-radius</span>: <span class="tok-val">14px</span>;
+}</code></pre>
+  </div>
+
+  <h3>نتیجه نهایی</h3>
+  <div class="preview-panel">
+    <div class="panel-label">نتیجه زنده کامل</div>
+    <div class="preview-body" style="display:block; direction:rtl; text-align:center; padding:30px 18px;">
+      <h2 style="border:none; font-size:1.4rem; margin:0 0 8px;">دستیار یادداشت‌برداری هوشمند</h2>
+      <p style="margin:0 0 16px;">ایده‌هایتان را سریع‌تر از همیشه ثبت کنید</p>
+      <a href="#" class="demo-link-fake" style="background:var(--accent); color:#fff; padding:10px 24px; border-radius:999px; text-decoration:none; font-size:.85rem; margin-bottom:24px;">شروع رایگان</a>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:10px; text-align:center; margin-top:10px;">
+        <div style="background:var(--accent-soft); padding:12px; border-radius:10px; font-size:.75rem;"><strong style="display:block; color:var(--accent); margin-bottom:3px;">سریع</strong>بدون تاخیر</div>
+        <div style="background:var(--accent-soft); padding:12px; border-radius:10px; font-size:.75rem;"><strong style="display:block; color:var(--accent); margin-bottom:3px;">امن</strong>رمزنگاری‌شده</div>
+        <div style="background:var(--accent-soft); padding:12px; border-radius:10px; font-size:.75rem;"><strong style="display:block; color:var(--accent); margin-bottom:3px;">ساده</strong>بدون پیچیدگی</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="lesson" id="project-profile">
+  <div class="lesson-num">پروژه ۲</div>
+  <h2>کارت پروفایل با افکت‌ها</h2>
+  <p>یک کارت پروفایل می‌سازیم که با position، box-shadow و transition کار می‌کنیم تا در حالت hover بلند شود و سایه بگیرد.</p>
+
+  <h3>گام ۱: ساختار HTML</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>profile.html</div>
+    <pre><code>&lt;div class="profile-card"&gt;
+  &lt;div class="profile-card__cover"&gt;&lt;/div&gt;
+  &lt;img class="profile-card__avatar"
+       src="avatar.jpg" alt="عکس پروفایل سارا احمدی"&gt;
+  &lt;h3 class="profile-card__name"&gt;سارا احمدی&lt;/h3&gt;
+  &lt;p class="profile-card__role"&gt;طراح رابط کاربری&lt;/p&gt;
+  &lt;div class="profile-card__stats"&gt;
+    &lt;span&gt;۱۲۰ پروژه&lt;/span&gt;
+    &lt;span&gt;۴.۸ امتیاز&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+  </div>
+
+  <h3>گام ۲: کاور و آواتار با position: absolute</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>profile.css (بخش ۱)</div>
+    <pre><code><span class="tok-sel">.profile-card</span> {
+  <span class="tok-prop">position</span>: <span class="tok-val">relative</span>;
+  <span class="tok-prop">width</span>: <span class="tok-val">240px</span>;
+  <span class="tok-prop">text-align</span>: <span class="tok-val">center</span>;
+  <span class="tok-prop">border-radius</span>: <span class="tok-val">16px</span>;
+  <span class="tok-prop">overflow</span>: <span class="tok-val">hidden</span>;
+  <span class="tok-prop">background</span>: <span class="tok-val">var(--bg-elevated)</span>;
+  <span class="tok-prop">box-shadow</span>: <span class="tok-val">var(--shadow)</span>;
+  <span class="tok-prop">transition</span>: <span class="tok-val">transform .25s, box-shadow .25s</span>;
+}
+<span class="tok-sel">.profile-card__cover</span> {
+  <span class="tok-prop">height</span>: <span class="tok-val">80px</span>;
+  <span class="tok-prop">background</span>: <span class="tok-val">linear-gradient(135deg, var(--accent), var(--accent2))</span>;
+}
+<span class="tok-sel">.profile-card__avatar</span> {
+  <span class="tok-prop">width</span>: <span class="tok-val">72px</span>; <span class="tok-prop">height</span>: <span class="tok-val">72px</span>;
+  <span class="tok-prop">border-radius</span>: <span class="tok-val">50%</span>;
+  <span class="tok-prop">border</span>: <span class="tok-val">4px solid var(--bg-elevated)</span>;
+  <span class="tok-prop">margin-top</span>: <span class="tok-val">-36px</span>; <span class="tok-cmt">/* نصف روی کاور */</span>
+  <span class="tok-prop">object-fit</span>: <span class="tok-val">cover</span>;
+}</code></pre>
+  </div>
+
+  <h3>گام ۳: افکت hover</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>profile.css (بخش ۲)</div>
+    <pre><code><span class="tok-sel">.profile-card:hover</span> {
+  <span class="tok-prop">transform</span>: <span class="tok-val">translateY(-8px)</span>;
+  <span class="tok-prop">box-shadow</span>: <span class="tok-val">var(--shadow-lg)</span>;
+}
+<span class="tok-sel">.profile-card__stats</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">flex</span>;
+  <span class="tok-prop">justify-content</span>: <span class="tok-val">center</span>;
+  <span class="tok-prop">gap</span>: <span class="tok-val">16px</span>;
+  <span class="tok-prop">font-size</span>: <span class="tok-val">.8rem</span>;
+  <span class="tok-prop">color</span>: <span class="tok-val">var(--text-faint)</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">12px 0 20px</span>;
+}</code></pre>
+  </div>
+
+  <h3>نتیجه نهایی</h3>
+  <div class="preview-panel" style="max-width:260px;">
+    <div class="panel-label">نتیجه زنده (موس را روی کارت ببرید)</div>
+    <div class="preview-body" style="padding:0;">
+      <div class="demo-hover-card" style="width:220px; text-align:center; border-radius:16px; overflow:hidden; background:var(--bg-elevated); box-shadow:var(--shadow); margin:20px;">
+        <div style="height:60px; background:linear-gradient(135deg, var(--accent), var(--accent2));"></div>
+        <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#f0a868,#e07856); border:4px solid var(--bg-elevated); margin:-28px auto 0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.3rem;">س</div>
+        <h4 style="margin:10px 0 2px; font-size:.95rem;">سارا احمدی</h4>
+        <p style="margin:0 0 10px; font-size:.78rem; color:var(--text-faint);">طراح رابط کاربری</p>
+        <div style="display:flex; justify-content:center; gap:14px; font-size:.7rem; color:var(--text-faint); padding-bottom:16px;">
+          <span>۱۲۰ پروژه</span><span>۴.۸ امتیاز</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="lesson" id="project-portfolio">
+  <div class="lesson-num">پروژه ۳</div>
+  <h2>پورتفولیوی ریسپانسیو</h2>
+  <p>آخرین پروژه یک صفحه پورتفولیو با ناوبری، گالری پروژه با Grid و یک بخش تماس است که همه چیزهایی که یاد گرفتیم را ترکیب می‌کند.</p>
+
+  <h3>گام ۱: ساختار معنایی کامل</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>portfolio.html</div>
+    <pre><code>&lt;header class="site-header"&gt;
+  &lt;nav&gt;
+    &lt;strong&gt;نیلوفر.&lt;/strong&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href="#work"&gt;نمونه‌کارها&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#contact"&gt;تماس&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;
+
+&lt;main&gt;
+  &lt;section id="work" class="portfolio-grid"&gt;
+    &lt;article class="project"&gt;
+      &lt;h3&gt;پروژه یک&lt;/h3&gt;
+      &lt;p&gt;طراحی اپلیکیشن موبایل&lt;/p&gt;
+    &lt;/article&gt;
+    &lt;!-- پروژه‌های بیشتر... --&gt;
+  &lt;/section&gt;
+&lt;/main&gt;</code></pre>
+  </div>
+
+  <h3>گام ۲: ناوبری چسبان (sticky) با Flexbox</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>portfolio.css (بخش ۱)</div>
+    <pre><code><span class="tok-sel">.site-header</span> {
+  <span class="tok-prop">position</span>: <span class="tok-val">sticky</span>;
+  <span class="tok-prop">top</span>: <span class="tok-val">0</span>;
+  <span class="tok-prop">background</span>: <span class="tok-val">var(--bg-elevated)</span>;
+  <span class="tok-prop">z-index</span>: <span class="tok-val">10</span>;
+}
+<span class="tok-sel">nav</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">flex</span>;
+  <span class="tok-prop">justify-content</span>: <span class="tok-val">space-between</span>;
+  <span class="tok-prop">align-items</span>: <span class="tok-val">center</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">16px 24px</span>;
+}
+<span class="tok-sel">nav ul</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">flex</span>;
+  <span class="tok-prop">gap</span>: <span class="tok-val">20px</span>;
+  <span class="tok-prop">list-style</span>: <span class="tok-val">none</span>;
+}</code></pre>
+  </div>
+
+  <h3>گام ۳: گالری پروژه‌ها با Grid ریسپانسیو</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>portfolio.css (بخش ۲)</div>
+    <pre><code><span class="tok-sel">.portfolio-grid</span> {
+  <span class="tok-prop">display</span>: <span class="tok-val">grid</span>;
+  <span class="tok-prop">grid-template-columns</span>: <span class="tok-val">repeat(auto-fit, minmax(200px, 1fr))</span>;
+  <span class="tok-prop">gap</span>: <span class="tok-val">18px</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">32px 24px</span>;
+}
+<span class="tok-sel">.project</span> {
+  <span class="tok-prop">aspect-ratio</span>: <span class="tok-val">4 / 3</span>;
+  <span class="tok-prop">background</span>: <span class="tok-val">var(--accent-soft)</span>;
+  <span class="tok-prop">border-radius</span>: <span class="tok-val">14px</span>;
+  <span class="tok-prop">padding</span>: <span class="tok-val">18px</span>;
+  <span class="tok-prop">display</span>: <span class="tok-val">flex</span>;
+  <span class="tok-prop">flex-direction</span>: <span class="tok-val">column</span>;
+  <span class="tok-prop">justify-content</span>: <span class="tok-val">flex-end</span>;
+  <span class="tok-prop">transition</span>: <span class="tok-val">transform .2s</span>;
+}
+<span class="tok-sel">.project:hover</span> { <span class="tok-prop">transform</span>: <span class="tok-val">scale(1.03)</span>; }</code></pre>
+  </div>
+
+  <h3>گام ۴: ریسپانسیو کردن منو برای موبایل</h3>
+  <div class="code-panel">
+    <div class="panel-label"><span class="dots"><span></span><span></span><span></span></span>portfolio.css (بخش ۳)</div>
+    <pre><code><span class="tok-sel">@media (max-width: 560px)</span> {
+  <span class="tok-sel">nav</span> { <span class="tok-prop">flex-direction</span>: <span class="tok-val">column</span>; <span class="tok-prop">gap</span>: <span class="tok-val">10px</span>; }
+  <span class="tok-sel">.portfolio-grid</span> { <span class="tok-prop">grid-template-columns</span>: <span class="tok-val">1fr</span>; }
+}</code></pre>
+  </div>
+
+  <h3>نتیجه نهایی</h3>
+  <div class="preview-panel">
+    <div class="panel-label">نتیجه زنده کامل</div>
+    <div class="preview-body" style="display:block; padding:0; direction:rtl;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-bottom:1px solid var(--border-soft); font-size:.85rem;">
+        <strong>نیلوفر.</strong>
+        <div style="display:flex; gap:14px; font-size:.78rem;"><span>نمونه‌کارها</span><span>تماس</span></div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:10px; padding:16px;">
+        <div style="aspect-ratio:4/3; background:var(--accent-soft); border-radius:10px; display:flex; align-items:flex-end; padding:8px; font-size:.68rem; color:var(--accent); font-weight:700;">پروژه یک</div>
+        <div style="aspect-ratio:4/3; background:var(--accent2-soft); border-radius:10px; display:flex; align-items:flex-end; padding:8px; font-size:.68rem; color:var(--accent2); font-weight:700;">پروژه دو</div>
+        <div style="aspect-ratio:4/3; background:var(--accent-soft); border-radius:10px; display:flex; align-items:flex-end; padding:8px; font-size:.68rem; color:var(--accent); font-weight:700;">پروژه سه</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="lesson" id="cheatsheet">
+  <div class="lesson-num">جمع‌بندی</div>
+  <h2>چیت‌شیت نهایی</h2>
+
+  <h3>تگ‌های پراستفاده HTML</h3>
+  <div class="scrollx">
+  <table>
+    <thead><tr><th>تگ</th><th>کاربرد</th></tr></thead>
+    <tbody>
+      <tr><td><code>&lt;header&gt;</code></td><td>سربرگ صفحه یا بخش</td></tr>
+      <tr><td><code>&lt;nav&gt;</code></td><td>ناوبری اصلی</td></tr>
+      <tr><td><code>&lt;main&gt;</code></td><td>محتوای اصلی (یک‌بار در صفحه)</td></tr>
+      <tr><td><code>&lt;section&gt;</code></td><td>بخش موضوعی</td></tr>
+      <tr><td><code>&lt;article&gt;</code></td><td>محتوای مستقل و قابل‌اشتراک</td></tr>
+      <tr><td><code>&lt;aside&gt;</code></td><td>محتوای جانبی/مرتبط</td></tr>
+      <tr><td><code>&lt;footer&gt;</code></td><td>پاورقی صفحه یا بخش</td></tr>
+      <tr><td><code>&lt;form&gt;</code>, <code>&lt;label&gt;</code>, <code>&lt;input&gt;</code></td><td>ورودی کاربر</td></tr>
+      <tr><td><code>&lt;img alt="..."&gt;</code></td><td>تصویر با متن جایگزین</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>ویژگی‌های کلیدی CSS</h3>
+  <div class="scrollx">
+  <table>
+    <thead><tr><th>ویژگی</th><th>کاربرد</th></tr></thead>
+    <tbody>
+      <tr><td><code>display: flex</code></td><td>چیدمان یک‌بعدی</td></tr>
+      <tr><td><code>display: grid</code></td><td>چیدمان دوبعدی</td></tr>
+      <tr><td><code>grid-template-columns: repeat(auto-fit, minmax(Xpx, 1fr))</code></td><td>گرید خودکار ریسپانسیو</td></tr>
+      <tr><td><code>gap</code></td><td>فاصله بین آیتم‌ها (flex/grid)</td></tr>
+      <tr><td><code>position: sticky</code></td><td>چسبیدن هنگام اسکرول</td></tr>
+      <tr><td><code>clamp(min, ideal, max)</code></td><td>اندازه سیال و ریسپانسیو</td></tr>
+      <tr><td><code>var(--name)</code></td><td>استفاده از متغیر CSS</td></tr>
+      <tr><td><code>transition</code></td><td>انیمیشن نرم بین دو حالت</td></tr>
+      <tr><td><code>@media (min-width: Xpx)</code></td><td>استایل بر اساس اندازه صفحه</td></tr>
+      <tr><td><code>box-sizing: border-box</code></td><td>شمول padding/border در عرض</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="lesson" id="roadmap">
+  <h2>قدم بعدی: به کجا بروم؟</h2>
+  <p>با تسلط بر HTML و CSS، پایه محکمی برای ساخت هر نوع صفحه وب دارید. قدم بعدی منطقی، یادگیری <strong>JavaScript</strong> است — زبانی که به صفحات شما رفتار و تعامل واقعی (مثل پاسخ به کلیک، ارسال فرم بدون رفرش، یا بارگذاری داده) می‌دهد. این دوره عمداً JavaScript را پوشش نداد تا تمرکز کامل روی پایه HTML/CSS باشد.</p>
+  <div class="why-box">
+    <p><strong>پیشنهاد مسیر یادگیری:</strong> پس از JavaScript پایه، می‌توانید به سراغ یک فریم‌ورک مثل React یا Vue بروید، یا اگر به طراحی علاقه بیشتری دارید، عمیق‌تر در انیمیشن‌های پیشرفته CSS و ابزارهایی مثل Sass/Tailwind غرق شوید.</p>
+  </div>
+</section>
+<footer class="site-footer">
+  دوره کامل HTML و CSS — ساخته‌شده فقط با HTML و CSS، بدون حتی یک خط جاوااسکریپت.
+</footer>
+</main>
+</div>
+</body>
+</html>
