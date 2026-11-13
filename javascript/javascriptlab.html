@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>آزمایشگاه کد جاوااسکریپت — مثال‌های تخصصی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  color-scheme: dark;
+  --bg: #0c0f12;
+  --bg-raised: #11151a;
+  --panel: #151a20;
+  --panel-2: #1a2029;
+  --border: #262e38;
+  --border-soft: #1d242c;
+  --text: #e7ebee;
+  --text-dim: #9aa6b0;
+  --text-faint: #5f6b76;
+  --accent: #d9a441;
+  --accent-strong: #f0c05e;
+  --accent-ink: #2a1f08;
+  --accent2: #4fb3bf;
+  --accent2-strong: #7ecfd9;
+  --success: #5cb87a;
+  --success-ink: #0c1f14;
+  --warning: #d99a3d;
+  --warning-ink: #241804;
+  --danger: #dd6a63;
+  --danger-ink: #260c0a;
+  --code-bg: #0a0d10;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --sidebar-w: 264px;
+  --topbar-h: 56px;
+  --font-sans: 'Vazirmatn', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Vazirmatn', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --maxw: 780px;
+}
+:root[data-theme="light"]{
+  color-scheme: light;
+  --bg:#f5f4f0; --bg-raised:#ffffff; --panel:#ffffff; --panel-2:#f0efe9;
+  --border:#dcd8ce; --border-soft:#e6e3da;
+  --text:#1c1c1a; --text-dim:#54524a; --text-faint:#8a8778;
+  --accent:#a5720f; --accent-strong:#8a5e0c; --accent-ink:#fff7e6;
+  --accent2:#1f7d88; --accent2-strong:#166069;
+  --success:#227a4a; --success-ink:#eafaf0;
+  --warning:#8a5e0c; --warning-ink:#fff6e6;
+  --danger:#a53a33; --danger-ink:#fdecea;
+  --code-bg:#f0efe9;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth; scroll-padding-top: calc(var(--topbar-h) + 14px + env(safe-area-inset-top,0px));}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+body{
+  margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans);
+  font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  padding-top: env(safe-area-inset-top,0px); padding-bottom: env(safe-area-inset-bottom,0px);
+}
+h1,h2,h3,h4{font-family:var(--font-sans); font-weight:600; line-height:1.25; margin:0 0 .5em;}
+p{margin:0 0 1em; color:var(--text);}
+a{color:var(--accent2-strong);}
+code, pre, kbd, .mono{font-family:var(--font-mono);}
+code{background:var(--panel-2); padding:.12em .4em; border-radius:4px; font-size:.88em; border:1px solid var(--border-soft);}
+pre code{background:none; border:none; padding:0; font-size:.86em;}
+::selection{background:var(--accent); color:var(--accent-ink);}
+button{font-family:inherit;}
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--accent-strong); outline-offset:2px; border-radius:3px;
+}
+.visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+.skip-link{position:fixed; top:-100px; right:8px; z-index:999; background:var(--accent); color:var(--accent-ink); padding:.6em 1em; border-radius:6px; font-weight:600;}
+.skip-link:focus{top:8px;}
+
+/* ============================================================
+   LAYOUT SHELL
+   ============================================================ */
+.topbar{
+  position:sticky; top:0; z-index:60; height:var(--topbar-h);
+  padding-top:env(safe-area-inset-top,0px);
+  display:flex; align-items:center; gap:.75rem;
+  background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border); padding-left:1rem; padding-right:1rem;
+}
+.topbar .brand{display:flex; align-items:center; gap:.6rem; font-weight:600; letter-spacing:.01em; white-space:nowrap; text-decoration:none; color:var(--text);}
+.brand .mark{width:26px; height:26px; border-radius:6px; background:linear-gradient(155deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:700; color:var(--accent-ink); font-size:13px; flex:none;}
+.brand .name{font-size:.95rem;}
+.brand .name b{color:var(--accent-strong);}
+.hamburger{display:none; background:none; border:1px solid var(--border); color:var(--text); width:36px; height:36px; border-radius:7px; align-items:center; justify-content:center; cursor:pointer; flex:none;}
+.hamburger svg{width:18px; height:18px;}
+.topbar-spacer{flex:1;}
+.icon-btn{
+  display:flex; align-items:center; gap:.45rem; background:var(--panel); border:1px solid var(--border);
+  color:var(--text-dim); padding:.42rem .7rem; border-radius:7px; cursor:pointer; font-size:.85rem;
+}
+.icon-btn:hover{color:var(--text); border-color:var(--accent2);}
+.icon-btn svg{width:15px; height:15px; flex:none;}
+kbd.key{font-family:var(--font-mono); font-size:.72rem; background:var(--bg-raised); border:1px solid var(--border); border-bottom-width:2px; padding:.05em .4em; border-radius:4px; color:var(--text-faint);}
+.progress-pill{display:flex; align-items:center; gap:.5rem; padding:.3rem .6rem .3rem .3rem; border:1px solid var(--border); border-radius:99px; background:var(--panel);}
+.progress-ring{width:28px; height:28px; flex:none;}
+.progress-pill .pct{font-family:var(--font-mono); font-size:.78rem; color:var(--text-dim); font-variant-numeric:tabular-nums;}
+
+.shell{display:flex; align-items:flex-start;}
+.sidebar{
+  position:sticky; top:var(--topbar-h); width:var(--sidebar-w); flex:none;
+  height:calc(100vh - var(--topbar-h)); overflow-y:auto;
+  border-left:1px solid var(--border); padding:1.1rem .9rem 3rem;
+  scrollbar-width:thin;
+}
+.sidebar-group{margin-bottom:1.3rem;}
+.sidebar-label{font-size:.72rem; text-transform:none; color:var(--text-faint); letter-spacing:.02em; margin:0 0 .45rem .4rem; font-weight:500;}
+.sidebar a{display:flex; align-items:center; gap:.55rem; justify-content:space-between; text-decoration:none; color:var(--text-dim); font-size:.86rem; padding:.42rem .5rem; border-radius:6px; border-right:2px solid transparent;}
+.sidebar a:hover{background:var(--panel); color:var(--text);}
+.sidebar a.active{background:var(--panel-2); color:var(--text); border-right-color:var(--accent);}
+.sidebar a .lvl-num{font-family:var(--font-mono); font-size:.72rem; color:var(--text-faint); flex:none;}
+.sidebar a .bar{flex:1; height:3px; background:var(--border-soft); border-radius:3px; overflow:hidden; margin:0 .5rem;}
+.sidebar a .bar i{display:block; height:100%; background:var(--accent2); width:0%;}
+.sidebar a .mini-pct{font-family:var(--font-mono); font-size:.68rem; color:var(--text-faint); flex:none; min-width:2.2em; text-align:right;}
+
+main{flex:1; min-width:0;}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:2.6rem 1.4rem 4rem;}
+.wrap-wide{max-width:1040px; margin:0 auto; padding:2.6rem 1.4rem 4rem;}
+
+@media (max-width: 999px){
+  .sidebar{position:fixed; right:0; top:var(--topbar-h); z-index:55; background:var(--bg-raised);
+    transform:translateX(100%); transition:transform .22s ease; box-shadow:-12px 0 30px rgba(0,0,0,.35);}
+  .sidebar.open{transform:translateX(0);}
+  .hamburger{display:flex;}
+  .sidebar-overlay{display:none; position:fixed; inset:0; top:var(--topbar-h); background:rgba(0,0,0,.5); z-index:54;}
+  .sidebar-overlay.open{display:block;}
+  .brand .name{font-size:.85rem;}
+  .icon-btn .label-text{display:none;}
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{border-bottom:1px solid var(--border); background:
+  radial-gradient(1100px 420px at 15% -10%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 60%),
+  radial-gradient(900px 380px at 100% 0%, color-mix(in srgb, var(--accent2) 12%, transparent), transparent 60%);
+}
+.hero-inner{max-width:820px; margin:0 auto; padding:3.6rem 1.4rem 3rem;}
+.hero .kicker{font-family:var(--font-mono); font-size:.78rem; color:var(--accent2-strong); margin-bottom:1rem; display:flex; align-items:center; gap:.5em;}
+.hero .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--success); box-shadow:0 0 0 3px color-mix(in srgb, var(--success) 25%, transparent);}
+.hero h1{font-size:clamp(1.9rem, 4.4vw, 2.85rem); margin-bottom:.55rem; letter-spacing:-0.01em;}
+.hero h1 em{font-style:normal; color:var(--accent-strong);}
+.hero .sub{font-size:1.05rem; color:var(--text-dim); max-width:640px; margin-bottom:1.7rem;}
+.hero-actions{display:flex; gap:.75rem; flex-wrap:wrap; margin-bottom:2.2rem;}
+.btn{display:inline-flex; align-items:center; gap:.5rem; padding:.72rem 1.15rem; border-radius:8px; font-weight:600; font-size:.92rem; text-decoration:none; cursor:pointer; border:1px solid transparent;}
+.btn-primary{background:var(--accent); color:var(--accent-ink);}
+.btn-primary:hover{background:var(--accent-strong);}
+.btn-ghost{background:var(--panel); color:var(--text); border-color:var(--border);}
+.btn-ghost:hover{border-color:var(--accent2);}
+.hero-stats{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden;}
+.hero-stats div{background:var(--panel); padding:.9rem .9rem;}
+.hero-stats .n{font-family:var(--font-mono); font-size:1.3rem; color:var(--accent-strong); display:block;}
+.hero-stats .l{font-size:.74rem; color:var(--text-faint);}
+@media (max-width:640px){.hero-stats{grid-template-columns:repeat(2,1fr);}}
+
+/* ============================================================
+   SECTION / SUBSECTION HEADERS
+   ============================================================ */
+.section-head{margin-bottom:1.8rem;}
+.section-head .tag{font-family:var(--font-mono); font-size:.76rem; color:var(--accent2-strong); margin-bottom:.5rem; display:block;}
+.section-head h2{font-size:1.7rem;}
+.section-head p{color:var(--text-dim); max-width:640px;}
+section{scroll-margin-top: calc(var(--topbar-h) + 10px);}
+.divider{border:none; border-top:1px solid var(--border); margin:2.6rem 0;}
+
+/* ============================================================
+   LEVEL META BAR
+   ============================================================ */
+.level-meta{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:1.6rem;}
+.level-meta div{background:var(--panel); padding:.75rem .9rem;}
+.level-meta .l{display:block; font-size:.68rem; color:var(--text-faint); margin-bottom:.25rem;}
+.level-meta .v{font-size:.86rem; font-weight:500;}
+@media (max-width:640px){.level-meta{grid-template-columns:repeat(2,1fr);}}
+.obj-grid{display:grid; grid-template-columns:1fr 1fr; gap:.6rem 1.4rem; margin:1rem 0 1.8rem;}
+@media (max-width:640px){.obj-grid{grid-template-columns:1fr;}}
+.obj-grid li{font-size:.9rem; color:var(--text-dim); position:relative; padding-right:1.3rem;}
+.obj-grid li::before{content:"‹"; position:absolute; right:0; color:var(--accent2); font-weight:700;}
+
+/* ============================================================
+   LESSON ACCORDIONS
+   ============================================================ */
+details.lesson, details.project, details.scenario, details.ref-block{
+  background:var(--panel); border:1px solid var(--border); border-radius:10px; margin-bottom:.7rem; overflow:hidden;
+}
+details.lesson > summary, details.project > summary, details.scenario > summary, details.ref-block > summary{
+  list-style:none; cursor:pointer; padding:.85rem 1rem; display:flex; align-items:center; gap:.7rem; justify-content:space-between;
+}
+details.lesson > summary::-webkit-details-marker, details.project > summary::-webkit-details-marker, details.scenario > summary::-webkit-details-marker, details.ref-block > summary::-webkit-details-marker{display:none;}
+.lesson-title-wrap{display:flex; align-items:center; gap:.65rem; min-width:0;}
+.chev{width:16px; height:16px; flex:none; color:var(--text-faint); transition:transform .18s ease; transform:scaleX(-1);}
+details[open] > summary .chev{transform:scaleX(-1) rotate(90deg);}
+.lesson-title{font-weight:500; font-size:.96rem;}
+.lesson-tags{display:flex; gap:.4rem; flex:none; align-items:center;}
+.tag-pill{font-family:var(--font-mono); font-size:.66rem; padding:.15em .5em; border-radius:99px; border:1px solid var(--border); color:var(--text-faint); white-space:nowrap;}
+.tag-pill.concept{color:var(--accent2-strong); border-color:color-mix(in srgb, var(--accent2) 40%, var(--border));}
+.tag-pill.done{color:var(--success); border-color:color-mix(in srgb, var(--success) 40%, var(--border));}
+.lesson-body{padding:0 1.1rem 1.15rem; border-top:1px solid var(--border-soft);}
+.lesson-body > p:first-child, .lesson-body > *:first-child{margin-top:1rem;}
+
+.model{background:var(--panel-2); border:1px dashed var(--border); border-radius:8px; padding:.8rem .95rem; margin:.9rem 0; font-size:.86rem;}
+.model .model-title{font-family:var(--font-mono); font-size:.68rem; color:var(--accent-strong); margin-bottom:.4rem; display:block;}
+.model-flow{font-family:var(--font-mono); font-size:.85rem; color:var(--text); display:flex; flex-wrap:wrap; align-items:center; gap:.35em;}
+.model-flow .arrow{color:var(--text-faint);}
+.model-flow span.node{background:var(--bg-raised); border:1px solid var(--border); padding:.15em .55em; border-radius:5px;}
+
+/* code blocks */
+.code-block{margin:.9rem 0; border-radius:8px; overflow:hidden; border:1px solid var(--border);}
+.code-head{display:flex; align-items:center; justify-content:space-between; background:var(--bg-raised); padding:.4rem .7rem; font-family:var(--font-mono); font-size:.7rem; color:var(--text-faint); border-bottom:1px solid var(--border);}
+.copy-btn{background:none; border:1px solid var(--border); color:var(--text-faint); font-size:.68rem; padding:.2em .6em; border-radius:5px; cursor:pointer; font-family:var(--font-mono);}
+.copy-btn:hover{color:var(--text); border-color:var(--accent2);}
+.code-block pre{margin:0; padding:.85rem 1rem; background:var(--code-bg); overflow-x:auto;}
+.code-output{background:var(--bg-raised); border-top:1px solid var(--border); padding:.55rem 1rem; font-family:var(--font-mono); font-size:.78rem; color:var(--success);}
+.code-output.err{color:var(--danger);}
+.code-output .lbl{color:var(--text-faint); margin-right:.5em;}
+.tok-comment{color:var(--text-faint); font-style:italic;}
+.tok-string{color:var(--success);}
+.tok-number{color:var(--accent2-strong);}
+.tok-keyword{color:var(--accent-strong); font-weight:500;}
+.tok-builtin{color:#c893e8;}
+:root[data-theme="light"] .tok-builtin{color:#8438ad;}
+
+.callout{border-radius:8px; padding:.8rem .95rem; margin:.9rem 0; font-size:.87rem; border:1px solid; display:flex; gap:.6rem;}
+.callout svg{width:16px; height:16px; flex:none; margin-top:.15em;}
+.callout.mistake{background:color-mix(in srgb, var(--danger) 8%, var(--panel)); border-color:color-mix(in srgb, var(--danger) 35%, var(--border)); color:var(--text);}
+.callout.mistake svg{color:var(--danger);}
+.callout.note{background:color-mix(in srgb, var(--accent2) 8%, var(--panel)); border-color:color-mix(in srgb, var(--accent2) 35%, var(--border));}
+.callout.note svg{color:var(--accent2-strong);}
+.callout.security{background:color-mix(in srgb, var(--warning) 9%, var(--panel)); border-color:color-mix(in srgb, var(--warning) 40%, var(--border));}
+.callout.security svg{color:var(--warning);}
+.callout strong{display:block; margin-bottom:.15em;}
+
+details.exercise{background:var(--panel-2); border:1px solid var(--border-soft); border-radius:7px; margin:.9rem 0; padding:0;}
+details.exercise > summary{cursor:pointer; padding:.6rem .85rem; font-size:.87rem; font-weight:500; list-style:none; display:flex; gap:.5rem; align-items:center;}
+details.exercise > summary::-webkit-details-marker{display:none;}
+details.exercise > summary::before{content:"?"; font-family:var(--font-mono); background:var(--accent2); color:var(--accent-ink); width:1.3em; height:1.3em; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:.75em; flex:none;}
+details.exercise .ex-body{padding:0 .9rem .9rem;}
+details.solution{margin-top:.6rem; border:1px dashed var(--border); border-radius:6px;}
+details.solution > summary{cursor:pointer; padding:.45rem .75rem; font-size:.8rem; color:var(--accent-strong); list-style:none; font-family:var(--font-mono);}
+details.solution > summary::-webkit-details-marker{display:none;}
+details.solution .sol-body{padding:0 .75rem .75rem;}
+
+.mark-complete{display:flex; align-items:center; gap:.5rem; font-size:.82rem; color:var(--text-dim); margin-top:1rem; padding-top:.85rem; border-top:1px solid var(--border-soft); cursor:pointer; user-select:none;}
+.mark-complete input{width:16px; height:16px; accent-color:var(--success); cursor:pointer;}
+
+/* predict output / debug scenario blocks */
+.predict-block{border:1px solid var(--border); border-radius:9px; overflow:hidden; margin:1.4rem 0;}
+.predict-head{background:var(--bg-raised); padding:.6rem .9rem; font-family:var(--font-mono); font-size:.72rem; color:var(--accent2-strong); border-bottom:1px solid var(--border);}
+.predict-block pre{margin:0; padding:.9rem 1rem; background:var(--code-bg);}
+.predict-answer{background:var(--panel-2); border-top:1px dashed var(--border);}
+.predict-answer > summary{cursor:pointer; padding:.6rem .9rem; font-size:.82rem; color:var(--accent-strong); list-style:none; font-family:var(--font-mono);}
+.predict-answer > summary::-webkit-details-marker{display:none;}
+.predict-answer .pa-body{padding:0 1rem 1rem;}
+.trace{font-family:var(--font-mono); font-size:.82rem; border-collapse:collapse; width:100%; margin:.6rem 0;}
+.trace th,.trace td{text-align:right; padding:.35rem .6rem; border-bottom:1px solid var(--border-soft);}
+.trace th{color:var(--text-faint); font-weight:500; font-size:.72rem;}
+
+.debug-flow{display:flex; flex-direction:column; gap:0;}
+.debug-step{display:grid; grid-template-columns:110px 1fr; gap:.9rem; padding:.6rem 0; border-bottom:1px solid var(--border-soft);}
+.debug-step:last-child{border-bottom:none;}
+.debug-step .k{font-family:var(--font-mono); font-size:.68rem; color:var(--accent2-strong); padding-top:.15em;}
+.debug-step .v{font-size:.88rem; color:var(--text-dim);}
+.debug-step .v code{font-size:.85em;}
+
+/* diagrams */
+.diagram{border:1px solid var(--border); border-radius:10px; background:var(--panel); padding:1.2rem; margin:1.2rem 0; overflow-x:auto;}
+.diagram-title{font-family:var(--font-mono); font-size:.7rem; color:var(--text-faint); margin-bottom:.9rem;}
+.flow-row{display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; font-family:var(--font-mono); font-size:.82rem;}
+.flow-row .box{background:var(--bg-raised); border:1px solid var(--border); padding:.5em .8em; border-radius:6px; white-space:nowrap;}
+.flow-row .box.accent{border-color:var(--accent); color:var(--accent-strong);}
+.flow-row .box.accent2{border-color:var(--accent2); color:var(--accent2-strong);}
+.flow-row .arrow{color:var(--text-faint);}
+
+/* Live demos */
+.demo{border:1px solid var(--border); border-radius:10px; background:var(--panel); margin:1.2rem 0; overflow:hidden;}
+.demo-head{padding:.6rem .9rem; border-bottom:1px solid var(--border); background:var(--bg-raised); display:flex; align-items:center; justify-content:space-between; gap:.6rem; flex-wrap:wrap;}
+.demo-head .t{font-size:.78rem; font-family:var(--font-mono); color:var(--accent-strong); display:flex; align-items:center; gap:.4em;}
+.demo-body{padding:1rem;}
+.demo-row{display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin-bottom:.7rem;}
+.demo select, .demo input[type=text], .demo input[type=number]{background:var(--bg-raised); border:1px solid var(--border); color:var(--text); padding:.45rem .6rem; border-radius:6px; font-family:var(--font-mono); font-size:.82rem;}
+.demo-btn{background:var(--accent2); color:#08151a; border:none; padding:.5rem .95rem; border-radius:6px; font-weight:600; cursor:pointer; font-size:.82rem;}
+.demo-btn:hover{background:var(--accent2-strong);}
+.demo-btn.secondary{background:var(--panel-2); color:var(--text); border:1px solid var(--border);}
+.console-out{background:var(--code-bg); border:1px solid var(--border); border-radius:6px; padding:.7rem .9rem; font-family:var(--font-mono); font-size:.8rem; min-height:2.4em; max-height:220px; overflow-y:auto;}
+.console-out .line{padding:.15em 0; color:var(--text-dim); border-bottom:1px dashed var(--border-soft);}
+.console-out .line:last-child{border-bottom:none;}
+.console-out .line .t{color:var(--text-faint); margin-right:.5em;}
+.console-out .line.ok{color:var(--success);}
+.console-out .line.warn{color:var(--warning);}
+.console-out .line.stack{color:var(--accent-strong);}
+.console-out .line.micro{color:var(--accent2-strong);}
+.console-out .line.macro{color:#c893e8;}
+.dom-sandbox{border:1px solid var(--border); border-radius:7px; padding:1rem; background:var(--bg-raised);}
+.dom-sandbox ul{margin:0; padding-left:1.2rem;}
+.dom-sandbox li{padding:.15rem 0; font-size:.88rem;}
+.evt-box{border:2px dashed var(--border); padding:1.4rem; border-radius:8px; text-align:center; cursor:pointer; font-size:.82rem; color:var(--text-dim); transition:background .1s;}
+.evt-box:hover{background:var(--panel-2);}
+.evt-outer{border-color:var(--accent);} .evt-mid{border-color:var(--accent2); margin:0 auto;} .evt-inner{border-color:var(--success); margin:0 auto;}
+
+/* project cards */
+.proj-grid{display:grid; grid-template-columns:1fr; gap:.7rem;}
+.proj-diff{font-family:var(--font-mono); font-size:.66rem; padding:.15em .55em; border-radius:99px; border:1px solid; white-space:nowrap;}
+.proj-diff.beginner{color:var(--success); border-color:color-mix(in srgb, var(--success) 45%, var(--border));}
+.proj-diff.intermediate{color:var(--accent2-strong); border-color:color-mix(in srgb, var(--accent2) 45%, var(--border));}
+.proj-diff.advanced{color:var(--accent-strong); border-color:color-mix(in srgb, var(--accent) 45%, var(--border));}
+.proj-diff.capstone{color:var(--danger); border-color:color-mix(in srgb, var(--danger) 45%, var(--border));}
+.field{margin:.85rem 0;}
+.field .fk{font-family:var(--font-mono); font-size:.68rem; color:var(--accent2-strong); display:block; margin-bottom:.35rem;}
+.field ul{margin:0; padding-inline-start:1.15rem;}
+.field li{font-size:.87rem; color:var(--text-dim); margin-bottom:.2rem;}
+.chiprow{display:flex; flex-wrap:wrap; gap:.4rem;}
+.chip{font-size:.74rem; background:var(--panel-2); border:1px solid var(--border); padding:.2em .6em; border-radius:99px; color:var(--text-dim);}
+
+/* cheatsheet */
+.cheat-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:.9rem;}
+.cheat-card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:1rem 1.1rem;}
+.cheat-card h3{font-size:.92rem; margin-bottom:.7rem; color:var(--accent-strong); display:flex; align-items:center; gap:.5em;}
+.cheat-card h3::before{content:""; width:6px; height:6px; background:var(--accent2); border-radius:50%; flex:none;}
+.cheat-row{display:grid; grid-template-columns:1fr; gap:.15rem; padding:.4rem 0; border-bottom:1px solid var(--border-soft); font-size:.82rem;}
+.cheat-row:last-child{border-bottom:none;}
+.cheat-row code{background:var(--code-bg); display:inline-block;}
+.cheat-row .d{color:var(--text-faint); font-size:.79rem;}
+
+/* resources */
+.res-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:.8rem;}
+.res-card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:.95rem 1.05rem; text-decoration:none; color:var(--text); display:block;}
+.res-card:hover{border-color:var(--accent2);}
+.res-card .rk{font-family:var(--font-mono); font-size:.68rem; color:var(--text-faint); display:block; margin-bottom:.3rem;}
+.res-card .rt{font-weight:600; font-size:.92rem; margin-bottom:.25rem;}
+.res-card .rd{font-size:.8rem; color:var(--text-dim);}
+
+/* checklist */
+.checklist{display:flex; flex-direction:column; gap:0; border:1px solid var(--border); border-radius:10px; overflow:hidden;}
+.check-item{display:flex; align-items:flex-start; gap:.7rem; padding:.7rem .95rem; border-bottom:1px solid var(--border-soft); background:var(--panel); font-size:.87rem; cursor:pointer;}
+.check-item:last-child{border-bottom:none;}
+.check-item input{margin-top:.2rem; width:16px; height:16px; accent-color:var(--success); cursor:pointer; flex:none;}
+.check-item.done span{color:var(--text-faint); text-decoration:line-through;}
+.check-group-label{font-family:var(--font-mono); font-size:.7rem; color:var(--accent2-strong); padding:.6rem .95rem .3rem;}
+
+/* footer */
+footer{border-top:1px solid var(--border); padding:2.4rem 1.4rem 3rem; text-align:center;}
+footer .flow{font-family:var(--font-mono); font-size:.82rem; color:var(--text-dim); margin-bottom:.9rem;}
+footer .meta{font-size:.76rem; color:var(--text-faint);}
+
+/* search overlay */
+.search-overlay{position:fixed; inset:0; background:rgba(6,8,10,.72); backdrop-filter:blur(3px); z-index:200; display:none; align-items:flex-start; justify-content:center; padding:9vh 1rem 2rem;}
+.search-overlay.open{display:flex;}
+.search-panel{background:var(--bg-raised); border:1px solid var(--border); border-radius:12px; width:100%; max-width:600px; max-height:74vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.search-input-row{display:flex; align-items:center; gap:.6rem; padding:.9rem 1rem; border-bottom:1px solid var(--border);}
+.search-input-row svg{width:17px; height:17px; color:var(--text-faint); flex:none;}
+#searchInput{flex:1; background:none; border:none; color:var(--text); font-size:1rem; outline:none; font-family:var(--font-sans);}
+#searchInput::placeholder{color:var(--text-faint);}
+.search-esc{direction:ltr; font-family:var(--font-mono); font-size:.7rem; color:var(--text-faint); border:1px solid var(--border); padding:.15em .5em; border-radius:4px; flex:none;}
+.search-results{overflow-y:auto; padding:.5rem;}
+.search-result{display:flex; align-items:center; justify-content:space-between; gap:.7rem; padding:.65rem .75rem; border-radius:7px; cursor:pointer; text-decoration:none; color:var(--text);}
+.search-result:hover, .search-result.sel{background:var(--panel-2);}
+.search-result .srt{font-size:.88rem; font-weight:500;}
+.search-result .srs{font-size:.76rem; color:var(--text-faint); margin-top:.1rem;}
+.search-result .src{font-family:var(--font-mono); font-size:.66rem; color:var(--accent2-strong); border:1px solid var(--border); padding:.1em .5em; border-radius:99px; flex:none; white-space:nowrap;}
+.search-empty{padding:1.4rem; text-align:center; color:var(--text-faint); font-size:.86rem;}
+.search-hint{padding:.6rem 1rem; border-top:1px solid var(--border); font-size:.72rem; color:var(--text-faint); display:flex; gap:1rem; flex-wrap:wrap;}
+
+/* toast */
+.toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--panel-2); border:1px solid var(--border); color:var(--text); padding:.65rem 1.1rem; border-radius:8px; font-size:.85rem; z-index:300; opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease; display:flex; align-items:center; gap:.5em;}
+.toast svg{width:15px; height:15px; color:var(--success); flex:none;}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+/* theme toggle */
+.theme-toggle{background:var(--panel); border:1px solid var(--border); width:36px; height:36px; border-radius:7px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-dim); flex:none;}
+.theme-toggle svg{width:16px; height:16px;}
+
+/* misc utility */
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:1.4rem;}
+@media (max-width:700px){.two-col{grid-template-columns:1fr;}}
+.small-muted{font-size:.8rem; color:var(--text-faint);}
+
+/* ===== Persian / RTL overrides ===== */
+.small-cap{margin-bottom:.4rem; font-family:var(--font-sans); color:var(--accent2-strong); font-size:.78rem;}
+.proj-label,.res-label{font-size:.95rem; color:var(--accent2-strong); margin:2rem 0 .9rem; font-weight:600;}
+
+*{letter-spacing:0 !important;}
+pre, .code-block, .console-out{direction:ltr; text-align:left;}
+code, kbd, .mono{unicode-bidi:isolate;}
+code{direction:ltr;}
+.code-output{direction:rtl; text-align:right; font-family:var(--font-sans); font-size:.82rem;}
+.code-head{font-size:.72rem;}
+.console-out .line{white-space:pre-wrap;}
+.model-flow, .flow-row{direction:rtl;}
+.cheat-row code{max-width:100%; overflow-wrap:anywhere; text-align:left;}
+.sub-h3{font-size:1rem; color:var(--text-dim); margin-top:2rem;}
+.plain-ol{font-size:.88rem; color:var(--text-dim); padding-inline-start:1.3rem;}
+.lesson-body ul, .lesson-body ol{padding-inline-start:1.4rem;}
+.tag-pill.debug{color:var(--danger); border-color:color-mix(in srgb, var(--danger) 40%, var(--border));}
+.tag-pill.security{color:var(--warning); border-color:color-mix(in srgb, var(--warning) 45%, var(--border));}
+.tag-pill.platform{color:var(--accent-strong); border-color:color-mix(in srgb, var(--accent) 45%, var(--border));}
+.tag-pill.live{color:var(--accent2-strong); border-color:color-mix(in srgb, var(--accent2) 45%, var(--border));}
+.tag-pill.sim{color:var(--warning); border-color:color-mix(in srgb, var(--warning) 45%, var(--border));}
+.tag-pill{font-family:var(--font-sans); font-size:.72rem;}
+.proj-diff{font-family:var(--font-sans); font-size:.72rem;}
+.demo-head .t, .model .model-title, .section-head .tag, .field .fk, .debug-step .k, .predict-head, .diagram-title, .level-meta .l, .res-card .rk, .check-group-label, .sidebar-label{font-family:var(--font-sans); font-size:.78rem;}
+.level-meta .l{font-size:.74rem;}
+.debug-step{grid-template-columns:96px 1fr;}
+.hero .kicker{font-family:var(--font-sans); font-size:.82rem;}
+.hero h1{line-height:1.5;}
+.demo input[type=text]{direction:rtl; text-align:right;}
+.evt-box{font-family:var(--font-mono);}
+.mono-ltr{direction:ltr; unicode-bidi:isolate; display:inline-block;}
+.dom-tree{display:flex; flex-direction:column; align-items:flex-start; gap:.35rem; font-size:.78rem;}
+.dom-tree .flow-row{direction:ltr;}
+.callout svg{margin-top:.45em;}
+@media (max-width:640px){.debug-step{grid-template-columns:1fr; gap:.2rem;}}
+
+/* ===== Code Lab ===== */
+html{scroll-padding-top:calc(var(--topbar-h) + 14px);}
+.lab-main{max-width:920px; margin:0 auto; padding:2rem 1.2rem 4rem;}
+.lab-hero h1{font-size:clamp(1.6rem,3.6vw,2.2rem); margin-bottom:.5rem; line-height:1.5;}
+.lab-hero h1 em{font-style:normal; color:var(--accent-strong);}
+.lab-hero p{color:var(--text-dim); max-width:680px;}
+.lab-note{font-size:.82rem; color:var(--text-faint); border:1px dashed var(--border); border-radius:8px; padding:.6rem .8rem; margin:1rem 0 1.4rem;}
+.lab-search{flex:0 1 280px; min-width:0; background:var(--panel); border:1px solid var(--border); color:var(--text); padding:.45rem .75rem; border-radius:7px; font-family:var(--font-sans); font-size:.86rem;}
+.lab-search::placeholder{color:var(--text-faint);}
+.chips-bar{display:flex; flex-wrap:wrap; gap:.45rem; margin:0 0 .8rem; position:sticky; top:var(--topbar-h); z-index:20; padding:.6rem 0; background:color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter:blur(8px);}
+.cat-chip{background:var(--panel); border:1px solid var(--border); color:var(--text-dim); font-size:.8rem; padding:.3rem .75rem; border-radius:99px; cursor:pointer; font-family:var(--font-sans);}
+.cat-chip:hover{border-color:var(--accent2); color:var(--text);}
+.cat-chip[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+.cat-chip .n{opacity:.7; margin-inline-start:.35em; font-size:.72rem;}
+.lab-count{font-size:.8rem; color:var(--text-faint); margin-bottom:.9rem;}
+details.lab-card{background:var(--panel); border:1px solid var(--border); border-radius:10px; margin-bottom:.7rem; overflow:hidden;}
+details.lab-card > summary{list-style:none; cursor:pointer; padding:.85rem 1rem; display:flex; align-items:center; gap:.7rem; justify-content:space-between;}
+details.lab-card > summary::-webkit-details-marker{display:none;}
+.lab-card .sum-main{display:flex; flex-direction:column; gap:.15rem; min-width:0;}
+.lab-card .sum-cat{font-size:.72rem; color:var(--text-faint);}
+.lab-card .lab-title{font-weight:600; font-size:.97rem; line-height:1.6;}
+.lab-body{padding:0 1.1rem 1.1rem; border-top:1px solid var(--border-soft);}
+.lab-body > p.desc{margin:1rem 0 .9rem; color:var(--text-dim); font-size:.92rem;}
+.editor{position:relative; direction:ltr; border:1px solid var(--border); border-radius:8px 8px 0 0; background:var(--code-bg); overflow:hidden;}
+.editor pre, .editor textarea{margin:0; padding:.85rem 1rem; font-family:var(--font-mono); font-size:.8rem; line-height:1.65; white-space:pre-wrap; word-break:break-word; tab-size:2; border:0; text-align:left;}
+.editor pre{pointer-events:none; color:var(--text); min-height:3rem;}
+.editor pre code{font-size:inherit; background:none; border:none; padding:0; direction:ltr; unicode-bidi:normal;}
+.editor textarea{position:absolute; inset:0; width:100%; height:100%; resize:none; background:transparent; color:transparent; caret-color:var(--accent-strong); outline:none; overflow:hidden; direction:ltr;}
+.editor textarea::selection{background:color-mix(in srgb, var(--accent) 35%, transparent); color:transparent;}
+.editor:focus-within{border-color:var(--accent2);}
+.toolbar{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; background:var(--bg-raised); border:1px solid var(--border); border-top:0; padding:.5rem .7rem; border-radius:0 0 8px 8px;}
+.lab-btn{display:inline-flex; align-items:center; gap:.4rem; background:var(--panel-2); color:var(--text); border:1px solid var(--border); padding:.38rem .8rem; border-radius:6px; cursor:pointer; font-size:.8rem; font-family:var(--font-sans);}
+.lab-btn:hover{border-color:var(--accent2);}
+.lab-btn.run{background:var(--accent2); color:#08151a; border-color:var(--accent2); font-weight:600;}
+.lab-btn.run:hover{background:var(--accent2-strong);}
+.lab-btn svg{width:13px; height:13px;}
+.toolbar .spacer{flex:1;}
+.toolbar .meta{font-size:.74rem; color:var(--text-faint);}
+.toolbar kbd{font-size:.68rem;}
+.pane-label{font-size:.72rem; color:var(--text-faint); margin:.9rem 0 .35rem;}
+.lab-root{border:1px solid var(--border); border-radius:8px; padding:.9rem; background:var(--bg-raised); min-height:3rem; color:var(--text);}
+.lab-root button{background:var(--panel-2); color:var(--text); border:1px solid var(--border); border-radius:5px; cursor:pointer; padding:.15rem .5rem;}
+.out{background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:.6rem .85rem; font-family:var(--font-mono); font-size:.79rem; min-height:2.6rem; max-height:360px; overflow:auto;}
+.out .line{padding:.14em 0; white-space:pre-wrap; word-break:break-word; color:var(--text); unicode-bidi:plaintext; text-align:start;}
+.out .line.info{color:var(--accent2-strong);}
+.out .line.warn{color:var(--warning);}
+.out .line.error{color:var(--danger);}
+.out .line.sys{color:var(--text-faint); font-style:italic;}
+.out .placeholder{color:var(--text-faint); font-family:var(--font-sans); font-size:.8rem;}
+.out table{border-collapse:collapse; margin:.3rem 0; direction:ltr;}
+.out th,.out td{border:1px solid var(--border); padding:.15rem .6rem; text-align:left; font-size:.76rem;}
+.out th{color:var(--accent-strong); font-weight:500;}
+.notes{margin:1rem 0 0; padding-inline-start:1.2rem; font-size:.86rem; color:var(--text-dim);}
+.notes li{margin-bottom:.35rem;}
+.empty{padding:2.5rem 1rem; text-align:center; color:var(--text-faint); border:1px dashed var(--border); border-radius:10px;}
+.lab-footer{border-top:1px solid var(--border); padding:1.8rem 1.2rem 2.5rem; text-align:center; font-size:.8rem; color:var(--text-faint);}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#top"><span class="mark">JS</span><span class="name">آزمایشگاه <b>کد</b></span></a>
+  <div class="topbar-spacer"></div>
+  <input class="lab-search" id="q" type="search" placeholder="جست‌وجو در مثال‌ها… ( / )" aria-label="جست‌وجو در مثال‌ها" autocomplete="off">
+  <button class="theme-toggle" id="themeToggle" aria-label="تغییر پوستهٔ روشن و تیره" title="تغییر پوسته"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg></button>
+</header>
+<main class="lab-main" id="top">
+  <section class="lab-hero">
+    <h1>آزمایشگاه کد جاوااسکریپت؛ <em>مثال‌های تخصصی و اجراشدنی</em></h1>
+    <p>مجموعه‌ای از الگوهای پیشرفته که در پروژه‌های واقعی دیده می‌شوند: از memoize و EventEmitter تا retry، Proxy، Web Component و تست‌نویسی. هر مثال را ویرایش کنید، اجرا کنید، بشکنید و دوباره بسازید.</p>
+    <div class="lab-note">کد هر مثال همین‌جا و با دسترسی کامل به همین صفحه اجرا می‌شود؛ کدی را که نمی‌شناسید paste و اجرا نکنید. میانبر اجرا: <kbd class="key">Ctrl</kbd> + <kbd class="key">Enter</kbd> داخل ویرایشگر.</div>
+  </section>
+  <nav class="chips-bar" id="chips" aria-label="دسته‌بندی مثال‌ها"></nav>
+  <div class="lab-count" id="count" aria-live="polite"></div>
+  <div id="list"></div>
+</main>
+<footer class="lab-footer">آزمایشگاه کد · مکمل دورهٔ «جاوااسکریپت از صفر تا حرفه‌ای» · همه‌چیز در مرورگر خودتان اجرا می‌شود و چیزی ارسال نمی‌شود.</footer>
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 13 4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toastMsg">کپی شد</span></div>
+
+<script type="application/json" id="lab-data">[{"id": "memoize", "cat": "توابع و الگوهای تابعی", "level": "متوسط", "title": "memoize: کش‌کردن نتیجهٔ توابع خالص", "desc": "تابعی که نتیجهٔ هر ترکیب ورودی را در یک `Map` نگه می‌دارد تا محاسبهٔ تکراری انجام نشود. مثال فیبوناچی نشان می‌دهد چرا کش، پیچیدگی را از نمایی به خطی می‌برد.", "code": "function memoize(fn, keyFn = (...args) => JSON.stringify(args)) {\n  const cache = new Map();\n  const wrapped = (...args) => {\n    const key = keyFn(...args);\n    if (cache.has(key)) { wrapped.hits++; return cache.get(key); }\n    const result = fn(...args);\n    cache.set(key, result);\n    return result;\n  };\n  wrapped.hits = 0;\n  wrapped.clear = () => cache.clear();\n  return wrapped;\n}\n\nlet calls = 0;\nconst square = memoize(n => { calls++; return n * n; });\nconsole.log(square(9), square(9), square(9));\nconsole.log('فراخوانی واقعی:', calls, '— برخورد کش:', square.hits);\n\nconst slowFib = n => n < 2 ? n : slowFib(n - 1) + slowFib(n - 2);\nconst fastFib = memoize(n => n < 2 ? n : fastFib(n - 1) + fastFib(n - 2));\n\nlet t = performance.now();\nconsole.log('بدون کش  fib(30) =', slowFib(30), '|', (performance.now() - t).toFixed(1) + 'ms');\nt = performance.now();\nconsole.log('با کش    fib(30) =', fastFib(30), '|', (performance.now() - t).toFixed(2) + 'ms');", "notes": ["فقط برای توابع **خالص** امن است؛ اگر نتیجه به زمان یا وضعیت بیرونی وابسته باشد کش جواب غلط می‌دهد.", "`JSON.stringify` برای کلید ساده است ولی کند و برای شیءهای حلقوی ناکارآمد؛ در کد واقعی `keyFn` مناسب بدهید و برای جلوگیری از رشد بی‌پایان حافظه، سقف (مثل LRU همین صفحه) بگذارید."], "tags": "closure cache map"}, {"id": "curry-compose", "cat": "توابع و الگوهای تابعی", "level": "متوسط", "title": "curry، compose و pipe", "desc": "`curry` تابعی چندپارامتری را به زنجیره‌ای از توابع تک‌پارامتری تبدیل می‌کند و `pipe`/`compose` توابع کوچک را به یک خط لولهٔ داده تبدیل می‌کنند. نتیجه، کدی اعلانی و بسیار قابل‌تست است.", "code": "const curry = fn => function curried(...args) {\n  return args.length >= fn.length\n    ? fn.apply(this, args)\n    : (...more) => curried.apply(this, [...args, ...more]);\n};\nconst pipe    = (...fns) => x => fns.reduce((acc, f) => f(acc), x);\nconst compose = (...fns) => x => fns.reduceRight((acc, f) => f(acc), x);\n\nconst add3 = curry((a, b, c) => a + b + c);\nconsole.log(add3(1)(2)(3), add3(1, 2)(3), add3(1)(2, 3));\n\nconst prop = curry((key, obj) => obj[key]);\nconst gt   = curry((n, x) => x > n);\nconst users = [\n  { name: 'علی', age: 31 }, { name: 'سارا', age: 24 }, { name: 'رضا', age: 42 },\n];\n\nconst adultNames = pipe(\n  list => list.filter(u => gt(30, prop('age', u))),\n  list => list.map(prop('name')),\n  list => list.join(' ، '),\n);\nconsole.log(adultNames(users));\n\nconst trimThenUpper = compose(s => s.toUpperCase(), s => s.trim());\nconsole.log(trimThenUpper('  hello  '));", "notes": ["`fn.length` تعداد پارامترهای بدون مقدار پیش‌فرض و بدون rest را می‌شمارد؛ پس `curry` روی توابع دارای پارامتر پیش‌فرض/rest رفتار غیرمنتظره دارد.", "در `pipe` ترتیب اجرا چپ‌به‌راست و در `compose` راست‌به‌چپ است."], "tags": "functional pipeline"}, {"id": "debounce", "cat": "توابع و الگوهای تابعی", "level": "پیشرفته", "title": "debounce کامل: leading، trailing و cancel", "desc": "نسخهٔ حرفه‌ای debounce که هم اجرای فوری (leading) و هم اجرای پایانی (trailing) را پشتیبانی می‌کند. زمان‌بندی خروجی را ببینید.", "code": "function debounce(fn, wait, { leading = false, trailing = true } = {}) {\n  let timer = null, pendingArgs = null;\n  function debounced(...args) {\n    const isFirst = timer === null;\n    if (isFirst && leading) fn.apply(this, args);\n    else pendingArgs = args;\n    clearTimeout(timer);\n    timer = setTimeout(() => {\n      timer = null;\n      if (trailing && pendingArgs) fn.apply(this, pendingArgs);\n      pendingArgs = null;\n    }, wait);\n  }\n  debounced.cancel = () => { clearTimeout(timer); timer = null; pendingArgs = null; };\n  return debounced;\n}\n\nconst t0 = performance.now();\nconst stamp = () => String(Math.round(performance.now() - t0)).padStart(3) + 'ms';\n\nconst onTrailing = debounce(v => console.log(stamp(), 'trailing ←', v), 100);\nconst onLeading  = debounce(v => console.log(stamp(), 'leading  ←', v), 100, { leading: true, trailing: false });\n\n['a', 'ab', 'abc', 'abcd'].forEach((v, i) => {\n  setTimeout(() => { onTrailing(v); onLeading(v); }, i * 30);\n});\n\nconst cancelled = debounce(() => console.log('این هرگز چاپ نمی‌شود'), 50);\ncancelled(); cancelled.cancel();\n\nawait new Promise(r => setTimeout(r, 350));   // تا همهٔ تایمرها تمام شوند\nconsole.log('پایان');", "notes": ["leading برای واکنش فوری (مثل کلیک دکمه) و trailing برای «بعد از اتمام تایپ» مناسب است.", "اگر `this` اهمیت دارد حتماً از `function` معمولی (نه پیکانی) برای `debounced` استفاده کنید تا `apply(this, …)` درست کار کند."], "tags": "timer input search"}, {"id": "throttle", "cat": "توابع و الگوهای تابعی", "level": "پیشرفته", "title": "throttle با اجرای پایانی", "desc": "حداکثر یک اجرا در هر بازه؛ با این تفاوت که آخرین فراخوانی هم گم نمی‌شود. ۲۰ فراخوانیِ سریع را ببینید که به چند اجرای منظم تبدیل می‌شوند.", "code": "function throttle(fn, interval) {\n  let last = 0, timer = null, lastArgs;\n  return function (...args) {\n    const now = Date.now();\n    lastArgs = args;\n    const remaining = interval - (now - last);\n    if (remaining <= 0) {\n      clearTimeout(timer); timer = null;\n      last = now;\n      fn.apply(this, args);\n    } else if (!timer) {\n      timer = setTimeout(() => {\n        last = Date.now(); timer = null;\n        fn.apply(this, lastArgs);\n      }, remaining);\n    }\n  };\n}\n\nconst sleep = ms => new Promise(r => setTimeout(r, ms));\nconst t0 = performance.now();\nconst tick = throttle(i => console.log(String(Math.round(performance.now() - t0)).padStart(4) + 'ms ← فراخوانی #' + i), 100);\n\nfor (let i = 1; i <= 20; i++) { tick(i); await sleep(20); }\nawait sleep(150);\nconsole.log('۲۰ فراخوانی ورودی، چند اجرای خروجی (بالا)');", "notes": ["برای رویدادهای پیوسته (scroll، resize، mousemove) مناسب است؛ برای «بعد از مکث» از debounce استفاده کنید.", "برای انیمیشن/اسکرول، `requestAnimationFrame` اغلب از throttle زمانی بهتر است چون با نرخ رندر مرورگر هم‌گام می‌شود."], "tags": "scroll resize rate limit"}, {"id": "emitter", "cat": "ساختار داده و معماری", "level": "متوسط", "title": "EventEmitter با فیلد خصوصی", "desc": "پیاده‌سازی الگوی Pub/Sub: `on`، `off`، `once` و `emit`. توجه کنید `emit` از یک کپی از شنونده‌ها می‌پیمایَد تا حذف شنونده در میانهٔ emit مشکل نسازد.", "code": "class Emitter {\n  #handlers = new Map();\n  on(event, fn) {\n    if (!this.#handlers.has(event)) this.#handlers.set(event, new Set());\n    this.#handlers.get(event).add(fn);\n    return () => this.off(event, fn);          // تابع لغو اشتراک\n  }\n  off(event, fn) { this.#handlers.get(event)?.delete(fn); }\n  once(event, fn) {\n    const off = this.on(event, (...args) => { off(); fn(...args); });\n    return off;\n  }\n  emit(event, ...args) {\n    const list = [...(this.#handlers.get(event) ?? [])];\n    list.forEach(fn => fn(...args));\n    return list.length;\n  }\n}\n\nconst bus = new Emitter();\nconst unsubscribe = bus.on('login', user => console.log('شنونده ۱:', user));\nbus.once('login', user => console.log('فقط یک‌بار:', user));\nbus.on('login', function selfRemoving() { console.log('خودحذف'); bus.off('login', selfRemoving); });\n\nconsole.log('تعداد شنونده‌ها:', bus.emit('login', 'سارا'));\nconsole.log('تعداد شنونده‌ها:', bus.emit('login', 'علی'));\nunsubscribe();\nconsole.log('بعد از لغو اشتراک:', bus.emit('login', 'رضا'));", "notes": ["برگرداندن تابع «لغو اشتراک» از `on` الگوی تمیزی برای جلوگیری از نشت حافظه است.", "در مرورگر خود `EventTarget` و `CustomEvent` هم همین کار را بدون پیاده‌سازی دستی می‌کنند."], "tags": "pubsub observer events"}, {"id": "lru", "cat": "ساختار داده و معماری", "level": "پیشرفته", "title": "کش LRU با Map (ترتیب درج)", "desc": "`Map` ترتیب درج کلیدها را حفظ می‌کند؛ پس با حذف و درج دوبارهٔ هر کلید در هنگام خواندن، «قدیمی‌ترین مورد استفاده» همیشه اولین کلید است و عملیات O(1) می‌ماند.", "code": "class LRU {\n  #max; #map = new Map();\n  constructor(max) { this.#max = max; }\n  get(key) {\n    if (!this.#map.has(key)) return undefined;\n    const value = this.#map.get(key);\n    this.#map.delete(key);            // به انتها ببر = «تازه‌استفاده‌شده»\n    this.#map.set(key, value);\n    return value;\n  }\n  set(key, value) {\n    this.#map.delete(key);\n    this.#map.set(key, value);\n    if (this.#map.size > this.#max) {\n      const oldest = this.#map.keys().next().value;\n      this.#map.delete(oldest);\n      console.log('  ⟵ حذف شد:', oldest);\n    }\n    return this;\n  }\n  get keys() { return [...this.#map.keys()]; }\n}\n\nconst cache = new LRU(3);\ncache.set('a', 1).set('b', 2).set('c', 3);\nconsole.log('ترتیب:', cache.keys);\ncache.get('a');                       // a تازه شد\nconsole.log('پس از get(a):', cache.keys);\ncache.set('d', 4);                    // b قدیمی‌ترین بود\nconsole.log('پس از set(d):', cache.keys);\nconsole.log(cache.get('b'), cache.get('c'));", "notes": ["همین الگو پایهٔ کش پاسخ API و کش تصویر در بسیاری از برنامه‌هاست.", "برای کلیدهای شیء که نباید جلوی زباله‌روبی را بگیرند، `WeakMap` گزینهٔ دیگری است (اما ترتیب و اندازه ندارد)."], "tags": "cache map eviction"}, {"id": "store", "cat": "ساختار داده و معماری", "level": "پیشرفته", "title": "Store مشاهده‌پذیر با reducer و selector", "desc": "نسخهٔ کوچک Redux: وضعیت تنها از طریق `dispatch` و تابع خالص `reducer` عوض می‌شود و مشترکان فقط وقتی خبردار می‌شوند که «برش» (selector) مورد علاقه‌شان واقعاً تغییر کرده باشد.", "code": "function createStore(reducer, initial) {\n  let state = initial;\n  const subs = new Set();\n  return {\n    getState: () => state,\n    dispatch(action) {\n      const next = reducer(state, action);\n      if (Object.is(next, state)) return;      // بدون تغییر = بدون اعلان\n      state = next;\n      subs.forEach(fn => fn(state, action));\n    },\n    subscribe(listener, selector = s => s) {\n      let prev = selector(state);\n      const sub = s => {\n        const cur = selector(s);\n        if (!Object.is(cur, prev)) { prev = cur; listener(cur); }\n      };\n      subs.add(sub);\n      return () => subs.delete(sub);\n    },\n  };\n}\n\nconst reducer = (state, { type, payload }) => {\n  switch (type) {\n    case 'add':    return { ...state, todos: [...state.todos, { id: payload.id, text: payload.text, done: false }] };\n    case 'toggle': return { ...state, todos: state.todos.map(t => t.id === payload ? { ...t, done: !t.done } : t) };\n    case 'filter': return { ...state, filter: payload };\n    default:       return state;\n  }\n};\n\nconst store = createStore(reducer, { todos: [], filter: 'all' });\nstore.subscribe(n => console.log('تعداد انجام‌شده:', n), s => s.todos.filter(t => t.done).length);\nstore.subscribe(f => console.log('فیلتر تغییر کرد:', f), s => s.filter);\n\nstore.dispatch({ type: 'add', payload: { id: 1, text: 'یادگیری Proxy' } });\nstore.dispatch({ type: 'add', payload: { id: 2, text: 'نوشتن تست' } });\nstore.dispatch({ type: 'toggle', payload: 1 });    // فقط مشترک اول خبردار می‌شود\nstore.dispatch({ type: 'filter', payload: 'done' });// فقط مشترک دوم\nstore.dispatch({ type: 'unknown' });                // هیچ‌کس\nconsole.log(JSON.stringify(store.getState()));", "notes": ["به‌روزرسانی تغییرناپذیر (spread) دلیل کار کردن `Object.is` برای تشخیص تغییر است؛ اگر state را درجا تغییر دهید، هیچ اعلانی نمی‌رسد.", "سطح ۱۰ دورهٔ اصلی همین الگو را در معماری یک برنامهٔ واقعی نشان داد."], "tags": "redux state management"}, {"id": "deep-clone", "cat": "ساختار داده و معماری", "level": "پیشرفته", "title": "deepClone با پشتیبانی از ارجاع حلقوی", "desc": "کلون عمیقی که `Date`، `Map`، `Set` و ساختارهای حلقوی را درست کپی می‌کند؛ با `WeakMap` ارجاع‌های دیده‌شده را به یاد می‌آورد. در پایان با `JSON` و `structuredClone` مقایسه می‌شود.", "code": "function deepClone(value, seen = new WeakMap()) {\n  if (value === null || typeof value !== 'object') return value;\n  if (seen.has(value)) return seen.get(value);            // جلوگیری از حلقهٔ بی‌پایان\n  if (value instanceof Date) return new Date(value);\n  if (value instanceof Map) {\n    const m = new Map(); seen.set(value, m);\n    value.forEach((v, k) => m.set(deepClone(k, seen), deepClone(v, seen)));\n    return m;\n  }\n  if (value instanceof Set) {\n    const s = new Set(); seen.set(value, s);\n    value.forEach(v => s.add(deepClone(v, seen)));\n    return s;\n  }\n  const out = Array.isArray(value) ? [] : Object.create(Object.getPrototypeOf(value));\n  seen.set(value, out);\n  for (const key of Object.keys(value)) out[key] = deepClone(value[key], seen);\n  return out;\n}\n\nconst original = { when: new Date(0), tags: new Set(['a']), map: new Map([[1, { x: 1 }]]), list: [1, [2, 3]] };\noriginal.self = original;                                  // ارجاع حلقوی\n\nconst copy = deepClone(original);\nconsole.log('شیء جدید؟', copy !== original, '| حلقه حفظ شد؟', copy.self === copy);\nconsole.log('Date واقعی؟', copy.when instanceof Date, '| Set واقعی؟', copy.tags instanceof Set);\nconsole.log('عمیق؟', copy.map.get(1) !== original.map.get(1), copy.list[1] !== original.list[1]);\n\ntry { JSON.stringify(original); } catch (e) { console.log('JSON.stringify →', e.name); }\nconst native = structuredClone(original);\nconsole.log('structuredClone هم حلقه را حفظ می‌کند:', native.self === native);", "notes": ["در عمل `structuredClone` را ترجیح دهید؛ این نسخهٔ دستی برای فهم سازوکار و موارد خاص (مثل حفظ prototype) است.", "توابع، DOM nodeها و `Symbol`ها با `structuredClone` قابل کپی نیستند (خطای `DataCloneError`)."], "tags": "copy immutable structuredClone"}, {"id": "path-utils", "cat": "ساختار داده و معماری", "level": "متوسط", "title": "get / setIn: دسترسی و به‌روزرسانی تغییرناپذیر با مسیر", "desc": "شبیه `_.get` و `_.set` در lodash اما بدون وابستگی: مسیر رشته‌ای (`a.b[0].c`) را می‌خواند و در `setIn` فقط شاخه‌های تغییرکرده کپی می‌شوند، یعنی بقیهٔ ساختار **همان ارجاع** می‌ماند.", "code": "const parsePath = p => p.replace(/\\[(\\d+)\\]/g, '.$1').split('.').filter(Boolean);\n\nconst get = (obj, path, fallback) =>\n  parsePath(path).reduce((o, k) => o?.[k], obj) ?? fallback;\n\nconst setIn = (obj, path, value) => {\n  const [head, ...rest] = Array.isArray(path) ? path : parsePath(path);\n  const copy = Array.isArray(obj) ? [...obj] : { ...obj };\n  copy[head] = rest.length\n    ? setIn(obj?.[head] ?? (/^\\d+$/.test(rest[0]) ? [] : {}), rest, value)\n    : value;\n  return copy;\n};\n\nconst state = { user: { name: 'علی', langs: ['fa', 'en'] }, items: [{ id: 1 }] };\n\nconsole.log(get(state, 'user.langs[0]'), '|', get(state, 'user.age', 'نامشخص'));\n\nconst next = setIn(state, 'user.langs[1]', 'de');\nconsole.log(next.user.langs, '← جدید');\nconsole.log(state.user.langs, '← اصلی دست‌نخورده');\nconsole.log('ساختار اشتراکی:', 'items همان ارجاع؟', next.items === state.items, '| user جدید؟', next.user !== state.user);\n\nconsole.log(JSON.stringify(setIn({}, 'a.b[2].c', 1)));", "notes": ["اشتراک ساختاری (structural sharing) همان چیزی است که تشخیص تغییر با `===` را در React/Redux ارزان می‌کند.", "کتابخانه‌هایی مثل Immer همین کار را با نحو «تغییر درجا» انجام می‌دهند."], "tags": "immutable update lodash"}, {"id": "mixins", "cat": "ساختار داده و معماری", "level": "پیشرفته", "title": "Mixin، فیلد خصوصی و static block", "desc": "ترکیب (composition) به‌جای وراثت عمیق: هر mixin تابعی است که کلاس پایه را می‌گیرد و کلاس گسترش‌یافته برمی‌گرداند. به‌علاوه `#private`، فیلد ایستای خصوصی و `static {}`.", "code": "const Timestamped = Base => class extends Base {\n  touch() { this.updatedAt = Date.now(); return this; }\n};\nconst Serializable = Base => class extends Base {\n  toJSON() { return { type: this.constructor.name, ...this }; }\n};\n\nclass Entity {\n  static #count = 0;                                  // فیلد ایستای خصوصی\n  static { Entity.registry = new Set(); }             // بلوک مقداردهی ایستا\n  #id = ++Entity.#count;                              // فیلد خصوصی نمونه\n  constructor() { Entity.registry.add(this.#id); }\n  get id() { return this.#id; }\n}\n\nclass Note extends Serializable(Timestamped(Entity)) {\n  constructor(text) { super(); this.text = text; }\n}\n\nconst a = new Note('اولی');\nconst b = new Note('دومی').touch();\nconsole.log(a.id, b.id, [...Entity.registry]);\nconsole.log(JSON.stringify([a, b]));\nconsole.log(Object.keys(a), '← #id در کلیدها نیست');\nconsole.log(a instanceof Entity, typeof a.touch);", "notes": ["ترتیب ترکیب مهم است: `Serializable(Timestamped(Entity))` یعنی زنجیرهٔ پروتوتایپ از Serializable شروع می‌شود.", "فیلدهای `#` را حتی `Proxy` و `Reflect` هم نمی‌بینند؛ حریم خصوصی واقعی‌اند، نه قرارداد نام‌گذاری."], "tags": "class private static composition"}, {"id": "retry", "cat": "ناهمگامی پیشرفته", "level": "پیشرفته", "title": "retry با backoff نمایی و jitter", "desc": "تلاش مجدد هوشمند برای عملیات ناپایدار: فاصلهٔ بین تلاش‌ها هر بار دو برابر می‌شود و کمی تصادفی (jitter) دارد تا همهٔ کلاینت‌ها هم‌زمان به سرور هجوم نیاورند.", "code": "const sleep = ms => new Promise(r => setTimeout(r, ms));\n\nasync function retry(fn, { retries = 4, base = 50, factor = 2, jitter = true, onRetry } = {}) {\n  for (let attempt = 0; ; attempt++) {\n    try {\n      return await fn(attempt);\n    } catch (err) {\n      if (attempt >= retries) throw err;\n      const delay = base * factor ** attempt * (jitter ? 0.5 + Math.random() / 2 : 1);\n      onRetry?.(attempt + 1, Math.round(delay), err);\n      await sleep(delay);\n    }\n  }\n}\n\nlet n = 0;\nconst flaky = async () => {\n  n++;\n  if (n < 4) throw new Error('خطای شبکه شمارهٔ ' + n);\n  return 'موفق در تلاش ' + n;\n};\n\nconsole.log(await retry(flaky, {\n  onRetry: (i, d, e) => console.log(`تلاش ${i} پس از ${d}ms ← ${e.message}`),\n}));\n\ntry {\n  await retry(async () => { throw new Error('همیشه شکست'); }, { retries: 2, base: 10 });\n} catch (e) { console.log('در نهایت شکست خورد:', e.message); }", "notes": ["فقط خطاهای **موقت** را retry کنید (مثل 503 یا قطع شبکه)؛ خطای 4xx با تکرار درست نمی‌شود.", "برای عملیات غیرایدمپوتنت (مثل POST پرداخت) retry کورکورانه می‌تواند دوبار اجرا شود."], "tags": "backoff network resilience"}, {"id": "timeout", "cat": "ناهمگامی پیشرفته", "level": "پیشرفته", "title": "timeout و لغو با AbortController", "desc": "هر عملیات ناهمگامی را که `AbortSignal` بپذیرد می‌توان با یک تایمر لغو کرد. دقت کنید تایمر در `finally` پاک می‌شود و دلیل لغو از طریق `signal.reason` منتقل می‌شود.", "code": "const sleep = (ms, signal) => new Promise((resolve, reject) => {\n  const id = setTimeout(resolve, ms, 'کار تمام شد');\n  signal?.addEventListener('abort', () => { clearTimeout(id); reject(signal.reason); }, { once: true });\n});\n\nfunction withTimeout(task, ms) {\n  const ctrl = new AbortController();\n  const timer = setTimeout(() => ctrl.abort(new Error(`Timeout پس از ${ms}ms`)), ms);\n  return task(ctrl.signal).finally(() => clearTimeout(timer));\n}\n\nconsole.log(await withTimeout(signal => sleep(50, signal), 200));\n\ntry {\n  await withTimeout(signal => sleep(500, signal), 100);\n} catch (e) { console.log('خطا:', e.message); }\n\n// ابزار داخلی مرورگر برای همین کار:\nconst s = AbortSignal.timeout(30);\nawait sleep(100).catch(() => {});\nconsole.log('AbortSignal.timeout →', s.aborted, s.reason?.name);\n\n// ترکیب دو سیگنال: لغو کاربر یا timeout\nconst user = new AbortController();\nconst either = AbortSignal.any([user.signal, AbortSignal.timeout(1000)]);\nuser.abort(new Error('کاربر لغو کرد'));\nconsole.log('AbortSignal.any →', either.aborted, either.reason.message);", "notes": ["`AbortSignal.timeout` و `AbortSignal.any` در مرورگرهای مدرن موجودند؛ برای مرورگرهای قدیمی‌تر باید نسخهٔ دستی بالا را به کار برد.", "بدون `clearTimeout` تایمرها حتی بعد از موفقیت زنده می‌مانند و حافظه/پردازش هدر می‌دهند."], "tags": "abort cancel fetch"}, {"id": "pool", "cat": "ناهمگامی پیشرفته", "level": "پیشرفته", "title": "محدودکنندهٔ هم‌زمانی (Promise Pool)", "desc": "به‌جای شلیک ۱۰۰۰ درخواست هم‌زمان با `Promise.all`، فقط N کارگر که از یک صف مشترک کار برمی‌دارند. نتیجه‌ها به ترتیب اصلی برمی‌گردند و شکست یک کار بقیه را متوقف نمی‌کند.", "code": "async function pool(tasks, limit) {\n  const results = new Array(tasks.length);\n  let next = 0, running = 0, maxRunning = 0;\n\n  async function worker() {\n    while (next < tasks.length) {\n      const i = next++;\n      running++; maxRunning = Math.max(maxRunning, running);\n      try   { results[i] = { status: 'fulfilled', value: await tasks[i]() }; }\n      catch (reason) { results[i] = { status: 'rejected', reason }; }\n      running--;\n    }\n  }\n  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));\n  return { results, maxRunning };\n}\n\nconst sleep = ms => new Promise(r => setTimeout(r, ms));\nconst tasks = Array.from({ length: 8 }, (_, i) => async () => {\n  await sleep(60 + (i % 3) * 40);\n  if (i === 5) throw new Error('خرابی کار ۵');\n  return i * i;\n});\n\nconst t0 = performance.now();\nconst { results, maxRunning } = await pool(tasks, 3);\nconsole.log(results.map(r => r.status === 'fulfilled' ? r.value : '✗').join('  '));\nconsole.log('حداکثر هم‌زمانی:', maxRunning, '| زمان کل:', Math.round(performance.now() - t0) + 'ms');\nconsole.log('خطا:', results[5].reason.message);", "notes": ["ایدهٔ «کارگرهای مشترک روی یک شمارندهٔ `next`» امن است چون جاوااسکریپت تک‌نخی است و `next++` بین دو `await` قطع نمی‌شود.", "مرورگرها خودشان تعداد اتصال هم‌زمان به یک مبدأ را محدود می‌کنند؛ اما محدودیت سطح برنامه به سرور و حافظهٔ شما کمک می‌کند."], "tags": "concurrency promise.all"}, {"id": "async-gen", "cat": "ناهمگامی پیشرفته", "level": "پیشرفته", "title": "async generator و for await برای صفحه‌بندی لازی", "desc": "دادهٔ صفحه‌بندی‌شده را تنها وقتی می‌گیرید که مصرف‌کننده واقعاً بخواهد. با `return` در حلقهٔ `for await`، مولد زیرین خودکار بسته می‌شود و صفحه‌های بعدی هرگز درخواست نمی‌شوند.", "code": "const sleep = ms => new Promise(r => setTimeout(r, ms));\nlet requested = 0;\n\nasync function* fetchPages(totalPages) {\n  try {\n    for (let page = 1; page <= totalPages; page++) {\n      await sleep(30);\n      requested++;\n      yield { page, items: [0, 1, 2].map(i => `آیتم ${(page - 1) * 3 + i + 1}`) };\n    }\n  } finally {\n    console.log('  (مولد بسته شد و منابع آزاد شد)');\n  }\n}\n\nasync function* take(source, n) {\n  if (n <= 0) return;\n  let i = 0;\n  for await (const value of source) {\n    yield value;\n    if (++i >= n) return;\n  }\n}\n\nfor await (const { page, items } of take(fetchPages(100), 3)) {\n  console.log('صفحه', page, '←', items.join('، '));\n}\nconsole.log('درخواست‌های واقعی:', requested, 'از ۱۰۰ صفحه');", "notes": ["بلوک `finally` داخل مولد، جای مناسب بستن اتصال/فایل هنگام توقف زودهنگام مصرف است.", "در Node.js و مرورگرها، `ReadableStream` و `response.body` نیز با `for await` قابل پیمایش‌اند."], "tags": "generator stream pagination"}, {"id": "event-loop", "cat": "ناهمگامی پیشرفته", "level": "پیشرفته", "title": "معمای ترتیب اجرا: sync، microtask و macrotask", "desc": "قبل از اجرا، ترتیب خروجی را حدس بزنید. سپس اجرا کنید و با قاعدهٔ «همه همگام ← همهٔ میکروتسک‌ها ← یک ماکروتسک» مقایسه کنید.", "code": "const order = [];\nconst log = label => order.push(label);\n\nlog('A: همگام');\nsetTimeout(() => log('B: setTimeout 0'), 0);\nqueueMicrotask(() => log('C: queueMicrotask'));\nPromise.resolve()\n  .then(() => log('D: then اول'))\n  .then(() => log('E: then دوم'));\n\n(async () => {\n  log('F: بخش همگامِ async');\n  await null;\n  log('G: بعد از await');\n})();\n\nlog('H: پایان همگام');\n\nawait new Promise(r => setTimeout(r, 20));\norder.forEach((x, i) => console.log(i + 1, x));", "notes": ["`await` پس از خود، ادامهٔ تابع را به‌صورت میکروتسک زمان‌بندی می‌کند؛ پس ترتیب `queueMicrotask` / `.then` / `await` بر اساس **زمان ثبت** است.", "«then دوم» تا اجرای «then اول» ثبت نمی‌شود، برای همین بعد از «بعد از await» می‌آید."], "tags": "microtask macrotask order"}, {"id": "http-client", "cat": "ناهمگامی پیشرفته", "level": "پیشرفته", "title": "کلاینت HTTP با HttpError و تزریق fetch", "desc": "لایهٔ API تمیز: `response.ok` را بررسی می‌کند، خطای معنادار با `status` و `body` پرتاب می‌کند و timeout دارد. با تزریق `fetchImpl`، بدون شبکه و با یک «سرور ساختگی» قابل‌تست است.", "code": "class HttpError extends Error {\n  constructor(res, body) {\n    super(`HTTP ${res.status}`);\n    this.name = 'HttpError'; this.status = res.status; this.body = body;\n  }\n}\n\nfunction createClient({ baseUrl = '', fetchImpl = fetch, timeout = 2000 } = {}) {\n  async function request(path, { method = 'GET', json, headers } = {}) {\n    const ctrl = new AbortController();\n    const timer = setTimeout(() => ctrl.abort(new Error('timeout')), timeout);\n    try {\n      const res = await fetchImpl(baseUrl + path, {\n        method,\n        headers: { ...(json ? { 'Content-Type': 'application/json' } : {}), ...headers },\n        body: json ? JSON.stringify(json) : undefined,\n        signal: ctrl.signal,\n      });\n      const text = await res.text();\n      const isJson = res.headers.get('content-type')?.includes('json');\n      const body = text ? (isJson ? JSON.parse(text) : text) : null;\n      if (!res.ok) throw new HttpError(res, body);\n      return body;\n    } finally { clearTimeout(timer); }\n  }\n  return {\n    get:  (p, o) => request(p, o),\n    post: (p, json, o) => request(p, { ...o, method: 'POST', json }),\n  };\n}\n\n// ----- سرور ساختگی: بدون شبکه -----\nconst reply = (obj, status = 200) =>\n  new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json' } });\nconst fakeFetch = async (url, { method, body, signal }) => {\n  await new Promise((resolve, reject) => {\n    const id = setTimeout(resolve, 30);\n    signal.addEventListener('abort', () => { clearTimeout(id); reject(signal.reason); });\n  });\n  if (url.endsWith('/users/1')) return reply({ id: 1, name: 'سارا' });\n  if (url.endsWith('/users') && method === 'POST') return reply({ id: 2, ...JSON.parse(body) }, 201);\n  return reply({ error: 'پیدا نشد' }, 404);\n};\n\nconst api = createClient({ baseUrl: 'https://api.test', fetchImpl: fakeFetch });\nconsole.log(await api.get('/users/1'));\nconsole.log(await api.post('/users', { name: 'علی' }));\ntry { await api.get('/users/999'); }\ncatch (e) { console.log(e.name, e.status, e.body); }\n\nconst hung = createClient({ timeout: 50, fetchImpl: (u, { signal }) =>\n  new Promise((_, reject) => signal.addEventListener('abort', () => reject(signal.reason))) });\ntry { await hung.get('/x'); } catch (e) { console.log('timeout ←', e.message); }", "notes": ["تزریق وابستگی (`fetchImpl`) ساده‌ترین راه تست‌پذیرکردن کد شبکه‌ای است: در تست، fetch ساختگی؛ در تولید، fetch واقعی.", "اگر پاسخ JSON نیست `res.json()` خطا می‌دهد؛ برای همین ابتدا `text()` و سپس بر اساس `content-type` تجزیه می‌شود."], "tags": "fetch api error handling"}, {"id": "proxy", "cat": "ویژگی‌های مدرن زبان", "level": "پیشرفته", "title": "Proxy: اعتبارسنجی، اندیس منفی و واکنش‌پذیری", "desc": "با `Proxy` می‌توان عملیات پایه (خواندن، نوشتن، حذف) را رهگیری کرد. سه کاربرد واقعی: آرایه‌ای با اندیس منفی، شیئی که ورودی نامعتبر را رد می‌کند و شیئی واکنش‌پذیر که تغییرها را گزارش می‌دهد.", "code": "// ۱) اندیس منفی مثل Python\nconst negative = arr => new Proxy(arr, {\n  get(target, prop, receiver) {\n    if (typeof prop === 'string' && /^-\\d+$/.test(prop)) prop = String(target.length + Number(prop));\n    return Reflect.get(target, prop, receiver);\n  },\n});\nconst a = negative([10, 20, 30, 40]);\nconsole.log(a[-1], a[-2], a[0], a.length);\n\n// ۲) اعتبارسنجی هنگام نوشتن\nconst validated = (target, rules) => new Proxy(target, {\n  set(t, key, value) {\n    if (rules[key] && !rules[key](value)) throw new TypeError(`مقدار نامعتبر برای «${String(key)}»: ${value}`);\n    return Reflect.set(t, key, value);\n  },\n});\nconst user = validated({}, {\n  name: v => typeof v === 'string' && v.trim() !== '',\n  age:  v => Number.isInteger(v) && v >= 0 && v < 150,\n});\nuser.name = 'نیلوفر'; user.age = 29;\ntry { user.age = -5; } catch (e) { console.log(e.message); }\nconsole.log(JSON.stringify(user));\n\n// ۳) واکنش‌پذیری\nfunction reactive(obj, onChange) {\n  return new Proxy(obj, {\n    set(t, k, v, r) {\n      const old = t[k];\n      const ok = Reflect.set(t, k, v, r);\n      if (!Object.is(old, v)) onChange(k, old, v);\n      return ok;\n    },\n    deleteProperty(t, k) {\n      const old = t[k];\n      const ok = Reflect.deleteProperty(t, k);\n      onChange(k, old, undefined);\n      return ok;\n    },\n  });\n}\nconst model = reactive({ count: 0 }, (k, o, n) => console.log(`«${k}»: ${o} ← ${n}`));\nmodel.count++;\nmodel.count = 5;\nmodel.count = 5;        // بدون تغییر، بدون اعلان\ndelete model.count;", "notes": ["Vue 3 سیستم واکنش‌پذیری خود را دقیقاً روی `Proxy` ساخته است.", "همیشه در تله‌ها از `Reflect` استفاده کنید تا رفتار پیش‌فرض (و `this` درست) حفظ شود؛ و بدانید `Proxy` هزینهٔ کارایی دارد و برای داده‌های بسیار داغ مناسب نیست."], "tags": "metaprogramming reactive validation"}, {"id": "generators", "cat": "ویژگی‌های مدرن زبان", "level": "پیشرفته", "title": "Generator: دنباله‌های لازی و ماشین حالت", "desc": "مولدها محاسبه را «در صورت نیاز» انجام می‌دهند؛ پس می‌توان دنبالهٔ بی‌پایان تعریف کرد و فقط بخش مصرف‌شده را حساب کرد. همچنین `next(value)` یک کانال دوطرفه است.", "code": "function* naturals(start = 1) { while (true) yield start++; }\n\nconst lazy = {\n  *map(it, f)    { for (const x of it) yield f(x); },\n  *filter(it, f) { for (const x of it) if (f(x)) yield x; },\n  *take(it, n)   { if (n <= 0) return; for (const x of it) { yield x; if (--n <= 0) return; } },\n};\n\n// فقط ۵ مربعِ فرد اول از دنبالهٔ بی‌پایان\nconst result = [...lazy.take(lazy.filter(lazy.map(naturals(), x => x * x), x => x % 2 === 1), 5)];\nconsole.log(result);\n\n// مولد دوطرفه: next(true) شمارنده را ریست می‌کند\nfunction* invoiceIds(prefix) {\n  let i = 0;\n  while (true) {\n    const reset = yield `${prefix}-${String(++i).padStart(3, '0')}`;\n    if (reset) i = 0;\n  }\n}\nconst ids = invoiceIds('INV');\nconsole.log(ids.next().value, ids.next().value, ids.next(true).value);\n\n// iterator protocol دستی\nconst it = [10, 20][Symbol.iterator]();\nconsole.log(it.next(), it.next(), it.next());", "notes": ["خروجی `lazy.take` به‌محض رسیدن به n، زنجیرهٔ مولدهای قبلی را هم می‌بندد؛ هیچ عنصر اضافه‌ای محاسبه نمی‌شود.", "در مرورگرهای جدید متدهای `Iterator.prototype.map/filter/take` همین الگو را به‌صورت داخلی ارائه می‌دهند."], "tags": "iterator lazy sequence"}, {"id": "symbols", "cat": "ویژگی‌های مدرن زبان", "level": "پیشرفته", "title": "پروتکل‌های Symbol: toPrimitive، iterator و toStringTag", "desc": "Symbolهای شناخته‌شده به شیء‌های شما اجازه می‌دهند در رفتار زبان شرکت کنند: تبدیل به عدد/رشته، پیمایش با `for…of`/spread و برچسب نمایش.", "code": "class Money {\n  constructor(amount, currency) { this.amount = amount; this.currency = currency; }\n  [Symbol.toPrimitive](hint) {\n    return hint === 'number' ? this.amount : `${this.amount.toLocaleString('fa-IR')} ${this.currency}`;\n  }\n  get [Symbol.toStringTag]() { return 'Money'; }\n}\nconst price = new Money(1250000, 'تومان');\nconsole.log(`${price}`);                                   // hint: string\nconsole.log(+price, price > new Money(1000, 'تومان'));     // hint: number\nconsole.log(Object.prototype.toString.call(price));\n\nclass Range {\n  constructor(from, to, step = 1) { Object.assign(this, { from, to, step }); }\n  *[Symbol.iterator]() { for (let x = this.from; x <= this.to; x += this.step) yield x; }\n}\nconsole.log([...new Range(1, 10, 3)], Math.max(...new Range(1, 5)));\nconst [first, second, ...rest] = new Range(1, 6);\nconsole.log(first, second, rest);\nconsole.log(Array.from(new Range(1, 3), x => x * 10));", "notes": ["هر شیئی که `Symbol.iterator` داشته باشد با spread، destructuring، `for…of`، `Array.from` و `Promise.all` سازگار می‌شود.", "برای تعریف کلیدهای پنهان از تداخل، `Symbol()` مناسب است؛ ولی برای حریم خصوصی واقعی از `#field` استفاده کنید."], "tags": "iterator toprimitive well-known symbols"}, {"id": "tagged-template", "cat": "ویژگی‌های مدرن زبان", "level": "پیشرفته", "title": "Tagged template برای HTML امن", "desc": "تابع برچسب‌دار هر مقدار درون‌یابی‌شده را قبل از ساخت رشته دریافت می‌کند؛ پس می‌تواند همه را به‌طور خودکار escape کند و فقط مقادیر «اعتمادشده» (`SafeHTML`) را دست‌نخورده بگذارد.", "code": "const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#39;' };\nconst escapeHTML = s => String(s).replace(/[&<>\"']/g, c => ESC[c]);\n\nclass SafeHTML { constructor(v) { this.value = v; } toString() { return this.value; } }\nconst trusted = s => new SafeHTML(s);\n\nfunction html(strings, ...values) {\n  const render = v =>\n    v instanceof SafeHTML ? v.value :\n    Array.isArray(v)      ? v.map(render).join('') :\n                            escapeHTML(v);\n  return new SafeHTML(strings.reduce((out, str, i) => out + render(values[i - 1]) + str));\n}\n\nconst evil = '<img src=x onerror=\"alert(1)\">';\nconst item = name => html`<li>${name}<\/li>`;\nconst page = html`<ul>${['علی', 'سارا', evil].map(item)}<\/ul>`;\n\nconsole.log(String(page));\nconsole.log('--- درج در DOM به‌صورت متن بی‌اثر ---');\nroot.innerHTML = String(page);\nconsole.log('تعداد <img> واقعی در صفحه:', root.querySelectorAll('img').length);", "notes": ["این همان ایدهٔ پشت کتابخانه‌هایی مثل lit-html است: «پیش‌فرض امن»، و استثنا فقط با علامت‌گذاری صریح.", "`strings.raw` رشتهٔ خام بدون پردازش escape را می‌دهد و در تگ‌هایی مثل `String.raw` کاربرد دارد."], "tags": "xss escape template"}, {"id": "intl", "cat": "ویژگی‌های مدرن زبان", "level": "متوسط", "title": "Intl برای فارسی: عدد، تاریخ شمسی، نسبی و مرتب‌سازی", "desc": "قالب‌بندی بومی بدون هیچ کتابخانه‌ای: عدد و پول با ارقام فارسی، تاریخ شمسی، «۲ ساعت دیگر»، فهرست و مرتب‌سازی الفبای فارسی. خروجی دقیق به ICU مرورگر شما بستگی دارد.", "code": "const nf = new Intl.NumberFormat('fa-IR');\nconsole.log(nf.format(1234567.891));\nconsole.log(new Intl.NumberFormat('fa-IR', { style: 'currency', currency: 'IRR', maximumFractionDigits: 0 }).format(25000000));\nconsole.log(new Intl.NumberFormat('fa-IR', { notation: 'compact' }).format(1530000));\nconsole.log(new Intl.NumberFormat('fa-IR', { style: 'percent' }).format(0.256));\n\nconst d = new Date(Date.UTC(2025, 2, 21, 12));\nconsole.log(new Intl.DateTimeFormat('fa-IR', { dateStyle: 'full', timeZone: 'Asia/Tehran' }).format(d));\nconsole.log(new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: 'long', day: 'numeric' }).format(d));\nconsole.log(new Intl.DateTimeFormat('en-US-u-ca-persian', { dateStyle: 'medium' }).format(d));\n\nconst rtf = new Intl.RelativeTimeFormat('fa', { numeric: 'auto' });\nconsole.log(rtf.format(-1, 'day'), '|', rtf.format(2, 'hour'), '|', rtf.format(0, 'day'));\n\nconsole.log(new Intl.ListFormat('fa', { type: 'conjunction' }).format(['جاوااسکریپت', 'پایتون', 'گو']));\nconsole.log(['ی', 'ب', 'پ', 'آ', 'ا'].sort(new Intl.Collator('fa').compare).join(' '));", "notes": ["به‌جای ساخت دستی رشتهٔ تاریخ یا جداکنندهٔ هزارگان، همیشه از `Intl` استفاده کنید؛ هم درست است هم با زبان کاربر هماهنگ.", "نمونهٔ `Intl.NumberFormat` را یک‌بار بسازید و بارها استفاده کنید؛ ساختنش گران‌تر از `format` است."], "tags": "persian jalali locale format date number"}, {"id": "clone-compare", "cat": "ویژگی‌های مدرن زبان", "level": "متوسط", "title": "مقایسهٔ کپی: spread، JSON و structuredClone", "desc": "سه روش رایج کپی روی یک شیء پیچیده چه چیزهایی را از دست می‌دهند؟ خروجی نوع هر ویژگی را بعد از کپی نشان می‌دهد.", "code": "const src = {\n  n: 1, when: new Date(0), missing: undefined,\n  map: new Map([['a', 1]]), set: new Set([1]), re: /x/g,\n  nested: { list: [1, { z: 1 }] }, fn() {},\n};\n\nfunction summarize(obj) {\n  return Object.entries(obj)\n    .map(([k, v]) => `${k}:${v === undefined ? 'undefined' : v?.constructor?.name ?? v}`).join('  ');\n}\nfunction attempt(label, fn) {\n  try { console.log(label.padEnd(20), summarize(fn())); }\n  catch (e) { console.log(label.padEnd(20), '✗', e.name); }\n}\n\nattempt('spread (سطحی)', () => ({ ...src }));\nattempt('JSON رفت‌وبرگشت', () => JSON.parse(JSON.stringify(src)));\nattempt('structuredClone', () => structuredClone(src));\n\nconst { fn, ...clonable } = src;\nattempt('structuredClone بدون fn', () => structuredClone(clonable));\n\nconst shallow = { ...src };\nconsole.log('nested مشترک است؟', shallow.nested === src.nested);\nconsole.log('کپی عمیق جداست؟', structuredClone(clonable).nested !== src.nested);", "notes": ["`JSON` رفت‌وبرگشت: `Date` به رشته، `undefined` حذف و `Map`/`Set`/`RegExp` به `{}` تبدیل می‌شوند.", "`structuredClone` تابع را نمی‌پذیرد (`DataCloneError`) ولی نوع‌های داده‌ای مدرن را درست کپی می‌کند."], "tags": "copy json spread"}, {"id": "url", "cat": "ویژگی‌های مدرن زبان", "level": "متوسط", "title": "URL و URLSearchParams", "desc": "تجزیه و ساخت آدرس بدون regex دستی؛ شامل کدگذاری خودکار حروف فارسی، آدرس نسبی و تفاوت `Object.fromEntries` با `getAll` برای پارامتر تکراری.", "code": "const url = new URL('https://shop.example.com:8080/products/list?cat=phone&sort=price#reviews');\nconsole.log(url.origin, url.pathname, url.port, url.hash);\n\nurl.searchParams.append('tag', 'نو و دست‌نخورده');\nurl.searchParams.set('sort', 'rating');\nurl.searchParams.delete('cat');\nconsole.log(url.href);\nconsole.log([...url.searchParams]);\n\nconst query = 'b=2&b=3&a=1';\nconsole.log(Object.fromEntries(new URLSearchParams(query)), '← مقدار آخر برنده است');\nconsole.log(new URLSearchParams(query).getAll('b'), '← همهٔ مقدارها');\n\nconst rel = new URL('../cart?x=1', 'https://shop.example.com/products/list');\nconsole.log(rel.href);\n\nconsole.log(encodeURIComponent('نام & نام‌خانوادگی = ۱'));\nconsole.log(decodeURIComponent('%D9%86%D9%88'));\n\n// اعتبارسنجی ساده: فقط پروتکل‌های مجاز\nconst isSafe = s => { try { return ['http:', 'https:'].includes(new URL(s).protocol); } catch { return false; } };\nconsole.log(isSafe('https://example.com'), isSafe('javascript:alert(1)'), isSafe('نامعتبر'));", "notes": ["هنگام ساخت آدرس با ورودی کاربر، هرگز رشته‌ها را دستی به هم نچسبانید؛ `searchParams.set` خودش کدگذاری می‌کند.", "بررسی پروتکل با `new URL(...).protocol` راه مطمئن‌تری از regex برای رد `javascript:` است."], "tags": "query string encode"}, {"id": "delegation", "cat": "DOM و مرورگر", "level": "متوسط", "title": "Event delegation روی فهرست پویا", "desc": "یک شنونده برای همهٔ آیتم‌ها (حال و آینده). این مثال روی عنصر نمایش‌داده‌شدهٔ زیر اجرا می‌شود و کلیک‌ها را شبیه‌سازی می‌کند.", "code": "root.replaceChildren();\nconst ul = document.createElement('ul');\nul.style.cssText = 'list-style:none;padding:0;margin:0;display:grid;gap:6px';\nroot.append(ul);\n\nlet nextId = 0;\nfunction addTask(text) {\n  const li = document.createElement('li');\n  li.dataset.id = ++nextId;\n  li.style.cssText = 'display:flex;gap:8px;align-items:center;padding:6px 10px;border:1px solid var(--border);border-radius:6px';\n  const label = document.createElement('span');\n  label.textContent = text; label.style.flex = '1'; label.dataset.role = 'label';\n  const del = document.createElement('button');\n  del.textContent = '✕'; del.dataset.action = 'delete';\n  li.append(label, del);\n  ul.append(li);\n}\n\nul.addEventListener('click', e => {\n  const li = e.target.closest('li');\n  if (!li || !ul.contains(li)) return;\n  if (e.target.closest('[data-action=\"delete\"]')) { li.remove(); return; }\n  const label = li.querySelector('[data-role=\"label\"]');\n  label.style.textDecoration = label.style.textDecoration ? '' : 'line-through';\n});\n\n['شیر', 'نان', 'پنیر'].forEach(addTask);\n\nul.querySelector('li:nth-child(2) [data-role=\"label\"]').click();   // خط‌زدن «نان»\nul.querySelector('li:nth-child(1) [data-action]').click();         // حذف «شیر»\naddTask('گوجه');                                                   // آیتم جدید بدون شنوندهٔ تازه کار می‌کند\nconsole.log('آیتم‌های باقی‌مانده:', ul.children.length, '| تعداد addEventListener: 1');", "notes": ["`closest` را به‌کار ببرید، نه `e.target` مستقیم؛ چون ممکن است کلیک روی عنصر درونی (مثل `<span>` داخل دکمه) باشد.", "رویدادهایی که bubble نمی‌شوند (مثل `focus`، `blur`، `mouseenter`) باید با `focusin`/`focusout`/`mouseover` یا فاز capture دلیگیت شوند."], "tags": "click bubbling list"}, {"id": "virtual-list", "cat": "DOM و مرورگر", "level": "پیشرفته", "title": "Virtual list: ۱۰٬۰۰۰ ردیف با ~۱۰ عنصر DOM", "desc": "فقط ردیف‌های قابل‌مشاهده (به‌اضافهٔ کمی حاشیه) ساخته می‌شوند و با `translateY` جابه‌جا می‌شوند؛ ارتفاع کل را یک عنصر خالی تأمین می‌کند. اسکرول کنید و تعداد عنصرهای واقعی را ببینید.", "code": "root.replaceChildren();\nconst N = 10000, ROW = 28, VIEW = 224, OVERSCAN = 3;\n\nconst box = document.createElement('div');\nbox.style.cssText = `height:${VIEW}px;overflow:auto;position:relative;border:1px solid var(--border);border-radius:6px`;\nconst spacer = document.createElement('div');\nspacer.style.height = N * ROW + 'px';\nconst layer = document.createElement('div');\nlayer.style.cssText = 'position:absolute;inset-inline:0;top:0;will-change:transform';\nspacer.append(layer); box.append(spacer); root.append(box);\n\nfunction render() {\n  const start = Math.max(0, Math.floor(box.scrollTop / ROW) - OVERSCAN);\n  const end = Math.min(N, Math.ceil((box.scrollTop + VIEW) / ROW) + OVERSCAN);\n  layer.style.transform = `translateY(${start * ROW}px)`;\n  const frag = document.createDocumentFragment();\n  for (let i = start; i < end; i++) {\n    const row = document.createElement('div');\n    row.style.cssText = `height:${ROW}px;line-height:${ROW}px;padding:0 10px;border-bottom:1px solid var(--border-soft)`;\n    row.textContent = `ردیف شمارهٔ ${(i + 1).toLocaleString('fa-IR')}`;\n    frag.append(row);\n  }\n  layer.replaceChildren(frag);\n  return layer.children.length;\n}\n\nbox.addEventListener('scroll', render, { passive: true });\nconsole.log('عنصرهای DOM در شروع:', render(), 'از', N);\nbox.scrollTop = 140000;\nconsole.log('بعد از پرش به میانهٔ فهرست:', render());", "notes": ["در تولید معمولاً ارتفاع ردیف‌ها متغیر است و از کتابخانه (TanStack Virtual، react-window) استفاده می‌شود؛ ایدهٔ پایه همین است.", "برای فهرست‌های پویا اغلب `content-visibility: auto` در CSS ساده‌ترین بهبود اولیه است."], "tags": "performance windowing scroll"}, {"id": "web-component", "cat": "DOM و مرورگر", "level": "پیشرفته", "title": "Web Component با Shadow DOM", "desc": "عنصر سفارشی `<fa-rating>` با استایل کپسوله‌شده، ویژگی‌های واکنشی (`observedAttributes`) و رویداد سفارشی. روی عنصر زیر ساخته می‌شود.", "code": "if (!customElements.get('fa-rating')) {\n  customElements.define('fa-rating', class extends HTMLElement {\n    static observedAttributes = ['value'];\n    #shadow = this.attachShadow({ mode: 'open' });\n\n    connectedCallback() {\n      this.#render();\n      this.#shadow.addEventListener('click', e => {\n        const star = e.target.closest('[data-v]');\n        if (!star) return;\n        this.value = Number(star.dataset.v);\n        this.dispatchEvent(new CustomEvent('rate', { detail: this.value, bubbles: true }));\n      });\n    }\n    attributeChangedCallback() { this.#render(); }\n\n    get value() { return Number(this.getAttribute('value')) || 0; }\n    set value(v) { this.setAttribute('value', v); }\n\n    #render() {\n      const stars = [1, 2, 3, 4, 5].map(i =>\n        `<span data-v=\"${i}\" class=\"${i <= this.value ? 'on' : ''}\">★<\/span>`).join('');\n      this.#shadow.innerHTML =\n        `<style>span{cursor:pointer;font-size:1.7rem;color:#777}span.on{color:#e6b422}<\/style>${stars}`;\n    }\n  });\n}\n\nroot.replaceChildren();\nconst el = document.createElement('fa-rating');\nel.setAttribute('value', '3');\nroot.append(el);\nel.addEventListener('rate', e => console.log('امتیاز جدید:', e.detail));\n\nconsole.log('امتیاز اولیه:', el.value);\nel.shadowRoot.querySelector('[data-v=\"5\"]').click();\nconsole.log('مقدار ویژگی HTML:', el.getAttribute('value'));\nconsole.log('محتوای Shadow از بیرون با querySelector پیدا نمی‌شود:', root.querySelector('[data-v]') === null);", "notes": ["هر عنصر سفارشی فقط یک‌بار در هر صفحه قابل ثبت است؛ اگر کلاس را ویرایش و دوباره اجرا کنید باید صفحه را reload کنید.", "در `#render` فقط مقادیر کنترل‌شده در `innerHTML` رفته‌اند؛ برای داده‌ٔ کاربر همچنان باید `textContent` به کار رود."], "tags": "custom element shadow dom"}, {"id": "mutation-observer", "cat": "DOM و مرورگر", "level": "پیشرفته", "title": "MutationObserver و رابطه‌اش با میکروتسک", "desc": "تغییرهای DOM دسته‌ای و به‌صورت میکروتسک گزارش می‌شوند، نه همزمان با هر تغییر. این مثال همین را ثابت می‌کند.", "code": "root.replaceChildren();\nconst target = document.createElement('div');\nroot.append(target);\n\nconst records = [];\nconst observer = new MutationObserver(list => {\n  for (const r of list) {\n    records.push(r.type === 'attributes'\n      ? `attributes ← ${r.attributeName}`\n      : `childList ← +${r.addedNodes.length} / -${r.removedNodes.length}`);\n  }\n});\nobserver.observe(target, { childList: true, attributes: true, subtree: true });\n\ntarget.setAttribute('data-state', 'ready');\ntarget.append(document.createElement('b'), 'متن');\ntarget.firstChild.remove();\n\nconsole.log('همگام، بلافاصله بعد از تغییرها:', records.length, 'گزارش');\nawait null;                                   // یک میکروتسک صبر\nconsole.log('بعد از یک میکروتسک:', records.length, 'گزارش');\nrecords.forEach(r => console.log('  •', r));\nobserver.disconnect();", "notes": ["به همین دلیل نمی‌توان از Observer برای «واکنش همزمان» استفاده کرد؛ همیشه بعد از اتمام کد فعلی اجرا می‌شود.", "`ResizeObserver` و `IntersectionObserver` الگوی مشابه دارند اما با چرخهٔ رندر (نه میکروتسک) هماهنگ‌اند."], "tags": "observer dom microtask"}, {"id": "storage-ttl", "cat": "DOM و مرورگر", "level": "متوسط", "title": "localStorage با انقضا و پارس امن", "desc": "پوشش کوچک روی `localStorage` که JSON را امن می‌خواند، مقدار منقضی را پاک می‌کند و در برابر داده‌های خراب و کامل‌بودن سهمیه مقاوم است.", "code": "const store = {\n  set(key, value, ttlMs) {\n    try {\n      localStorage.setItem(key, JSON.stringify({ v: value, e: ttlMs ? Date.now() + ttlMs : null }));\n      return true;\n    } catch { return false; }               // سهمیه پر یا storage غیرفعال\n  },\n  get(key, fallback = null) {\n    try {\n      const raw = localStorage.getItem(key);\n      if (raw === null) return fallback;\n      const { v, e } = JSON.parse(raw);\n      if (e && Date.now() > e) { localStorage.removeItem(key); return fallback; }\n      return v;\n    } catch { return fallback; }            // JSON خراب\n  },\n};\n\nstore.set('lab:user', { name: 'سارا' }, 100);\nconsole.log('فوراً:', store.get('lab:user'));\nawait new Promise(r => setTimeout(r, 150));\nconsole.log('بعد از انقضا:', store.get('lab:user', 'منقضی شد'));\n\nlocalStorage.setItem('lab:broken', '{not json');\nconsole.log('داده‌ٔ خراب:', store.get('lab:broken', 'نادیده گرفته شد'));\nlocalStorage.removeItem('lab:broken');\nconsole.log('کلیدهای lab: باقی‌مانده:', Object.keys(localStorage).filter(k => k.startsWith('lab:')).length);", "notes": ["`localStorage` همگام و روی نخ اصلی است؛ دادهٔ حجیم را آنجا نگذارید (از IndexedDB استفاده کنید).", "هر کلید را با پیشوند برنامه بسازید تا با اسکریپت‌های دیگر روی همان مبدأ تداخل نکند."], "tags": "persist json"}, {"id": "bench", "cat": "کارایی", "level": "متوسط", "title": "ریزسنجش (micro-benchmark) درست‌تر", "desc": "گرم‌کردن (warm-up)، چند اجرا و گزارش میانه به‌جای یک اندازه‌گیری تکی. ببینید ساختار داده چقدر بر زمان جست‌وجو اثر می‌گذارد.", "code": "function bench(label, fn, runs = 7) {\n  fn();                                           // warm-up برای JIT\n  const times = [];\n  for (let i = 0; i < runs; i++) {\n    const t = performance.now(); fn();\n    times.push(performance.now() - t);\n  }\n  times.sort((a, b) => a - b);\n  console.log(label.padEnd(30), 'میانه', times[runs >> 1].toFixed(2).padStart(7) + 'ms');\n}\n\nconst N = 200_000;\nconst data = Array.from({ length: N }, (_, i) => i);\nconst set = new Set(data);\n\nbench('for کلاسیک', () => { let s = 0; for (let i = 0; i < data.length; i++) s += data[i] * 2; return s; });\nbench('reduce', () => data.reduce((s, x) => s + x * 2, 0));\nbench('map+filter+reduce (۳ آرایه)', () => data.map(x => x * 2).filter(x => x % 3 === 0).reduce((a, b) => a + b, 0));\nbench('Array.includes × ۲۰۰۰', () => { let c = 0; for (let i = 0; i < 2000; i++) if (data.includes(i * 97)) c++; return c; });\nbench('Set.has × ۲۰۰۰', () => { let c = 0; for (let i = 0; i < 2000; i++) if (set.has(i * 97)) c++; return c; });", "notes": ["اعداد این صفحه به دستگاه و مرورگر شما بستگی دارد؛ **مقایسهٔ نسبی** مهم است، نه عدد مطلق.", "قبل از بهینه‌سازی با پنل Performance در DevTools پروفایل بگیرید؛ بیشتر گلوگاه‌ها جای دیگری از جایی هستند که حدس می‌زنید."], "tags": "performance timing"}, {"id": "layout-thrash", "cat": "کارایی", "level": "پیشرفته", "title": "Layout thrashing: خواندن و نوشتن درهم‌تنیده", "desc": "خواندن ویژگی‌های چینش (مثل `offsetHeight`) بین نوشتن‌ها، مرورگر را مجبور می‌کند در هر دور layout را دوباره حساب کند. دسته‌بندی نوشتن‌ها و خواندن‌ها فاصلهٔ چشمگیری می‌سازد.", "code": "function measure(label, fn) {\n  root.replaceChildren();\n  const host = document.createElement('div');\n  host.style.cssText = 'width:300px;font-size:12px';\n  root.append(host);\n  const t = performance.now();\n  fn(host);\n  console.log(label.padEnd(34), (performance.now() - t).toFixed(1).padStart(7) + 'ms');\n}\nconst N = 1500;\nconst make = i => { const d = document.createElement('div'); d.textContent = 'ردیف ' + i; return d; };\n\nmeasure('درهم‌تنیده (نوشتن، خواندن، نوشتن…)', host => {\n  for (let i = 0; i < N; i++) { host.append(make(i)); host.offsetHeight; }\n});\n\nmeasure('دسته‌ای با DocumentFragment', host => {\n  const frag = document.createDocumentFragment();\n  for (let i = 0; i < N; i++) frag.append(make(i));\n  host.append(frag);\n  host.offsetHeight;                             // فقط یک خواندن در پایان\n});\n\nmeasure('اندازه‌گیری دسته‌ای (خواندن‌ها، بعد نوشتن‌ها)', host => {\n  const frag = document.createDocumentFragment();\n  for (let i = 0; i < N; i++) frag.append(make(i));\n  host.append(frag);\n  const kids = [...host.children];\n  const heights = kids.map(k => k.offsetHeight);       // همهٔ خواندن‌ها با هم\n  kids.forEach((k, i) => { k.style.minHeight = heights[i] + 'px'; }); // همهٔ نوشتن‌ها با هم\n});", "notes": ["الگوی طلایی: «اول همهٔ خواندن‌ها، بعد همهٔ نوشتن‌ها»؛ یا نوشتن‌ها را در `requestAnimationFrame` ببرید.", "در پنل Performance، هشدار «Forced reflow» دقیقاً همین مشکل را نشان می‌دهد."], "tags": "reflow dom performance"}, {"id": "sanitize", "cat": "امنیت", "level": "پیشرفته", "title": "پاک‌سازی HTML با allowlist و DOMParser", "desc": "وقتی ناچارید HTML کاربر را نمایش دهید (مثلاً ادیتور متن غنی)، به‌جای حذف الگوهای «بد» باید فقط «خوب»های مشخص را مجاز کنید. `DOMParser` سند را بدون اجرای اسکریپت یا بارگیری تصویر می‌سازد.", "code": "const ALLOWED = { B: [], I: [], EM: [], STRONG: [], P: [], UL: [], LI: [], BR: [], A: ['href'] };\nconst SAFE_URL = /^(https?:|mailto:)/i;\n\nfunction sanitize(dirty) {\n  const doc = new DOMParser().parseFromString(dirty, 'text/html');   // سند غیرفعال\n  (function walk(node) {\n    for (const child of [...node.childNodes]) {\n      if (child.nodeType === Node.TEXT_NODE) continue;\n      if (child.nodeType !== Node.ELEMENT_NODE) { child.remove(); continue; }   // کامنت و …\n      const allowedAttrs = ALLOWED[child.tagName];\n      if (!allowedAttrs) {                                  // تگ مجاز نیست ← فقط متن\n        child.replaceWith(document.createTextNode(child.textContent));\n        continue;\n      }\n      for (const attr of [...child.attributes]) {\n        const ok = allowedAttrs.includes(attr.name) && (attr.name !== 'href' || SAFE_URL.test(attr.value.trim()));\n        if (!ok) child.removeAttribute(attr.name);\n      }\n      walk(child);\n    }\n  })(doc.body);\n  return doc.body.innerHTML;\n}\n\nconst dirty = `<p onclick=\"steal()\">سلام <b>دنیا<\/b>\n  <script>alert(1)<\\/script><img src=x onerror=alert(2)>\n  <a href=\"javascript:alert(3)\">لینک بد<\/a>\n  <a href=\"https://example.com\" onclick=\"x()\">لینک خوب<\/a><\/p>`;\n\nconst clean = sanitize(dirty);\nconsole.log(clean);\nroot.innerHTML = clean;\nconsole.log('اسکریپت/تصویر/onclick در خروجی:',\n  root.querySelectorAll('script,img,[onclick]').length);", "notes": ["در پروژهٔ واقعی از **DOMPurify** یا API استاندارد `Sanitizer` (وقتی در دسترس باشد) استفاده کنید؛ این نمونه فقط برای فهم اصل allowlist است.", "ساده‌ترین و امن‌ترین راه همچنان `textContent` است؛ پاک‌سازی فقط وقتی لازم است که واقعاً نشانه‌گذاری را بخواهید."], "tags": "xss dompurify"}, {"id": "proto-pollution", "cat": "امنیت", "level": "پیشرفته", "title": "Prototype pollution: ادغام ناامن در برابر امن", "desc": "ادغام بازگشتیِ ساده‌انگارانه با ورودی `JSON` حاوی `__proto__` می‌تواند ویژگی را روی `Object.prototype` و در نتیجه روی **همهٔ** شیءها بگذارد. این مثال آلودگی را در محیط کنترل‌شده نشان می‌دهد و بلافاصله پاکش می‌کند.", "code": "function unsafeMerge(target, source) {\n  for (const key in source) {\n    if (typeof source[key] === 'object' && source[key] !== null) {\n      target[key] ??= {};\n      unsafeMerge(target[key], source[key]);\n    } else {\n      target[key] = source[key];\n    }\n  }\n  return target;\n}\n\nconst BLOCKED = new Set(['__proto__', 'constructor', 'prototype']);\nfunction safeMerge(target, source) {\n  for (const key of Object.keys(source)) {\n    if (BLOCKED.has(key)) continue;\n    if (typeof source[key] === 'object' && source[key] !== null) {\n      if (!Object.hasOwn(target, key)) target[key] = {};\n      safeMerge(target[key], source[key]);\n    } else {\n      target[key] = source[key];\n    }\n  }\n  return target;\n}\n\nconst payload = JSON.parse('{\"__proto__\": {\"isAdmin\": true}}');   // ورودی مهاجم\n\nconsole.log('قبل از حمله، ({}).isAdmin =', ({}).isAdmin);\ntry {\n  unsafeMerge({}, payload);\n  console.log('پس از ادغام ناامن، ({}).isAdmin =', ({}).isAdmin, '← همهٔ شیءها آلوده شدند!');\n} finally {\n  delete Object.prototype.isAdmin;                                // پاک‌سازی تا صفحه سالم بماند\n}\nconsole.log('پس از پاک‌سازی =', ({}).isAdmin);\n\nsafeMerge({}, payload);\nconsole.log('پس از ادغام امن =', ({}).isAdmin);\n\nconst dict = Object.create(null);           // دیکشنری بدون prototype\ndict.__proto__ = 'فقط یک کلید معمولی';\nconsole.log('Object.create(null):', Object.keys(dict), 'ایمن از آلودگی');", "notes": ["راه‌های دفاعی: رد کلیدهای خطرناک، `Object.create(null)`، `Map` به‌جای شیء، `Object.freeze(Object.prototype)` در سیاست‌های سخت‌گیر و به‌روز نگه‌داشتن وابستگی‌ها.", "بخش `finally` را حذف نکنید؛ آلودگی `Object.prototype` تا reload صفحه باقی می‌ماند و روی همهٔ مثال‌ها اثر می‌گذارد."], "tags": "security merge __proto__"}, {"id": "mini-test", "cat": "تست", "level": "پیشرفته", "title": "چارچوب تست کوچک: test، expect، spy و کد ناهمگام", "desc": "ساختن یک اجراکنندهٔ تست از صفر، تا سازوکار ابزارهایی مثل Vitest/Jest روشن شود: ثبت تست‌ها، assertion، spy و پشتیبانی از `async`. یک تست عمداً شکست می‌خورد.", "code": "const tests = [];\nconst test = (name, fn) => tests.push({ name, fn });\nconst fmt = v => JSON.stringify(v);\n\nconst expect = actual => ({\n  toBe(expected) {\n    if (!Object.is(actual, expected)) throw new Error(`انتظار ${fmt(expected)} ولی ${fmt(actual)} بود`);\n  },\n  toEqual(expected) {\n    if (fmt(actual) !== fmt(expected)) throw new Error(`انتظار ${fmt(expected)} ولی ${fmt(actual)} بود`);\n  },\n  toThrow() {\n    try { actual(); } catch { return; }\n    throw new Error('انتظار پرتاب خطا بود');\n  },\n});\n\nfunction spy(impl = () => {}) {\n  const s = (...args) => { s.calls.push(args); return impl(...args); };\n  s.calls = [];\n  return s;\n}\n\nasync function run() {\n  let pass = 0, fail = 0;\n  for (const { name, fn } of tests) {\n    try { await fn(); pass++; console.log('✓', name); }\n    catch (e) { fail++; console.log('✗', name, '—', e.message); }\n  }\n  console.log(`\\n${pass} موفق، ${fail} ناموفق`);\n}\n\n// ----- کد موردآزمون -----\nconst slugify = s => s.trim().toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, '-').replace(/^-+|-+$/g, '');\n\ntest('فاصله‌ها به خط‌تیره تبدیل می‌شوند', () => expect(slugify(' Hello  World ')).toBe('hello-world'));\ntest('حروف فارسی حفظ می‌شود', () => expect(slugify('سلام دنیا')).toBe('سلام-دنیا'));\ntest('رشتهٔ خالی', () => expect(slugify('')).toBe(''));\ntest('ورودی غیررشته خطا می‌دهد', () => expect(() => slugify(null)).toThrow());\ntest('باگ عمدی: زیرخط (باید شکست بخورد)', () => expect(slugify('A_B')).toBe('a_b'));\ntest('کد ناهمگام با spy', async () => {\n  const done = spy();\n  await new Promise(r => setTimeout(() => { done('ok'); r(); }, 10));\n  expect(done.calls).toEqual([['ok']]);\n});\n\nawait run();", "notes": ["تست شکست‌خورده یعنی ابزار کار می‌کند: همیشه یک بار ببینید تست شما واقعاً می‌تواند fail شود.", "در پروژهٔ واقعی از Vitest یا `node:test` استفاده کنید؛ ولی دانستن اینکه زیرشان فقط «ثبت، اجرا، گزارش» است ذهن را روشن می‌کند."], "tags": "unit test mock assertion"}]</script>
+<script>
+(function(){
+"use strict";
+const DATA = JSON.parse(document.getElementById('lab-data').textContent);
+const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+const $ = (s, r=document) => r.querySelector(s);
+
+/* ---------- theme ---------- */
+try { const t = localStorage.getItem('jslab_theme'); if (t === 'light') document.documentElement.setAttribute('data-theme','light'); } catch {}
+$('#themeToggle').addEventListener('click', () => {
+  const light = document.documentElement.getAttribute('data-theme') === 'light';
+  if (light) document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme','light');
+  try { localStorage.setItem('jslab_theme', light ? 'dark' : 'light'); } catch {}
+});
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg){ $('#toastMsg').textContent = msg; $('#toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('show'), 1700); }
+
+/* ---------- highlight ---------- */
+const HL = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(`(?:\\.|[^`\\])*`)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])*')|(\b\d[\d_]*(?:\.\d+)?n?\b)|(\b(?:const|let|var|function|return|if|else|for|while|do|class|extends|new|this|async|await|try|catch|finally|throw|import|from|export|default|typeof|instanceof|null|undefined|true|false|static|get|set|super|of|in|break|continue|switch|case|delete|void|yield)\b)|(\b(?:console|document|window|JSON|Promise|Proxy|Reflect|Symbol|Map|Set|WeakMap|WeakSet|Array|Object|Number|String|Boolean|Math|Date|Error|TypeError|RegExp|Intl|URL|URLSearchParams|AbortController|AbortSignal|MutationObserver|structuredClone|localStorage|performance|root|queueMicrotask|setTimeout|clearTimeout|customElements|HTMLElement|Response|DOMParser|Node|CustomEvent|Reflect)\b)/gm;
+function highlight(src){
+  const esc = src.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return esc.replace(HL, (m,c1,c2,c3,c4,c5,num,kw,bi) => {
+    const cls = (c1||c2) ? 'tok-comment' : (c3||c4||c5) ? 'tok-string' : num ? 'tok-number' : kw ? 'tok-keyword' : bi ? 'tok-builtin' : null;
+    return cls ? '<span class="'+cls+'">'+m+'</span>' : m;
+  });
+}
+
+/* ---------- inspect / console ---------- */
+function inspect(v, depth = 0, seen = new Set(), top = true){
+  if (typeof v === 'string') return top ? v : JSON.stringify(v);
+  if (v === null) return 'null';
+  if (v === undefined) return 'undefined';
+  switch (typeof v) {
+    case 'number': return Object.is(v, -0) ? '-0' : String(v);
+    case 'bigint': return v + 'n';
+    case 'boolean': return String(v);
+    case 'symbol': return v.toString();
+    case 'function': return '[Function' + (v.name ? ': ' + v.name : '') + ']';
+  }
+  if (seen.has(v)) return '[Circular]';
+  if (depth > 4) return Array.isArray(v) ? '[…]' : '{…}';
+  seen.add(v);
+  const sub = x => inspect(x, depth + 1, seen, false);
+  let s;
+  if (v instanceof Error) s = v.name + ': ' + v.message;
+  else if (v instanceof Date) s = isNaN(v) ? 'Invalid Date' : v.toISOString();
+  else if (v instanceof RegExp) s = String(v);
+  else if (Array.isArray(v)) s = '[' + v.slice(0, 100).map(sub).join(', ') + (v.length > 100 ? ', …' : '') + ']';
+  else if (v instanceof Map) s = 'Map(' + v.size + ') {' + [...v].map(([k, x]) => sub(k) + ' => ' + sub(x)).join(', ') + '}';
+  else if (v instanceof Set) s = 'Set(' + v.size + ') {' + [...v].map(sub).join(', ') + '}';
+  else if (typeof Node !== 'undefined' && v instanceof Node) s = '<' + v.nodeName.toLowerCase() + '>';
+  else if (v instanceof Promise) s = 'Promise';
+  else {
+    const proto = Object.getPrototypeOf(v);
+    const name = proto === null ? '[Object: null prototype] ' : (v.constructor && v.constructor !== Object ? v.constructor.name + ' ' : '');
+    const keys = Object.keys(v);
+    s = keys.length ? name + '{ ' + keys.map(k => (/^[\w$]+$/.test(k) ? k : JSON.stringify(k)) + ': ' + sub(v[k])).join(', ') + ' }' : name + '{}';
+  }
+  seen.delete(v);
+  return s;
+}
+function makeConsole(out, alive){
+  const timers = new Map();
+  const add = (cls, args) => {
+    if (!alive()) return;
+    const ph = out.querySelector('.placeholder'); if (ph) ph.remove();
+    const d = document.createElement('div');
+    d.className = 'line' + (cls ? ' ' + cls : '');
+    d.setAttribute('dir', 'auto');
+    d.textContent = args.map(a => inspect(a)).join(' ');
+    out.append(d);
+    out.scrollTop = out.scrollHeight;
+  };
+  return {
+    log: (...a) => add('', a), info: (...a) => add('info', a),
+    warn: (...a) => add('warn', a), error: (...a) => add('error', a),
+    clear: () => { if (alive()) out.textContent = ''; },
+    time: (l = 'default') => timers.set(l, performance.now()),
+    timeEnd: (l = 'default') => { if (timers.has(l)) { add('info', [l + ': ' + (performance.now() - timers.get(l)).toFixed(2) + 'ms']); timers.delete(l); } },
+    table(data){
+      if (!alive()) return;
+      const rows = Array.isArray(data) ? data : Object.entries(data ?? {}).map(([k, v]) => ({ '(key)': k, ...(typeof v === 'object' && v ? v : { value: v }) }));
+      const cols = [...new Set(rows.flatMap(r => (r && typeof r === 'object') ? Object.keys(r) : ['value']))];
+      const t = document.createElement('table');
+      const head = t.insertRow(); cols.forEach(c => { const th = document.createElement('th'); th.textContent = c; head.append(th); });
+      rows.forEach(r => { const tr = t.insertRow(); cols.forEach(c => { const td = tr.insertCell(); td.textContent = inspect((r && typeof r === 'object') ? r[c] : (c === 'value' ? r : undefined), 1, new Set(), false); }); });
+      const w = document.createElement('div'); w.className = 'line'; w.append(t); out.append(w);
+    },
+  };
+}
+
+/* ---------- cards ---------- */
+const list = $('#list');
+const CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>';
+const md = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>';
+
+function buildCard(ex){
+  const usesRoot = /\broot\b/.test(ex.code);
+  const el = document.createElement('details');
+  el.className = 'lab-card'; el.id = 'ex-' + ex.id; el.dataset.cat = ex.cat;
+  el._ex = ex; el._run = 0;
+  el.innerHTML =
+    '<summary><span class="lesson-title-wrap">' + CHEV + '<span class="sum-main"><span class="lab-title">' + md(ex.title) + '</span><span class="sum-cat">' + md(ex.cat) + '</span></span></span>' +
+    '<span class="lesson-tags"><span class="tag-pill ' + (ex.level === 'پیشرفته' ? 'platform' : 'concept') + '">' + ex.level + '</span></span></summary>' +
+    '<div class="lab-body"><p class="desc">' + md(ex.desc) + '</p>' +
+    '<div class="editor"><pre aria-hidden="true"><code></code></pre><textarea spellcheck="false" aria-label="ویرایشگر کد: ' + md(ex.title) + '" wrap="soft"></textarea></div>' +
+    '<div class="toolbar"><button class="lab-btn run" data-act="run" type="button">' + PLAY + ' اجرا</button>' +
+    '<button class="lab-btn" data-act="reset" type="button">بازنشانی کد</button><button class="lab-btn" data-act="copy" type="button">کپی</button>' +
+    '<span class="spacer"></span><span class="meta" data-role="time"></span></div>' +
+    (usesRoot ? '<div class="pane-label">نمایشگر DOM (متغیر <code>root</code>)</div><div class="lab-root" data-role="root"></div>' : '') +
+    '<div class="pane-label">خروجی کنسول</div><div class="out" data-role="out"><span class="placeholder">«اجرا» را بزنید…</span></div>' +
+    '<ul class="notes">' + ex.notes.map(n => '<li>' + md(n) + '</li>').join('') + '</ul></div>';
+  const ta = $('textarea', el), codeEl = $('pre code', el);
+  const sync = () => { codeEl.innerHTML = highlight(ta.value) + '\n'; };
+  ta.value = ex.code; sync();
+  ta.addEventListener('input', sync);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab') { e.preventDefault(); const s = ta.selectionStart; ta.setRangeText('  ', s, ta.selectionEnd, 'end'); sync(); }
+    else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(el); }
+  });
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act;
+    if (act === 'run') run(el);
+    else if (act === 'reset') { ta.value = ex.code; sync(); toast('کد به حالت اولیه برگشت'); }
+    else if (act === 'copy') { (navigator.clipboard ? navigator.clipboard.writeText(ta.value) : Promise.reject()).then(() => toast('کد کپی شد'), () => { ta.select(); try { document.execCommand('copy'); toast('کد کپی شد'); } catch { toast('کپی ناموفق بود'); } }); }
+  });
+  return el;
+}
+
+async function run(card){
+  const ta = $('textarea', card), out = $('[data-role=out]', card), rootEl = $('[data-role=root]', card), timeEl = $('[data-role=time]', card);
+  const id = ++card._run, alive = () => card._run === id;
+  out.textContent = ''; if (rootEl) rootEl.replaceChildren();
+  timeEl.textContent = 'در حال اجرا…';
+  const con = makeConsole(out, alive);
+  const t0 = performance.now();
+  let fn;
+  try { fn = new AsyncFunction('console', 'root', ta.value); }
+  catch (e) { con.error((e.name || 'SyntaxError') + ': ' + e.message); timeEl.textContent = ''; return; }
+  try { const r = await fn(con, rootEl); if (r !== undefined) con.log('↩', r); }
+  catch (e) { con.error((e && e.name ? e.name : 'Error') + ': ' + (e && e.message ? e.message : e)); }
+  if (alive()) timeEl.textContent = '⏱ ' + Math.round(performance.now() - t0) + 'ms';
+}
+
+const cards = DATA.map(buildCard);
+cards.forEach(c => list.append(c));
+
+/* ---------- filters ---------- */
+const cats = [...new Set(DATA.map(e => e.cat))];
+let activeCat = 'all';
+const chipsEl = $('#chips');
+function renderChips(){
+  const mk = (key, label, n) => '<button class="cat-chip" type="button" data-cat="' + key + '" aria-pressed="' + (activeCat === key) + '">' + label + '<span class="n">' + n + '</span></button>';
+  chipsEl.innerHTML = mk('all', 'همه', DATA.length) + cats.map(c => mk(c, md(c), DATA.filter(e => e.cat === c).length)).join('');
+}
+chipsEl.addEventListener('click', e => { const b = e.target.closest('.cat-chip'); if (!b) return; activeCat = b.dataset.cat; renderChips(); apply(); });
+const norm = s => s.toLowerCase().replace(/ي/g, 'ی').replace(/ك/g, 'ک');
+function apply(){
+  const q = norm($('#q').value.trim());
+  let shown = 0;
+  cards.forEach(c => {
+    const e = c._ex;
+    const hay = norm([e.title, e.desc, e.cat, e.tags, e.id, e.level].join(' '));
+    const ok = (activeCat === 'all' || e.cat === activeCat) && (!q || q.split(/\s+/).every(w => hay.includes(w)));
+    c.hidden = !ok; if (ok) shown++;
+  });
+  $('#count').textContent = shown ? shown.toLocaleString('fa-IR') + ' مثال نمایش داده می‌شود' : '';
+  let empty = $('.empty', list);
+  if (!shown && !empty) { empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = 'مثالی با این جست‌وجو پیدا نشد.'; list.append(empty); }
+  else if (shown && empty) empty.remove();
+}
+$('#q').addEventListener('input', apply);
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) { e.preventDefault(); $('#q').focus(); }
+  else if (e.key === 'Escape' && document.activeElement === $('#q')) { $('#q').blur(); }
+});
+function openFromHash(){
+  const id = decodeURIComponent(location.hash.slice(1));
+  const el = id && document.getElementById(id);
+  if (el && el.classList.contains('lab-card')) { el.hidden = false; el.open = true; el.scrollIntoView({ block: 'start' }); }
+}
+window.addEventListener('hashchange', openFromHash);
+renderChips(); apply(); openFromHash();
+})();
+</script>
+</body>
+</html>
