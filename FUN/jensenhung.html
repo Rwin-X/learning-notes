@@ -1,0 +1,743 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>جنسن هوانگ و انویدیا</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Vazirmatn:wght@300;400;500;700;800&display=swap">
+<style>
+/* Layout concept: fifteen full-window slides, no page scroll. Each slide is a head (label + headline) over a content block.
+   JS scales the slide's type until the block fits the window. Black ground, one NVIDIA green, Persian display type, a slow helix of 1993-2026 behind. */
+:root{
+  --bg:#020302; --fg:#f2f5ee; --mut:#8c9285; --line:#222621; --card:#0a0c09; --soft:#111410;
+  --acc:#76b900; --acc-ink:#8ed100; --on-acc:#050605; --acc-glow:rgba(118,185,0,.17);
+  --sub:color-mix(in srgb,var(--fg) 78%,transparent);
+  --fa:"Vazirmatn","Tahoma","Segoe UI",system-ui,sans-serif;
+  --lt:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+  --num:"Inter","Vazirmatn","Segoe UI",system-ui,sans-serif;
+  --base:clamp(13px,min(1.12vw,2.15vh),20px);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0;overflow:hidden;background:var(--bg);color:var(--fg);
+  font:400 15px/1.9 var(--fa);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-kerning:normal;hyphens:none;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0;
+}
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(55% 60% at 20% 48%,var(--acc-glow),transparent 72%)}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.app{position:relative;z-index:1;height:100%;max-width:1240px;margin:0 auto;display:flex;flex-direction:column}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+
+/* header */
+.top{flex:none;position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:11px;border-bottom:1px solid var(--fg)}
+.brand{display:flex;align-items:center;gap:12px;font:500 11px var(--lt);letter-spacing:.3em;text-transform:uppercase;white-space:nowrap}
+.brand svg{flex:none;color:var(--acc)}
+.tools{display:flex;align-items:center;gap:8px}
+.cnt{font:400 13px var(--lt);color:var(--mut);min-width:4.4em;text-align:center;direction:ltr;unicode-bidi:isolate;letter-spacing:.04em}
+#prog{position:absolute;inset-inline:0;bottom:-1px;height:3px;background:var(--acc);transform-origin:right center;transform:scaleX(var(--p,.07));transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.btn{font:500 13px var(--fa);color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:6px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;line-height:1.6;transition:border-color .2s,background .2s}
+.btn:hover:not(:disabled){border-color:var(--acc)}
+.btn:disabled{opacity:.3;cursor:default}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--on-acc);font-weight:700}
+.btn.pri:hover:not(:disabled){background:color-mix(in srgb,var(--acc) 88%,#fff)}
+
+/* bottom nav */
+.nav{flex:none;display:flex;align-items:center;gap:14px;padding-block:9px;padding-bottom:max(9px,env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.ticks{flex:1;display:flex;gap:4px;min-width:0}
+.tick{flex:1;min-width:0;height:26px;background:none;border:0;padding:0;position:relative;cursor:pointer}
+.tick::after{content:"";position:absolute;inset-inline:0;top:12px;height:2px;background:var(--line);transition:background .2s}
+.tick:hover::after{background:var(--mut)}
+.tick.seen::after{background:color-mix(in srgb,var(--acc) 45%,var(--line))}
+.tick[aria-current="true"]::after{background:var(--acc);height:4px;top:11px}
+
+/* stage */
+#stage{flex:1;min-height:0;position:relative;overflow:hidden;font-size:var(--base)}
+.ghost{position:absolute;inset-inline-end:0;bottom:-.14em;z-index:0;font:800 min(17em,40vh)/1 var(--fa);color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--fg) 8%,transparent);pointer-events:none;user-select:none;direction:ltr}
+.slide{--s:1;position:absolute;inset:0;z-index:1;display:grid;grid-template-rows:auto minmax(0,1fr);row-gap:clamp(12px,3vh,36px);padding-block:clamp(8px,2vh,24px);font-size:calc(var(--base)*var(--s));overflow:hidden;line-height:1.9}
+.slide.scroll{overflow-y:auto;grid-template-rows:auto auto;align-content:start}
+.slide.in{animation:in .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes in{from{opacity:0;transform:translateX(-18px)}}
+@media (prefers-reduced-motion:reduce){.slide.in{animation:none}#prog{transition:none}}
+.head{min-width:0}
+.c{align-self:center;min-width:0}
+
+/* type */
+.lab{display:inline-flex;align-items:center;font:500 .72em var(--lt);letter-spacing:.28em;text-transform:uppercase;color:var(--acc-ink)}
+.lab::before{content:"";display:inline-block;width:.62em;height:.62em;background:var(--acc);margin-inline-end:.9em}
+.display{font-family:var(--fa);font-weight:800;letter-spacing:0;margin:0;text-wrap:balance;line-height:1.3}
+h2.display{font-size:3.5em;margin-top:.15em;max-width:15em}
+h1.display{font-size:min(9.6em,19vw);line-height:1.2;margin-top:.05em}
+.display em{font-style:normal;color:var(--acc-ink)}
+.lt{font-family:var(--lt);font-size:.92em}
+h2 .lt,h1 .lt{letter-spacing:-.04em}
+.lead{font-size:1.28em;line-height:2.05;max-width:34em;color:var(--sub);margin:.7em 0 0;text-wrap:pretty}
+p{margin:0 0 .6em}
+.body{max-width:34em;color:var(--sub);text-wrap:pretty}
+.note{font-size:.82em;color:var(--mut);line-height:1.95;text-wrap:pretty;margin:.5em 0 0}
+.tag{display:inline-block;font:500 .66em/1.9 var(--lt);letter-spacing:.2em;text-transform:uppercase;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:0 .9em}
+.tag.f{color:var(--acc-ink);border-color:color-mix(in srgb,var(--acc) 45%,transparent)}
+.bn{display:block;font:300 6.4em/1.05 var(--num);letter-spacing:-.04em;color:var(--fg)}
+.bn small{display:block;font:500 .2em/1.8 var(--fa);color:var(--acc-ink);margin-top:.5em}
+
+/* grids and cards */
+.g{display:grid;gap:.8em}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:760px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.g2,.g3{grid-template-columns:minmax(0,1fr)}}
+.split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:3em;align-items:center}
+@media (max-width:860px){.split{grid-template-columns:minmax(0,1fr);gap:1.4em}}
+.card{border:1px solid var(--line);border-radius:12px;padding:1.05em 1.25em;background:var(--card);min-width:0;transition:border-color .2s}
+.card:hover{border-color:color-mix(in srgb,var(--acc) 60%,var(--line))}
+.card h3{font:700 1.1em/1.6 var(--fa);margin:.2em 0 .15em}
+.card p{font-size:.86em;line-height:1.95;color:var(--sub);margin:0;text-wrap:pretty}
+.card .k{display:block;font:300 2.3em/1.15 var(--num);letter-spacing:-.03em;color:var(--fg)}
+.card .k i{font-style:normal;font-family:var(--fa);font-size:.4em;letter-spacing:0;color:var(--acc-ink);font-weight:500;margin-inline-start:.5em}
+
+/* cover stats */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--fg);margin-top:.4em}
+.stat{position:relative;padding:1em 0 .2em;padding-inline-end:1em}
+.stat::before{content:"";position:absolute;top:-2px;inset-inline-start:0;width:2.4em;height:3px;background:var(--acc)}
+.stat b{display:block;font:300 3.6em/1.15 var(--num);letter-spacing:-.04em}
+.stat b i{font-style:normal;font-size:.3em;color:var(--acc-ink);font-weight:500;margin-inline-start:.5em}
+.stat span{display:block;color:var(--mut);font-size:.84em;line-height:1.7}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat b{font-size:2.8em}}
+.hint{margin-top:1.2em;font-size:.82em;color:var(--mut)}
+
+/* rows */
+.rows{border-bottom:1px solid var(--line)}
+.row{display:grid;grid-template-columns:minmax(5.2em,8em) minmax(0,1fr);gap:1.2em;padding:.7em 0;border-top:1px solid var(--line);align-items:baseline}
+.row .y{font:300 1.9em/1.3 var(--num);letter-spacing:-.03em;color:var(--fg)}
+.row .t{color:var(--sub);font-size:.9em;line-height:1.95;min-width:0;text-wrap:pretty}
+.row .t b{color:var(--fg);font-weight:700}
+@media (min-width:900px){.rows.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:3em}.rows.two .row:nth-child(2){border-top:1px solid var(--line)}}
+
+/* survival steps */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.4em;border-top:1px solid var(--fg);padding-top:1.1em}
+.step{position:relative;min-width:0}
+.step::before{content:"";position:absolute;top:calc(-1.1em - 5px);inset-inline-start:0;width:9px;height:9px;background:var(--acc)}
+.step .y{font:300 2.2em/1.2 var(--num);letter-spacing:-.03em;display:block}
+.step h3{font:700 1.08em/1.6 var(--fa);margin:.1em 0 .2em}
+.step p{font-size:.86em;line-height:1.95;color:var(--sub);margin:0;text-wrap:pretty}
+.step .hl{color:var(--acc-ink);font-weight:700}
+@media (max-width:760px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* equation */
+.eq{display:flex;flex-wrap:wrap;gap:.6em .9em;align-items:center;border-top:1px solid var(--fg);padding-top:1em;margin-top:1.2em;font-weight:700;font-size:.95em}
+.eq .i{border:1px solid var(--line);border-radius:8px;padding:.15em .9em;background:var(--card)}
+.eq .o{color:var(--mut);font:300 1.4em var(--lt)}
+.eq .r{background:var(--acc);color:var(--on-acc);border-radius:8px;padding:.15em .9em}
+
+/* chart */
+.chart{border:1px solid var(--line);border-radius:12px;padding:1.1em 1.3em;background:var(--card);min-width:0}
+.chart .cap{font-size:.82em;color:var(--mut);margin-bottom:1em}
+.bars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.7em;align-items:end;height:min(19em,42vh);border-bottom:1px solid var(--fg)}
+.col{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:.35em;height:100%}
+.col .v{font:400 .86em var(--lt);direction:ltr;unicode-bidi:isolate}
+.bar{width:100%;max-width:4.4em;height:max(2px,calc(var(--v)/193.7*(100% - 1.6em)));background:color-mix(in srgb,var(--acc) 18%,transparent);border:1px solid var(--acc);border-bottom:0;border-radius:3px 3px 0 0}
+.col:last-child .bar{background:var(--acc)}
+.yrs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.7em;margin-top:.5em}
+.yrs span{text-align:center;font:500 .7em var(--lt);letter-spacing:.16em;color:var(--mut)}
+
+/* share bars */
+.sb{display:flex;height:3.2em;border:1px solid var(--fg);border-radius:8px;overflow:hidden;margin:.45em 0 .3em}
+.sb span{display:flex;align-items:center;justify-content:center;font-size:.8em;font-weight:500;white-space:nowrap;min-width:0;overflow:hidden;padding-inline:.3em;background:var(--soft)}
+.sb span+span{border-inline-start:1px solid var(--bg)}
+.sb .n{background:var(--acc);color:var(--on-acc);font-weight:700}
+.sb .h{background:color-mix(in srgb,var(--acc) 24%,transparent)}
+.sbl{font-size:.8em;color:var(--mut);margin:0 0 1em;line-height:1.8}
+
+/* lessons */
+.les{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 2em;border-top:1px solid var(--fg)}
+.les div{padding:.9em 0;border-bottom:1px solid var(--line);min-width:0}
+.les h3{font:700 1.08em/1.6 var(--fa);margin:0 0 .15em;display:flex;align-items:baseline;gap:.7em}
+.les h3::before{content:"";flex:none;width:.55em;height:.55em;background:var(--acc);transform:translateY(-.05em)}
+.les p{font-size:.86em;line-height:1.95;color:var(--sub);margin:0;text-wrap:pretty}
+@media (max-width:860px){.les{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.les{grid-template-columns:minmax(0,1fr)}}
+
+/* sources */
+.src{list-style:none;margin:0;padding:0;border-top:1px solid var(--fg);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:1.6em}
+.src li{border-bottom:1px solid var(--line);padding:.35em 0;font-size:.8em;line-height:1.7;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.8em;align-items:baseline}
+.src a{text-decoration:none;min-width:0;overflow-wrap:anywhere}
+.src a:hover{text-decoration:underline;text-decoration-color:var(--acc)}
+.src em{font:400 .78em var(--lt);color:var(--mut);font-style:normal;letter-spacing:.08em}
+@media (max-width:760px){.src{grid-template-columns:minmax(0,1fr)}}
+.big{font:800 2.5em/1.45 var(--fa);max-width:16em;text-wrap:balance;margin:.2em 0 0}
+.big em{font-style:normal;color:var(--acc-ink)}
+
+/* menu */
+@media (max-height:520px){
+  .ghost{display:none}
+  .top{padding-block:5px}
+  .nav{padding-block:4px}
+  .tick{height:18px}.tick::after{top:8px}.tick[aria-current="true"]::after{top:7px}
+  .btn{padding:3px 12px}
+  .slide{row-gap:8px;padding-block:4px}
+  .lead{margin-top:.3em}
+  .stats{margin-top:0}
+}
+#menu{position:fixed;inset:0;z-index:20;overflow:auto;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  padding:calc(20px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#menu .in{max-width:900px;margin:0 auto}
+#menu header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--fg);padding-bottom:12px;margin-bottom:6px}
+#menuList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:2em}
+@media (max-width:640px){#menuList{grid-template-columns:minmax(0,1fr)}}
+#menu a{display:grid;grid-template-columns:3em minmax(0,1fr);gap:10px;align-items:baseline;padding:.55em 0;border-bottom:1px solid var(--line);text-decoration:none;font:700 1.25em/1.5 var(--fa);transition:padding .2s,color .2s}
+#menu a small{font:300 .8em var(--lt);color:var(--mut);direction:ltr;unicode-bidi:isolate;text-align:right}
+#menu a:hover{padding-inline-start:10px;color:var(--acc-ink)}
+#menu a[aria-current="page"]{border-bottom-color:var(--acc);color:var(--acc-ink)}
+</style>
+
+<div class="veil" aria-hidden="true"></div>
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div class="app" dir="rtl" lang="fa">
+  <header class="top">
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1.5" y="1.5" width="19" height="19"/><path d="M1.5 20.5 20.5 1.5M8 20.5l12.5-12.5"/></svg>
+      <span>Jensen Huang</span>
+    </div>
+    <div class="tools">
+      <span class="cnt" id="cnt" aria-live="polite">01 / 15</span>
+      <button class="btn" id="openMenu" type="button">فهرست</button>
+    </div>
+    <div id="prog" aria-hidden="true"></div>
+  </header>
+
+  <main id="stage">
+    <div class="ghost" id="ghost" aria-hidden="true">01</div>
+
+    <!-- 1 -->
+    <section class="slide" id="cover" data-title="جلد">
+      <div class="head">
+        <span class="lab">NVIDIA · 1993 — 2026</span>
+        <h1 class="display">جنسن <em>هوانگ</em></h1>
+        <p class="lead">مردی که یک شرکت تراشه‌ی بازی‌های رایانه‌ای را به زیرساخت هوش مصنوعی جهان تبدیل کرد. این ارائه مسیر زندگی او، تاریخچه‌ی انویدیا و شگردهای مدیریتی‌اش را کنار هم می‌گذارد.</p>
+      </div>
+      <div class="c">
+        <div class="stats">
+          <div class="stat"><b>1963</b><span>سال تولد</span></div>
+          <div class="stat"><b>1993</b><span>تأسیس انویدیا</span></div>
+          <div class="stat"><b>33</b><span>سال مدیرعاملی پیوسته</span></div>
+          <div class="stat"><b>215.9</b><span>میلیارد دلار، درآمد سال مالی 2026</span></div>
+        </div>
+        <p class="hint">با کلیدهای ← و →، کشیدن انگشت یا دکمه‌های پایین صفحه جلو و عقب بروید.</p>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" id="roots" data-title="ریشه‌ها" hidden>
+      <div class="head"><span class="lab">Roots</span><h2 class="display">اول مهندس، <em>بعد</em> مدیر</h2></div>
+      <div class="c split">
+        <div>
+          <p class="body">نام اصلی او جن‌هسون (<bdi class="lt">Jen-Hsun</bdi>) است. در 17 فوریه‌ی 1963 در تایوان به دنیا آمد و در کودکی با خانواده به ایالات متحده رفت.</p>
+          <div class="card">
+            <span class="tag">Reading</span>
+            <h3>تفسیر</h3>
+            <p>او مدیری نیست که تراشه را از بیرون ببیند. طراحی تراشه را خودش انجام داده است و شرط‌های بزرگش هم فنی‌اند، نه مالی.</p>
+          </div>
+        </div>
+        <div class="rows">
+          <div class="row"><div class="y">1963</div><div class="t"><b>تولد در تایوان.</b> خانواده در پنج‌سالگی او به تایلند می‌رود.</div></div>
+          <div class="row"><div class="y">کودکی</div><div class="t"><b>کنتاکی.</b> در مدرسه‌ی <bdi class="lt">Oneida Baptist Institute</bdi> درس می‌خواند؛ سال‌ها بعد 2 میلیون دلار برای ساختن یک ساختمان همان‌جا کمک می‌کند.</div></div>
+          <div class="row"><div class="y">لیسانس</div><div class="t"><b>مهندسی برق</b> در دانشگاه ایالتی اورگن.</div></div>
+          <div class="row"><div class="y"><bdi dir="ltr">1985–93</bdi></div><div class="t"><b>LSI Logic و AMD.</b> در AMD طراح ریزپردازنده بود. در LSI از مهندسی تا بازاریابی و مدیریت کل کار کرد و مدیر بخش <bdi class="lt">CoreWare</bdi> شد.</div></div>
+          <div class="row"><div class="y">1992</div><div class="t"><b>کارشناسی ارشد مهندسی برق در استنفورد،</b> شب‌ها و آخر هفته‌ها، هم‌زمان با کار در LSI.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" id="founding" data-title="تأسیس" hidden>
+      <div class="head"><span class="lab">Founding · April 1993</span><h2 class="display">سه نفر و یک <em>میز</em> در دنی‌ز</h2></div>
+      <div class="c split">
+        <div>
+          <span class="bn"><bdi dir="ltr">≈0%</bdi><small>شانس موفقیت انویدیا در 1993، به برآورد خود هوانگ</small></span>
+        </div>
+        <div>
+          <p class="body">هوانگ در 30 سالگی با کریس مالاچوفسکی و کورتیس پریم، دو طراح تراشه با سابقه در سان مایکروسیستمز، در یک شعبه‌ی دنی‌ز نزدیک سن‌خوزه نشست. هدف، پردازنده‌ی گرافیکی برای بازی‌ها بود. 5 آوریل 1993 شرکت ثبت شد. پریم بعدها گفت از روز اول اداره‌ی شرکت را به هوانگ سپردند، چون کارهایی که خودشان بلد نبودند با او بود.</p>
+          <div class="g g3" style="margin-top:.9em">
+            <div class="card"><span class="lab">Market</span><h3>بازار</h3><p>بازاری که هنوز وجود نداشت.</p></div>
+            <div class="card"><span class="lab">Technology</span><h3>فناوری</h3><p>فناوری‌ای که هنوز ثابت نشده بود.</p></div>
+            <div class="card"><span class="lab">Ecosystem</span><h3>اکوسیستم</h3><p>اکوسیستمی که باید از صفر ساخته می‌شد.</p></div>
+          </div>
+          <p class="note">هوانگ می‌گوید خودش هم در آن مقطع روی چنین شرکتی سرمایه‌گذاری نمی‌کرد و اگر از دشواری‌اش خبر داشتند، احتمالاً شروع نمی‌کردند.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" id="survival" data-title="بقا" hidden>
+      <div class="head"><span class="lab">Survival · 1995 — 1997</span><h2 class="display">سی روز تا <em>پایان</em></h2></div>
+      <div class="c">
+        <div class="steps">
+          <div class="step"><span class="y">1995</span><h3>شکست <bdi class="lt">NV1</bdi></h3><p>نخستین تراشه‌ی انویدیا شکل‌ها را با سطح‌های منحنی می‌کشید. مایکروسافت با DirectX مثلث را استاندارد کرد و NV1 کنار ماند. تراشه‌ی بعدی که با سگا ساخته می‌شد هم لغو شد.</p></div>
+          <div class="step"><span class="y">بحران</span><h3>حدود 30 روز نقدینگی</h3><p>به نقل از Tom's Hardware، شرکت در میانه‌ی دهه‌ی 90 فقط برای حدود یک ماه پول داشت.</p></div>
+          <div class="step"><span class="y"><span class="hl">5</span> میلیون</span><h3>سرمایه‌ی سگا</h3><p>هوانگ از سگا خواست بخشی از قرارداد را به سرمایه‌ی سهام تبدیل کند و صریح گفت احتمالاً پول از دست می‌رود. ایریماجیری هیئت‌مدیره‌ی سگا را قانع کرد. پول حدود شش ماه زمان خرید.</p></div>
+          <div class="step"><span class="y">1997</span><h3><bdi class="lt">RIVA 128</bdi></h3><p>تراشه‌ای مبتنی بر مثلث که با همین پول ساخته شد و در چهار ماه یک میلیون واحد فروخت.</p></div>
+        </div>
+        <p class="note" style="margin-top:1.6em">انویدیا در 1999 وارد بورس شد و سگا بعدها سهمش را حدود 15 میلیون دلار فروخت. هوانگ در 2026 در توکیو از سگا تشکر کرد و گفت بدون آن کمک، انویدیا امروز وجود نداشت.</p>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" id="timeline" data-title="خط زمان" hidden>
+      <div class="head"><span class="lab">Timeline</span><h2 class="display">سی‌وسه سال در <em>یازده</em> سال</h2></div>
+      <div class="c">
+        <div class="rows two">
+          <div class="row"><div class="y">1993</div><div class="t"><b>تأسیس.</b> هوانگ مدیرعامل می‌شود.</div></div>
+          <div class="row"><div class="y">1999</div><div class="t"><b>عرضه‌ی عمومی در نزدک</b> (ژانویه، 12 دلار برای هر سهم) و <bdi class="lt">GeForce 256</bdi> که «نخستین GPU جهان» نام گرفت.</div></div>
+          <div class="row"><div class="y">2006</div><div class="t"><b>CUDA</b> با <bdi class="lt">GeForce 8800 GTX</bdi>؛ برنامه‌نویسی همه‌منظوره روی GPU.</div></div>
+          <div class="row"><div class="y">2012</div><div class="t"><b>AlexNet</b> روی دو کارت GeForce؛ آغاز دوران یادگیری عمیق.</div></div>
+          <div class="row"><div class="y">2017</div><div class="t"><b>Volta (V100)</b> با <bdi class="lt">Tensor Core</bdi>.</div></div>
+          <div class="row"><div class="y">2018</div><div class="t"><b>RTX:</b> ردیابی پرتو بلادرنگ.</div></div>
+          <div class="row"><div class="y">2020</div><div class="t"><b>تکمیل خرید ملانوکس</b> و ورود جدی به شبکه‌ی مراکز داده.</div></div>
+          <div class="row"><div class="y">2022</div><div class="t"><b>H100 (Hopper):</b> تراشه‌ی دوران ChatGPT.</div></div>
+          <div class="row"><div class="y">2024</div><div class="t"><b>Blackwell.</b></div></div>
+          <div class="row"><div class="y">2025</div><div class="t"><b>نخستین شرکت با ارزش بازار بالای 4 تریلیون دلار.</b> هوانگ در شمار «معماران هوش مصنوعی» مجله‌ی تایم.</div></div>
+          <div class="row"><div class="y">2026</div><div class="t"><b>Grace Blackwell در بازار؛</b> <bdi class="lt">Vera Rubin</bdi> نسل بعدی است.</div></div>
+        </div>
+        <p class="note">هر سال این فهرست یک مکعب سبز روی مارپیچ پس‌زمینه است. مارپیچ 34 گره دارد، از 1993 تا 2026.</p>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" id="bets" data-title="سه شرط" hidden>
+      <div class="head"><span class="lab">Bets</span><h2 class="display">سه شرط، یک <em>پلتفرم</em></h2></div>
+      <div class="c">
+        <div class="g g3">
+          <div class="card"><span class="lab">1999</span><h3><bdi class="lt">GPU</bdi></h3><p>تراشه‌ای که تبدیل و نورپردازی (<bdi class="lt">transform &amp; lighting</bdi>) را خودش انجام می‌داد و این بار را از CPU برمی‌داشت. انویدیا نام GPU را همین‌جا جا انداخت.</p></div>
+          <div class="card"><span class="lab">2006</span><h3><bdi class="lt">CUDA</bdi></h3><p>بخشی از سطح تراشه برای منطق غیرگرافیکی کنار گذاشته شد، ابزار برنامه‌نویسی رایگان بود و هزاران مهندس روی درایور و کتابخانه گذاشته شدند. ثمره‌اش شش سال بعد رسید.</p></div>
+          <div class="card"><span class="lab">2012</span><h3><bdi class="lt">AlexNet</bdi></h3><p>شبکه‌ای هشت‌لایه روی دو کارت <bdi class="lt">GTX 580</bdi> آموزش دید و خطای ImageNet از 26.2% به 15.3% رسید. چارچوب‌هایی مثل <bdi class="lt">Caffe</bdi>، <bdi class="lt">TensorFlow</bdi> و <bdi class="lt">PyTorch</bdi> بعدها روی CUDA ساخته شدند.</p></div>
+        </div>
+        <div class="eq">
+          <span class="i">سخت‌افزار</span><span class="o">×</span>
+          <span class="i">نرم‌افزار (CUDA)</span><span class="o">×</span>
+          <span class="i">توسعه‌دهندگان</span><span class="o">=</span>
+          <span class="r">قفل پلتفرم</span>
+        </div>
+        <p class="note">دیوار دفاعی انویدیا از نرم‌افزار ساخته شده، نه از سیلیکون.</p>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" id="numbers" data-title="اعداد" hidden>
+      <div class="head"><span class="lab">Numbers · FY2026</span><h2 class="display">مقیاس <em>امروز</em></h2></div>
+      <div class="c split" style="grid-template-columns:minmax(0,6fr) minmax(0,6fr)">
+        <div class="chart">
+          <div class="cap">درآمد بخش مرکز داده، میلیارد دلار (مقیاس خطی)</div>
+          <div class="bars">
+            <div class="col"><span class="v">0.34</span><div class="bar" style="--v:0.34"></div></div>
+            <div class="col"><span class="v">2.98</span><div class="bar" style="--v:2.98"></div></div>
+            <div class="col"><span class="v">47.5</span><div class="bar" style="--v:47.5"></div></div>
+            <div class="col"><span class="v">≈115</span><div class="bar" style="--v:115"></div></div>
+            <div class="col"><span class="v">193.7</span><div class="bar" style="--v:193.7"></div></div>
+          </div>
+          <div class="yrs"><span>FY15</span><span>FY20</span><span>FY24</span><span>FY25</span><span>FY26</span></div>
+        </div>
+        <div>
+          <div class="g g2">
+            <div class="card"><span class="lab">Revenue FY26</span><span class="k">215.9<i>میلیارد دلار</i></span><p>درآمد سال مالی 2026، 65% بیشتر از سال قبل.</p></div>
+            <div class="card"><span class="lab">Operating income</span><span class="k">130.4<i>میلیارد دلار</i></span><p>سود عملیاتی همان سال.</p></div>
+            <div class="card"><span class="lab">Gross margin</span><span class="k">71.1<i>%</i></span><p>حاشیه‌ی سود ناخالص سال؛ در فصل چهارم 75%.</p></div>
+            <div class="card"><span class="lab">Q2 FY27</span><span class="k">96.2<i>میلیارد دلار</i></span><p>درآمد فصل منتهی به 26 ژوئیه‌ی 2026، حدود 106% بیشتر از سال قبل.</p></div>
+          </div>
+          <p class="note">سهم مرکز داده از درآمد: حدود 4% در FY15، 78% در FY24 و نزدیک 90% در FY26 (محاسبه از همین ارقام). مقدار FY25 تقریبی است. سال مالی در اواخر ژانویه تمام می‌شود.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" id="beyond" data-title="فراتر از مرکز داده" hidden>
+      <div class="head"><span class="lab">Beyond the data center</span><h2 class="display">وقتی هوش مصنوعی <em>جسم</em> پیدا می‌کند</h2></div>
+      <div class="c split" style="grid-template-columns:minmax(0,4fr) minmax(0,8fr)">
+        <div>
+          <span class="bn">6<small>میلیارد دلار درآمد «هوش مصنوعی فیزیکی» در سال مالی 2026، به گزارش خود شرکت</small></span>
+        </div>
+        <div>
+          <div class="g g3">
+            <div class="card"><span class="lab">Gaming</span><span class="k">16.0<i><bdi dir="ltr">+41%</bdi></i></span><p>میلیارد دلار؛ رشد با تقاضای Blackwell.</p></div>
+            <div class="card"><span class="lab">Pro Visualization</span><span class="k">3.2<i><bdi dir="ltr">+70%</bdi></i></span><p>میلیارد دلار.</p></div>
+            <div class="card"><span class="lab">Automotive</span><span class="k">2.3<i><bdi dir="ltr">+39%</bdi></i></span><p>میلیارد دلار.</p></div>
+          </div>
+          <div class="g g2" style="margin-top:.8em">
+            <div class="card"><h3>خودرو</h3><p>مرسدس‌بنز با <bdi class="lt">DRIVE</bdi> انویدیا، خودروی آماده‌ی سطح 4 رانندگی خودکار عرضه می‌کند و با اوبر برای شبکه‌ی بزرگ حمل‌ونقل سطح 4 همکاری شده است.</p></div>
+            <div class="card"><h3>ربات و مدل‌های باز</h3><p>در CES ژانویه‌ی 2026 مدل‌های <bdi class="lt">Cosmos</bdi>، <bdi class="lt">Isaac GR00T N1.6</bdi> برای ربات‌های انسان‌نما و <bdi class="lt">Alpamayo</bdi> برای رانندگی خودکار معرفی شد؛ از شرکا: بوستون داینامیکس، کاترپیلار و لوسید.</p></div>
+          </div>
+          <p class="note">ارقام بخش‌ها از جدول بیانیه‌ی نمایندگی سهامداران به ترتیب جدول خوانده شده‌اند؛ درصدها رشد نسبت به سال قبل‌اند.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" id="style" data-title="سبک مدیریت" hidden>
+      <div class="head"><span class="lab">Management</span><h2 class="display">یک مدیرعامل، ده‌ها گزارش <em>مستقیم</em></h2></div>
+      <div class="c split" style="grid-template-columns:minmax(0,4fr) minmax(0,8fr)">
+        <div>
+          <span class="bn"><bdi dir="ltr">36–60</bdi><small>گزارش مستقیم به مدیرعامل</small></span>
+          <p class="note">نمودار سازمانی اکتبر 2025 از 36 نفر می‌گوید (یک سال قبل 55 نفر). گزارش‌های دیگر حدود 60 نفر نوشته‌اند.</p>
+        </div>
+        <div class="g g2">
+          <div class="card"><span class="lab">No 1:1</span><h3>بدون جلسه‌ی یک‌به‌یک</h3><p>مدیران ارشد در جلسه‌ی گروهی می‌شنوند و هم‌زمان هم‌تراز می‌شوند.</p></div>
+          <div class="card"><span class="lab">Feedback</span><h3>بازخورد جلوی همه</h3><p>اشتباه یک نفر را جلوی جمع تصحیح می‌کند تا بقیه هم یاد بگیرند.</p></div>
+          <div class="card"><span class="lab">Flat</span><h3>لایه‌ی کمتر، سرعت بیشتر</h3><p>استدلال او: گزارش مستقیم بیشتر یعنی لایه‌ی کمتر و رسیدن سریع‌تر اطلاعات.</p></div>
+          <div class="card"><span class="lab">Whiteboard</span><h3>وایت‌برد به‌جای اسلاید</h3><p>طبق کتاب <bdi class="lt">The Nvidia Way</bdi>، وایت‌برد را به پاورپوینت ترجیح می‌دهد.</p></div>
+          <div class="card"><span class="lab">No plan</span><h3>بدون برنامه‌ی بلندمدت رسمی</h3><p>به گفته‌ی گزارش‌های مصاحبه‌ی او، گزارش وضعیت و برنامه‌ی بلندمدت رسمی ندارد.</p></div>
+          <div class="card"><span class="lab">Composition</span><h3>ترکیب فنی</h3><p>از 36 گزارش مستقیم، 28 نفر مدیر مهندسی یا محصول‌اند و بسیاری درآمد یکسان دارند.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" id="playbook" data-title="شگردها" hidden>
+      <div class="head"><span class="lab">Playbook</span><h2 class="display">شش شگرد <em>تکرارشونده</em></h2></div>
+      <div class="c">
+        <div class="g g3">
+          <div class="card"><span class="lab">Platform</span><h3>پلتفرم بفروش، نه تراشه</h3><p>CUDA، کتابخانه‌ها، شبکه و حالا سیستم‌های کامل. انتقال از فروش ماژول به فروش سیستم، حاشیه‌ی سود ناخالص را در 2026 پایین آورد.</p></div>
+          <div class="card"><span class="lab">Timing</span><h3>پیش از بازار سرمایه‌گذاری کن</h3><p>سهم مرکز داده از درآمد از حدود 4% در FY15 به 78% در FY24 رسید.</p></div>
+          <div class="card"><span class="lab">Urgency</span><h3>همیشه نزدیک مرگ</h3><p>سال‌ها ارائه‌های داخلی را با این جمله شروع می‌کرد که شرکت 30 روز تا ورشکستگی فاصله دارد، تا رضایت جا نیفتد.</p></div>
+          <div class="card"><span class="lab">Flatness</span><h3>سازمان تخت</h3><p>اطلاعات بدون فیلتر به مدیرعامل می‌رسد و بازخورد جلوی جمع داده می‌شود.</p></div>
+          <div class="card"><span class="lab">Ecosystem</span><h3>مشتری و توسعه‌دهنده بساز</h3><p>در FY26 حدود 17.5 میلیارد دلار در شرکت‌های خصوصی و صندوق‌های زیرساخت سرمایه‌گذاری کرد، بیشتر در استارتاپ‌های اولیه؛ و مدل‌های باز مثل <bdi class="lt">Nemotron</bdi> و <bdi class="lt">Cosmos</bdi> را منتشر می‌کند.</p></div>
+          <div class="card"><span class="lab">Stage</span><h3>مدیرعامل به‌مثابه چهره</h3><p>ژاکت چرمی مشکی، تی‌شرت و شلوار مشکی و کلیدنوت‌هایی که شبیه کنسرت اجرا می‌شوند.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" id="mind" data-title="ذهنیت" hidden>
+      <div class="head"><span class="lab">Mindset</span><h2 class="display">شخصیت از <em>سختی</em> ساخته می‌شود</h2></div>
+      <div class="c split" style="grid-template-columns:minmax(0,5fr) minmax(0,7fr)">
+        <div>
+          <p class="big" style="font-size:2.1em">«<em>رنج</em> به سراغ شما هم بیاید.»</p>
+          <p class="note">خلاصه‌ی توصیه‌ی او به دانشجویان استنفورد. عبارت اصلی: <bdi class="lt">“I hope suffering happens to you”</bdi></p>
+        </div>
+        <div class="g">
+          <div class="card"><span class="lab">Resilience</span><h3>مقاومت، نه هوش</h3><p>می‌گوید بزرگی از شخصیت می‌آید و شخصیت از سختی شکل می‌گیرد. نمی‌داند مقاومت را چطور مستقیم آموزش داد. عبارت «رنج و سختی» را داخل انویدیا هم برای شکل دادن به شخصیت شرکت به کار می‌برد.</p></div>
+          <div class="card"><span class="lab">Expectations</span><h3>انتظار کم، مزیت است</h3><p>انتظار پایین را برای خودش مزیت می‌داند و می‌گوید انتظارات بالای فارغ‌التحصیلان استنفورد آن‌ها را در برابر شکست شکننده‌تر می‌کند.</p></div>
+          <div class="card"><span class="lab">Urgency</span><h3>سی روز تا ورشکستگی</h3><p>همان جمله‌ای که سال‌ها ارائه‌هایش با آن شروع می‌شد، نه به‌عنوان خاطره، بلکه به‌عنوان روش کار.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" id="rivals" data-title="رقبا" hidden>
+      <div class="head"><span class="lab">Competition · estimates</span><h2 class="display">رقبا و سهمی که <em>کم</em> می‌شود</h2></div>
+      <div class="c split" style="grid-template-columns:minmax(0,7fr) minmax(0,5fr)">
+        <div>
+          <div class="card" style="padding-bottom:.6em">
+            <span class="lab">Share of AI accelerator revenue · 2026 est</span>
+            <div class="sb"><span class="n" style="flex:73">انویدیا ≈73%</span><span style="flex:20">سفارشی ≈20%</span><span style="flex:7">AMD</span></div>
+            <p class="sbl">انویدیا حدود 70 تا 75% (در 2024 حدود 87%). سیلیکون سفارشی: TPU گوگل ≈8%، Trainium و Inferentia ≈5%، Maia و MTIA ≈3%، سایر ≈4%. سهم کوچک آخر: AMD ≈6 تا 8%.</p>
+            <span class="lab">Share of accelerator-server units · 2026 est</span>
+            <div class="sb"><span style="flex:72">GPU تجاری ≈72%</span><span class="h" style="flex:28">ASIC ≈28%</span></div>
+            <p class="sbl">سرورهای مبتنی بر ASIC تعداد بیشتری می‌فروشند چون ارزان‌ترند؛ برای همین سهم درآمدی و سهم تعدادی فرق دارد.</p>
+          </div>
+        </div>
+        <div class="g">
+          <div class="card"><span class="lab">AMD</span><h3>نزدیک‌ترین رقیب</h3><p>درآمد مرکز داده در فصل اول 2026 برابر 5.8 میلیارد دلار بود، با 57% رشد.</p></div>
+          <div class="card"><span class="lab">Custom silicon</span><h3>مشتری‌ها رقیب می‌شوند</h3><p>برودکام در فصل اول سال مالی 2026 درآمد نیمه‌رسانای هوش مصنوعی را 8.4 میلیارد دلار گزارش کرد. ارسال ASIC سریع‌تر از GPU رشد می‌کند.</p></div>
+          <p class="note" style="margin:0">این اعداد برآورد تحلیلی‌اند؛ جدول حسابرسی‌شده‌ی مورد توافقی وجود ندارد و سهم انویدیا بسته به روش از 70 تا 86% برآورد می‌شود.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" id="risks" data-title="ریسک‌ها" hidden>
+      <div class="head"><span class="lab">Risks</span><h2 class="display">هزینه‌ی <em>این</em> مدل</h2><p class="note" style="margin-top:.3em">برچسب‌ها نشان می‌دهند هر مورد گزارش مستقیم است یا تفسیر.</p></div>
+      <div class="c">
+        <div class="g g3">
+          <div class="card"><span class="tag f">Fact</span><h3>تمرکز در مرکز داده</h3><p>حدود 90% درآمد FY26 از یک بخش می‌آید، و آن بخش به چرخه‌ی سرمایه‌گذاری چند مشتری بزرگ وابسته است.</p></div>
+          <div class="card"><span class="tag f">Fact</span><h3>سرمایه‌گذاری در مشتریان</h3><p>بخشی از 17.5 میلیارد دلار سرمایه‌گذاری FY26 به سازندگان مدل‌های هوش مصنوعی رفت که محصولات انویدیا را می‌خرند. خود شرکت می‌گوید بسیاری از آن‌ها نقدشونده نیستند.</p></div>
+          <div class="card"><span class="tag f">Fact</span><h3>محدودیت صادرات</h3><p>از 2022 فروش A100 و H100 به چین محدود شد. در آوریل 2025 برای H20 مجوز لازم شد و انویدیا 4.5 میلیارد دلار هزینه‌ی موجودی و تعهدات ثبت کرد. در ژانویه‌ی 2026 بررسی H200 مورد به مورد شد.</p></div>
+          <div class="card"><span class="tag f">Estimate</span><h3>سیلیکون سفارشی</h3><p>مشتری‌های بزرگ تراشه‌ی خودشان را می‌سازند؛ سهم برآوردی آن‌ها حدود 20% درآمد شتاب‌دهنده‌هاست.</p></div>
+          <div class="card"><span class="tag f">Fact</span><h3>ریزمدیریتی</h3><p>فورچون او را مدیری می‌داند که به لایه‌های پایین سازمان هم سر می‌زند؛ این سبک می‌تواند کار در انویدیا را سخت کند.</p></div>
+          <div class="card"><span class="tag">Reading</span><h3>وابستگی به یک نفر</h3><p>سازمان تخت روی ظرفیت توجه هوانگ سوار است. اگر او کنار برود، سازوکاری که این سرعت را تضمین می‌کند روشن نیست.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" id="lessons" data-title="درس‌ها" hidden>
+      <div class="head"><span class="lab">Takeaways · reading</span><h2 class="display">برای یک سازنده: چه <em>می‌ماند</em></h2><p class="note" style="margin-top:.3em"><span class="tag">Reading</span> این صفحه تفسیر است، نه گزارش.</p></div>
+      <div class="c">
+        <div class="les">
+          <div><h3>پلتفرم بساز</h3><p>CUDA فقط یک کتابخانه نبود؛ قفلی بود که سخت‌افزار را به عادت توسعه‌دهنده‌ها گره زد.</p></div>
+          <div><h3>زود شرط ببند، صبور باش</h3><p>از CUDA تا AlexNet شش سال گذشت. شرط فنی تا بازار پیدا کند زمان می‌خواهد.</p></div>
+          <div><h3>از ریسک صریح حرف بزن</h3><p>هوانگ به سگا گفت پول احتمالاً از دست می‌رود، و همین صراحت سرمایه آورد.</p></div>
+          <div><h3>بازخورد را جمعی کن</h3><p>تصحیح یک نفر جلوی همه، یادگیری را برای همه یک‌باره پخش می‌کند.</p></div>
+          <div><h3>اکوسیستم را تأمین مالی کن</h3><p>سرمایه‌گذاری در استارتاپ‌ها و مدل‌های باز، تقاضای آینده‌ی پلتفرم را می‌سازد.</p></div>
+          <div><h3>گلوگاه را بشناس</h3><p>سازمان تخت سریع است، اما همه چیز به توجه یک نفر وصل می‌شود.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide" id="sources" data-title="منابع" hidden>
+      <div class="head"><span class="lab">Close · Sources</span><p class="big">بزرگ‌ترین شرط انویدیا یک تراشه نبود. <em>نرم‌افزاری</em> بود که سال‌ها مشتری قابل‌توجهی نداشت.</p><p class="note"><span class="tag">Reading</span> این جمع‌بندی تفسیر است. محل تولد (تاینان یا تایپه)، تعداد گزارش‌های مستقیم (36 تا 60)، تاریخ دقیق GeForce 256 و سهم‌های بازار (برآوردی) در منابع یکسان نیست؛ ارقام مالی از اسناد SEC‌اند، به‌جز FY25 که تقریبی است.</p></div>
+      <div class="c">
+        <ul class="src">
+          <li><a href="https://www.sec.gov/Archives/edgar/data/1045810/000104581026000019/q4fy26pr.htm" target="_blank" rel="noopener noreferrer">گزارش فصل چهارم و سال مالی 2026</a><em>SEC</em></li>
+          <li><a href="https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000051/q1fy27pr.htm" target="_blank" rel="noopener noreferrer">گزارش فصل اول سال مالی 2027</a><em>SEC</em></li>
+          <li><a href="https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000075/nvda-20260726.htm" target="_blank" rel="noopener noreferrer">فرم 10-Q فصل دوم 2027</a><em>SEC</em></li>
+          <li><a href="https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000036/nvda-20260512.htm" target="_blank" rel="noopener noreferrer">بیانیه‌ی نمایندگی (DEF 14A)</a><em>SEC</em></li>
+          <li><a href="https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000038/a2026-annualxreportxwebxfi.pdf" target="_blank" rel="noopener noreferrer">گزارش سالانه‌ی 2026</a><em>SEC</em></li>
+          <li><a href="https://www.britannica.com/biography/Jensen-Huang" target="_blank" rel="noopener noreferrer">بریتانیکا، جنسن هوانگ</a><em>BIO</em></li>
+          <li><a href="https://quartr.com/insights/business-philosophy/the-story-of-jensen-huang-and-nvidia" target="_blank" rel="noopener noreferrer">Quartr، داستان هوانگ و انویدیا</a><em>BIO</em></li>
+          <li><a href="https://thenextweb.com/news/nvidia-sega-1995-5-million-rescue" target="_blank" rel="noopener noreferrer">TNW، نجات انویدیا با 5 میلیون دلار سگا</a><em>HISTORY</em></li>
+          <li><a href="https://www.cnbc.com/2024/03/15/nvidia-ceo-huang-at-stanford-pain-and-suffering-breeds-success.html" target="_blank" rel="noopener noreferrer">CNBC، سخنرانی استنفورد</a><em>MIND</em></li>
+          <li><a href="https://www.tomshardware.com/news/nvidia-ceo-shares-management-style-always-learn-make-no-plans" target="_blank" rel="noopener noreferrer">Tom's Hardware، سبک مدیریت</a><em>MGMT</em></li>
+          <li><a href="https://fortune.com/2024/11/12/jensen-huang-nvidia-ceo-leadership-mpp" target="_blank" rel="noopener noreferrer">Fortune، 60 گزارش مستقیم</a><em>MGMT</em></li>
+          <li><a href="https://digitimes.com/news/a20241212PD205.html" target="_blank" rel="noopener noreferrer">Digitimes، کتاب The Nvidia Way</a><em>MGMT</em></li>
+          <li><a href="https://www.sovereignmagazine.com/article/constant-direct-communication-why-nvidia-s-ceo-drops-everything-for-his-team" target="_blank" rel="noopener noreferrer">Sovereign، 36 گزارش مستقیم</a><em>MGMT</em></li>
+          <li><a href="https://www.stratrix.com/vault/nvidia-ai-pivot-strategy" target="_blank" rel="noopener noreferrer">Stratrix، گذار به هوش مصنوعی</a><em>HISTORY</em></li>
+          <li><a href="https://zsjunai.github.io/history-of-ai/en/houses/nvidia" target="_blank" rel="noopener noreferrer">History of AI، CUDA و AlexNet</a><em>HISTORY</em></li>
+          <li><a href="https://alatirok.com/ai-chip-market-share-2026/" target="_blank" rel="noopener noreferrer">Alatirok، سهم بازار تراشه‌ی هوش مصنوعی</a><em>EST.</em></li>
+          <li><a href="https://neuralwired.com/2026/06/05/nvidia-chip-export-controls-china-2026/" target="_blank" rel="noopener noreferrer">NeuralWired، کنترل صادرات و چین</a><em>EXPORT</em></li>
+          <li><a href="https://www.therobotreport.com/nvidia-releases-new-physical-ai-models-plus-autonomous-vehicle-tools/" target="_blank" rel="noopener noreferrer">The Robot Report، مدل‌های هوش مصنوعی فیزیکی</a><em>CES</em></li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="nav" aria-label="ناوبری اسلایدها">
+    <button class="btn" id="prev" type="button" disabled>
+      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 5h14M11 1l4 4-4 4"/></svg>
+      قبلی
+    </button>
+    <div class="ticks" id="ticks"></div>
+    <button class="btn pri" id="next" type="button">
+      بعدی
+      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M15 5H1M5 1 1 5l4 4"/></svg>
+    </button>
+  </nav>
+</div>
+
+<div id="menu" dir="rtl" lang="fa" hidden>
+  <div class="in">
+    <header><span class="lab">Index</span><button class="btn" id="closeMenu" type="button">بستن</button></header>
+    <div id="menuList"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var root=document.documentElement;
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var stage=document.getElementById('stage');
+var pages=Array.prototype.slice.call(document.querySelectorAll('.slide'));
+var N=pages.length;
+var ids=pages.map(function(p){return p.id;});
+var faNum=new Intl.NumberFormat('en-US',{minimumIntegerDigits:2});
+var faYear=new Intl.NumberFormat('en-US',{useGrouping:false});
+var cnt=document.getElementById('cnt'), prog=document.getElementById('prog'), ghost=document.getElementById('ghost');
+var prevB=document.getElementById('prev'), nextB=document.getElementById('next');
+var ticksEl=document.getElementById('ticks'), menu=document.getElementById('menu'), menuList=document.getElementById('menuList');
+var cur=0, target=0, pv=0, tx=0, ty=0, mx=0, my=0;
+var tickEls=[], menuEls=[];
+var MINS=.62, MAXS=1.45;
+
+/* ---------- fit each slide into the window: largest scale that still fits ---------- */
+function fitSlide(){
+  var s=pages[cur]; if(!s) return;
+  var head=s.querySelector('.head'), c=s.querySelector('.c');
+  s.classList.remove('scroll');
+  var cs=getComputedStyle(s);
+  function over(k){
+    s.style.setProperty('--s',k);
+    var padV=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
+    var gap=parseFloat(cs.rowGap)||0;
+    var tall=head.offsetHeight+gap+c.offsetHeight>s.clientHeight-padV+1;
+    var wide=c.scrollWidth>c.clientWidth+1||head.scrollWidth>head.clientWidth+1;
+    return tall||wide;
+  }
+  if(!over(MAXS)) return;
+  if(over(MINS)){ s.classList.add('scroll'); return; }
+  var lo=MINS, hi=MAXS;
+  for(var i=0;i<8;i++){ var mid=(lo+hi)/2; if(over(mid)) hi=mid; else lo=mid; }
+  over(Math.floor(lo*100)/100);
+}
+
+/* ---------- canvas helix ---------- */
+var cv=document.getElementById('bg'), ctx=cv.getContext('2d');
+var W=0,H=0,dpr=1,yaw=0,pit=.28,zoom=1,sx=.2;
+var FIRST=1993, COUNT=34, R=300, SPAN=1700;
+var MIL=[1993,1999,2006,2012,2017,2018,2020,2022,2024,2025,2026];
+var fg=[242,245,238], ac=[118,185,0], sprites={};
+var EDGES=[];
+for(var a=0;a<8;a++){for(var b=a+1;b<8;b++){var d=a^b; if(d===1||d===2||d===4) EDGES.push([a,b]);}}
+var YEARS=[]; for(var yi=0;yi<COUNT;yi++){YEARS.push(faYear.format(FIRST+yi));}
+
+function hexRGB(h){var m=/^#([0-9a-f]{6})$/i.exec((h||'').trim());return m?[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)]:null;}
+function refreshColors(){
+  var cs=getComputedStyle(root);
+  fg=hexRGB(cs.getPropertyValue('--fg'))||fg;
+  ac=hexRGB(cs.getPropertyValue('--acc'))||ac;
+}
+function sprite(rgb){
+  var key=rgb.join(',');
+  if(sprites[key]) return sprites[key];
+  var s=64, g=document.createElement('canvas'); g.width=g.height=s;
+  var gc=g.getContext('2d'), rg=gc.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  rg.addColorStop(0,'rgba('+key+',.9)'); rg.addColorStop(.4,'rgba('+key+',.25)'); rg.addColorStop(1,'rgba('+key+',0)');
+  gc.fillStyle=rg; gc.fillRect(0,0,s,s); sprites[key]=g; return g;
+}
+function fitCanvas(){
+  dpr=Math.min(window.devicePixelRatio||1,1.5);
+  W=innerWidth; H=innerHeight;
+  cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  zoom=Math.max(.7,Math.min(1.25,H/820));
+  sx=W>860?.2:.5;
+  if(reduce) draw(0);
+}
+function P(x,y,z){
+  var c=Math.cos(yaw), s=Math.sin(yaw);
+  var X=x*c+z*s, Z=-x*s+z*c;
+  var cp=Math.cos(pit), sp=Math.sin(pit);
+  var Y=y*cp-Z*sp; Z=y*sp+Z*cp;
+  var f=zoom*900/(1400+Z);
+  return [W*sx+X*f, H*.5+Y*f, f, Z];
+}
+function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+function rgba(c,a){return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';}
+function draw(t){
+  ctx.clearRect(0,0,W,H);
+  var k=W>860?1:.55;
+  yaw=.35+t*.00006+pv*3.1+tx*.2; pit=.28+ty*.06;
+  var pts=[], nodes=[], i, p;
+  for(i=0;i<COUNT;i++){
+    var an=i*.62, x=Math.cos(an)*R, z=Math.sin(an)*R, y=(i/(COUNT-1)-pv)*SPAN;
+    nodes.push([x,y,z]); pts.push(P(x,y,z));
+  }
+  ctx.beginPath();
+  for(i=0;i<COUNT;i++){ if(i) ctx.lineTo(pts[i][0],pts[i][1]); else ctx.moveTo(pts[i][0],pts[i][1]); }
+  ctx.strokeStyle=rgba(fg,.13*k); ctx.lineWidth=1; ctx.stroke();
+  var gf=sprite(fg), ga=sprite(ac), curI=Math.round(pv*(COUNT-1));
+  ctx.font='500 11px Inter, Vazirmatn, sans-serif'; ctx.textAlign='center';
+  for(i=0;i<COUNT;i++){
+    p=pts[i];
+    var near=1-clamp((p[3]+R)/(2*R),0,1);
+    var isM=MIL.indexOf(FIRST+i)>-1;
+    if(isM){
+      var cs=24, r=t*.0008+i*.7, cr=Math.cos(r), sr=Math.sin(r), ct=Math.cos(.5), st=Math.sin(.5), V=[];
+      for(var v=0;v<8;v++){
+        var vx=(v&1)?1:-1, vy=(v&2)?1:-1, vz=(v&4)?1:-1;
+        var x1=vx*cr+vz*sr, z1=-vx*sr+vz*cr, y1=vy*ct-z1*st, z2=vy*st+z1*ct;
+        V.push(P(nodes[i][0]+x1*cs,nodes[i][1]+y1*cs,nodes[i][2]+z2*cs));
+      }
+      ctx.beginPath();
+      for(var e=0;e<EDGES.length;e++){ctx.moveTo(V[EDGES[e][0]][0],V[EDGES[e][0]][1]);ctx.lineTo(V[EDGES[e][1]][0],V[EDGES[e][1]][1]);}
+      ctx.strokeStyle=rgba(ac,(.3+.6*near)*k); ctx.lineWidth=1; ctx.stroke();
+      if(near>.3||i===curI){ctx.fillStyle=rgba(fg,(.25+.3*near)*k); ctx.fillText(YEARS[i],p[0],p[1]+34*p[2]+8);}
+    } else {
+      var sz=4*p[2]*6; ctx.globalAlpha=(.12+.45*near)*k;
+      ctx.drawImage(gf,p[0]-sz/2,p[1]-sz/2,sz,sz); ctx.globalAlpha=1;
+    }
+    if(i===curI){
+      var pulse=reduce?0:Math.sin(t/420), sz2=(10+1.5*pulse)*p[2]*6, kk=Math.max(k,.8);
+      ctx.globalAlpha=kk; ctx.drawImage(ga,p[0]-sz2/2,p[1]-sz2/2,sz2,sz2); ctx.globalAlpha=1;
+      ctx.beginPath(); ctx.arc(p[0],p[1],(16+3*pulse)*p[2],0,6.2832); ctx.strokeStyle=rgba(ac,.7*kk); ctx.lineWidth=1.2; ctx.stroke();
+    }
+  }
+}
+var lastT=0, fr=0;
+function frame(ts){
+  requestAnimationFrame(frame);
+  if(ts-lastT<33) return; lastT=ts;
+  if(++fr%30===0) refreshColors();
+  pv+=(target-pv)*.07; tx+=(mx-tx)*.06; ty+=(my-ty)*.06;
+  draw(ts);
+}
+
+/* ---------- navigation ---------- */
+function go(i){
+  i=clamp(i,0,N-1); cur=i;
+  pages.forEach(function(p,k){p.hidden=(k!==i); p.classList.remove('in');});
+  var pg=pages[i]; void pg.offsetWidth; pg.classList.add('in');
+  fitSlide();
+  cnt.textContent=faNum.format(i+1)+' / '+faNum.format(N);
+  ghost.textContent=faNum.format(i+1);
+  prog.style.setProperty('--p',(i+1)/N);
+  prevB.disabled=(i===0); nextB.disabled=(i===N-1);
+  tickEls.forEach(function(t,k){
+    if(k===i) t.setAttribute('aria-current','true'); else t.removeAttribute('aria-current');
+    t.classList.toggle('seen',k<i);
+  });
+  menuEls.forEach(function(a,k){ if(k===i) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  target=i/(N-1);
+  if(reduce){pv=target; draw(0);}
+}
+function nav(i){
+  i=clamp(i,0,N-1);
+  if(location.hash==='#'+ids[i]) go(i); else location.hash=ids[i];
+}
+function route(){
+  var k=ids.indexOf(location.hash.slice(1));
+  menu.hidden=true;
+  go(k>=0?k:0);
+}
+
+pages.forEach(function(p,k){
+  var t=document.createElement('button');
+  t.type='button'; t.className='tick'; t.setAttribute('aria-label',p.getAttribute('data-title'));
+  t.addEventListener('click',function(){nav(k);});
+  ticksEl.appendChild(t); tickEls.push(t);
+  var a=document.createElement('a');
+  a.href='#'+p.id;
+  a.innerHTML='<small></small><span></span>';
+  a.firstChild.textContent=faNum.format(k+1);
+  a.lastChild.textContent=p.getAttribute('data-title');
+  menuList.appendChild(a); menuEls.push(a);
+});
+
+prevB.addEventListener('click',function(){nav(cur-1);});
+nextB.addEventListener('click',function(){nav(cur+1);});
+document.getElementById('openMenu').addEventListener('click',function(){menu.hidden=false;});
+document.getElementById('closeMenu').addEventListener('click',function(){menu.hidden=true;});
+addEventListener('hashchange',route);
+addEventListener('keydown',function(e){
+  if(e.altKey||e.ctrlKey||e.metaKey) return;
+  var k=e.key;
+  if(k==='Escape'){menu.hidden=true;return;}
+  if(!menu.hidden) return;
+  if(k==='ArrowLeft'||k==='PageDown'){e.preventDefault();nav(cur+1);}
+  else if(k==='ArrowRight'||k==='PageUp'){e.preventDefault();nav(cur-1);}
+  else if(k==='Home'){nav(0);}
+  else if(k==='End'){nav(N-1);}
+});
+var sx0=0, sy0=0;
+document.addEventListener('touchstart',function(e){var t=e.changedTouches[0];sx0=t.clientX;sy0=t.clientY;},{passive:true});
+document.addEventListener('touchend',function(e){
+  if(!menu.hidden) return;
+  var t=e.changedTouches[0], dx=t.clientX-sx0, dy=t.clientY-sy0;
+  if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.6){ nav(dx>0?cur+1:cur-1); }
+},{passive:true});
+if(!reduce){
+  addEventListener('mousemove',function(e){mx=e.clientX/W*2-1;my=e.clientY/H*2-1;},{passive:true});
+}
+var rz=0;
+addEventListener('resize',function(){
+  fitCanvas();
+  if(rz) cancelAnimationFrame(rz);
+  rz=requestAnimationFrame(function(){rz=0;fitSlide();});
+});
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){fitSlide();});}
+if(document.fonts&&document.fonts.addEventListener){document.fonts.addEventListener('loadingdone',function(){fitSlide();});}
+
+refreshColors(); fitCanvas(); route();
+if(reduce){ pv=target; draw(0); } else { requestAnimationFrame(frame); }
+})();
+</script>
+
+</body></html>
