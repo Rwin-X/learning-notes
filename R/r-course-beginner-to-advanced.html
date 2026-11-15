@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>R — از مبتدی تا پیشرفته</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:        #faf9f6;
+  --bg-raised: #ffffff;
+  --ink:       #1a1917;
+  --ink-soft:  #585650;
+  --ink-faint: #8c897f;
+  --line:      #e4e1d7;
+  --line-soft: #edebe3;
+  --accent:    #2f6f5e;
+  --accent-ink:#f2f7f5;
+  --code-bg:   #15241f;
+  --code-ink:  #d7ead7;
+  --code-key:  #7fd4ae;
+  --code-str:  #e3c07b;
+  --code-com:  #6b8f82;
+  --code-num:  #d98b5f;
+  --warn-bg:   #fbeee9;
+  --warn-ink:  #8a3b22;
+
+  --lvl-beginner:   #3f7d5c;
+  --lvl-elementary: #3f7d5c;
+  --lvl-intermediate: #b4791f;
+  --lvl-advanced:   #a13d3d;
+
+  --font-fa: 'Vazirmatn', 'Tahoma', 'Iranian Sans', 'Arial', sans-serif;
+  --font-mono: 'JetBrains Mono', 'DejaVu Sans Mono', monospace;
+
+  --page-w: 680px;
+}
+
+*{ box-sizing:border-box; }
+html{ background:var(--bg); }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-fa);
+  font-size:15.5px;
+  line-height:2;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+.page{
+  max-width:var(--page-w);
+  width:100%;
+  margin-left:auto;
+  margin-right:auto;
+  padding:0 28px 80px;
+}
+
+/* ================= COVER ================= */
+
+.cover{
+  padding:68px 0 40px;
+  border-bottom:3px solid var(--ink);
+  margin-bottom:36px;
+}
+.cover-kicker{
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:.04em;
+  color:var(--accent);
+  margin-bottom:16px;
+  direction:ltr;
+  text-align:right;
+  unicode-bidi:isolate;
+}
+.cover h1{
+  font-size:48px;
+  line-height:1.35;
+  margin:0 0 14px;
+  font-weight:800;
+  letter-spacing:-0.01em;
+  unicode-bidi:isolate;
+}
+.cover h1 span.hl{
+  font-style:normal;
+  color:var(--accent);
+  unicode-bidi:isolate;
+  display:inline-block;
+}
+.cover p.sub{
+  font-size:17.5px;
+  color:var(--ink-soft);
+  margin:0 0 26px;
+  max-width:60ch;
+  font-weight:500;
+}
+
+/* progress ladder on cover */
+.ladder{
+  display:flex;
+  gap:6px;
+  margin-bottom:22px;
+}
+.ladder-step{
+  flex:1;
+  text-align:center;
+  padding:9px 4px;
+  border-radius:4px;
+  font-size:11.5px;
+  font-weight:700;
+  color:#fff;
+}
+.ladder-step small{
+  display:block;
+  font-weight:500;
+  font-size:9.5px;
+  opacity:.85;
+  margin-top:1px;
+}
+
+.cover-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+}
+.cover-meta span{
+  font-size:12px;
+  color:var(--ink-soft);
+  background:var(--bg-raised);
+  border:1px solid var(--line);
+  border-radius:3px;
+  padding:5px 10px;
+}
+
+/* ================= TOC ================= */
+
+.toc{
+  margin:0 0 50px;
+  padding:24px 26px;
+  background:var(--bg-raised);
+  border:1px solid var(--line);
+  border-radius:6px;
+}
+.toc-title{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  letter-spacing:.08em;
+  color:var(--ink-faint);
+  margin:0 0 6px;
+  direction:ltr;
+  text-align:right;
+}
+.toc-tier{
+  margin:18px 0 8px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.02em;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.toc-tier:first-of-type{ margin-top:10px; }
+.toc-tier .dot{
+  width:9px; height:9px; border-radius:50%;
+  display:inline-block;
+  flex-shrink:0;
+}
+.toc ol{
+  margin:0 0 4px;
+  padding:0;
+  list-style:none;
+}
+.toc li{
+  font-size:13.5px;
+  padding:5px 0;
+  border-bottom:1px dotted var(--line);
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+}
+.toc li b{ font-weight:600; }
+.toc li span{
+  font-family:var(--font-mono);
+  color:var(--ink-faint);
+  font-size:11.5px;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+
+/* ================= LEVEL BADGE ================= */
+
+.lvl-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  font-weight:600;
+  letter-spacing:.03em;
+  padding:4px 10px 4px 8px;
+  border-radius:20px;
+  margin-bottom:16px;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+.lvl-badge .dot{ width:7px; height:7px; border-radius:50%; }
+.lvl-beginner    { background:#e8f3ec; color:#2b5940; }
+.lvl-beginner .dot    { background:var(--lvl-beginner); }
+.lvl-intermediate{ background:#fbf1e0; color:#8a5c13; }
+.lvl-intermediate .dot{ background:var(--lvl-intermediate); }
+.lvl-advanced    { background:#f7e9e5; color:#8a3226; }
+.lvl-advanced .dot    { background:var(--lvl-advanced); }
+
+/* ================= TIER PART BREAK ================= */
+
+.tier-break{
+  margin:64px 0 36px;
+  padding:28px 24px;
+  border-radius:8px;
+  color:#fff;
+}
+.tier-break .tier-kicker{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.06em;
+  opacity:.8;
+  margin-bottom:6px;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+.tier-break h2{
+  color:#fff;
+  margin:0 0 8px;
+  font-size:25px;
+}
+.tier-break p{
+  margin:0;
+  font-size:14px;
+  opacity:.92;
+  max-width:65ch;
+  color:#fff;
+}
+.tier-break.t1{ background:#2b5940; }
+.tier-break.t2{ background:#245548; }
+.tier-break.t3{ background:#8a5c13; }
+.tier-break.t4{ background:#8a3226; }
+
+/* ================= SECTIONS ================= */
+
+section.unit{ margin-bottom:50px; }
+
+.sec-num{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--ink-faint);
+  font-weight:600;
+  letter-spacing:.02em;
+  direction:ltr;
+  display:inline-block;
+  unicode-bidi:isolate;
+  margin-inline-end:10px;
+}
+h2{
+  font-size:24px;
+  font-weight:800;
+  margin:0 0 6px;
+  letter-spacing:-0.005em;
+  display:flex;
+  align-items:baseline;
+  gap:2px;
+  flex-wrap:wrap;
+}
+h2 .en{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--ink-faint);
+  font-weight:500;
+  margin-inline-start:8px;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+.sec-intro{
+  color:var(--ink-soft);
+  font-size:14.5px;
+  margin:12px 0 22px;
+  max-width:72ch;
+  border-inline-start:3px solid var(--line);
+  padding-inline-start:16px;
+}
+
+h3{
+  font-size:16px;
+  font-weight:700;
+  margin:28px 0 12px;
+  color:var(--ink);
+}
+h3 .en{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  font-weight:500;
+  color:var(--ink-faint);
+  margin-inline-start:8px;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+
+p{ margin:0 0 14px; }
+ul, ol.plain{ margin:0 0 14px; padding-inline-start:22px; }
+li{ margin-bottom:6px; }
+strong{ font-weight:700; color:var(--ink); }
+
+/* ================= CODE ================= */
+
+pre{
+  background:var(--code-bg);
+  color:var(--code-ink);
+  border-radius:6px;
+  padding:16px 18px;
+  margin:0 0 16px;
+  overflow-x:auto;
+  direction:ltr;
+  text-align:left;
+  font-family:var(--font-mono);
+  font-size:12.8px;
+  line-height:1.75;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+}
+pre code{
+  font-family:inherit;
+  background:none;
+  padding:0;
+  color:inherit;
+  white-space:pre;
+}
+code{
+  font-family:var(--font-mono);
+  background:var(--line-soft);
+  color:#5a4a1f;
+  border-radius:3px;
+  padding:1.5px 6px;
+  font-size:12.5px;
+  direction:ltr;
+  display:inline-block;
+  unicode-bidi:isolate;
+  max-width:100%;
+}
+.c{ color:var(--code-com); }
+.k{ color:var(--code-key); font-weight:500; }
+.s{ color:var(--code-str); }
+.n{ color:var(--code-num); }
+.f{ color:#9fc6e0; }
+
+.code-label{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  color:var(--ink-faint);
+  letter-spacing:.06em;
+  margin:0 0 6px;
+  direction:ltr;
+  text-align:left;
+  unicode-bidi:isolate;
+}
+
+/* ================= GRID / CARDS ================= */
+
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+.card{
+  background:var(--bg-raised);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:16px 18px;
+}
+.card h4{
+  margin:0 0 10px;
+  font-size:13.5px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:4px;
+}
+.card h4 .en{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  color:var(--accent);
+  font-weight:600;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+.card pre{ margin-bottom:0; font-size:12px; }
+.card p.note{
+  font-size:12.5px;
+  color:var(--ink-soft);
+  margin:8px 0 0;
+}
+
+/* ================= TABLE ================= */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin:0 0 18px;
+  font-size:13px;
+  background:var(--bg-raised);
+  border:1px solid var(--line);
+  border-radius:6px;
+  overflow:hidden;
+}
+thead th{
+  background:var(--ink);
+  color:#fff;
+  text-align:right;
+  padding:10px 14px;
+  font-weight:600;
+  font-size:12px;
+}
+thead th.ltr-col{ text-align:left; direction:ltr; }
+tbody td{
+  padding:9px 14px;
+  border-top:1px solid var(--line-soft);
+  vertical-align:top;
+}
+tbody tr:nth-child(even){ background:var(--bg); }
+td.mono, th.mono{
+  font-family:var(--font-mono);
+  direction:ltr;
+  unicode-bidi:isolate;
+  text-align:left;
+  font-size:12px;
+  color:var(--accent);
+}
+
+/* ================= CALLOUTS ================= */
+
+.tip, .warn{
+  border-radius:6px;
+  padding:14px 18px;
+  margin:0 0 18px;
+  font-size:13.5px;
+}
+.tip{
+  background:var(--accent-ink);
+  border:1px solid #c7ddd4;
+  color:#20473c;
+}
+.warn{
+  background:var(--warn-bg);
+  border:1px solid #edc9ba;
+  color:var(--warn-ink);
+}
+.tip b, .warn b{ display:block; margin-bottom:4px; font-size:12px; letter-spacing:.02em; }
+
+/* ================= EXERCISE ================= */
+
+.exercise{
+  border:1.5px dashed var(--accent);
+  border-radius:6px;
+  padding:16px 18px;
+  margin:0 0 6px;
+  background:#fff;
+}
+.exercise b{
+  display:block;
+  font-size:12px;
+  color:var(--accent);
+  margin-bottom:6px;
+  letter-spacing:.02em;
+}
+
+/* ================= DENSE REF ================= */
+
+.dense-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0 24px;
+}
+.dense-block{ break-inside:avoid; margin-bottom:20px; }
+.dense-block h4{
+  font-size:12.5px;
+  font-weight:700;
+  margin:0 0 8px;
+  padding-bottom:6px;
+  border-bottom:2px solid var(--ink);
+  display:flex;
+  justify-content:space-between;
+}
+.dense-block h4 .en{
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--ink-faint);
+  font-weight:500;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+.dense-table{ width:100%; font-size:12px; border-collapse:collapse; }
+.dense-table tr{ border-bottom:1px solid var(--line-soft); }
+.dense-table td{ padding:5px 0; vertical-align:top; }
+.dense-table td.desc{
+  text-align:right;
+  padding-inline-end:10px;
+  color:var(--ink-soft);
+  width:52%;
+}
+.dense-table td.code{
+  font-family:var(--font-mono);
+  direction:ltr;
+  unicode-bidi:isolate;
+  text-align:left;
+  color:var(--accent);
+  font-size:11.5px;
+}
+
+/* ================= FOOTER ================= */
+
+footer{
+  margin-top:64px;
+  padding-top:22px;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:11.5px;
+  color:var(--ink-faint);
+}
+footer .en{ font-family:var(--font-mono); direction:ltr; unicode-bidi:isolate; }
+
+/* ================= PRINT ================= */
+
+@media print{
+  body{ font-size:12px; }
+  .page{ max-width:100%; padding:0 6mm; }
+  section.unit{ margin-bottom:28px; }
+  .tier-break{ break-before:page; }
+  pre{ box-shadow:none; }
+  .card, .toc{ break-inside:avoid; }
+  .grid2{ break-inside:avoid; }
+  a{ color:inherit; text-decoration:none; }
+  @page{ margin:14mm 12mm; }
+}
+
+@media (max-width:720px){
+  .cover h1{ font-size:34px; }
+  .grid2{ grid-template-columns:1fr; }
+  .dense-grid{ grid-template-columns:1fr; }
+  .ladder{ flex-wrap:wrap; }
+  .ladder-step{ flex:1 1 45%; }
+}
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============ COVER ============ -->
+  <div class="cover">
+    <div class="cover-kicker">R LANGUAGE — FROM ZERO TO ADVANCED</div>
+    <h1>آموزش زبان <span class="hl">R</span><br>از مبتدی تا پیشرفته</h1>
+    <p class="sub">مسیری پلکانی برای یادگیری R: از نخستین خط کد تا برنامه‌نویسی شیءگرا، مدیریت خطا و بهینه‌سازی کارایی.</p>
+
+    <div class="ladder">
+      <div class="ladder-step" style="background:#2b5940">پایه<small>بخش ۱ تا ۴</small></div>
+      <div class="ladder-step" style="background:#245548">کاربردی<small>بخش ۵ تا ۸</small></div>
+      <div class="ladder-step" style="background:#8a5c13">تحلیل داده<small>بخش ۹ تا ۱۱</small></div>
+      <div class="ladder-step" style="background:#8a3226">پیشرفته<small>بخش ۱۲ تا ۱۴</small></div>
+    </div>
+
+    <div class="cover-meta">
+      <span>۱۴ بخش آموزشی</span>
+      <span>مرجع فشرده در پایان</span>
+      <span>ویرایش‌شده از نظر نگارش و املا</span>
+    </div>
+  </div>
+
+  <!-- ============ TOC ============ -->
+  <div class="toc">
+    <div class="toc-title">CONTENTS</div>
+
+    <div class="toc-tier"><span class="dot" style="background:#2b5940"></span>سطح پایه — آشنایی با زبان</div>
+    <ol>
+      <li><b>۱. R چیست و چرا متفاوت است</b><span>§1</span></li>
+      <li><b>۲. نصب، محیط کار و اجرای نخستین کد</b><span>§2</span></li>
+      <li><b>۳. متغیرها و انواع داده</b><span>§3</span></li>
+      <li><b>۴. وکتور، ستون فقرات زبان R</b><span>§4</span></li>
+    </ol>
+
+    <div class="toc-tier"><span class="dot" style="background:#245548"></span>سطح کاربردی — ساختارها و منطق برنامه</div>
+    <ol>
+      <li><b>۵. ایندکس‌گذاری و زیرمجموعه‌گیری</b><span>§5</span></li>
+      <li><b>۶. فهرست، ماتریس و متغیر دسته‌ای</b><span>§6</span></li>
+      <li><b>۷. قاب داده (data.frame) و tibble</b><span>§7</span></li>
+      <li><b>۸. ساختار کنترلی و نوشتن تابع</b><span>§8</span></li>
+    </ol>
+
+    <div class="toc-tier"><span class="dot" style="background:#8a5c13"></span>تحلیل داده‌ی مدرن</div>
+    <ol>
+      <li><b>۹. جایگزینیِ حلقه با خانواده‌ی apply</b><span>§9</span></li>
+      <li><b>۱۰. تبدیل داده با dplyr و عملگر pipe</b><span>§10</span></li>
+      <li><b>۱۱. رسم نمودار با ggplot2</b><span>§11</span></li>
+    </ol>
+
+    <div class="toc-tier"><span class="dot" style="background:#8a3226"></span>سطح پیشرفته</div>
+    <ol>
+      <li><b>۱۲. برنامه‌نویسی شیءگرا (S3 و S4)</b><span>§12</span></li>
+      <li><b>۱۳. مدیریت خطا و اشکال‌زدایی</b><span>§13</span></li>
+      <li><b>۱۴. کارایی، بردارش و اشتباهات رایج</b><span>§14</span></li>
+      <li><b>مرجع فشرده — چیت‌شیت نهایی</b><span>REF</span></li>
+    </ol>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- TIER 1 — BEGINNER                                        -->
+  <!-- ======================================================= -->
+  <div class="tier-break t1">
+    <div class="tier-kicker">TIER 1 — BEGINNER</div>
+    <h2>سطح پایه</h2>
+    <p>در این سطح با فلسفه‌ی زبان R، نصب محیط کار، و ساده‌ترین واحد داده یعنی وکتور آشنا می‌شوید. هدف این بخش، ساختن تصویری درست از نحوه‌ی فکر کردن زبان R است، نه حفظ دستورها.</p>
+  </div>
+
+  <!-- ============ 1 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-beginner"><span class="dot"></span>BEGINNER</span>
+    <h2><span class="sec-num">01</span>R چیست و چرا متفاوت است<span class="en">mental model</span></h2>
+    <p class="sec-intro">زبان R در اصل برای تحلیل آماری طراحی شده، نه برای برنامه‌نویسی عمومی. همین ریشه باعث شده چند مفهوم پایه با زبان‌های دیگری که شاید پیش‌تر دیده باشید، تفاوت داشته باشد.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>همه‌چیز وکتور است<span class="en">vectorized</span></h4>
+        <p class="note">حتی یک عدد تکی در R یک وکتور به طول یک است. عملیات روی وکتورها به‌صورت عنصر‌به‌عنصر انجام می‌شود، بدون نیاز به حلقه‌ی دستی.</p>
+      </div>
+      <div class="card">
+        <h4>شمارش از یک آغاز می‌شود<span class="en">1-indexed</span></h4>
+        <p class="note">برخلاف بسیاری از زبان‌های برنامه‌نویسی، نخستین عضو یک وکتور با <code>x[1]</code> به‌دست می‌آید، نه <code>x[0]</code>.</p>
+      </div>
+      <div class="card">
+        <h4>عملگر انتساب <span class="en">assignment</span></h4>
+        <p class="note">علامت رایج برای انتساب مقدار، پیکان چپ (<code>&lt;-</code>) است. علامت مساوی نیز کار می‌کند، اما در میان برنامه‌نویسان R رایج‌تر نیست.</p>
+      </div>
+      <div class="card">
+        <h4>مقدار گم‌شده بخشی از زبان است<span class="en">NA</span></h4>
+        <p class="note">مقدار <code>NA</code> نشان‌دهنده‌ی داده‌ی گم‌شده است و یک شهروند درجه‌یک در زبان به‌شمار می‌رود، نه یک استثنا.</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>اگر از پایتون می‌آیید</b>
+      وکتور در R از نظر رفتار به <code>numpy.array</code> نزدیک‌تر است تا لیست پایتون. <code>data.frame</code> معادل <code>pandas.DataFrame</code> است، و بسته‌ی tidyverse همان روحیه‌ی pandas و matplotlib را دارد، با این تفاوت که از عملگر pipe به‌جای زنجیره‌ی متدها استفاده می‌کند.
+    </div>
+  </section>
+
+  <!-- ============ 2 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-beginner"><span class="dot"></span>BEGINNER</span>
+    <h2><span class="sec-num">02</span>نصب، محیط کار و اجرای نخستین کد<span class="en">setup</span></h2>
+    <p class="sec-intro">زبان R خود موتور اجرای کد است. RStudio یک محیط توسعه (IDE) روی این موتور است، درست مانند رابطه‌ی پایتون با PyCharm.</p>
+
+    <div class="code-label">terminal / bash</div>
+    <pre><code><span class="c"># Debian / Ubuntu</span>
+sudo apt install r-base
+
+<span class="c"># macOS</span>
+brew install r
+
+<span class="c"># Windows: installer from cran.r-project.org</span>
+
+<span class="c"># launch interactive REPL</span>
+R
+
+<span class="c"># run a script from the terminal</span>
+Rscript script.R</code></pre>
+
+    <p>پس از نصب زبان، نصب <strong>RStudio</strong> نیز توصیه می‌شود. این محیط، پنجره‌ی ویرایش کد، کنسول، فهرست متغیرها و نمودارها را در یک صفحه کنار هم نمایش می‌دهد.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>Positron <span class="en">alternative</span></h4>
+        <p class="note">محیط توسعه‌ی جدیدتری از تیم Posit، ساخته‌شده بر پایه‌ی VS Code. برای کسی که پیش‌تر با VS Code کار کرده، می‌تواند گزینه‌ی راحت‌تری باشد.</p>
+      </div>
+      <div class="card">
+        <h4>اجرای تکه‌کد <span class="en">run line</span></h4>
+        <p class="note">در RStudio، ترکیب <code>Ctrl+Enter</code> خط جاری را اجرا می‌کند. برای اجرای کل یک فایل در کنسول R، از دستور <code>source("file.R")</code> استفاده می‌شود.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-beginner"><span class="dot"></span>BEGINNER</span>
+    <h2><span class="sec-num">03</span>متغیرها و انواع داده<span class="en">types &amp; assignment</span></h2>
+
+    <div class="code-label">assignment.R</div>
+    <pre><code><span class="c"># the standard assignment operator</span>
+x <span class="k">&lt;-</span> <span class="n">10</span>
+name <span class="k">&lt;-</span> <span class="s">"rwin"</span>
+is_ready <span class="k">&lt;-</span> <span class="k">TRUE</span>   <span class="c"># or short form: T</span>
+
+<span class="c"># printing a value</span>
+print(x)
+x   <span class="c"># in the REPL, just the name prints it too</span>
+
+<span class="c"># inspecting the type</span>
+class(x)        <span class="c"># "numeric"</span>
+typeof(x)       <span class="c"># "double"</span>
+is.numeric(x)   <span class="c"># TRUE</span></code></pre>
+
+    <table>
+      <thead><tr><th>نوع</th><th class="ltr-col">نمونه</th><th>معادل در پایتون</th></tr></thead>
+      <tbody>
+        <tr><td>عدد اعشاری</td><td class="mono">3.14</td><td><code>float</code></td></tr>
+        <tr><td>عدد صحیح</td><td class="mono">5L</td><td><code>int</code></td></tr>
+        <tr><td>رشته</td><td class="mono">"text"</td><td><code>str</code></td></tr>
+        <tr><td>منطقی</td><td class="mono">TRUE / FALSE</td><td><code>bool</code></td></tr>
+        <tr><td>دسته‌ای <span style="font-size:11px">(factor)</span></td><td class="mono">factor()</td><td><code>pandas.Categorical</code></td></tr>
+        <tr><td>مقدار گم‌شده</td><td class="mono">NA</td><td><code>None</code> / <code>np.nan</code></td></tr>
+        <tr><td>تهی <span style="font-size:11px">(بدون طول)</span></td><td class="mono">NULL</td><td>نزدیک به <code>None</code>، اما بدون طول</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <b>نکته‌ی مهم درباره‌ی NA و NULL</b>
+      این دو مقدار یکسان نیستند. <code>NULL</code> به این معناست که «چیزی در این‌جا وجود ندارد» و طول آن صفر است. <code>NA</code> به این معناست که «باید مقداری وجود داشته باشد، اما گم شده است» و طول آن برابر با یک عضو واقعی است. نادیده گرفتن این تفاوت، منشأ بسیاری از خطاهای رایج در میان تازه‌کاران است.
+    </div>
+  </section>
+
+  <!-- ============ 4 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-beginner"><span class="dot"></span>BEGINNER</span>
+    <h2><span class="sec-num">04</span>وکتور، ستون فقرات زبان R<span class="en">vectors</span></h2>
+    <p class="sec-intro">تقریباً تمام عملیات عددی در زبان R حول محور وکتور می‌چرخد. درک درست این بخش، پایه‌ی فهم درست بقیه‌ی زبان است.</p>
+
+    <div class="code-label">vectors.R</div>
+    <pre><code><span class="c"># creating a vector with c() -- combine</span>
+v <span class="k">&lt;-</span> c(<span class="n">10</span>, <span class="n">20</span>, <span class="n">30</span>, <span class="n">40</span>)
+
+<span class="c"># numeric sequences</span>
+1:10              <span class="c"># 1 2 3 ... 10</span>
+seq(0, 1, by=0.25)
+seq(1, 10, length.out=5)
+
+<span class="c"># repetition</span>
+rep(c(1,2), times=3)   <span class="c"># 1 2 1 2 1 2</span>
+rep(c(1,2), each=3)    <span class="c"># 1 1 1 2 2 2</span>
+
+<span class="c"># operating on the whole vector, no loop needed</span>
+v * 2          <span class="c"># 20 40 60 80</span>
+v + c(1,1,1,1) <span class="c"># element-wise sum</span>
+v > 25         <span class="c"># TRUE/FALSE for each element</span>
+
+<span class="c"># statistics over a vector</span>
+sum(v); mean(v); max(v); min(v); length(v); sd(v)</code></pre>
+
+    <div class="tip">
+      <b>بازچرخانی وکتور <span style="font-weight:400">(recycling)</span></b>
+      اگر دو وکتور با طول متفاوت را با هم جمع کنید، R وکتور کوتاه‌تر را به‌صورت خودکار تکرار می‌کند تا طول هر دو برابر شود، بدون آن‌که خطایی صادر شود (گاهی فقط یک هشدار نمایش داده می‌شود). این رفتار می‌تواند منشأ خطاهای پنهان باشد، پس همیشه طول وکتورها را بررسی کنید.
+    </div>
+
+    <div class="code-label">recycling-example.R</div>
+    <pre><code>c(1,2,3,4) + c(10,20)
+<span class="c"># result: 11 22 13 24 -- the second vector repeated twice</span></code></pre>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- TIER 2 — ELEMENTARY/INTERMEDIATE STRUCTURES              -->
+  <!-- ======================================================= -->
+  <div class="tier-break t2">
+    <div class="tier-kicker">TIER 2 — APPLIED</div>
+    <h2>سطح کاربردی</h2>
+    <p>در این سطح یاد می‌گیرید چگونه به عناصر داده دسترسی پیدا کنید، ساختارهای پیچیده‌تر مانند فهرست و قاب داده بسازید، و منطق برنامه را با شرط، حلقه و تابع کنترل کنید.</p>
+  </div>
+
+  <!-- ============ 5 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-beginner"><span class="dot"></span>ELEMENTARY</span>
+    <h2><span class="sec-num">05</span>ایندکس‌گذاری و زیرمجموعه‌گیری<span class="en">indexing &amp; subsetting</span></h2>
+    <p class="sec-intro">سه روش اصلی برای دسترسی به عناصر وجود دارد: بر اساس موقعیت عددی، بر اساس نام، و بر اساس شرط منطقی. روش سوم پرکاربردترین روش در تحلیل داده است.</p>
+
+    <div class="code-label">indexing.R</div>
+    <pre><code>v <span class="k">&lt;-</span> c(a=<span class="n">5</span>, b=<span class="n">10</span>, c=<span class="n">15</span>, d=<span class="n">20</span>)
+
+v[1]          <span class="c"># first element (indexing starts at 1)</span>
+v[c(1,3)]     <span class="c"># first and third elements</span>
+v[-1]         <span class="c"># everything except the first -- negative means drop</span>
+v["b"]        <span class="c"># access by name</span>
+v[v > 10]     <span class="c"># logical filter -- only elements passing the condition</span>
+
+<span class="c"># replacement uses the same syntax</span>
+v[v > 10] <span class="k">&lt;-</span> 0   <span class="c"># zero out every element greater than 10</span></code></pre>
+
+    <table>
+      <thead><tr><th>عملگر</th><th class="ltr-col">نحو</th><th>کاربرد</th></tr></thead>
+      <tbody>
+        <tr><td>براکت تکی</td><td class="mono">x[i]</td><td>زیرمجموعه می‌گیرد، نوع ساختار اصلی حفظ می‌شود</td></tr>
+        <tr><td>براکت دوتایی</td><td class="mono">x[[i]]</td><td>یک عضو را از فهرست استخراج می‌کند، بدون بسته‌بندی</td></tr>
+        <tr><td>علامت دلار</td><td class="mono">x$name</td><td>دسترسی به ستون یا فیلد با نام، در فهرست و قاب داده</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <b>تفاوت [ ] و [[ ]] در فهرست</b>
+      دستور <code>list[1]</code> یک زیرفهرست با یک عضو برمی‌گرداند که خود همچنان از نوع فهرست است. دستور <code>list[[1]]</code> محتوای همان عضو را بدون بسته‌بندی برمی‌گرداند. این تفاوت شبیه تفاوت میان برش (slice) و دسترسی تکی در پایتون است، با این تفاوت که در R نوع خروجی را نیز تغییر می‌دهد.
+    </div>
+  </section>
+
+  <!-- ============ 6 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-beginner"><span class="dot"></span>ELEMENTARY</span>
+    <h2><span class="sec-num">06</span>فهرست، ماتریس و متغیر دسته‌ای<span class="en">data structures</span></h2>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>فهرست <span class="en">list()</span></h4>
+        <pre><code>L <span class="k">&lt;-</span> list(
+  name = <span class="s">"rwin"</span>,
+  scores = c(90, 85, 77),
+  active = <span class="k">TRUE</span>
+)
+L$scores       <span class="c"># access by name</span>
+L[["name"]]    <span class="c"># same result</span></code></pre>
+        <p class="note">معادل تقریبی دیکشنری در پایتون، با این تفاوت که می‌تواند عناصری از انواع ناهمگون داشته باشد و هم با نام و هم با ایندکس در دسترس است.</p>
+      </div>
+      <div class="card">
+        <h4>ماتریس <span class="en">matrix()</span></h4>
+        <pre><code>m <span class="k">&lt;-</span> matrix(1:6, nrow=2, ncol=3)
+m[1, ]     <span class="c"># entire first row</span>
+m[, 2]     <span class="c"># entire second column</span>
+t(m)       <span class="c"># transpose</span>
+m %*% t(m) <span class="c"># matrix multiplication</span></code></pre>
+        <p class="note">برخلاف قاب داده، همه‌ی عناصر یک ماتریس باید از یک نوع باشند.</p>
+      </div>
+    </div>
+
+    <h3>متغیر دسته‌ای <span class="en">factor</span></h3>
+    <pre><code>grade <span class="k">&lt;-</span> factor(c(<span class="s">"low"</span>, <span class="s">"high"</span>, <span class="s">"mid"</span>),
+                levels = c(<span class="s">"low"</span>, <span class="s">"mid"</span>, <span class="s">"high"</span>),
+                ordered = <span class="k">TRUE</span>)
+grade <span class="k">&lt;</span> <span class="s">"high"</span>   <span class="c"># TRUE FALSE TRUE -- it understands the order</span></code></pre>
+    <p>برای ستون‌های دسته‌ای، مانند جنسیت، سطح تحصیلات یا رتبه‌بندی، بهتر است از <code>factor</code> استفاده شود، نه از رشته‌ی خام. مدل‌های آماری و بسته‌ی ggplot رفتار متفاوتی نسبت به داده‌ی دسته‌ای دارند.</p>
+  </section>
+
+  <!-- ============ 7 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-intermediate"><span class="dot"></span>INTERMEDIATE</span>
+    <h2><span class="sec-num">07</span>قاب داده و tibble<span class="en">tabular data</span></h2>
+    <p class="sec-intro">قاب داده (data.frame) قلب تحلیل داده در زبان R است؛ معادل مستقیم <code>pandas.DataFrame</code> در پایتون.</p>
+
+    <div class="code-label">dataframe.R</div>
+    <pre><code>df <span class="k">&lt;-</span> data.frame(
+  name = c(<span class="s">"Ali"</span>, <span class="s">"Sara"</span>, <span class="s">"Reza"</span>),
+  age  = c(25, 31, 28),
+  city = c(<span class="s">"Tehran"</span>, <span class="s">"Shiraz"</span>, <span class="s">"Tehran"</span>)
+)
+
+str(df)        <span class="c"># full structure -- type of each column</span>
+head(df, 2)    <span class="c"># first two rows</span>
+nrow(df); ncol(df); dim(df)
+summary(df)    <span class="c"># statistical summary per column</span>
+
+<span class="c"># accessing a column</span>
+df$age
+df[["age"]]
+df[, "age"]
+
+<span class="c"># filtering rows (base R)</span>
+df[df$age > 26, ]
+
+<span class="c"># adding a new column</span>
+df$is_adult <span class="k">&lt;-</span> df$age >= 18</code></pre>
+
+    <div class="tip">
+      <b>tibble چیست و چرا اهمیت دارد</b>
+      <code>tibble</code> نسخه‌ای مدرن‌تر از قاب داده است که در بسته‌ی tidyverse عرضه می‌شود: نمایش خروجی تمیزتر است، رشته‌ها هرگز به‌صورت خودکار به factor تبدیل نمی‌شوند، و رفتار آن در ایندکس‌گذاری قابل‌پیش‌بینی‌تر است. در کد جدید، معمولاً به‌جای <code>data.frame()</code> از <code>tibble()</code> استفاده می‌شود.
+    </div>
+  </section>
+
+  <!-- ============ 8 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-intermediate"><span class="dot"></span>INTERMEDIATE</span>
+    <h2><span class="sec-num">08</span>ساختار کنترلی و نوشتن تابع<span class="en">control flow &amp; functions</span></h2>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>شرط <span class="en">if / else</span></h4>
+        <pre><code><span class="k">if</span> (x > 10) {
+  print(<span class="s">"large"</span>)
+} <span class="k">else if</span> (x > 5) {
+  print(<span class="s">"medium"</span>)
+} <span class="k">else</span> {
+  print(<span class="s">"small"</span>)
+}</code></pre>
+      </div>
+      <div class="card">
+        <h4>حلقه <span class="en">loops</span></h4>
+        <pre><code><span class="k">for</span> (i in 1:5) {
+  print(i)
+}
+
+i <span class="k">&lt;-</span> 0
+<span class="k">while</span> (i < 3) {
+  i <span class="k">&lt;-</span> i + 1
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="warn">
+      <b>حلقه نوشته‌اید، اما شاید روش درست R نباشد</b>
+      حلقه‌ی <code>for</code> روی یک وکتور کار می‌کند، اما اصطلاحاً idiomatic نیست و معمولاً کندتر هم هست. اگر با <code>for</code> روی یک وکتور یا ستون پیمایش می‌کنید تا محاسبه‌ای انجام دهید، تقریباً همیشه جایگزینی بردارش‌شده یا یکی از توابع خانواده‌ی apply وجود دارد (بخش ۹).
+    </div>
+
+    <h3>تعریف تابع <span class="en">function definition</span></h3>
+    <pre><code>square <span class="k">&lt;-</span> function(x) {
+  <span class="k">return</span>(x^2)
+}
+
+<span class="c"># the last evaluated expression is returned implicitly</span>
+add <span class="k">&lt;-</span> function(a, b=10) {
+  a + b   <span class="c"># no explicit return needed</span>
+}
+
+add(5)        <span class="c"># 15 -- b used its default value</span>
+add(5, 2)     <span class="c"># 7</span>
+add(b=1, a=2) <span class="c"># named arguments -- order doesn't matter</span></code></pre>
+
+    <div class="exercise">
+      <b>تمرین پایان سطح کاربردی</b>
+      یک قاب داده با سه ستون (name، age، score) برای ده نفر بسازید. تابعی بنویسید که یک وکتور عددی بگیرد و بگوید میانگین آن بالاتر از ۱۸ است یا نه. سپس با استفاده از ایندکس‌گذاری منطقی، فقط ردیف‌هایی را نگه دارید که نمره‌شان از میانگین کل بالاتر است.
+    </div>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- TIER 3 — DATA ANALYSIS                                   -->
+  <!-- ======================================================= -->
+  <div class="tier-break t3">
+    <div class="tier-kicker">TIER 3 — MODERN DATA ANALYSIS</div>
+    <h2>تحلیل داده‌ی مدرن</h2>
+    <p>در این سطح وارد دنیای tidyverse می‌شوید: مجموعه‌پکیجی که عملاً استاندارد تحلیل داده در R است. هدف این بخش، نوشتن کد خواناتر و سریع‌تر با dplyr و ترسیم نمودار با ggplot2 است.</p>
+  </div>
+
+  <!-- ============ 9 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-intermediate"><span class="dot"></span>INTERMEDIATE</span>
+    <h2><span class="sec-num">09</span>جایگزینی حلقه با خانواده‌ی apply<span class="en">functional iteration</span></h2>
+    <p class="sec-intro">این خانواده از توابع، روش متعارف پیمایش داده در R است. برای کسی که از پایتون می‌آید، شبیه تابع <code>map()</code> است، با چند نسخه‌ی مختلف بسته به نوع ورودی و خروجی.</p>
+
+    <table>
+      <thead><tr><th class="mono">تابع</th><th>ورودی</th><th>خروجی</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">sapply(x, f)</td><td>وکتور یا فهرست</td><td>وکتور یا ماتریس (ساده‌شده)</td></tr>
+        <tr><td class="mono">lapply(x, f)</td><td>وکتور یا فهرست</td><td>همیشه فهرست</td></tr>
+        <tr><td class="mono">vapply(x, f, type)</td><td>وکتور یا فهرست</td><td>وکتور، با نوع تضمین‌شده (ایمن‌تر)</td></tr>
+        <tr><td class="mono">mapply(f, x, y)</td><td>چند وکتور</td><td>اجرای موازی روی چند آرگومان</td></tr>
+        <tr><td class="mono">apply(m, 1, f)</td><td>ماتریس یا قاب داده</td><td>روی سطر (۱) یا ستون (۲)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-label">apply-family.R</div>
+    <pre><code>nums <span class="k">&lt;-</span> list(1:3, 4:6, 7:9)
+
+sapply(nums, sum)        <span class="c"># 6 15 24</span>
+lapply(nums, sum)        <span class="c"># same result, wrapped in a list</span>
+
+m <span class="k">&lt;-</span> matrix(1:6, nrow=2)
+apply(m, 1, sum)   <span class="c"># sum of each row</span>
+apply(m, 2, mean)  <span class="c"># mean of each column</span>
+
+<span class="c"># anonymous function with \(x) or function(x)</span>
+sapply(1:5, \(x) x^2)</code></pre>
+  </section>
+
+  <!-- ============ 10 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-advanced"><span class="dot"></span>ADVANCED</span>
+    <h2><span class="sec-num">10</span>تبدیل داده با dplyr و عملگر pipe<span class="en">tidyverse</span></h2>
+
+    <div class="code-label">install once</div>
+    <pre><code>install.packages(<span class="s">"tidyverse"</span>)
+library(tidyverse)</code></pre>
+
+    <h3>عملگر pipe <span class="en">|&gt;</span></h3>
+    <pre><code><span class="c"># without pipe -- nested and hard to read</span>
+round(mean(sqrt(c(4, 9, 16))), 2)
+
+<span class="c"># with pipe -- reads left to right, like a pipeline</span>
+c(4, 9, 16) |> sqrt() |> mean() |> round(2)
+
+<span class="c"># the older magrittr pipe is still common: %>%</span>
+c(4, 9, 16) %>% sqrt() %>% mean() %>% round(2)</code></pre>
+
+    <h3>فعل‌های dplyr <span class="en">verbs</span></h3>
+    <table>
+      <thead><tr><th class="mono">فعل</th><th>کاربرد</th><th>معادل در pandas</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">filter()</td><td>فیلتر ردیف بر اساس شرط</td><td><code>df[df.col > x]</code></td></tr>
+        <tr><td class="mono">select()</td><td>انتخاب ستون‌ها</td><td><code>df[['a','b']]</code></td></tr>
+        <tr><td class="mono">mutate()</td><td>ساخت یا تغییر ستون</td><td><code>df['c'] = ...</code></td></tr>
+        <tr><td class="mono">arrange()</td><td>مرتب‌سازی</td><td><code>df.sort_values()</code></td></tr>
+        <tr><td class="mono">group_by()</td><td>گروه‌بندی</td><td><code>df.groupby()</code></td></tr>
+        <tr><td class="mono">summarise()</td><td>تجمیع پس از گروه‌بندی</td><td><code>.agg()</code></td></tr>
+        <tr><td class="mono">left_join()</td><td>الحاق دو جدول</td><td><code>pd.merge(how='left')</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-label">dplyr-pipeline.R</div>
+    <pre><code>library(dplyr)
+
+df |>
+  filter(age >= 18) |>
+  mutate(age_group = ifelse(age < 30, <span class="s">"young"</span>, <span class="s">"adult"</span>)) |>
+  group_by(city) |>
+  summarise(
+    avg_age = mean(age),
+    n = n()
+  ) |>
+  arrange(desc(avg_age))</code></pre>
+
+    <div class="tip">
+      <b>این زنجیره را مانند یک جمله بخوانید</b>
+      «از df آغاز کن، فقط بزرگ‌سالان را نگه‌دار، ستونی برای گروه سنی بساز، بر اساس شهر گروه‌بندی کن، میانگین سن و تعداد هر گروه را محاسبه کن، و بر اساس میانگین سن به‌ترتیب نزولی مرتب کن.» همین خوانایی، دلیل اصلی محبوبیت dplyr است.
+    </div>
+  </section>
+
+  <!-- ============ 11 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-advanced"><span class="dot"></span>ADVANCED</span>
+    <h2><span class="sec-num">11</span>رسم نمودار با ggplot2<span class="en">grammar of graphics</span></h2>
+    <p class="sec-intro">ggplot2 بر پایه‌ی لایه‌گذاری کار می‌کند: داده، نگاشت زیبایی‌شناختی (aesthetic mapping) و نوع نمودار (geom) با عملگر <code>+</code> به یکدیگر متصل می‌شوند.</p>
+
+    <pre><code>library(ggplot2)
+
+ggplot(df, aes(x = age, y = city)) +
+  geom_point(size = 3, color = <span class="s">"#2f6f5e"</span>) +
+  labs(title = <span class="s">"Age by city"</span>, x = <span class="s">"age"</span>, y = <span class="s">"city"</span>) +
+  theme_minimal()</code></pre>
+
+    <table>
+      <thead><tr><th class="mono">geom</th><th>نوع نمودار</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">geom_point()</td><td>پراکندگی</td></tr>
+        <tr><td class="mono">geom_line()</td><td>خطی یا سری زمانی</td></tr>
+        <tr><td class="mono">geom_bar()</td><td>میله‌ای شمارشی</td></tr>
+        <tr><td class="mono">geom_col()</td><td>میله‌ای با مقدار از پیش محاسبه‌شده</td></tr>
+        <tr><td class="mono">geom_histogram()</td><td>هیستوگرام توزیع</td></tr>
+        <tr><td class="mono">geom_boxplot()</td><td>جعبه‌ای، برای مقایسه‌ی توزیع‌ها</td></tr>
+        <tr><td class="mono">geom_smooth()</td><td>خط روند یا رگرسیون</td></tr>
+      </tbody>
+    </table>
+
+    <div class="exercise">
+      <b>تمرین پایان سطح تحلیل داده</b>
+      یک قاب داده با ستون‌های name، score و passed برای ده نفر بسازید. با dplyr فقط افرادی را نگه دارید که قبول شده‌اند، میانگین نمره‌شان را با summarise محاسبه کنید، و توزیع نمرات را با ggplot2 به‌صورت هیستوگرام نمایش دهید.
+    </div>
+  </section>
+
+  <!-- ======================================================= -->
+  <!-- TIER 4 — ADVANCED                                        -->
+  <!-- ======================================================= -->
+  <div class="tier-break t4">
+    <div class="tier-kicker">TIER 4 — ADVANCED</div>
+    <h2>سطح پیشرفته</h2>
+    <p>در این سطح به مباحثی می‌پردازیم که معمولاً برنامه‌نویسان حرفه‌ای به آن نیاز دارند: برنامه‌نویسی شیءگرا، مدیریت خطا، و نوشتن کدی که از نظر کارایی بهینه باشد.</p>
+  </div>
+
+  <!-- ============ 12 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-advanced"><span class="dot"></span>ADVANCED</span>
+    <h2><span class="sec-num">12</span>برنامه‌نویسی شیءگرا<span class="en">S3 &amp; S4</span></h2>
+    <p class="sec-intro">زبان R چند سامانه‌ی شیءگرایی دارد. دو سامانه‌ی رایج S3 و S4 نام دارند. S3 ساده و غیررسمی است؛ S4 رسمی‌تر است و اعتبارسنجی نوع را نیز انجام می‌دهد.</p>
+
+    <h3>سامانه‌ی S3 <span class="en">informal OOP</span></h3>
+    <pre><code><span class="c"># a constructor function returning a list with a class attribute</span>
+new_animal <span class="k">&lt;-</span> function(name, sound) {
+  obj <span class="k">&lt;-</span> list(name = name, sound = sound)
+  class(obj) <span class="k">&lt;-</span> <span class="s">"animal"</span>
+  obj
+}
+
+<span class="c"># a generic function and its method for class "animal"</span>
+speak <span class="k">&lt;-</span> function(x) UseMethod(<span class="s">"speak"</span>)
+speak.animal <span class="k">&lt;-</span> function(x) {
+  cat(x$name, <span class="s">"says"</span>, x$sound, <span class="s">"\n"</span>)
+}
+
+cat_obj <span class="k">&lt;-</span> new_animal(<span class="s">"Cat"</span>, <span class="s">"Meow"</span>)
+speak(cat_obj)   <span class="c"># Cat says Meow</span></code></pre>
+
+    <h3>سامانه‌ی S4 <span class="en">formal OOP</span></h3>
+    <pre><code>setClass(<span class="s">"Animal"</span>, representation(
+  name = <span class="s">"character"</span>,
+  sound = <span class="s">"character"</span>
+))
+
+setGeneric(<span class="s">"speak"</span>, function(x) standardGeneric(<span class="s">"speak"</span>))
+setMethod(<span class="s">"speak"</span>, <span class="s">"Animal"</span>, function(x) {
+  cat(x@name, <span class="s">"says"</span>, x@sound, <span class="s">"\n"</span>)
+})
+
+dog <span class="k">&lt;-</span> new(<span class="s">"Animal"</span>, name=<span class="s">"Dog"</span>, sound=<span class="s">"Woof"</span>)
+speak(dog)</code></pre>
+
+    <div class="tip">
+      <b>کدام سامانه را انتخاب کنیم</b>
+      برای بیشتر کارهای تحلیل داده، S3 کافی و رایج‌تر است. اگر در حال نوشتن یک بسته‌ی رسمی هستید که به اعتبارسنجی دقیق ساختار نیاز دارد، S4 گزینه‌ی مناسب‌تری است. یک سامانه‌ی سوم به نام R6 نیز وجود دارد که شیء آن قابل تغییر (mutable) است و برای برنامه‌نویسانی که از زبان‌های شیءگرای کلاسیک می‌آیند، آشناتر به‌نظر می‌رسد.
+    </div>
+  </section>
+
+  <!-- ============ 13 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-advanced"><span class="dot"></span>ADVANCED</span>
+    <h2><span class="sec-num">13</span>مدیریت خطا و اشکال‌زدایی<span class="en">error handling &amp; debugging</span></h2>
+
+    <h3>صدور و دریافت خطا <span class="en">condition system</span></h3>
+    <pre><code>safe_divide <span class="k">&lt;-</span> function(a, b) {
+  <span class="k">if</span> (b == 0) {
+    stop(<span class="s">"division by zero is not allowed"</span>)
+  }
+  a / b
+}
+
+<span class="c"># tryCatch intercepts errors, warnings and messages</span>
+result <span class="k">&lt;-</span> tryCatch({
+  safe_divide(10, 0)
+}, error = function(e) {
+  cat(<span class="s">"caught an error:"</span>, conditionMessage(e), <span class="s">"\n"</span>)
+  NA
+})</code></pre>
+
+    <table>
+      <thead><tr><th class="mono">تابع</th><th>کاربرد</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">stop()</td><td>توقف اجرا و صدور یک خطا</td></tr>
+        <tr><td class="mono">warning()</td><td>صدور هشدار بدون توقف اجرا</td></tr>
+        <tr><td class="mono">tryCatch()</td><td>گرفتن خطا، هشدار یا پیام و واکنش کنترل‌شده</td></tr>
+        <tr><td class="mono">try()</td><td>نسخه‌ی ساده‌تر، فقط برای جلوگیری از توقف برنامه</td></tr>
+        <tr><td class="mono">stopifnot()</td><td>بررسی یک شرط؛ در صورت نادرست بودن، خطا صادر می‌شود</td></tr>
+      </tbody>
+    </table>
+
+    <h3>ابزارهای اشکال‌زدایی <span class="en">debugging tools</span></h3>
+    <pre><code><span class="c"># pause execution at the start of a function, inspect variables</span>
+debug(my_function)
+my_function(10)
+undebug(my_function)
+
+<span class="c"># insert a breakpoint anywhere in the code</span>
+browser()
+
+<span class="c"># print the full call stack after a crash</span>
+traceback()</code></pre>
+
+    <div class="warn">
+      <b>چرا نادیده گرفتن خطا خطرناک است</b>
+      استفاده از <code>try()</code> بدون بررسی نتیجه، می‌تواند خطایی را که باید دیده شود، پنهان کند. همیشه خروجی <code>try()</code> یا <code>tryCatch()</code> را بررسی کنید و مطمئن شوید که برنامه با یک مقدار نامعتبر به کار خود ادامه نمی‌دهد.
+    </div>
+  </section>
+
+  <!-- ============ 14 ============ -->
+  <section class="unit">
+    <span class="lvl-badge lvl-advanced"><span class="dot"></span>ADVANCED</span>
+    <h2><span class="sec-num">14</span>کارایی، بردارش و اشتباهات رایج<span class="en">performance &amp; gotchas</span></h2>
+
+    <h3>چرا بردارش سریع‌تر است <span class="en">vectorization</span></h3>
+    <pre><code><span class="c"># slow: growing a vector inside a loop reallocates memory each time</span>
+result <span class="k">&lt;-</span> c()
+<span class="k">for</span> (i in 1:100000) {
+  result <span class="k">&lt;-</span> c(result, i^2)
+}
+
+<span class="c"># fast: pre-allocate, or better, vectorize entirely</span>
+result <span class="k">&lt;-</span> (1:100000)^2</code></pre>
+
+    <div class="tip">
+      <b>قاعده‌ی عملی برای کارایی</b>
+      هر زمان که در حال نوشتن حلقه‌ای هستید که در هر مرحله به وکتور یا فهرست موجود عنصر اضافه می‌کند، به‌احتمال زیاد راهی بردارش‌شده یا یکی از توابع خانواده‌ی apply برای همان کار وجود دارد که هم سریع‌تر است و هم خواناتر.
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h4>برابری با NA</h4>
+        <pre><code>NA == NA        <span class="c"># NA, not TRUE!</span>
+is.na(x)        <span class="c"># the correct way to check</span></code></pre>
+        <p class="note">هر عملیات منطقی که در آن NA دخالت داشته باشد، نتیجه‌اش NA می‌شود، نه TRUE یا FALSE.</p>
+      </div>
+      <div class="card">
+        <h4>کپی به‌جای ارجاع</h4>
+        <pre><code>a <span class="k">&lt;-</span> c(1,2,3)
+b <span class="k">&lt;-</span> a
+b[1] <span class="k">&lt;-</span> 99
+<span class="c"># a remains unchanged -- copy-on-modify</span></code></pre>
+        <p class="note">برخلاف پایتون و جاوااسکریپت، بیشتر ساختارهای داده در R به‌صورت کپی‌شده رفتار می‌کنند، نه ارجاع‌شده.</p>
+      </div>
+      <div class="card">
+        <h4>وکتور تک‌نوع</h4>
+        <pre><code>c(1, <span class="s">"2"</span>, <span class="k">TRUE</span>)
+<span class="c"># everything coerced to string: "1" "2" "TRUE"</span></code></pre>
+        <p class="note">یک وکتور تنها یک نوع می‌پذیرد؛ در صورت تناقض، R به‌طور خاموش نوع را تبدیل می‌کند. برای داده‌ی ناهمگون از <code>list()</code> استفاده کنید.</p>
+      </div>
+      <div class="card">
+        <h4>فراموش کردن drop</h4>
+        <pre><code>df[, 1]       <span class="c"># returns a vector (dimension dropped)</span>
+df[, 1, drop=<span class="k">FALSE</span>]  <span class="c"># returns a single-column data.frame</span></code></pre>
+        <p class="note">انتخاب یک ستون با براکت تکی، به‌طور پیش‌فرض یک بعد را حذف می‌کند.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REFERENCE ============ -->
+  <section class="unit" style="margin-top:60px; padding-top:36px; border-top:3px solid var(--ink);">
+    <h2>مرجع فشرده<span class="en">one-page reference</span></h2>
+    <p class="sec-intro">خلاصه‌ای از پرکاربردترین دستورها، برای مراجعه‌ی سریع هنگام کدنویسی.</p>
+
+    <div class="dense-grid">
+
+      <div class="dense-block">
+        <h4>عملگرها<span class="en">operators</span></h4>
+        <table class="dense-table">
+          <tr><td class="desc">انتساب</td><td class="code">&lt;-   =   &lt;&lt;-</td></tr>
+          <tr><td class="desc">برابری / نابرابری</td><td class="code">==   !=</td></tr>
+          <tr><td class="desc">مقایسه</td><td class="code">&lt;  &lt;=  &gt;  &gt;=</td></tr>
+          <tr><td class="desc">و / یا (بردارشی)</td><td class="code">&amp;   |</td></tr>
+          <tr><td class="desc">و / یا (تکی، در if)</td><td class="code">&amp;&amp;   ||</td></tr>
+          <tr><td class="desc">نقیض</td><td class="code">!x</td></tr>
+          <tr><td class="desc">pipe (مدرن / tidyverse)</td><td class="code">|&gt;   %&gt;%</td></tr>
+          <tr><td class="desc">نام‌فضا</td><td class="code">pkg::fn()</td></tr>
+          <tr><td class="desc">توان</td><td class="code">x^2</td></tr>
+          <tr><td class="desc">باقی‌مانده / خارج‌قسمت صحیح</td><td class="code">%%   %/%</td></tr>
+        </table>
+      </div>
+
+      <div class="dense-block">
+        <h4>بررسی نوع<span class="en">type checks</span></h4>
+        <table class="dense-table">
+          <tr><td class="desc">کلاس شیء</td><td class="code">class(x)</td></tr>
+          <tr><td class="desc">نوع خام داخلی</td><td class="code">typeof(x)</td></tr>
+          <tr><td class="desc">آیا عددی است</td><td class="code">is.numeric(x)</td></tr>
+          <tr><td class="desc">آیا رشته است</td><td class="code">is.character(x)</td></tr>
+          <tr><td class="desc">آیا NA است</td><td class="code">is.na(x)</td></tr>
+          <tr><td class="desc">آیا NULL است</td><td class="code">is.null(x)</td></tr>
+          <tr><td class="desc">تبدیل نوع</td><td class="code">as.numeric() as.character()</td></tr>
+        </table>
+      </div>
+
+      <div class="dense-block">
+        <h4>ساخت وکتور<span class="en">creation</span></h4>
+        <table class="dense-table">
+          <tr><td class="desc">ترکیب مقادیر</td><td class="code">c(1, 2, 3)</td></tr>
+          <tr><td class="desc">دنباله‌ی صحیح</td><td class="code">1:10</td></tr>
+          <tr><td class="desc">دنباله‌ی سفارشی</td><td class="code">seq(0, 1, 0.1)</td></tr>
+          <tr><td class="desc">تکرار</td><td class="code">rep(x, times=3)</td></tr>
+          <tr><td class="desc">وکتور خالی عددی</td><td class="code">numeric(5)</td></tr>
+          <tr><td class="desc">تصادفی یکنواخت</td><td class="code">runif(5)</td></tr>
+          <tr><td class="desc">تصادفی نرمال</td><td class="code">rnorm(5)</td></tr>
+        </table>
+      </div>
+
+      <div class="dense-block">
+        <h4>آمار توصیفی<span class="en">stats</span></h4>
+        <table class="dense-table">
+          <tr><td class="desc">میانگین / میانه</td><td class="code">mean(x)  median(x)</td></tr>
+          <tr><td class="desc">انحراف معیار / واریانس</td><td class="code">sd(x)  var(x)</td></tr>
+          <tr><td class="desc">کمینه / بیشینه / دامنه</td><td class="code">min() max() range()</td></tr>
+          <tr><td class="desc">صدک‌ها</td><td class="code">quantile(x)</td></tr>
+          <tr><td class="desc">همبستگی</td><td class="code">cor(x, y)</td></tr>
+          <tr><td class="desc">جدول فراوانی</td><td class="code">table(x)</td></tr>
+          <tr><td class="desc">نادیده گرفتن NA</td><td class="code">mean(x, na.rm=TRUE)</td></tr>
+        </table>
+      </div>
+
+      <div class="dense-block">
+        <h4>رشته‌ها<span class="en">strings</span></h4>
+        <table class="dense-table">
+          <tr><td class="desc">طول رشته</td><td class="code">nchar(s)</td></tr>
+          <tr><td class="desc">الحاق با جداکننده</td><td class="code">paste(a, b, sep="-")</td></tr>
+          <tr><td class="desc">الحاق بدون فاصله</td><td class="code">paste0(a, b)</td></tr>
+          <tr><td class="desc">حروف بزرگ/کوچک</td><td class="code">toupper() tolower()</td></tr>
+          <tr><td class="desc">جایگزینی با عبارت باقاعده</td><td class="code">gsub("a","b", s)</td></tr>
+          <tr><td class="desc">برش رشته</td><td class="code">substr(s, 1, 3)</td></tr>
+          <tr><td class="desc">تقسیم رشته</td><td class="code">strsplit(s, ",")</td></tr>
+          <tr><td class="desc">حذف فاصله‌ی اضافه</td><td class="code">trimws(s)</td></tr>
+        </table>
+      </div>
+
+      <div class="dense-block">
+        <h4>قاب داده<span class="en">quick ops</span></h4>
+        <table class="dense-table">
+          <tr><td class="desc">ابعاد</td><td class="code">dim(df) nrow() ncol()</td></tr>
+          <tr><td class="desc">نام ستون‌ها</td><td class="code">colnames(df)</td></tr>
+          <tr><td class="desc">چند ردیف اول/آخر</td><td class="code">head(df) tail(df)</td></tr>
+          <tr><td class="desc">ساختار کامل</td><td class="code">str(df)</td></tr>
+          <tr><td class="desc">حذف ستون</td><td class="code">df$col &lt;- NULL</td></tr>
+          <tr><td class="desc">تغییر نام ستون</td><td class="code">names(df)[1] &lt;- "x"</td></tr>
+          <tr><td class="desc">شمارش NA در یک ستون</td><td class="code">sum(is.na(df$col))</td></tr>
+        </table>
+      </div>
+
+      <div class="dense-block">
+        <h4>dplyr<span class="en">tidyverse</span></h4>
+        <table class="dense-table">
+          <tr><td class="desc">فیلتر ردیف</td><td class="code">filter(df, x > 5)</td></tr>
+          <tr><td class="desc">انتخاب ستون</td><td class="code">select(df, a, b)</td></tr>
+          <tr><td class="desc">ستون جدید</td><td class="code">mutate(df, c = a+b)</td></tr>
+          <tr><td class="desc">گروه‌بندی و تجمیع</td><td class="code">group_by(df,g)|>summarise()</td></tr>
+          <tr><td class="desc">مرتب‌سازی</td><td class="code">arrange(df, desc(x))</td></tr>
+          <tr><td class="desc">شمارش در هر گروه</td><td class="code">count(df, g)</td></tr>
+          <tr><td class="desc">الحاق چپ</td><td class="code">left_join(a, b, by="id")</td></tr>
+        </table>
+      </div>
+
+      <div class="dense-block">
+        <h4>کنترل، خطا و اشیاء<span class="en">advanced</span></h4>
+        <table class="dense-table">
+          <tr><td class="desc">شرط وکتورایز</td><td class="code">ifelse(cond, a, b)</td></tr>
+          <tr><td class="desc">تابع ناشناس کوتاه</td><td class="code">\(x) x^2</td></tr>
+          <tr><td class="desc">توقف با خطا</td><td class="code">stop("msg")</td></tr>
+          <tr><td class="desc">هشدار</td><td class="code">warning("msg")</td></tr>
+          <tr><td class="desc">گرفتن خطا</td><td class="code">tryCatch(..., error=f)</td></tr>
+          <tr><td class="desc">نقطه‌ی توقف دستی</td><td class="code">browser()</td></tr>
+          <tr><td class="desc">کلاس شیء (S3)</td><td class="code">class(x) &lt;- "name"</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <span>R — از مبتدی تا پیشرفته</span>
+    <span class="en">generated for rwin</span>
+  </footer>
+
+</div>
+</body>
+</html>
